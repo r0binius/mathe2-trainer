@@ -1,30 +1,32 @@
 [package]
 name = "mouseless"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[lib]
-# The `_lib` suffix may seem redundant but it is necessary
-# to make the lib name unique and wouldn't conflict with the bin name.
-# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
-name = "mouseless_lib"
-crate-type = ["staticlib", "cdylib", "rlib"]
+description = "Keyboard shortcut training and look-up."
+edition = "2024"
+publish = false
 
 [build-dependencies]
-tauri-build = { version = "2", features = [] }
+tauri-build = "2"
 
 [dependencies]
-tauri = { version = "2", features = [] }
-tauri-plugin-opener = "2"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+tauri = "2"
 
+[lints.rust]
+# FFI code (macOS APIs) opts in per module with `#[allow(unsafe_code)]` and a SAFETY comment.
+unsafe_code = "deny"
+unused_qualifications = "warn"
 
-# Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+dbg_macro = "warn"
+expect_used = "warn"
+panic = "warn"
+print_stderr = "warn"
+print_stdout = "warn"
+todo = "warn"
+unwrap_used = "deny"
+
+# See https://tauri.app/concept/size/#cargo-configuration
 [profile.release]
 codegen-units = 1
 lto = true

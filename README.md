@@ -1,7 +1,34 @@
-# Tauri + Vue + TypeScript
+# Mouseless
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Keyboard shortcut training and look-up for macOS (Linux later). A rewrite of the Electron app in `../mouseless-old` with Tauri 2, Vue 3 and TypeScript.
 
-## Recommended IDE Setup
+## Docs
 
-- [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+- [Architecture](docs/architecture.md): layers, best practices, design patterns
+- [Conventions](docs/conventions.md): functional style, clean code, TypeScript, Vue and Rust rules
+- [Legacy architecture](docs/legacy-architecture.md): how the old app works and what must stay compatible
+
+## Requirements
+
+- Node.js 24+ and pnpm (see `packageManager` in `package.json`)
+- Rust (stable) via rustup
+- Xcode Command Line Tools
+
+## Scripts
+
+| Command            | Description                                               |
+| ------------------ | --------------------------------------------------------- |
+| `pnpm tauri dev`   | Run the app with hot reloading                            |
+| `pnpm tauri build` | Build the app bundle                                      |
+| `pnpm check`       | Run every check below; must pass before each commit       |
+| `pnpm format`      | Format all files with Prettier (`format:check` to verify) |
+| `pnpm lint`        | Lint with ESLint (`lint:fix` to apply fixes)              |
+| `pnpm typecheck`   | Type-check with `vue-tsc`                                 |
+| `pnpm test`        | Run unit tests with Vitest (`test:watch` while working)   |
+| `pnpm rust:format` | Format Rust with rustfmt (`rust:format:check` to verify)  |
+| `pnpm rust:lint`   | Lint Rust with Clippy                                     |
+| `pnpm rust:test`   | Run Rust tests                                            |
+
+## Editor
+
+VS Code recommends the needed extensions (`.vscode/extensions.json`). Files are formatted with Prettier on save, and ESLint fixes are applied on save.
