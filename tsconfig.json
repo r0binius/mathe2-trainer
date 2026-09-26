@@ -1,4 +1,28 @@
 {
+  // The solution file: `vue-tsc --build` checks the referenced projects, which
+  // both extend this file for its shared compiler options. `files: []` keeps
+  // this file itself from type-checking anything.
   "files": [],
-  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
+
+  // @vue/tsconfig sets up bundler resolution, ESM and `verbatimModuleSyntax`;
+  // everything below tightens type checking as far as TypeScript allows.
+  "extends": "@vue/tsconfig/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+
+    // Only syntax that type stripping can erase: no enums, namespaces or parameter properties.
+    "erasableSyntaxOnly": true,
+    "noUncheckedSideEffectImports": true
+  }
 }

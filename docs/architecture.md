@@ -62,7 +62,7 @@ Four things shape it:
 | Practice                                 | How                                                                                                                                           |
 | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `<script setup lang="ts">`               | Everywhere, with typed `defineProps`/`defineEmits`/`defineModel`. No Options API and no `this`.                                               |
-| Strict TypeScript                        | Every strictness flag TypeScript offers (`tsconfig.base.json`) plus `strictTemplates` for templates. `vue-tsc --build` in `pnpm check`.       |
+| Strict TypeScript                        | Every strictness flag TypeScript offers (`tsconfig.json`) plus `strictTemplates` for templates. `vue-tsc --build` in `pnpm check`.            |
 | Presentational vs. container components  | `components/` only take props and emit events. `features/*` wire stores and composables to them.                                              |
 | Composables for stateful, reusable logic | `useKeyCapture()` owns its listeners and cleans them up in `onScopeDispose`, replacing the manual `new Keyboard()` + `destroy()`.             |
 | Pinia setup stores                       | State as `ref`, derived values as `computed`, actions as functions. Stores call `platform/`, never `invoke` directly.                         |

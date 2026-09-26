@@ -56,5 +56,9 @@
     "extends": [
       "@commitlint/config-conventional"
     ]
+  },
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 100
   }
 }

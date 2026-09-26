@@ -42,7 +42,7 @@ In practice:
 
 ## TypeScript
 
-- Every strictness flag is on (`tsconfig.base.json`), including `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess` and `strictTemplates` for Vue templates.
+- Every strictness flag is on (`tsconfig.json`), including `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess` and `strictTemplates` for Vue templates.
 - **Only erasable syntax** (`erasableSyntaxOnly`): no `enum`, `namespace` or parameter properties. Use string literal unions and `as const` objects instead of enums.
 - `type` instead of `interface` (enforced).
 - `import type` for type-only imports (enforced).
@@ -76,11 +76,11 @@ In practice:
 
 ## Formatting
 
-Prettier formats TypeScript, Vue, SCSS, JSON and Markdown, and rustfmt formats Rust. Prettier uses its defaults except for single quotes and 100 columns (`.prettierrc.json`); rustfmt uses its defaults. Formatting is never discussed in review.
+Prettier formats TypeScript, Vue, SCSS, JSON and Markdown, and rustfmt formats Rust. Prettier uses its defaults except for single quotes and 100 columns (the `prettier` key in `package.json`); rustfmt uses its defaults. Formatting is never discussed in review.
 
 ## Git
 
-Enforced by git hooks (`lefthook.yml`), which `pnpm install` sets up.
+Enforced by git hooks (`.config/lefthook.yml`), which `pnpm install` sets up.
 
 - **Commits** follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/#specification), checked by commitlint (`@commitlint/config-conventional`): `<type>[(scope)][!]: <description>`, with types `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `style`, `build`, `ci`, `chore` and `revert`. The scope is optional and names the area (`domain`, `ui`, `platform`, `rust`, …). Breaking changes use `!` or a `BREAKING CHANGE:` footer.
 - **Branches** follow [Conventional Branch](https://conventionalbranch.org): `<type>/<description>` with `feature/`, `fix/`, `hotfix/`, `release/` or `chore/`, in lowercase letters, digits and single hyphens (dots only in versions, like `release/v1.2.0`).

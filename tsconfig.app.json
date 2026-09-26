@@ -1,6 +1,6 @@
 {
   // The Vue frontend, including its unit tests.
-  "extends": ["@vue/tsconfig/tsconfig.dom.json", "./tsconfig.base.json"],
+  "extends": ["@vue/tsconfig/tsconfig.dom.json", "./tsconfig.json"],
   "compilerOptions": {
     "composite": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
