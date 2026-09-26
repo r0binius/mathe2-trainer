@@ -11,14 +11,14 @@ The rewrite is built in small steps, and building it is also a way to learn: fun
    - **Claude writes** the plumbing (config, IPC, Rust FFI, data porting) and walks you through it.
    - **Claude reviews** your code the way a senior developer would: it points out issues, explains why, and gives hints before solutions. It doesn't rewrite your code unless you ask.
 4. **Check:** `pnpm check` passes.
-5. **Commit and merge:** Conventional Commits, then a fast-forward into `main`.
+5. **Commit and merge:** one Conventional Commit per sub-step, each after a review stop, with its box ticked in the sub-step list. The step's last commit ends with `Closes #N` (the step's issue), so the fast-forward into `main` closes it once pushed.
 6. **Log:** add a short _What we learned_ section to the step below.
 
 Status: ✅ done · 🚧 in progress · ⏳ planned
 
 ---
 
-## 1. Foundation ✅
+## 1. Foundation ✅ ([#1](https://codeberg.org/gobin/mouseless/issues/1))
 
 Tooling, strict configuration, docs and git conventions.
 
@@ -32,7 +32,7 @@ Tooling, strict configuration, docs and git conventions.
 - **Git commits the index, not the working tree.** That makes it possible to commit a partial change while the working tree holds the final state, which is how commit 2 was made after the `pnpm exec` sync uninstalled commitlint mid-hook.
 - **Environment:** tools need to be on the PATH of every shell. rustup's `~/.cargo/env` has to be sourced, typically from `~/.zshenv`.
 
-## 2. Domain: keyboard and shortcuts ⏳
+## 2. Domain: keyboard and shortcuts ⏳ ([#2](https://codeberg.org/gobin/mouseless/issues/2))
 
 Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions into keys for the current keyboard layout, with no Tauri, no Vue and no native code.
 
@@ -50,6 +50,19 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 - Collection helpers: native array methods (recommended) or `remeda`
 - SHA-256 for `shortcutId`: `@noble/hashes`, which is synchronous and keeps `shortcutId` a plain pure function, or the built-in Web Crypto API, which is asynchronous and makes everything that uses the ID async
 - Fixtures: dump the German and US keymaps and a sample of shortcut IDs from the old app
+
+**Sub-steps**
+
+- [ ] 2.1 `Result` type
+- [ ] 2.2 Fixtures: German and US keymaps and a sample of shortcut IDs from the old app (Claude)
+- [ ] 2.3 Keymap types and the ISO swap
+- [ ] 2.4 Key resolution chain and modifier ordering
+- [ ] 2.5 `shortcutId`, legacy-compatible
+- [ ] 2.6 Shortcut types and `defineApp` (together)
+- [ ] 2.7 `shortcutPolicy`
+- [ ] 2.8 Key labels
+- [ ] 2.9 Port the 10 apps (Claude)
+- [ ] 2.10 Data health test
 
 **Who writes what**
 
@@ -76,7 +89,7 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 - [`KeyboardEvent.code`](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code)
 - [legacy-architecture.md](legacy-architecture.md) §6–7
 
-## 3. Domain: practice and scheduling ⏳
+## 3. Domain: practice and scheduling ⏳ ([#3](https://codeberg.org/gobin/mouseless/issues/3))
 
 Branch `feature/practice-session`. The practice flow shared by learn and review, as a state machine, plus FSRS scheduling.
 
@@ -84,13 +97,22 @@ Branch `feature/practice-session`. The practice flow shared by learn and review,
 
 **Decisions:** keep the hand-written FSRS-5 or switch to `ts-fsrs`; whether skipped shortcuts survive across sessions; whether to use a pattern-matching library (`ts-pattern`) or plain `switch`.
 
+**Sub-steps**
+
+- [ ] 3.1 Practice session reducer (State + Command)
+- [ ] 3.2 Next-item strategies: weighted buckets for learn, due queue for review
+- [ ] 3.3 Grading
+- [ ] 3.4 `Scheduler` port and FSRS (Claude)
+- [ ] 3.5 Run snapshots (Memento)
+- [ ] 3.6 `reconcileProgress`
+
 **Who writes what:** you write the reducer, the strategies, grading and reconcile, test first. Claude brings in FSRS (port or library) and reviews.
 
 **Concepts:** state machines and reducers, injecting randomness and time for determinism (seeded random numbers), property-style tests, spaced repetition.
 
 **Resources:** [statecharts.dev](https://statecharts.dev/) · [refactoring.guru: State, Command, Strategy, Memento](https://refactoring.guru/design-patterns/catalog) · [FSRS algorithm](https://github.com/open-spaced-repetition/fsrs4anki/wiki/The-Algorithm) · [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) · [ts-pattern](https://github.com/gvergnaud/ts-pattern) · [legacy-architecture.md](legacy-architecture.md) §8–9
 
-## 4. Persistence and IPC ⏳
+## 4. Persistence and IPC ⏳ ([#4](https://codeberg.org/gobin/mouseless/issues/4))
 
 Branch `feature/persistence`. Settings and progress stored by Rust and reached through a typed platform facade.
 
@@ -98,13 +120,22 @@ Branch `feature/persistence`. Settings and progress stored by Rust and reached t
 
 **Decisions:** SQLite or JSON for progress; whether `tauri-specta` is ready; the settings schema (`trigger` as a union).
 
+**Sub-steps**
+
+- [ ] 4.1 Rust `AppError`
+- [ ] 4.2 Settings store
+- [ ] 4.3 SQLite progress repository and migrations
+- [ ] 4.4 Typed commands and events
+- [ ] 4.5 `platform/` facade
+- [ ] 4.6 Pinia stores
+
 **Who writes what:** you write Rust commands and repository queries, and the Pinia stores. Claude writes the migrations setup, the typed-bindings plumbing and the facade skeleton, and reviews.
 
 **Concepts:** Rust ownership and borrowing, `Result` and `?`, traits, `thiserror`; the Tauri process model, commands, state management and capabilities; Pinia setup stores; ports and adapters.
 
 **Resources:** [Rust book: Ownership](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html), [Error handling](https://doc.rust-lang.org/book/ch09-00-error-handling.html), [Traits](https://doc.rust-lang.org/book/ch10-02-traits.html) · [Rust by Example](https://doc.rust-lang.org/rust-by-example/) · [thiserror](https://docs.rs/thiserror/latest/thiserror/) · [rusqlite](https://docs.rs/rusqlite/latest/rusqlite/) · [Tauri process model](https://tauri.app/concept/process-model/), [IPC](https://tauri.app/concept/inter-process-communication/), [Calling Rust](https://tauri.app/develop/calling-rust/), [State management](https://tauri.app/develop/state-management/), [Capabilities](https://tauri.app/security/capabilities/) · [tauri-specta](https://github.com/specta-rs/tauri-specta) · [Pinia](https://pinia.vuejs.org/core-concepts/)
 
-## 5. Main window UI ⏳
+## 5. Main window UI ⏳ ([#5](https://codeberg.org/gobin/mouseless/issues/5))
 
 Branch `feature/main-window`. The library, sets, set detail, learn, review and options screens, with transitions and keyboard navigation.
 
@@ -112,17 +143,33 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 
 **Decisions:** spatial navigation (library or our own composable); design tokens as CSS custom properties; UI language (English UI with German shortcut titles, or i18n).
 
+**Sub-steps**
+
+- [ ] 5.1 Styles and design tokens (Claude)
+- [ ] 5.2 Presentational components (Claude)
+- [ ] 5.3 Router, library and set screens
+- [ ] 5.4 Learn and review screens (`useKeyCapture`, `usePracticeSession`)
+- [ ] 5.5 Options screen
+- [ ] 5.6 Spatial navigation and transitions
+
 **Who writes what:** you write the composables and feature components. Claude ports the styles and the presentational components, and reviews.
 
 **Concepts:** Vue reactivity (`ref`, `computed`, `watch`), composables and effect cleanup, presentational vs. container components, typed props and emits, the router.
 
 **Resources:** [Vue: Reactivity in depth](https://vuejs.org/guide/extras/reactivity-in-depth.html) · [Composables](https://vuejs.org/guide/reusability/composables.html) · [TypeScript with the Composition API](https://vuejs.org/guide/typescript/composition-api.html)
 
-## 6. Native keyboard layout ⏳
+## 6. Native keyboard layout ⏳ ([#6](https://codeberg.org/gobin/mouseless/issues/6))
 
 Branch `feature/native-keymap`. Read the current keyboard layout in Rust, replacing `native-keymap`.
 
 **Deliverables:** the `KeymapSource` trait, a macOS implementation (`TISCopyCurrentKeyboardLayoutInputSource` + `UCKeyTranslate`), layout-change events, and output that matches the step 2 fixtures.
+
+**Sub-steps**
+
+- [ ] 6.1 `KeymapSource` trait
+- [ ] 6.2 macOS FFI: `TISCopyCurrentKeyboardLayoutInputSource` + `UCKeyTranslate` (Claude)
+- [ ] 6.3 Safe translation into our keymap type and fixture comparison tests
+- [ ] 6.4 Layout-change events
 
 **Who writes what:** Claude writes the unsafe FFI bindings with `// SAFETY:` comments and walks you through them. You write the safe translation into our keymap type and the comparison tests against the fixtures.
 
@@ -130,9 +177,17 @@ Branch `feature/native-keymap`. Read the current keyboard layout in Rust, replac
 
 **Resources:** [The Rustonomicon](https://doc.rust-lang.org/nomicon/) · [objc2](https://docs.rs/objc2/latest/objc2/) · [UCKeyTranslate](https://developer.apple.com/documentation/coreservices/1390584-uckeytranslate)
 
-## 7. Menu bar popover and trigger ⏳
+## 7. Menu bar popover and trigger ⏳ ([#7](https://codeberg.org/gobin/mouseless/issues/7))
 
 Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcut, window coordination, dock icon, autostart, single instance, and a strict CSP.
+
+**Sub-steps**
+
+- [ ] 7.1 Tray icon and popover window
+- [ ] 7.2 `WindowCoordinator` (Mediator)
+- [ ] 7.3 Trigger: hold ⌘ event tap and global shortcut
+- [ ] 7.4 Dock icon, autostart, single instance
+- [ ] 7.5 Strict CSP, verified in the running app
 
 **Who writes what:** you write the `WindowCoordinator` (Mediator) logic. Claude writes the event tap and the plugin wiring.
 
@@ -140,9 +195,15 @@ Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcu
 
 **Resources:** [Tauri system tray](https://tauri.app/learn/system-tray/) · [Tauri CSP](https://tauri.app/security/csp/) · [NSWorkspace.frontmostApplication](https://developer.apple.com/documentation/appkit/nsworkspace/frontmostapplication)
 
-## 8. Menu shortcut lookup ⏳
+## 8. Menu shortcut lookup ⏳ ([#8](https://codeberg.org/gobin/mouseless/issues/8))
 
 Branch `feature/menu-lookup`. Read any app's menu shortcuts through the Accessibility API, and show them with search in the popover.
+
+**Sub-steps**
+
+- [ ] 8.1 AX FFI and the permission flow (Claude)
+- [ ] 8.2 Recursive menu walk and mapping into shortcut data
+- [ ] 8.3 Lookup UI with search
 
 **Who writes what:** Claude writes the AX FFI. You write the recursive menu walk, the mapping into shortcut data, and the lookup feature.
 
@@ -150,12 +211,17 @@ Branch `feature/menu-lookup`. Read any app's menu shortcuts through the Accessib
 
 **Resources:** [AXUIElement](https://developer.apple.com/documentation/applicationservices/axuielement_h)
 
-## 9. Import and packaging ⏳
+## 9. Import and packaging ⏳ ([#9](https://codeberg.org/gobin/mouseless/issues/9))
 
 Branch `feature/electron-import`. Import settings and progress from the old app's `config.json`, then build the app.
 
+**Sub-steps**
+
+- [ ] 9.1 Electron importer, including the layout-name mapping
+- [ ] 9.2 Bundle config and signing (Claude)
+
 **Who writes what:** you write the importer (an Adapter) with fixture tests. Claude writes the bundle config and signing.
 
-## 10. Linux ⏳
+## 10. Linux ⏳ ([#10](https://codeberg.org/gobin/mouseless/issues/10))
 
 Platform implementations for X11/Wayland, a UI driven by capabilities, and Linux key labels. Planned in detail once macOS is complete.
