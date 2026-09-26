@@ -1,6 +1,10 @@
 # Mouseless
 
-Keyboard shortcut training and look-up for macOS (Linux later). A rewrite of the Electron app in `../mouseless-old` with Tauri 2, Vue 3 and TypeScript.
+Keyboard shortcut training and look-up for macOS (Linux later). A rewrite of [ueberdosis/mouseless](https://github.com/ueberdosis/mouseless), an Electron app, with Tauri 2, Vue 3 and TypeScript.
+
+## Motivation
+
+The original Mouseless was abandoned about four years ago. I really like the idea, so I'm modernizing it with a new, current stack, and learning along the way.
 
 ## Docs
 
