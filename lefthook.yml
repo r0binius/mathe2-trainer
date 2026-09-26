@@ -1,0 +1,25 @@
+# Git hooks, installed by `pnpm install` (see the `prepare` script).
+
+pre-commit:
+  jobs:
+    - name: branch name
+      run: |
+        branch=$(git branch --show-current)
+        # Detached HEAD (e.g. during a rebase) has no branch to check.
+        [ -z "$branch" ] && exit 0
+        case "$branch" in
+          main)
+            echo "Commit on a branch, not on main (see docs/conventions.md#git)."
+            exit 1 ;;
+        esac
+        pattern='^(feature|feat|bugfix|fix|hotfix|release|chore)/[a-z0-9]+([.-][a-z0-9]+)*$'
+        if ! printf '%s' "$branch" | grep -Eq "$pattern"; then
+          echo "Branch '$branch' doesn't follow Conventional Branch: <type>/<description>,"
+          echo "e.g. feature/keyboard-domain (see https://conventionalbranch.org)."
+          exit 1
+        fi
+
+commit-msg:
+  jobs:
+    - name: conventional commit
+      run: pnpm exec commitlint --edit {1}

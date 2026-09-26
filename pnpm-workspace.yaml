@@ -1,0 +1,3 @@
+allowBuilds:
+  # Git hooks are installed by our own `prepare` script instead.
+  lefthook: false

@@ -32,3 +32,7 @@ Keyboard shortcut training and look-up for macOS (Linux later). A rewrite of the
 ## Editor
 
 VS Code recommends the needed extensions (`.vscode/extensions.json`). Files are formatted with Prettier on save, and ESLint fixes are applied on save.
+
+## Git
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) and branches follow [Conventional Branch](https://conventionalbranch.org). Git hooks installed by `pnpm install` check both. See [conventions](docs/conventions.md#git).
