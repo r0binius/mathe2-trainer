@@ -6,6 +6,7 @@ Keyboard shortcut training and look-up for macOS (Linux later). A rewrite of the
 
 - [Architecture](docs/architecture.md): layers, best practices, design patterns
 - [Conventions](docs/conventions.md): functional style, clean code, TypeScript, Vue and Rust rules
+- [Roadmap](docs/roadmap.md): the steps, who writes what, and what we learned
 - [Legacy architecture](docs/legacy-architecture.md): how the old app works and what must stay compatible
 
 ## Requirements
