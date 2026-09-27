@@ -49,7 +49,8 @@ function resolveKey(keymap: Keymap, key: string): KeyCombination {
   return matches.find((match) => match !== undefined) ?? [key];
 }
 
-function isModifier(key: string): boolean {
+/** Whether the key is one of `Control`, `Alt`, `Shift` and `Meta`. */
+export function isModifier(key: string): boolean {
   return modifierOrder.some((modifier) => modifier === key);
 }
 

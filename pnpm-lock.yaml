@@ -162,6 +162,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  is-immutable-type@5.0.4: 48d43667e27dd3843fe353d05d0efe88350867c7ff4fa8c27d7c11a8b945dfeb
+
 importers:
 
   .:
@@ -2522,7 +2525,7 @@ snapshots:
       deepmerge-ts: 7.1.6
       escape-string-regexp: 5.0.0
       eslint: 10.11.0(jiti@2.7.0)
-      is-immutable-type: 5.0.4(eslint@10.11.0(jiti@2.7.0))(typescript@6.0.3)
+      is-immutable-type: 5.0.4(patch_hash=48d43667e27dd3843fe353d05d0efe88350867c7ff4fa8c27d7c11a8b945dfeb)(eslint@10.11.0(jiti@2.7.0))(typescript@6.0.3)
       ts-api-utils: 2.5.0(typescript@6.0.3)
       ts-declaration-location: 1.0.7(typescript@6.0.3)
     optionalDependencies:
@@ -2750,7 +2753,7 @@ snapshots:
     dependencies:
       is-extglob: 2.1.1
 
-  is-immutable-type@5.0.4(eslint@10.11.0(jiti@2.7.0))(typescript@6.0.3):
+  is-immutable-type@5.0.4(patch_hash=48d43667e27dd3843fe353d05d0efe88350867c7ff4fa8c27d7c11a8b945dfeb)(eslint@10.11.0(jiti@2.7.0))(typescript@6.0.3):
     dependencies:
       '@typescript-eslint/type-utils': 8.70.1(eslint@10.11.0(jiti@2.7.0))(typescript@6.0.3)
       eslint: 10.11.0(jiti@2.7.0)

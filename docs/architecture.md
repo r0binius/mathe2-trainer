@@ -115,7 +115,7 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 **Chain of Responsibility: shortcut policy and resolution**
 
 - _Problem:_ two separate lists of forbidden shortcuts (`Keyboard.blockedShortcuts`, `OptionsOverlay.isAllowedShortcut`), and the current trigger is read only once.
-- `ShortcutPolicy` is an ordered list of rules: `noDuplicateKeys → notModifierOnly → notSystemReserved(platform) → notCurrentTrigger(trigger) → (recorder only) needsModifier, notAppStandard`. Each rule either passes or returns a reason (`{ ok: false, reason: 'system-reserved' }`). The data health test, the practice filter and the shortcut recorder use the same chain with different rule sets, and the recorder can show _why_ it rejected a shortcut.
+- `ShortcutPolicy` is an ordered list of rules: `noDuplicateKeys → notModifierOnly → notReserved(reserved)`, where `reserved` is the platform's list plus the current trigger, and the recorder (step 7) adds `needsModifier` and `notAppStandard`. Each rule either passes (`undefined`) or returns a reason (`{ reason: 'reserved' }`), and `checkShortcut` returns the first one as a `Result`. The data health test, the practice filter and the shortcut recorder use the same chain with different rule sets, and the recorder can show _why_ it rejected a shortcut.
 - Key resolution is a small chain as well: `value → withShift → withAlt → withShiftAlt → keep as code`.
 - Rust frontmost-app detection: `frontmostApplication → topmost other window → none`.
 

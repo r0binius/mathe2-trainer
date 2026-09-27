@@ -1,0 +1,32 @@
+diff --git a/dist/index.cjs b/dist/index.cjs
+index 6759bed9c36c616e915e2336081fe3477dbf3559..990b358c99f59fb81b60bb2b6d47a8fbbace146c 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -402,7 +402,10 @@ var TaskStateStage;
+  * Get the immutability of the given type data.
+  */
+ function getTypeImmutabilityHelper(program, td, overrides, useCache, maxImmutability, typeMatchesPatternSpecifier) {
+-    const cache = useCache === true ? globalCache : useCache === false ? new WeakMap() : useCache;
++    // Patched (is-immutable-type#625): the global cache is keyed by recursion identity, so
++    // generic instantiations and differently capped checks overwrite each other, making results
++    // depend on which files were checked first. A fresh cache per call keeps them order-independent.
++    const cache = useCache === true || useCache === false ? new WeakMap() : useCache;
+     const parameters = {
+         program,
+         overrides,
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 3bd08083cd4d1593c7a433bd7655ac5c54d9d9bb..8db2f6739e9a4f356274027f518f2b4632b322b0 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -400,7 +400,10 @@ var TaskStateStage;
+  * Get the immutability of the given type data.
+  */
+ function getTypeImmutabilityHelper(program, td, overrides, useCache, maxImmutability, typeMatchesPatternSpecifier) {
+-    const cache = useCache === true ? globalCache : useCache === false ? new WeakMap() : useCache;
++    // Patched (is-immutable-type#625): the global cache is keyed by recursion identity, so
++    // generic instantiations and differently capped checks overwrite each other, making results
++    // depend on which files were checked first. A fresh cache per call keeps them order-independent.
++    const cache = useCache === true || useCache === false ? new WeakMap() : useCache;
+     const parameters = {
+         program,
+         overrides,

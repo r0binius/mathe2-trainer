@@ -1,3 +1,6 @@
 allowBuilds:
   # Git hooks are installed by our own `prepare` script instead.
   lefthook: false
+# Order-dependent lint results from a shared cache. Remove once is-immutable-type#625 is fixed.
+patchedDependencies:
+  is-immutable-type@5.0.4: patches/is-immutable-type@5.0.4.patch
