@@ -1,0 +1,21 @@
+{
+  "essentials": {
+    "title": "Grundlagen",
+    "chats": "Chats",
+    "updates": "Aktuelles",
+    "communities": "Communitys",
+    "calls": "Anrufe",
+    "media": "Medien",
+    "back": "Zurück",
+    "previousChat": "Vorheriger Chat",
+    "nextChat": "Nächster Chat",
+    "search": "Suchen",
+    "settings": "Einstellungen"
+  },
+  "view": {
+    "title": "Darstellung",
+    "zoomIn": "Text vergrößern",
+    "zoomOut": "Text verkleinern",
+    "actualSize": "Text auf Standardgröße setzen"
+  }
+}
