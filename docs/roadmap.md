@@ -146,7 +146,7 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 
 **Deliverables:** presentational components (`KeyCap`, `BaseButton`, `CircleProgress`, …), feature routes, composables (`useKeyCapture`, `usePracticeSession`, `useSpatialNav`), styles ported from the old app.
 
-**Decisions:** spatial navigation (library or our own composable); design tokens as CSS custom properties; vue-i18n setup and the UI's language (the data is translatable from step 2).
+**Decisions:** spatial navigation (library or our own composable); design tokens as CSS custom properties; vue-i18n setup and the UI's language (the data is translatable from step 2); app titles the vendor translates itself (Apple's Notes is `Notizen` on a German Mac, hard-coded in the data for now).
 
 **Sub-steps**
 
