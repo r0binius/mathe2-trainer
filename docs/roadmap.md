@@ -1,17 +1,14 @@
 # Roadmap
 
-The rewrite is built in small steps, and building it is also a way to learn: functional TypeScript, Rust and macOS APIs, Tauri and Vue architecture, and test-driven development.
+The rewrite is built in small steps. Claude writes the code; you decide and review.
 
 ## How a step works
 
-1. **Learn:** read the concepts and resources listed for the step, then Claude explains them using this project's code.
-2. **Decide:** go through the step's open decisions. Claude recommends an option; you decide.
-3. **Build:** on a branch named per [Conventional Branch](https://conventionalbranch.org), e.g. `feature/keyboard-domain`.
-   - **You write** the pure domain code and its tests, test first: write a failing test, make it pass, refactor. A step's first function starts from a test Claude writes as a worked example.
-   - **Claude writes** the plumbing (config, IPC, Rust FFI, data porting) and walks you through it.
-   - **Claude reviews** your code the way a senior developer would: it points out issues, explains why, and gives hints before solutions. It doesn't rewrite your code unless you ask.
+1. **Decide:** go through the step's open decisions. Claude recommends an option; you decide.
+2. **Build:** on a branch named per [Conventional Branch](https://conventionalbranch.org), e.g. `feature/keyboard-domain`. Claude writes the code, domain code test first, one sub-step at a time.
+3. **Review:** after each sub-step, Claude walks you through the diff. Feedback is applied before committing.
 4. **Check:** `pnpm check` passes.
-5. **Commit and merge:** one Conventional Commit per sub-step, each after a review stop, with its box ticked in the sub-step list. The step's last commit ends with `Closes #N` (the step's issue), so the fast-forward into `main` closes it once pushed.
+5. **Commit and merge:** one Conventional Commit per sub-step, after your review, with its box ticked in the sub-step list. The step's last commit ends with `Closes #N` (the step's issue), so the fast-forward into `main` closes it once pushed.
 6. **Log:** add a short _What we learned_ section to the step below.
 
 Status: ✅ done · 🚧 in progress · ⏳ planned
@@ -54,20 +51,15 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 **Sub-steps**
 
 - [ ] 2.1 `Result` type
-- [ ] 2.2 Fixtures: German and US keymaps and a sample of shortcut IDs from the old app (Claude)
+- [ ] 2.2 Fixtures: German and US keymaps and a sample of shortcut IDs from the old app
 - [ ] 2.3 Keymap types and the ISO swap
 - [ ] 2.4 Key resolution chain and modifier ordering
 - [ ] 2.5 `shortcutId`, legacy-compatible
-- [ ] 2.6 Shortcut types and `defineApp` (together)
+- [ ] 2.6 Shortcut types and `defineApp`
 - [ ] 2.7 `shortcutPolicy`
 - [ ] 2.8 Key labels
-- [ ] 2.9 Port the 10 apps (Claude)
+- [ ] 2.9 Port the 10 apps
 - [ ] 2.10 Data health test
-
-**Who writes what**
-
-- You: `Result`, key resolution, `shortcutPolicy`, `shortcutId`, the data health test, and all their tests
-- Claude: the first test as a worked example, the fixture dumps, `defineApp` and its types (designed together), porting the app data, reviews
 
 **Concepts**
 
@@ -102,11 +94,9 @@ Branch `feature/practice-session`. The practice flow shared by learn and review,
 - [ ] 3.1 Practice session reducer (State + Command)
 - [ ] 3.2 Next-item strategies: weighted buckets for learn, due queue for review
 - [ ] 3.3 Grading
-- [ ] 3.4 `Scheduler` port and FSRS (Claude)
+- [ ] 3.4 `Scheduler` port and FSRS
 - [ ] 3.5 Run snapshots (Memento)
 - [ ] 3.6 `reconcileProgress`
-
-**Who writes what:** you write the reducer, the strategies, grading and reconcile, test first. Claude brings in FSRS (port or library) and reviews.
 
 **Concepts:** state machines and reducers, injecting randomness and time for determinism (seeded random numbers), property-style tests, spaced repetition.
 
@@ -129,8 +119,6 @@ Branch `feature/persistence`. Settings and progress stored by Rust and reached t
 - [ ] 4.5 `platform/` facade
 - [ ] 4.6 Pinia stores
 
-**Who writes what:** you write Rust commands and repository queries, and the Pinia stores. Claude writes the migrations setup, the typed-bindings plumbing and the facade skeleton, and reviews.
-
 **Concepts:** Rust ownership and borrowing, `Result` and `?`, traits, `thiserror`; the Tauri process model, commands, state management and capabilities; Pinia setup stores; ports and adapters.
 
 **Resources:** [Rust book: Ownership](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html), [Error handling](https://doc.rust-lang.org/book/ch09-00-error-handling.html), [Traits](https://doc.rust-lang.org/book/ch10-02-traits.html) · [Rust by Example](https://doc.rust-lang.org/rust-by-example/) · [thiserror](https://docs.rs/thiserror/latest/thiserror/) · [rusqlite](https://docs.rs/rusqlite/latest/rusqlite/) · [Tauri process model](https://tauri.app/concept/process-model/), [IPC](https://tauri.app/concept/inter-process-communication/), [Calling Rust](https://tauri.app/develop/calling-rust/), [State management](https://tauri.app/develop/state-management/), [Capabilities](https://tauri.app/security/capabilities/) · [tauri-specta](https://github.com/specta-rs/tauri-specta) · [Pinia](https://pinia.vuejs.org/core-concepts/)
@@ -145,14 +133,12 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 
 **Sub-steps**
 
-- [ ] 5.1 Styles and design tokens (Claude)
-- [ ] 5.2 Presentational components (Claude)
+- [ ] 5.1 Styles and design tokens
+- [ ] 5.2 Presentational components
 - [ ] 5.3 Router, library and set screens
 - [ ] 5.4 Learn and review screens (`useKeyCapture`, `usePracticeSession`)
 - [ ] 5.5 Options screen
 - [ ] 5.6 Spatial navigation and transitions
-
-**Who writes what:** you write the composables and feature components. Claude ports the styles and the presentational components, and reviews.
 
 **Concepts:** Vue reactivity (`ref`, `computed`, `watch`), composables and effect cleanup, presentational vs. container components, typed props and emits, the router.
 
@@ -167,11 +153,9 @@ Branch `feature/native-keymap`. Read the current keyboard layout in Rust, replac
 **Sub-steps**
 
 - [ ] 6.1 `KeymapSource` trait
-- [ ] 6.2 macOS FFI: `TISCopyCurrentKeyboardLayoutInputSource` + `UCKeyTranslate` (Claude)
+- [ ] 6.2 macOS FFI: `TISCopyCurrentKeyboardLayoutInputSource` + `UCKeyTranslate`
 - [ ] 6.3 Safe translation into our keymap type and fixture comparison tests
 - [ ] 6.4 Layout-change events
-
-**Who writes what:** Claude writes the unsafe FFI bindings with `// SAFETY:` comments and walks you through them. You write the safe translation into our keymap type and the comparison tests against the fixtures.
 
 **Concepts:** FFI and `unsafe`, `objc2`, Core Foundation memory rules, traits as ports (Bridge pattern).
 
@@ -189,8 +173,6 @@ Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcu
 - [ ] 7.4 Dock icon, autostart, single instance
 - [ ] 7.5 Strict CSP, verified in the running app
 
-**Who writes what:** you write the `WindowCoordinator` (Mediator) logic. Claude writes the event tap and the plugin wiring.
-
 **Concepts:** the Mediator pattern, macOS activation policy and focus handling, event taps, the Content Security Policy.
 
 **Resources:** [Tauri system tray](https://tauri.app/learn/system-tray/) · [Tauri CSP](https://tauri.app/security/csp/) · [NSWorkspace.frontmostApplication](https://developer.apple.com/documentation/appkit/nsworkspace/frontmostapplication)
@@ -201,11 +183,9 @@ Branch `feature/menu-lookup`. Read any app's menu shortcuts through the Accessib
 
 **Sub-steps**
 
-- [ ] 8.1 AX FFI and the permission flow (Claude)
+- [ ] 8.1 AX FFI and the permission flow
 - [ ] 8.2 Recursive menu walk and mapping into shortcut data
 - [ ] 8.3 Lookup UI with search
-
-**Who writes what:** Claude writes the AX FFI. You write the recursive menu walk, the mapping into shortcut data, and the lookup feature.
 
 **Concepts:** the Accessibility API and permissions, recursion over trees, matching apps by bundle ID.
 
@@ -218,9 +198,7 @@ Branch `feature/electron-import`. Import settings and progress from the old app'
 **Sub-steps**
 
 - [ ] 9.1 Electron importer, including the layout-name mapping
-- [ ] 9.2 Bundle config and signing (Claude)
-
-**Who writes what:** you write the importer (an Adapter) with fixture tests. Claude writes the bundle config and signing.
+- [ ] 9.2 Bundle config and signing
 
 ## 10. Linux ⏳ ([#10](https://codeberg.org/gobin/mouseless/issues/10))
 

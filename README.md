@@ -10,7 +10,7 @@ The original Mouseless was abandoned about four years ago. I really like the ide
 
 - [Architecture](docs/architecture.md): layers, best practices, design patterns
 - [Conventions](docs/conventions.md): functional style, clean code, TypeScript, Vue and Rust rules
-- [Roadmap](docs/roadmap.md): the steps, who writes what, and what we learned
+- [Roadmap](docs/roadmap.md): the steps, decisions and what we learned
 - [Legacy architecture](docs/legacy-architecture.md): how the old app works and what must stay compatible
 
 ## Requirements
