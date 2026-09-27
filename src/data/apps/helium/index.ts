@@ -25,10 +25,20 @@ export const helium = defineApp({
       id: 'tabs',
       title: 'tabs.title',
       shortcuts: [
-        { title: 'tabs.next', keys: [['Control', 'Tab']] },
-        { title: 'tabs.previous', keys: [['Control', 'Shift', 'Tab']] },
-        { title: 'tabs.nextAlternative', keys: [['Alt', 'Meta', 'ArrowRight']] },
-        { title: 'tabs.previousAlternative', keys: [['Alt', 'Meta', 'ArrowLeft']] },
+        {
+          title: 'tabs.next',
+          keys: [
+            ['Control', 'Tab'],
+            ['Alt', 'Meta', 'ArrowRight'],
+          ],
+        },
+        {
+          title: 'tabs.previous',
+          keys: [
+            ['Control', 'Shift', 'Tab'],
+            ['Alt', 'Meta', 'ArrowLeft'],
+          ],
+        },
         { title: 'tabs.first', keys: [['Meta', '1']] },
         { title: 'tabs.last', keys: [['Meta', '9']] },
         { title: 'tabs.search', keys: [['Shift', 'Meta', 'a']] },
