@@ -52,7 +52,7 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 
 - [x] 2.1 `Result` type
 - [x] 2.2 Fixture: the German keymap
-- [ ] 2.3 Keymap type
+- [x] 2.3 Keymap type
 - [ ] 2.4 Key resolution chain and modifier ordering
 - [ ] 2.5 `shortcutId`, legacy-compatible
 - [ ] 2.6 Shortcut types and `defineApp`
