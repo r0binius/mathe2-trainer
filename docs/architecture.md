@@ -128,7 +128,7 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 
 - `PracticeStrategy`: `learnStrategy` for learn (weighted buckets unseen 90 / trained 50 / learned 10, no immediate repeat) and `reviewStrategy` for review (a queue in due order, failed items requeued).
 - Grading is **not** a strategy while there's only one: `gradeRecall` (`practice/grading.ts`) is a plain function. The grade comes only from what was measured, never from the user's own estimate: a mistake → again, over 6 s → hard, under 2 s → easy, otherwise good. It becomes a parameter once a second grading exists, such as one relative to the user's own speed.
-- `Scheduler`: an FSRS implementation behind an interface, so the hand-written FSRS-5 and `ts-fsrs` are interchangeable, and tests can use a fixed scheduler.
+- `Scheduler` (`domain/scheduling/scheduler.ts`): a function type `(memory, grade, at) → memory` that FSRS fills. `scheduleWithFsrs` (`scheduling/fsrs.ts`) adapts `ts-fsrs`, and is the only file allowed to import it (a lint rule). The app's own rules stay outside the port, in `reviewCard` and `dueCards`, so tests can pin them with a fake scheduler.
 - `KeyLabels`: ⌘⌥⇧⌃ on macOS, Super/Ctrl/Alt/Shift on Linux.
 - Learn and review become the same session driven by different strategies. This replaces the duplicated route logic, and composition is preferred over a Template Method base class.
 

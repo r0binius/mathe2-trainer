@@ -1,5 +1,4 @@
-/** How well a shortcut was recalled, on the scale FSRS schedules with. */
-export type Grade = 'again' | 'hard' | 'good' | 'easy';
+import type { Grade } from '../scheduling/scheduler';
 
 /** What was measured when a shortcut was tested. */
 export type Recall = {

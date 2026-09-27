@@ -21,6 +21,14 @@ const frameworkImports = {
   message: 'The domain is framework-free. Pass data in, or move this code to the shell.',
 };
 
+const domainImports = [
+  frameworkImports,
+  {
+    group: ['@/*', '!@/domain', '!@/domain/**'],
+    message: 'The domain depends on nothing outside src/domain.',
+  },
+];
+
 const config: ReturnType<typeof withVueTs> = withVueTs(
   globalIgnores(['dist/**', 'src-tauri/**']),
 
@@ -170,14 +178,24 @@ const config: ReturnType<typeof withVueTs> = withVueTs(
         'error',
         {
           patterns: [
-            frameworkImports,
+            ...domainImports,
             {
-              group: ['@/*', '!@/domain', '!@/domain/**'],
-              message: 'The domain depends on nothing outside src/domain.',
+              group: ['ts-fsrs'],
+              message: 'Only domain/scheduling/fsrs.ts uses ts-fsrs. Use the Scheduler port.',
             },
           ],
         },
       ],
+    },
+  },
+
+  {
+    // The adapter behind the Scheduler port. Rule options replace rather than merge, so this
+    // repeats the domain's other restrictions.
+    name: 'mouseless/boundaries-fsrs',
+    files: ['src/domain/scheduling/fsrs.ts'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: domainImports }],
     },
   },
 

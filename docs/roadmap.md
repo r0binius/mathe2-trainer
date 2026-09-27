@@ -112,13 +112,14 @@ Branch `feature/practice-session`. The practice flow shared by learn and review,
 - Randomness and time are carried by messages: the shell puts `Math.random()` and `Date.now()` values into them (`advance { roll }`, `answer { keys, at }`), so the update stays pure and tests pass fixed numbers. No seeded random number generator.
 - [The Elm Architecture](https://guide.elm-lang.org/architecture/) (`architecture.md` §1.1): the session is a model with messages and `updateSession(session, msg) → { model, effects }`, in Elm's vocabulary (Model, Msg, update) but with `Effect` instead of `Cmd`, since GoF's Command is the message. Effects are data the shell carries out: results to save, and timers such as the 1 s pause after a success (`advanceAfter`), which makes that timing a tested domain rule. The shell's runtime (`useProgram`) comes in step 5. One model per concern, not one for the app.
 - Grading uses only what was measured, never the user's own estimate: a mistake → again, over 6 s → hard, under 2 s → easy, otherwise good (the old app never used easy). The 2 s limit is fixed for now and gets revisited with real data; a limit relative to the user's own speed needs the review log. `gradeRecall` is a plain function, not an injected strategy, while there's only one grading. Using the whole scale lets fluent shortcuts space out faster. Every review is logged from step 4 on, so FSRS's weights can later be fitted to the user's own data.
+- Scheduling: the `Scheduler` port is a function, `(memory, grade, at) → memory`, and `scheduleWithFsrs` in `domain/scheduling/fsrs.ts` adapts `ts-fsrs` to it. It's deterministic computation, not I/O, so it counts as core, and a lint rule keeps `ts-fsrs` out of every other file. Our rules stay outside the port (`reviewCard`, `dueCards`): a card is created on the first success, `again` is due tomorrow, and a card is due until the local end of today, which the shell computes and passes in. Settings: 90 % retention, at most 365 days between reviews (as before), fuzz on so cards learned together spread out (seeded by `ts-fsrs` from the card and review time, so still deterministic), and short-term steps off. Without them, a second review on the same day barely changes a card, where the old FSRS-5 code used a separate short-term formula. Times in the domain are epoch milliseconds; the storage format is decided in step 4. `Grade` moved to `scheduling`, since it's FSRS's scale. `ts-fsrs` throws on invalid input, so the port only takes valid memory: `CardMemory` is a branded type that only `parseCardMemory` (a `Result`: finite values, stability 0.001–36500, difficulty 1–10, consistent counts and dates) and a scheduler create, and step 4's decoders reuse the parser. A review timed before the last one (a clock set back) counts as made at the last one instead of failing, and a test over a grid of inputs checks that the adapter's output always parses.
 
 **Sub-steps**
 
 - [x] 3.1 Practice session update (State + Command, Elm style)
 - [x] 3.2 Next-item strategies: weighted buckets for learn, due queue for review
 - [x] 3.3 Grading
-- [ ] 3.4 `Scheduler` port and FSRS
+- [x] 3.4 `Scheduler` port and FSRS
 - [ ] 3.5 Run snapshots (Memento)
 - [ ] 3.6 `reconcileProgress`
 
@@ -153,7 +154,7 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 
 **Deliverables:** presentational components (`KeyCap`, `BaseButton`, `CircleProgress`, …), feature routes, composables (`useProgram`, the Elm runtime; `useKeyCapture`, `usePracticeSession`, `useSpatialNav`), styles ported from the old app.
 
-**Decisions:** spatial navigation (library or our own composable); design tokens as CSS custom properties; vue-i18n setup and the UI's language (the data is translatable from step 2); app titles the vendor translates itself (Apple's Notes is `Notizen` on a German Mac, hard-coded in the data for now).
+**Decisions:** spatial navigation (library or our own composable); design tokens as CSS custom properties; vue-i18n setup and the UI's language (the data is translatable from step 2); app titles the vendor translates itself (Apple's Notes is `Notizen` on a German Mac, hard-coded in the data for now). Guarding message times: the scheduler still throws if a review's `at` isn't a finite number (`ts-fsrs` rejects an invalid date). The shell's `Date.now()` never produces one, but parsing times where messages are built (a `parseTime` returning a `Result`) would close the last way an invalid input reaches `ts-fsrs` (noted in step 3.4).
 
 **Sub-steps**
 
