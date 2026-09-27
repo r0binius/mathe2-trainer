@@ -390,3 +390,5 @@ In the renderer:
 - FSRS: keep the hand-written FSRS-5 or switch to `ts-fsrs`.
 - Whether runs remember skipped shortcuts across sessions (they don't today).
 - Where progress lives: SQLite in Rust (per REWRITE.md) or a JSON store to begin with.
+- What progress is keyed by per layout: the old `localizedName` depends on the system language ("Deutsch" or "German"), so switching it orphans progress. The macOS input source ID (`com.apple.keylayout.German`) is stable. Decided in step 4 or 6.
+- `reconcileProgress` (step 3) no longer needs `importLearnedShortcuts`, which only migrated data from before spaced repetition. Pruning progress of removed shortcuts stays.
