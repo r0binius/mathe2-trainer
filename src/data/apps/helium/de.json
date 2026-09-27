@@ -1,0 +1,61 @@
+{
+  "essentials": {
+    "title": "Grundlagen",
+    "newTab": "Neuer Tab",
+    "newWindow": "Neues Fenster",
+    "newIncognitoWindow": "Neues Inkognitofenster",
+    "reopenClosedTab": "Geschlossenen Tab wieder öffnen",
+    "openLocation": "Adresse öffnen",
+    "closeTab": "Tab schließen",
+    "closeWindow": "Fenster schließen",
+    "openFile": "Datei öffnen",
+    "print": "Drucken"
+  },
+  "tabs": {
+    "title": "Tabs",
+    "next": "Nächster Tab",
+    "previous": "Vorheriger Tab",
+    "nextAlternative": "Nächster Tab (alternativ)",
+    "previousAlternative": "Vorheriger Tab (alternativ)",
+    "first": "Erster Tab",
+    "last": "Letzter Tab",
+    "search": "Tabs suchen",
+    "addToSplitView": "Tab zu neuer geteilter Ansicht hinzufügen"
+  },
+  "navigation": {
+    "title": "Navigation",
+    "back": "Zurück",
+    "forward": "Vorwärts",
+    "reload": "Seite neu laden",
+    "forceReload": "Neu laden erzwingen",
+    "stop": "Laden stoppen",
+    "home": "Startseite",
+    "history": "Gesamtverlauf anzeigen",
+    "clearBrowsingData": "Browserdaten löschen"
+  },
+  "bookmarks": {
+    "title": "Lesezeichen",
+    "bookmarkTab": "Lesezeichen für diesen Tab erstellen",
+    "bookmarkAllTabs": "Alle Tabs als Lesezeichen speichern",
+    "manager": "Lesezeichenmanager öffnen",
+    "toggleBar": "Lesezeichenleiste ein- oder ausblenden"
+  },
+  "search": {
+    "title": "Suchen",
+    "find": "Auf der Seite suchen",
+    "findNext": "Weitersuchen (vorwärts)",
+    "findPrevious": "Weitersuchen (rückwärts)",
+    "useSelection": "Auswahl für Suche übernehmen",
+    "searchWeb": "Im Web suchen"
+  },
+  "developer": {
+    "title": "Darstellung und Entwickler",
+    "actualSize": "Originalgröße",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "tools": "Entwicklertools",
+    "inspectElements": "Elemente untersuchen",
+    "console": "JavaScript-Konsole",
+    "viewSource": "Quelltext anzeigen"
+  }
+}
