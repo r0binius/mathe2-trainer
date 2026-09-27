@@ -111,13 +111,13 @@ Branch `feature/practice-session`. The practice flow shared by learn and review,
 - Matching: a plain exhaustive `switch`, no `ts-pattern`.
 - Randomness and time are carried by messages: the shell puts `Math.random()` and `Date.now()` values into them (`advance { roll }`, `answer { keys, at }`), so the update stays pure and tests pass fixed numbers. No seeded random number generator.
 - [The Elm Architecture](https://guide.elm-lang.org/architecture/) (`architecture.md` §1.1): the session is a model with messages and `updateSession(session, msg) → { model, effects }`, in Elm's vocabulary (Model, Msg, update) but with `Effect` instead of `Cmd`, since GoF's Command is the message. Effects are data the shell carries out: results to save, and timers such as the 1 s pause after a success (`advanceAfter`), which makes that timing a tested domain rule. The shell's runtime (`useProgram`) comes in step 5. One model per concern, not one for the app.
-- Grading uses only what was measured, never the user's own estimate: a mistake → again, over 6 s → hard, a fast first try → easy, otherwise good (the old app never used easy). Using the whole scale lets fluent shortcuts space out faster. Every review is logged from step 4 on, so FSRS's weights can later be fitted to the user's own data.
+- Grading uses only what was measured, never the user's own estimate: a mistake → again, over 6 s → hard, under 2 s → easy, otherwise good (the old app never used easy). The 2 s limit is fixed for now and gets revisited with real data; a limit relative to the user's own speed needs the review log. `gradeRecall` is a plain function, not an injected strategy, while there's only one grading. Using the whole scale lets fluent shortcuts space out faster. Every review is logged from step 4 on, so FSRS's weights can later be fitted to the user's own data.
 
 **Sub-steps**
 
 - [x] 3.1 Practice session update (State + Command, Elm style)
 - [x] 3.2 Next-item strategies: weighted buckets for learn, due queue for review
-- [ ] 3.3 Grading
+- [x] 3.3 Grading
 - [ ] 3.4 `Scheduler` port and FSRS
 - [ ] 3.5 Run snapshots (Memento)
 - [ ] 3.6 `reconcileProgress`
