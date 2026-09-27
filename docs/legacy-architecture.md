@@ -386,7 +386,7 @@ In the renderer:
 
 ## 17. Open decisions (made step by step during the rewrite)
 
-- UI language: English UI with German shortcut titles, or i18n from the start.
+- UI language: the data is translatable from step 2 (message keys, per-app catalogs, German as the fallback). Which language the UI starts in and the vue-i18n setup are decided in step 5.
 - FSRS: keep the hand-written FSRS-5 or switch to `ts-fsrs`.
 - Whether runs remember skipped shortcuts across sessions (they don't today).
 - Where progress lives: SQLite in Rust (per REWRITE.md) or a JSON store to begin with.

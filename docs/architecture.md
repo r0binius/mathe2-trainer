@@ -181,7 +181,7 @@ src/
 │  ├─ scheduling/   scheduler.ts (port), fsrs.ts
 │  ├─ progress/     types.ts, repository.ts (port), reconcile.ts
 │  └─ shared/       result.ts (errors as values)
-├─ data/apps/*.ts
+├─ data/apps/<id>/   index.ts, de.json
 ├─ platform/        tauri.ts (bindings), settings.ts, progress.ts, keymap.ts, lookup.ts, window.ts
 ├─ stores/          settings.ts, keymap.ts, catalog.ts, progress.ts
 ├─ composables/     useKeyCapture.ts, usePracticeSession.ts, useSpatialNav.ts
@@ -200,7 +200,7 @@ src-tauri/src/
 ## 7. Testing strategy
 
 - **Domain (Vitest):** keyboard resolution against a German keymap fixture, policy rules, shortcut IDs, session transitions (replaying command sequences), strategies with a seeded random number generator, grading, FSRS against reference values, reconcile.
-- **Data (Vitest):** a health test over all `data/apps` (duplicates, unknown key codes, several trigger keys, impossible shortcuts on the fixture layout).
+- **Data (Vitest):** a health test over all `data/apps` (duplicates, unknown key codes, message keys missing from or unused in `de`, several trigger keys, impossible shortcuts on the fixture layout).
 - **Stores:** with in-memory repositories.
 - **Rust (`cargo test`):** SQLite migrations, repository queries and keymap helpers. Platform adapters are covered by the manual smoke test.
 - **Manual smoke test:** the checklist in `REWRITE.md` §9.

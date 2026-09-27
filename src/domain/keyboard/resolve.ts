@@ -11,6 +11,9 @@ import { keyCodes } from './keymap';
  */
 export type KeyCombination = readonly string[];
 
+/** The combinations that trigger the same shortcut, at least one. */
+export type KeyAlternatives = readonly [KeyCombination, ...KeyCombination[]];
+
 /** One of the ways a key types characters: which character it types and what has to be held. */
 type Layer = {
   readonly field: keyof KeyCharacters;
@@ -80,10 +83,7 @@ export function resolveKeys(keymap: Keymap, keys: KeyCombination): KeyCombinatio
  *
  * When several are equally short, the first one wins.
  */
-export function resolveShortest(
-  keymap: Keymap,
-  alternatives: readonly [KeyCombination, ...KeyCombination[]],
-): KeyCombination {
+export function resolveShortest(keymap: Keymap, alternatives: KeyAlternatives): KeyCombination {
   const [first, ...rest] = alternatives;
 
   return rest.reduce(

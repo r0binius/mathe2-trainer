@@ -1,4 +1,4 @@
-import type { KeyCombination } from '../keyboard/resolve';
+import type { KeyAlternatives } from '../keyboard/resolve';
 import { orderModifiersFirst } from '../keyboard/resolve';
 
 /**
@@ -15,10 +15,7 @@ export type ShortcutId = `${string}/${string}`;
  * and alternatives are put in a fixed order, so the order they're written in doesn't matter.
  * @see §7.2 of `docs/legacy-architecture.md` for the old app's hashed IDs this replaces
  */
-export function shortcutId(
-  appId: string,
-  alternatives: readonly [KeyCombination, ...KeyCombination[]],
-): ShortcutId {
+export function shortcutId(appId: string, alternatives: KeyAlternatives): ShortcutId {
   const combinations = alternatives.map((keys) => orderModifiersFirst(keys).join('+'));
 
   // Default sort compares UTF-16 code units, which, unlike `localeCompare`, is the same everywhere.

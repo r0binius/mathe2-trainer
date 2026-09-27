@@ -38,7 +38,7 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 - `domain/shared/result.ts`: errors as values
 - `domain/keyboard/`: the keymap type, key resolution (a chain: value → Shift → Alt → Shift+Alt → code), modifier ordering, `shortcutPolicy` (a chain of rules), key labels
 - `domain/shortcuts/`: types, `defineApp`, a readable `shortcutId`
-- `data/apps/*.ts`: the 10 apps ported and typed
+- `data/apps/<id>/`: the 10 apps ported and typed, each with its German catalog
 - Tests: resolution against a German keymap fixture, policy rules, shortcut IDs, and a data health test over all apps
 
 **Decisions**
@@ -46,6 +46,8 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 - `Result`: our own type, tagged by `kind: 'ok' | 'err'`, rather than `neverthrow` or Effect. It starts with the constructors only; helpers come when a caller needs them.
 - Collection helpers: native array methods, no `remeda`.
 - No compatibility with the old app's user data: the shortcut data is ported, but progress and settings start fresh, so there's no importer and `shortcutId` doesn't have to reproduce the old SHA-256 IDs. It's a readable string derived from the app ID and the definition keys, with no hashing and no dependency: `vscodium/Meta+k|Meta+t`, with modifiers ordered ⌃⌥⇧⌘ and alternatives sorted. The set isn't part of it, so the same keys in two sets of one app share progress, as before.
+- Shortcut definitions: `keys` is always a non-empty list of combinations (`[['Meta', 'f']]`), so there's one shape and no runtime check between `string[]` and `string[][]`. `defineApp` is a typed identity, like Vite's `defineConfig`, and rules that types can't express go in the data health test. `category` is a union of the categories in use, as language-neutral IDs (`'development'`). Dropped: the set `version` (saved, never read), the `debug` flag and test app (fixtures replace them) and the app `description` (never shown).
+- Translatable text is written as message keys (`title: 'essentials.find'`), with a catalog per app and language next to its data (`data/apps/vscodium/de.json`). German is required and the fallback; other languages are optional and can be added gradually. Keys are plain strings in the domain, which doesn't import the data, and the data health test checks them against `de`, including unused keys. App titles are product names and aren't translated. vue-i18n comes with the UI in step 5.
 - Fixtures: one German keymap in our own `Keymap` shape (`germanKeymap.fixture.json`), which is exactly what the domain receives in the app. It was dumped from the old app's `native-keymap` and cleaned up: the ISO swap is applied, keys that type no character are left out, and `native-keymap` artifacts (`AudioVolumeUp`, the JIS keys) are removed. **No US keymap:** only German is in use, so add a fixture when someone uses another layout.
 
 **Sub-steps**
@@ -55,7 +57,7 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 - [x] 2.3 Keymap type
 - [x] 2.4 Key resolution chain and modifier ordering
 - [x] 2.5 `shortcutId`
-- [ ] 2.6 Shortcut types and `defineApp`
+- [x] 2.6 Shortcut types and `defineApp`
 - [ ] 2.7 `shortcutPolicy`
 - [ ] 2.8 Key labels
 - [ ] 2.9 Port the 10 apps
@@ -129,7 +131,7 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 
 **Deliverables:** presentational components (`KeyCap`, `BaseButton`, `CircleProgress`, …), feature routes, composables (`useKeyCapture`, `usePracticeSession`, `useSpatialNav`), styles ported from the old app.
 
-**Decisions:** spatial navigation (library or our own composable); design tokens as CSS custom properties; UI language (English UI with German shortcut titles, or i18n).
+**Decisions:** spatial navigation (library or our own composable); design tokens as CSS custom properties; vue-i18n setup and the UI's language (the data is translatable from step 2).
 
 **Sub-steps**
 
