@@ -140,9 +140,6 @@
   },
   "miscellaneous": {
     "title": "Sonstiges",
-    "jumpToBracket": "Zur passenden Klammer springen",
-    "fold": "Bereich einklappen",
-    "unfold": "Bereich ausklappen",
     "toggleMatchCase": "Suche: Groß-/Kleinschreibung umschalten",
     "toggleRegex": "Suche: Regulären Ausdruck umschalten",
     "toggleWholeWord": "Suche: Ganzes Wort umschalten",

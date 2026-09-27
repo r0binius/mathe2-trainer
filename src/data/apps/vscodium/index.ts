@@ -193,9 +193,6 @@ export const vscodium = defineApp({
       id: 'miscellaneous',
       title: 'miscellaneous.title',
       shortcuts: [
-        { title: 'miscellaneous.jumpToBracket', keys: [['Shift', 'Meta', '\\']] },
-        { title: 'miscellaneous.fold', keys: [['Alt', 'Meta', '[']] },
-        { title: 'miscellaneous.unfold', keys: [['Alt', 'Meta', ']']] },
         { title: 'miscellaneous.toggleMatchCase', keys: [['Alt', 'Meta', 'c']] },
         { title: 'miscellaneous.toggleRegex', keys: [['Alt', 'Meta', 'r']] },
         { title: 'miscellaneous.toggleWholeWord', keys: [['Alt', 'Meta', 'w']] },
