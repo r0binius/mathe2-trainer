@@ -42,6 +42,11 @@ export type ProgressEffect = {
   readonly durationMs: number;
 };
 
+/** Reports an attempt as a test that counts for reviews. */
+export function testedEffect({ item, failed, durationMs }: Attempt): ProgressEffect {
+  return { type: 'tested', id: item.id, failed, durationMs };
+}
+
 /**
  * Work the session asks the shell to do, as data (Elm's `Cmd`): save a result, or send
  * `advance` after a pause.
