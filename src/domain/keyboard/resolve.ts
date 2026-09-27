@@ -50,7 +50,8 @@ function isModifier(key: string): boolean {
   return modifierOrder.some((modifier) => modifier === key);
 }
 
-function orderModifiersFirst(keys: KeyCombination): KeyCombination {
+/** Puts the modifiers first, sorted ⌃⌥⇧⌘, and keeps the other keys in their order. */
+export function orderModifiersFirst(keys: KeyCombination): KeyCombination {
   return [
     ...modifierOrder.flatMap((modifier) => keys.filter((key) => key === modifier)),
     ...keys.filter((key) => !isModifier(key)),

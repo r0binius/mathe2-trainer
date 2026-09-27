@@ -389,5 +389,4 @@ In the renderer:
 - UI language: English UI with German shortcut titles, or i18n from the start.
 - FSRS: keep the hand-written FSRS-5 or switch to `ts-fsrs`.
 - Whether runs remember skipped shortcuts across sessions (they don't today).
-- Whether the same keys in two sets of one app should keep sharing progress, a side effect of the ID hashing the keys without the set.
 - Where progress lives: SQLite in Rust (per REWRITE.md) or a JSON store to begin with.

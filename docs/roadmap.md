@@ -45,7 +45,7 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 
 - `Result`: our own type, tagged by `kind: 'ok' | 'err'`, rather than `neverthrow` or Effect. It starts with the constructors only; helpers come when a caller needs them.
 - Collection helpers: native array methods, no `remeda`.
-- No compatibility with the old app's user data: the shortcut data is ported, but progress and settings start fresh, so there's no importer and `shortcutId` doesn't have to reproduce the old SHA-256 IDs. It's a readable string derived from the app ID and the definition keys, with no hashing and no dependency.
+- No compatibility with the old app's user data: the shortcut data is ported, but progress and settings start fresh, so there's no importer and `shortcutId` doesn't have to reproduce the old SHA-256 IDs. It's a readable string derived from the app ID and the definition keys, with no hashing and no dependency: `vscodium/Meta+k|Meta+t`, with modifiers ordered ⌃⌥⇧⌘ and alternatives sorted. The set isn't part of it, so the same keys in two sets of one app share progress, as before.
 - Fixtures: one German keymap in our own `Keymap` shape (`germanKeymap.fixture.json`), which is exactly what the domain receives in the app. It was dumped from the old app's `native-keymap` and cleaned up: the ISO swap is applied, keys that type no character are left out, and `native-keymap` artifacts (`AudioVolumeUp`, the JIS keys) are removed. **No US keymap:** only German is in use, so add a fixture when someone uses another layout.
 
 **Sub-steps**
@@ -54,7 +54,7 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 - [x] 2.2 Fixture: the German keymap
 - [x] 2.3 Keymap type
 - [x] 2.4 Key resolution chain and modifier ordering
-- [ ] 2.5 `shortcutId`
+- [x] 2.5 `shortcutId`
 - [ ] 2.6 Shortcut types and `defineApp`
 - [ ] 2.7 `shortcutPolicy`
 - [ ] 2.8 Key labels
