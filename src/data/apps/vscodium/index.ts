@@ -3,7 +3,9 @@ import { defineApp } from '@/domain/shortcuts/defineApp';
 /**
  * VS Code's default shortcuts, which VSCodium shares.
  *
- * Chords such as ⌘K ⌘S are left out: a shortcut is a single combination.
+ * Chords such as ⌘K ⌘S are left out: a shortcut is a single combination. VSCodium reaches a
+ * character that needs Option (`[`, `]`, `\` on German) with ⌃⌥ instead of ⌥, so those shortcuts
+ * add Control: ⌘] becomes ⌃⌥⌘6.
  * @see https://code.visualstudio.com/docs/reference/default-keybindings
  */
 export const vscodium = defineApp({
@@ -53,8 +55,8 @@ export const vscodium = defineApp({
         { title: 'lines.moveUp', keys: [['Alt', 'ArrowUp']] },
         { title: 'lines.copyDown', keys: [['Shift', 'Alt', 'ArrowDown']] },
         { title: 'lines.copyUp', keys: [['Shift', 'Alt', 'ArrowUp']] },
-        { title: 'lines.indent', keys: [['Meta', ']']] },
-        { title: 'lines.outdent', keys: [['Meta', '[']] },
+        { title: 'lines.indent', keys: [['Control', 'Meta', ']']] },
+        { title: 'lines.outdent', keys: [['Control', 'Meta', '[']] },
         { title: 'lines.goToEnd', keys: [['End']] },
       ],
     },
@@ -110,7 +112,7 @@ export const vscodium = defineApp({
         { title: 'window.newWindow', keys: [['Shift', 'Meta', 'n']] },
         { title: 'window.closeWindow', keys: [['Shift', 'Meta', 'w']] },
         { title: 'window.closeEditor', keys: [['Meta', 'w']] },
-        { title: 'window.splitEditor', keys: [['Meta', '\\']] },
+        { title: 'window.splitEditor', keys: [['Control', 'Meta', '\\']] },
         { title: 'window.focusFirstGroup', keys: [['Meta', '1']] },
         { title: 'window.focusSecondGroup', keys: [['Meta', '2']] },
         { title: 'window.focusThirdGroup', keys: [['Meta', '3']] },
