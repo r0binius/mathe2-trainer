@@ -115,7 +115,7 @@ Branch `feature/practice-session`. The practice flow shared by learn and review,
 
 **Sub-steps**
 
-- [ ] 3.1 Practice session update (State + Command, Elm style)
+- [x] 3.1 Practice session update (State + Command, Elm style)
 - [ ] 3.2 Next-item strategies: weighted buckets for learn, due queue for review
 - [ ] 3.3 Grading
 - [ ] 3.4 `Scheduler` port and FSRS
