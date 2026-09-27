@@ -29,7 +29,7 @@ Tooling, strict configuration, docs and git conventions.
 - **Git commits the index, not the working tree.** That makes it possible to commit a partial change while the working tree holds the final state, which is how commit 2 was made after the `pnpm exec` sync uninstalled commitlint mid-hook.
 - **Environment:** tools need to be on the PATH of every shell. rustup's `~/.cargo/env` has to be sourced, typically from `~/.zshenv`.
 
-## 2. Domain: keyboard and shortcuts ⏳ ([#2](https://codeberg.org/gobin/mouseless/issues/2))
+## 2. Domain: keyboard and shortcuts 🚧 ([#2](https://codeberg.org/gobin/mouseless/issues/2))
 
 Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions into keys for the current keyboard layout, with no Tauri, no Vue and no native code.
 
@@ -50,7 +50,7 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 
 **Sub-steps**
 
-- [ ] 2.1 `Result` type
+- [x] 2.1 `Result` type
 - [ ] 2.2 Fixtures: German and US keymaps and a sample of shortcut IDs from the old app
 - [ ] 2.3 Keymap types and the ISO swap
 - [ ] 2.4 Key resolution chain and modifier ordering
