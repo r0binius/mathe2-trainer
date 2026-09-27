@@ -1,0 +1,68 @@
+{
+  "windows": {
+    "title": "Fenster und Tabs",
+    "newWindow": "Neues Fenster",
+    "newTab": "Neuer Tab",
+    "newTabWithSameCommand": "Neuer Tab mit gleichem Befehl",
+    "closeTab": "Tab schließen",
+    "closeWindow": "Fenster schließen",
+    "closeOtherTabs": "Andere Tabs schließen",
+    "nextTab": "Nächster Tab",
+    "previousTab": "Vorheriger Tab",
+    "nextWindow": "Nächstes Fenster",
+    "showAllTabs": "Alle Tabs einblenden",
+    "toggleTabBar": "Tableiste ein- oder ausblenden",
+    "split": "Fenster teilen",
+    "closeSplit": "Geteiltes Fenster schließen"
+  },
+  "shell": {
+    "title": "Shell",
+    "lineStart": "Zum Zeilenanfang",
+    "lineEnd": "Zum Zeilenende",
+    "deleteToLineStart": "Bis zum Zeilenanfang löschen",
+    "deleteToLineEnd": "Bis zum Zeilenende löschen",
+    "deleteWordBefore": "Wort vor dem Cursor löschen",
+    "searchHistory": "Verlauf durchsuchen",
+    "interrupt": "Befehl abbrechen",
+    "exit": "Shell beenden",
+    "clearScreen": "Bildschirm leeren (Shell)"
+  },
+  "edit": {
+    "title": "Bearbeiten",
+    "clearToStart": "Bis zum Start löschen",
+    "clearScrollback": "Zeilenpuffer löschen",
+    "clearToPreviousMark": "Bis zur vorherigen Markierung löschen",
+    "pasteSelection": "Auswahl einsetzen",
+    "selectBetweenMarks": "Zwischen Markern auswählen",
+    "mark": "Markieren",
+    "insertBookmark": "Lesezeichen einfügen",
+    "previousMark": "Zur vorherigen Markierung",
+    "nextMark": "Zur nächsten Markierung",
+    "find": "Suchen",
+    "findNext": "Weitersuchen (vorwärts)",
+    "findPrevious": "Weitersuchen (rückwärts)"
+  },
+  "view": {
+    "title": "Darstellung",
+    "scrollToTop": "Zum Anfang",
+    "scrollToBottom": "Zum Ende",
+    "pageUp": "Seite nach oben",
+    "pageDown": "Seite nach unten",
+    "lineUp": "Zeile nach oben",
+    "lineDown": "Zeile nach unten",
+    "biggerText": "Größer",
+    "smallerText": "Kleiner",
+    "defaultFontSize": "Standardschriftgröße"
+  },
+  "shellMenu": {
+    "title": "Shell-Menü",
+    "newCommand": "Neuer Befehl",
+    "newRemoteConnection": "Neue entfernte Verbindung",
+    "showInspector": "Informationen einblenden",
+    "editTitle": "Titel bearbeiten",
+    "reset": "Zurücksetzen",
+    "hardReset": "Hard Reset",
+    "useOptionAsMeta": "Option-Taste als Meta-Taste verwenden",
+    "exportText": "Text exportieren als"
+  }
+}
