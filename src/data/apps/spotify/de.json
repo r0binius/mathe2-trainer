@@ -1,0 +1,33 @@
+{
+  "playback": {
+    "title": "Wiedergabe",
+    "playPause": "Wiedergabe/Pause",
+    "next": "Nächster Titel",
+    "previous": "Vorheriger Titel",
+    "seekForward": "Vorspulen",
+    "seekBackward": "Zurückspulen",
+    "shuffle": "Zufällige Wiedergabe",
+    "repeat": "Wiederholen",
+    "volumeUp": "Lauter",
+    "volumeDown": "Leiser"
+  },
+  "navigation": {
+    "title": "Navigation",
+    "search": "Suchen",
+    "filter": "Filter",
+    "back": "Zurück",
+    "forward": "Vorwärts",
+    "newPlaylist": "Neue Playlist",
+    "newPlaylistFolder": "Neuer Playlist-Ordner"
+  },
+  "miscellaneous": {
+    "title": "Sonstiges",
+    "actualSize": "Originalgröße",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "settings": "Einstellungen",
+    "help": "Spotify-Hilfe",
+    "logOut": "Abmelden",
+    "showWindow": "Spotify-Fenster anzeigen"
+  }
+}
