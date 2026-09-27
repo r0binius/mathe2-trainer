@@ -36,7 +36,7 @@ In practice:
 - **Names say what, not how.** Functions are verbs (`resolveKeys`, `gradeAnswer`), data is nouns (`keymap`, `dueCards`), booleans read as questions (`isLearned`, `hasModifier`). No abbreviations except well-known ones (`id`, `url`).
 - **Name by domain role, not by pattern:** `shortcutPolicy`, not `validationChain`.
 - **Named constants instead of magic numbers:** `const SUCCESS_PAUSE_MS = 1000`.
-- **Comments explain why, not what.** Code that needs a "what" comment should be renamed or split instead.
+- **Comments explain why, not what.** Code that needs a "what" comment should be renamed or split instead. Doc comments follow each language's own standard (see [Documentation](#documentation)).
 - **Exhaustive by construction.** Model variants as discriminated unions, and `switch` on them exhaustively (enforced), so a new variant is a compile error everywhere it matters.
 - **No dead code, no commented-out code.** Git remembers it.
 
@@ -73,6 +73,17 @@ In practice:
 - `unsafe` is denied crate-wide. FFI modules opt in with `#[allow(unsafe_code)]`, and every `unsafe` block gets a `// SAFETY:` comment.
 - Errors: `Result<T, AppError>` with `thiserror`. Commands return errors to the frontend and never panic.
 - Prefer immutable bindings, iterators over index loops, and small pure functions. Keep OS calls in `platform/`.
+
+## Documentation
+
+Each language documents code its own standard way, so editors and doc tools pick it up.
+
+- **TypeScript: [TSDoc](https://tsdoc.org/).** Every exported function, type and constant gets a `/** … */` comment (enforced by `eslint-plugin-jsdoc` with its TSDoc preset). It starts with a one-sentence summary, followed by details if needed. Types live in the signature, never in the comment: no JSDoc `{type}` annotations. Use `@param` and `@returns` only when they add something the names and types don't say. Use `@example` for non-obvious usage and `@see` for references, such as the legacy behaviour a function reproduces.
+- **Vue:** document props, emits and models with TSDoc on the members of the type passed to `defineProps`/`defineEmits`/`defineModel`, so Vue's language tools show them where the component is used.
+- **Rust: [rustdoc](https://doc.rust-lang.org/rustdoc/how-to-write-documentation.html).** `///` on public items and `//!` for crate and module docs (enforced by the `missing_docs` lint), with a summary line first. Standard sections where they apply: `# Errors` (enforced by Clippy), `# Panics`, `# Safety` on `unsafe fn`, and `# Examples`. Link to other items with intra-doc links (``[`AppError`]``). An `unsafe` block gets a `// SAFETY:` comment.
+- **Inline comments** (`//`) explain why: constraints, legacy quirks, workarounds. They never narrate the code.
+- **Tests document through their names:** `describe`/`it` read as a spec, and there are no doc comments on test cases.
+- **Markdown** docs live in `docs/`, and the README only introduces the project and links to them.
 
 ## Formatting
 

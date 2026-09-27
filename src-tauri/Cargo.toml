@@ -12,6 +12,7 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = [] }
 
 [lints.rust]
+missing_docs = "warn"
 # FFI code (macOS APIs) opts in per module with `#[allow(unsafe_code)]` and a SAFETY comment.
 unsafe_code = "deny"
 unused_qualifications = "warn"

@@ -1,3 +1,7 @@
+//! Mouseless: keyboard shortcut training and look-up.
+//!
+//! The library builds the Tauri app, and `main.rs` only calls [`run`].
+
 /// Builds and runs the app until it quits.
 ///
 /// # Errors

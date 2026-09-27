@@ -3,6 +3,7 @@ import skipFormatting from '@vue/eslint-config-prettier/skip-formatting';
 import { vueTsConfigs, withVueTs } from '@vue/eslint-config-typescript';
 import { globalIgnores } from 'eslint/config';
 import functional from 'eslint-plugin-functional';
+import jsdoc from 'eslint-plugin-jsdoc';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import pluginVue from 'eslint-plugin-vue';
 
@@ -91,6 +92,28 @@ const config: ReturnType<typeof withVueTs> = withVueTs(
         { selector: 'ExportDefaultDeclaration', message: 'Use named exports.' },
       ],
       '@typescript-eslint/explicit-module-boundary-types': 'error',
+    },
+  },
+
+  {
+    ...jsdoc.configs['flat/recommended-tsdoc-error'],
+    name: 'mouseless/docs',
+    files: ['src/**/*.{ts,vue}'],
+    ignores: ['src/**/*.test.ts'],
+    rules: {
+      ...jsdoc.configs['flat/recommended-tsdoc-error'].rules,
+      // Every export is documented, including types and constants.
+      'jsdoc/require-jsdoc': [
+        'error',
+        {
+          publicOnly: true,
+          require: { FunctionDeclaration: true },
+          contexts: ['TSTypeAliasDeclaration', 'VariableDeclaration'],
+        },
+      ],
+      // Types already say most of it: @param and @returns only when they add something.
+      'jsdoc/require-param': 'off',
+      'jsdoc/require-returns': 'off',
     },
   },
 
