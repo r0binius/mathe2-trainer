@@ -64,7 +64,7 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 - [x] 2.6 Shortcut types and `defineApp`
 - [x] 2.7 `shortcutPolicy`
 - [x] 2.8 Key labels
-- [ ] 2.9 Port the 10 apps
+- [x] 2.9 Port the 10 apps
 - [ ] 2.10 Data health test
 
 **Concepts**
