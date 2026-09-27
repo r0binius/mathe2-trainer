@@ -29,7 +29,7 @@ Tooling, strict configuration, docs and git conventions.
 - **Git commits the index, not the working tree.** That makes it possible to commit a partial change while the working tree holds the final state, which is how commit 2 was made after the `pnpm exec` sync uninstalled commitlint mid-hook.
 - **Environment:** tools need to be on the PATH of every shell. rustup's `~/.cargo/env` has to be sourced, typically from `~/.zshenv`.
 
-## 2. Domain: keyboard and shortcuts 🚧 ([#2](https://codeberg.org/gobin/mouseless/issues/2))
+## 2. Domain: keyboard and shortcuts ✅ ([#2](https://codeberg.org/gobin/mouseless/issues/2))
 
 Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions into keys for the current keyboard layout, with no Tauri, no Vue and no native code.
 
@@ -51,6 +51,7 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 - Porting the data: message keys are English camelCase names of what a shortcut does, grouped by set (`halves.topLeft`), and set IDs are camelCase too (`newitem` became `newItem`), and each catalog is nested JSON (`{ "halves": { "title": …, "topLeft": … } }`), vue-i18n's default shape. The 5 descriptions are sibling keys with a `Hint` suffix (`files.saveAsHint`), so every catalog entry stays a single string. Keys and German texts are ported verbatim, and a throwaway script checks each app 1:1 against the old file. Oddities go to the data health test (2.10) and are fixed there as separate changes. One app per commit.
 - Shortcut policy (`domain/keyboard/policy.ts`): a rule returns a `Rejection` (`duplicate-key` naming the key, `modifier-only`, `reserved`) or `undefined`, and `checkShortcut` returns the first rejection as a `Result`. `practicePolicy(reserved)` is the chain for the practice filter and the data health test. The caller passes the platform's list plus the current trigger and rebuilds the policy when the trigger changes, so there's no separate trigger rule and no stale trigger. The recorder's rules (needs ⌘, ⌃ or ⌥; not an app-standard shortcut like ⌘Q) come with the recorder in step 7. `macosReserved` lists what macOS takes before the practice window sees it: the old list plus ⌥⌘Space, ⌃Space, ⌃⌥Space, ⇧⌘3 and ⌃⌘Q. It hides a few ported shortcuts, such as Bitwig's ⌥⌘Space and VSCodium's ⌃Space, which can't be practiced while macOS takes them.
 - Key labels (`domain/keyboard/labels.ts`): `labelKey(labels, key)` returns `{ symbol, name? }`, where `labels` is a platform's table (`macosKeyLabels` now, a Linux table in step 10). The table replaces `keyboard-symbol` and the second labels of the old `Key` component. Names stay English, like the keycaps, and aren't translated. Any other key shows its character uppercased, unless the uppercase form is longer (`ß` → `SS`), which replaces the old hard-coded `ß` exception, and named keys keep their name (`F5`). New compared to the old app: `Home` ↖ and `End` ↘ as in macOS menus, and `Numpad0` as `0` with the name `Numpad`.
+- Data health test (`src/data/apps/health.test.ts`): it finds the apps with `import.meta.glob`, so a new folder can't be forgotten (the app registry comes with the UI in step 5), and has one test per rule that lists every violation. Rules: app ID = folder name, unique set IDs, the same keys at most once per set (across sets they share a shortcut ID, as decided), known key names, characters the German layout types, and on the German fixture exactly one key besides the modifiers and no rejection by `practicePolicy([])` (reserved combinations are allowed in the data, practice hides them), in every alternative. Plus every message key in `de` and every `de` entry used. It found 4 shortcuts that can't be pressed on German (a US character that already needs the added modifier, such as ⇧⌘\` → ⇧⇧⌘´): macOS window cycling became ⌘< / ⇧⌘<, as in Terminal's German menu, and VSCodium's go to bracket, fold and unfold were dropped.
 - `is-immutable-type` is patched (`patches/`): its shared cache made `functional/prefer-immutable-types` results depend on which files were linted together ([is-immutable-type#625](https://github.com/RebeccaStevens/is-immutable-type/issues/625)). The patch gives each check its own cache. Remove it once upstream ships a fix.
 - Fixtures: one German keymap in our own `Keymap` shape (`germanKeymap.fixture.json`), which is exactly what the domain receives in the app. It was dumped from the old app's `native-keymap` and cleaned up: the ISO swap is applied, keys that type no character are left out, and `native-keymap` artifacts (`AudioVolumeUp`, the JIS keys) are removed. **No US keymap:** only German is in use, so add a fixture when someone uses another layout.
 
@@ -65,7 +66,7 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 - [x] 2.7 `shortcutPolicy`
 - [x] 2.8 Key labels
 - [x] 2.9 Port the 10 apps
-- [ ] 2.10 Data health test
+- [x] 2.10 Data health test
 
 **Concepts**
 
@@ -86,6 +87,16 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 - [Test-driven development](https://martinfowler.com/bliki/TestDrivenDevelopment.html) · [Vitest guide](https://vitest.dev/guide/)
 - [`KeyboardEvent.code`](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code)
 - [legacy-architecture.md](legacy-architecture.md) §6–7
+
+**What we learned**
+
+- **Characters aren't keys.** Shortcut data written with US characters (`` ` ``, `\`, `[`) can need a modifier on German that the shortcut already adds, which makes it impossible to press. A test only catches the impossible cases; a shortcut that resolves but isn't what the app binds (VSCodium's ⌘\\ becoming ⇧⌥⌘7) can only be read from the app itself on the target layout, ideally from its menu bar.
+- **Types for the shape, tests for the rules.** `defineApp` is a typed identity: the compiler checks the shape of ~600 shortcuts, and everything types can't express (unique IDs, known keys, catalog coverage) lives in one data health test.
+- **Report every violation at once.** Collecting all hits of a rule and comparing with `[]` shows the whole problem list in one run, instead of stopping at the first bad shortcut.
+- **A rule that is green on real data proves little.** Nine of the ten rules passed at once, so breaking the data on purpose, once per rule, showed that each one actually fails when it should.
+- **A throwaway check makes a large port reviewable.** A script comparing each ported app 1:1 with the old file let the review focus on naming and oddities instead of retyped keys.
+- **Plain objects inherit keys.** A lookup table indexed by user data finds `constructor` unless it's checked with `Object.hasOwn`.
+- **Tool caches can leak between files.** A shared cache in `is-immutable-type` made lint results depend on which files were linted together; a small patch fixed it until upstream does.
 
 ## 3. Domain: practice and scheduling ⏳ ([#3](https://codeberg.org/gobin/mouseless/issues/3))
 
