@@ -37,16 +37,16 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 
 - `domain/shared/result.ts`: errors as values
 - `domain/keyboard/`: the keymap type, key resolution (a chain: value → Shift → Alt → Shift+Alt → code), modifier ordering, `shortcutPolicy` (a chain of rules), key labels
-- `domain/shortcuts/`: types, `defineApp`, legacy-compatible `shortcutId`
+- `domain/shortcuts/`: types, `defineApp`, a readable `shortcutId`
 - `data/apps/*.ts`: the 10 apps ported and typed
-- Tests: resolution against a German keymap fixture, policy rules, shortcut IDs against IDs computed by the old app, and a data health test over all apps
+- Tests: resolution against a German keymap fixture, policy rules, shortcut IDs, and a data health test over all apps
 
 **Decisions**
 
 - `Result`: our own type, tagged by `kind: 'ok' | 'err'`, rather than `neverthrow` or Effect. It starts with the constructors only; helpers come when a caller needs them.
 - Collection helpers: native array methods, no `remeda`.
-- SHA-256 for `shortcutId`: `@noble/hashes` (as in the old app). It's synchronous, so `shortcutId` stays a plain pure function; Web Crypto would make everything that uses the ID async.
-- Fixtures: one German keymap in our own `Keymap` shape (`germanKeymap.fixture.json`), which is exactly what the domain receives in the app. It was dumped from the old app's `native-keymap` and cleaned up: the ISO swap is applied, keys that type no character are left out, and `native-keymap` artifacts (`AudioVolumeUp`, the JIS keys) are removed. **No US keymap:** only German is in use, so add a fixture when someone uses another layout. Shortcut IDs are about 15 inline test cases computed by the old app, not a full list, which would freeze the shortcut data. The port (2.9) is checked once against all old IDs instead.
+- No compatibility with the old app's user data: the shortcut data is ported, but progress and settings start fresh, so there's no importer and `shortcutId` doesn't have to reproduce the old SHA-256 IDs. It's a readable string derived from the app ID and the definition keys, with no hashing and no dependency.
+- Fixtures: one German keymap in our own `Keymap` shape (`germanKeymap.fixture.json`), which is exactly what the domain receives in the app. It was dumped from the old app's `native-keymap` and cleaned up: the ISO swap is applied, keys that type no character are left out, and `native-keymap` artifacts (`AudioVolumeUp`, the JIS keys) are removed. **No US keymap:** only German is in use, so add a fixture when someone uses another layout.
 
 **Sub-steps**
 
@@ -54,7 +54,7 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 - [x] 2.2 Fixture: the German keymap
 - [x] 2.3 Keymap type
 - [x] 2.4 Key resolution chain and modifier ordering
-- [ ] 2.5 `shortcutId`, legacy-compatible
+- [ ] 2.5 `shortcutId`
 - [ ] 2.6 Shortcut types and `defineApp`
 - [ ] 2.7 `shortcutPolicy`
 - [ ] 2.8 Key labels
@@ -191,14 +191,13 @@ Branch `feature/menu-lookup`. Read any app's menu shortcuts through the Accessib
 
 **Resources:** [AXUIElement](https://developer.apple.com/documentation/applicationservices/axuielement_h)
 
-## 9. Import and packaging ⏳ ([#9](https://codeberg.org/gobin/mouseless/issues/9))
+## 9. Packaging ⏳ ([#9](https://codeberg.org/gobin/mouseless/issues/9))
 
-Branch `feature/electron-import`. Import settings and progress from the old app's `config.json`, then build the app.
+Branch `chore/packaging`. Build and sign the app. There's no importer: progress and settings start fresh.
 
 **Sub-steps**
 
-- [ ] 9.1 Electron importer, including the layout-name mapping
-- [ ] 9.2 Bundle config and signing
+- [ ] 9.1 Bundle config and signing
 
 ## 10. Linux ⏳ ([#10](https://codeberg.org/gobin/mouseless/issues/10))
 

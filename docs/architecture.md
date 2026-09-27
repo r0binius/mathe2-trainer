@@ -37,7 +37,7 @@ Four things shape it:
 ┌──────────────────────────────┴── Rust (src-tauri/src/) ─▼─────────────────────────┐
 │ commands/   thin #[tauri::command] handlers                 (Facade)              │
 │ app/        window coordinator, tray, trigger               (Mediator)            │
-│ services/   lookup, progress repository, settings, import                         │
+│ services/   lookup, progress repository, settings                                 │
 │ platform/   traits + macos/ (+ linux/) implementations      (Bridge + Adapter)    │
 └───────────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -123,7 +123,6 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 
 - Rust `platform/macos/*` adapts NSWorkspace, AXUIElement and UCKeyTranslate to our traits and data types (`Keymap`, `MenuShortcut { title, keys, group }`).
 - Frontend `platform/*` adapts the generated Tauri bindings to the domain ports (`ProgressRepository`, `SettingsRepository`).
-- `import_electron` adapts the old `config.json` (runs object, cards list, `['Meta']` trigger) to the new data model.
 
 **Bridge: features independent of the OS** (`src-tauri/src/platform/`)
 
@@ -177,7 +176,7 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 src/
 ├─ domain/
 │  ├─ keyboard/     keymap.ts (types), resolve.ts, policy.ts, labels.ts
-│  ├─ shortcuts/    types.ts, defineApp.ts, shortcutId.ts (legacy-compatible)
+│  ├─ shortcuts/    types.ts, defineApp.ts, shortcutId.ts
 │  ├─ practice/     session.ts (State + Command), strategies.ts, grading.ts
 │  ├─ scheduling/   scheduler.ts (port), fsrs.ts
 │  ├─ progress/     types.ts, repository.ts (port), reconcile.ts
@@ -194,14 +193,14 @@ src-tauri/src/
 ├─ main.rs, lib.rs, error.rs
 ├─ commands/        settings.rs, progress.rs, keymap.rs, lookup.rs, window.rs
 ├─ app/             coordinator.rs, tray.rs, trigger.rs, windows.rs
-├─ services/        lookup.rs, progress/ (sqlite + migrations), import_electron.rs
+├─ services/        lookup.rs, progress/ (sqlite + migrations)
 └─ platform/        mod.rs (traits, Capabilities, current()), macos/, linux/
 ```
 
 ## 7. Testing strategy
 
-- **Domain (Vitest):** keyboard resolution against a German keymap fixture, policy rules, shortcut ID compatibility against real IDs, session transitions (replaying command sequences), strategies with a seeded random number generator, grading, FSRS against reference values, reconcile.
+- **Domain (Vitest):** keyboard resolution against a German keymap fixture, policy rules, shortcut IDs, session transitions (replaying command sequences), strategies with a seeded random number generator, grading, FSRS against reference values, reconcile.
 - **Data (Vitest):** a health test over all `data/apps` (duplicates, unknown key codes, several trigger keys, impossible shortcuts on the fixture layout).
 - **Stores:** with in-memory repositories.
-- **Rust (`cargo test`):** SQLite migrations, repository queries, Electron import with a fixture `config.json`, and keymap helpers. Platform adapters are covered by the manual smoke test.
+- **Rust (`cargo test`):** SQLite migrations, repository queries and keymap helpers. Platform adapters are covered by the manual smoke test.
 - **Manual smoke test:** the checklist in `REWRITE.md` §9.

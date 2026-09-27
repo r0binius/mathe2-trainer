@@ -213,7 +213,7 @@ export default {
 
 `DB.js` loads them with `import.meta.glob`. Logos come from `assets/logos/<id>.svg`.
 
-### 7.2 Shortcut IDs: the compatibility contract
+### 7.2 Shortcut IDs
 
 ```js
 sha256(appId + collect(shortcut.keys).sort().toArray().toString()); // hex
@@ -224,7 +224,7 @@ sha256(appId + collect(shortcut.keys).sort().toArray().toString()); // hex
 - The set ID is not part of it. The same keys in two sets of one app share an ID, so learning one also counts for the other.
 - The title isn't part of it either, so renaming a shortcut keeps its progress, while changing its keys resets it.
 
-All runs and cards reference these IDs, so the rewrite must reproduce them **byte for byte**, including the quirks above.
+All runs and cards reference these IDs. The rewrite doesn't carry over the old progress, so it keeps the semantics above but not the hash and its sort quirks.
 
 ### 7.3 `App` model (`models/App.js`)
 
@@ -377,8 +377,8 @@ In the renderer:
 
 ## 16. Invariants to keep
 
-1. The `shortcutId` algorithm, byte for byte (§7.2).
-2. Progress is stored separately per keyboard layout. The layout name must match the old `localizedName` values, or be mapped during import.
+1. The `shortcutId` semantics (§7.2): derived from the definition keys, so it's the same on every layout, kept on renaming and new when the keys change. Not the hash itself: the rewrite doesn't carry over the old progress.
+2. Progress is stored separately per keyboard layout.
 3. Resolution semantics: lookup order value → Shift → AltGr → Shift + AltGr, ⌃⌥⇧⌘ sorting, the shortest alternative wins, and the ISO swap.
 4. Learning rules: training vs test, only the first test per session counts for reviews, bucket weights 90/50/10, and a run finishes only without skips.
 5. Review rules: a card is created on the first success, due until the end of the day, `again` → tomorrow and requeued in the session, and the 6 s `hard` threshold.
