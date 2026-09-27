@@ -116,7 +116,7 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 
 - _Problem:_ two separate lists of forbidden shortcuts (`Keyboard.blockedShortcuts`, `OptionsOverlay.isAllowedShortcut`), and the current trigger is read only once.
 - `ShortcutPolicy` is an ordered list of rules: `noDuplicateKeys → notModifierOnly → notSystemReserved(platform) → notCurrentTrigger(trigger) → (recorder only) needsModifier, notAppStandard`. Each rule either passes or returns a reason (`{ ok: false, reason: 'system-reserved' }`). The data health test, the practice filter and the shortcut recorder use the same chain with different rule sets, and the recorder can show _why_ it rejected a shortcut.
-- Key resolution is a small chain as well: `value → withShift → withAltGr → withShiftAltGr → keep as code`.
+- Key resolution is a small chain as well: `value → withShift → withAlt → withShiftAlt → keep as code`.
 - Rust frontmost-app detection: `frontmostApplication → topmost other window → none`.
 
 **Adapter: foreign APIs to our interfaces**
@@ -176,7 +176,7 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 ```
 src/
 ├─ domain/
-│  ├─ keyboard/     keymap.ts (types, ISO swap), resolve.ts, policy.ts, labels.ts
+│  ├─ keyboard/     keymap.ts (types), resolve.ts, policy.ts, labels.ts
 │  ├─ shortcuts/    types.ts, defineApp.ts, shortcutId.ts (legacy-compatible)
 │  ├─ practice/     session.ts (State + Command), strategies.ts, grading.ts
 │  ├─ scheduling/   scheduler.ts (port), fsrs.ts
@@ -200,8 +200,8 @@ src-tauri/src/
 
 ## 7. Testing strategy
 
-- **Domain (Vitest):** keyboard resolution against German and US keymap fixtures, policy rules, shortcut ID compatibility against real IDs, session transitions (replaying command sequences), strategies with a seeded random number generator, grading, FSRS against reference values, reconcile.
-- **Data (Vitest):** a health test over all `data/apps` (duplicates, unknown key codes, several trigger keys, impossible shortcuts on the fixture layouts).
+- **Domain (Vitest):** keyboard resolution against a German keymap fixture, policy rules, shortcut ID compatibility against real IDs, session transitions (replaying command sequences), strategies with a seeded random number generator, grading, FSRS against reference values, reconcile.
+- **Data (Vitest):** a health test over all `data/apps` (duplicates, unknown key codes, several trigger keys, impossible shortcuts on the fixture layout).
 - **Stores:** with in-memory repositories.
 - **Rust (`cargo test`):** SQLite migrations, repository queries, Electron import with a fixture `config.json`, and keymap helpers. Platform adapters are covered by the manual smoke test.
 - **Manual smoke test:** the checklist in `REWRITE.md` §9.

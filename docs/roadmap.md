@@ -36,23 +36,23 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 **Deliverables**
 
 - `domain/shared/result.ts`: errors as values
-- `domain/keyboard/`: keymap types and the ISO swap, key resolution (a chain: value → Shift → AltGr → Shift+AltGr → code), modifier ordering, `shortcutPolicy` (a chain of rules), key labels
+- `domain/keyboard/`: the keymap type, key resolution (a chain: value → Shift → Alt → Shift+Alt → code), modifier ordering, `shortcutPolicy` (a chain of rules), key labels
 - `domain/shortcuts/`: types, `defineApp`, legacy-compatible `shortcutId`
 - `data/apps/*.ts`: the 10 apps ported and typed
-- Tests: resolution against German and US keymap fixtures, policy rules, shortcut IDs against real IDs from the old `config.json`, and a data health test over all apps
+- Tests: resolution against a German keymap fixture, policy rules, shortcut IDs against IDs computed by the old app, and a data health test over all apps
 
 **Decisions**
 
-- `Result`: our own small type (recommended) or a library (`neverthrow`, Effect)
-- Collection helpers: native array methods (recommended) or `remeda`
-- SHA-256 for `shortcutId`: `@noble/hashes`, which is synchronous and keeps `shortcutId` a plain pure function, or the built-in Web Crypto API, which is asynchronous and makes everything that uses the ID async
-- Fixtures: dump the German and US keymaps and a sample of shortcut IDs from the old app
+- `Result`: our own type, tagged by `kind: 'ok' | 'err'`, rather than `neverthrow` or Effect. It starts with the constructors only; helpers come when a caller needs them.
+- Collection helpers: native array methods, no `remeda`.
+- SHA-256 for `shortcutId`: `@noble/hashes` (as in the old app). It's synchronous, so `shortcutId` stays a plain pure function; Web Crypto would make everything that uses the ID async.
+- Fixtures: one German keymap in our own `Keymap` shape (`germanKeymap.fixture.json`), which is exactly what the domain receives in the app. It was dumped from the old app's `native-keymap` and cleaned up: the ISO swap is applied, keys that type no character are left out, and `native-keymap` artifacts (`AudioVolumeUp`, the JIS keys) are removed. **No US keymap:** only German is in use, so add a fixture when someone uses another layout. Shortcut IDs are about 15 inline test cases computed by the old app, not a full list, which would freeze the shortcut data. The port (2.9) is checked once against all old IDs instead.
 
 **Sub-steps**
 
 - [x] 2.1 `Result` type
-- [ ] 2.2 Fixtures: German and US keymaps and a sample of shortcut IDs from the old app
-- [ ] 2.3 Keymap types and the ISO swap
+- [x] 2.2 Fixture: the German keymap
+- [ ] 2.3 Keymap type
 - [ ] 2.4 Key resolution chain and modifier ordering
 - [ ] 2.5 `shortcutId`, legacy-compatible
 - [ ] 2.6 Shortcut types and `defineApp`
@@ -148,7 +148,7 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 
 Branch `feature/native-keymap`. Read the current keyboard layout in Rust, replacing `native-keymap`.
 
-**Deliverables:** the `KeymapSource` trait, a macOS implementation (`TISCopyCurrentKeyboardLayoutInputSource` + `UCKeyTranslate`), layout-change events, and output that matches the step 2 fixtures.
+**Deliverables:** the `KeymapSource` trait, a macOS implementation (`TISCopyCurrentKeyboardLayoutInputSource` + `UCKeyTranslate`) that reports `Backquote` and `IntlBackslash` correctly on ISO keyboards (`native-keymap` swapped them), layout-change events, and output that matches the step 2 fixture.
 
 **Sub-steps**
 
