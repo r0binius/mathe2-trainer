@@ -8,6 +8,7 @@ Four things shape it:
 2. **Tauri 2 and Vue 3 best practices** (§3, §4).
 3. **Design patterns** from the [refactoring.guru catalog](https://refactoring.guru/design-patterns/catalog), in their functional form, used only where they solve a problem the old app actually had (§5).
 4. **Testability:** the domain logic runs without Tauri, Vue or a real keyboard.
+5. **[The Elm Architecture](https://guide.elm-lang.org/architecture/)** for every flow with logic: a model, messages, a pure update that returns effects as data, and a small runtime in the shell (§1.1).
 
 ---
 
@@ -20,6 +21,25 @@ Four things shape it:
 - **Rust owns the OS and the disk; TypeScript owns the domain and the UI.** Rust never decides what a shortcut means, and TypeScript never touches the file system.
 - **No module-level singletons.** Single instances exist, but they are created in one place and injected: Tauri's managed state in Rust, Pinia stores and `provide`/`inject` in Vue. This fixes the old app's biggest structural problem.
 - **Name code by its domain role, not by the pattern.** Write `ShortcutPolicy`, not `ValidationChain`. This doc records which pattern each module uses.
+
+### 1.1 The Elm Architecture
+
+The app's flows (a practice session, and later the stores' changes) follow [The Elm Architecture](https://guide.elm-lang.org/architecture/). Its ideas fit functional core, imperative shell exactly: the core decides, the shell carries out.
+
+| Elm                   | Here                                                                                                                                                                                                                                                                                          |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Model`               | An immutable value, a discriminated union when the flow has phases, so impossible states can't be represented (`Session`).                                                                                                                                                                    |
+| `Msg`                 | Plain data describing what happened (`{ type: 'answer', keys, at }`). A message that needs time or randomness carries it, filled in by the shell, just as Elm's `Time.now` and `Random.generate` deliver their values as messages.                                                            |
+| `update`              | A pure function `(model, msg) → { model, effects }`, named by its domain role (`updateSession`).                                                                                                                                                                                              |
+| `Cmd`                 | `Effect`: data describing work for the shell, such as saving a review or waiting (`{ type: 'advanceAfter', ms }`). Waiting is an effect too, so timings like the 1 s pause after a success are domain rules with tests. We say _effect_ because GoF's Command is the message, not the effect. |
+| `Sub`                 | Composables that turn outside events (key presses, Tauri events) into messages and remove their listeners in `onScopeDispose`.                                                                                                                                                                |
+| `view`                | Components render the model and dispatch messages. They hold no flow logic.                                                                                                                                                                                                                   |
+| The runtime           | `useProgram({ init, update, run })` (step 5): holds the model in a `shallowRef`, applies `update` on `dispatch(msg)` and passes the effects to `run`, whose results come back as messages.                                                                                                    |
+| JSON decoders         | Data from IPC and disk is parsed into domain types, as a `Result`, before the domain sees it ([parse, don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/)). How is decided in step 4.                                                                        |
+| `Maybe`, `Result`     | `Result` for failures, `undefined` for absence, and no exceptions in the domain (§1).                                                                                                                                                                                                         |
+| One model for the app | **Not adopted:** one model per concern. Pinia setup stores hold app-wide data (settings, progress, keymap) and change it through pure domain functions, and each flow, such as a practice screen, runs its own program. That keeps Vue's component-local state instead of fighting it.        |
+
+State + Command (§5) are this loop in pattern terms: the model is the State, and a message is the Command.
 
 ## 2. Layers
 
@@ -78,36 +98,36 @@ Each entry names the problem in the old app (see legacy-architecture.md), the pa
 
 The catalog describes patterns with classes. The intent of a pattern carries over to functional code, and its form gets simpler:
 
-| Pattern                 | Functional form in this repo                                                     |
-| ----------------------- | -------------------------------------------------------------------------------- |
-| State                   | Discriminated union of states + pure `transition(state, command) → state`        |
-| Command                 | Discriminated union of plain data (`{ type: 'skip' }`), interpreted by a reducer |
-| Strategy                | A function (or record of functions) passed as an argument                        |
-| Chain of Responsibility | An array of rule functions, evaluated in order until one decides                 |
-| Adapter, Facade         | A module or factory function that returns a record of functions                  |
-| Abstract Factory        | A function that returns a matching record of implementations                     |
-| Observer                | Vue reactivity (`computed`, `watch`) and Tauri event listeners                   |
-| Memento                 | Immutable snapshots; restoring is a pure function of the snapshot                |
+| Pattern                 | Functional form in this repo                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------------------------- |
+| State                   | Discriminated union of states + pure `update(model, msg) → { model, effects }` (§1.1)                   |
+| Command                 | A message: a discriminated union of plain data (`{ type: 'skip', roll, at }`), interpreted by an update |
+| Strategy                | A function (or record of functions) passed as an argument                                               |
+| Chain of Responsibility | An array of rule functions, evaluated in order until one decides                                        |
+| Adapter, Facade         | A module or factory function that returns a record of functions                                         |
+| Abstract Factory        | A function that returns a matching record of implementations                                            |
+| Observer                | Vue reactivity (`computed`, `watch`) and Tauri event listeners                                          |
+| Memento                 | Immutable snapshots; restoring is a pure function of the snapshot                                       |
 
 Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs for state, and a functional leaning (immutability by default, iterators, `Result`, pure functions where possible).
 
 ### 5.1 Used
 
-**State: practice session** (`domain/practice/session.ts`)
+**State: practice session** (`domain/practice/session.ts`, an Elm model, §1.1)
 
 - _Problem:_ `TestRoute` and `ReviewRoute` each spread their own copy of the same flow over boolean flags (`success`, `isFailed`, `testFailed`, `isTest`, `timeout`). Invalid combinations are possible.
-- _Pattern:_ each phase is an explicit state: `presenting(training | testing)`, `failedAttempt`, `succeeded`, `finished`. Each state defines which inputs it accepts.
-- _TS form:_ a discriminated union plus a pure `transition(state, command) → state`, which is the idiomatic TypeScript version of the State pattern, instead of a class per state. Invalid states can't be represented, and the compiler checks that every state is handled.
+- _Pattern:_ each phase is an explicit state: `presenting` (training or testing, with the first mistake of a test), `succeeded` and `finished`. Each state defines which inputs it accepts.
+- _TS form:_ a discriminated union plus a pure `updateSession(session, msg) → { model, effects }`, which is the idiomatic TypeScript version of the State pattern, instead of a class per state. Invalid states can't be represented, and the compiler checks that every state is handled.
 
 **Command: session inputs, IPC, menu actions**
 
-- Session inputs are data: `{ type: 'answer', keys }`, `{ type: 'skip' }`, `{ type: 'advance' }`. The component sends commands, and the state machine interprets them, so tests can replay a whole session.
+- Session inputs are messages (§1.1): `{ type: 'answer', keys, at }`, `{ type: 'skip', roll, at }`, `{ type: 'advance', roll, at }`. The component dispatches them, and the state machine interprets them, so tests can replay a whole session.
 - Tauri commands and tray/app menu items map to named actions (`showPreferences`, `togglePopover`, `quit`) that the Rust window coordinator handles in one place.
 
 **Strategy: what differs between learn and review**
 
 - `NextItemStrategy`: `weightedBuckets` for learn (unseen 90 / trained 50 / learned 10, no immediate repeat) and `dueQueue` for review (ordered by `dueAt`, failed items requeued).
-- `GradingStrategy`: failed → again, over 6 s → hard, otherwise good.
+- `GradingStrategy`: the grade comes only from what was measured, never from the user's own estimate: a mistake → again, over 6 s → hard, a fast first try → easy, otherwise good.
 - `Scheduler`: an FSRS implementation behind an interface, so the hand-written FSRS-5 and `ts-fsrs` are interchangeable, and tests can use a fixed scheduler.
 - `KeyLabels`: ⌘⌥⇧⌃ on macOS, Super/Ctrl/Alt/Shift on Linux.
 - Learn and review become the same session driven by different strategies. This replaces the duplicated route logic, and composition is preferred over a Template Method base class.
@@ -177,7 +197,7 @@ src/
 ├─ domain/
 │  ├─ keyboard/     keymap.ts (types), resolve.ts, policy.ts, labels.ts
 │  ├─ shortcuts/    types.ts, defineApp.ts, shortcutId.ts
-│  ├─ practice/     session.ts (State + Command), strategies.ts, grading.ts
+│  ├─ practice/     session.ts (Model, Msg, update), strategies.ts, grading.ts
 │  ├─ scheduling/   scheduler.ts (port), fsrs.ts
 │  ├─ progress/     types.ts, repository.ts (port), reconcile.ts
 │  └─ shared/       result.ts (errors as values)
@@ -199,7 +219,7 @@ src-tauri/src/
 
 ## 7. Testing strategy
 
-- **Domain (Vitest):** keyboard resolution against a German keymap fixture, policy rules, shortcut IDs, session transitions (replaying command sequences), strategies with a seeded random number generator, grading, FSRS against reference values, reconcile.
+- **Domain (Vitest):** keyboard resolution against a German keymap fixture, policy rules, shortcut IDs, session updates (replaying message sequences and checking their effects), strategies with fixed rolls, grading, FSRS against reference values, reconcile.
 - **Data (Vitest):** a health test over all `data/apps` (duplicates, unknown key codes, message keys missing from or unused in `de`, several trigger keys, impossible shortcuts on the fixture layout).
 - **Stores:** with in-memory repositories.
 - **Rust (`cargo test`):** SQLite migrations, repository queries and keymap helpers. Platform adapters are covered by the manual smoke test.

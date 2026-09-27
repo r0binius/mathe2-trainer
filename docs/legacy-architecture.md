@@ -381,14 +381,14 @@ In the renderer:
 2. Progress is stored separately per keyboard layout.
 3. Resolution semantics: lookup order value → Shift → AltGr → Shift + AltGr, ⌃⌥⇧⌘ sorting, the shortest alternative wins, and the ISO swap.
 4. Learning rules: training vs test, only the first test per session counts for reviews, bucket weights 90/50/10, and a run finishes only without skips.
-5. Review rules: a card is created on the first success, due until the end of the day, `again` → tomorrow and requeued in the session, and the 6 s `hard` threshold.
+5. Review rules: a card is created on the first success, due until the end of the day, `again` → tomorrow and requeued in the session, and the 6 s `hard` threshold. Grades come only from what was measured, never from the user's estimate; the rewrite adds `easy` for a fast first try (decided in step 3).
 6. Lookup: built-in sets take priority, Mouseless itself is never the looked-up app, and focus returns to the previous app on hide.
 
 ## 17. Open decisions (made step by step during the rewrite)
 
 - UI language: the data is translatable from step 2 (message keys, per-app catalogs, German as the fallback). Which language the UI starts in and the vue-i18n setup are decided in step 5.
-- FSRS: keep the hand-written FSRS-5 or switch to `ts-fsrs`.
-- Whether runs remember skipped shortcuts across sessions (they don't today).
+- FSRS: decided in step 3, `ts-fsrs` behind the `Scheduler` port.
+- Whether runs remember skipped shortcuts across sessions: decided in step 3, they don't (as today).
 - Where progress lives: SQLite in Rust (per REWRITE.md) or a JSON store to begin with.
 - What progress is keyed by per layout: the old `localizedName` depends on the system language ("Deutsch" or "German"), so switching it orphans progress. The macOS input source ID (`com.apple.keylayout.German`) is stable. Decided in step 4 or 6.
 - `reconcileProgress` (step 3) no longer needs `importLearnedShortcuts`, which only migrated data from before spaced repetition. Pruning progress of removed shortcuts stays.

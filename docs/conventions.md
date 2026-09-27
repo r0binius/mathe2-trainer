@@ -24,7 +24,7 @@ In practice:
 - **Transform, don't mutate.** Use `map`, `filter`, `reduce`, `flatMap`, spread and `toSorted()`. Write new objects instead of changing existing ones.
 - **Readonly types.** Declare data types with `readonly` properties and `readonly T[]`, and prefix them with `Readonly…` or `Immutable…` when the type-declaration rule asks for it.
 - **Errors are values.** Domain functions that can fail return a `Result` (a discriminated union of `ok` and `err`) and never throw. The shell decides how to show or log the error.
-- **Inject dependencies.** A function that needs time, randomness, a keymap or a repository receives it as a parameter (`now: Date`, `random: () => number`). This keeps functions pure and tests deterministic.
+- **Inject dependencies.** A function that needs time, randomness, a keymap or a repository receives it as a parameter or in a command's data (`now: Date`, `{ type: 'advance', roll: 0.42 }`), never by calling `Date.now()` or `Math.random()`. This keeps functions pure and tests deterministic.
 - **Side effects at the edges.** Timers, IPC, DOM listeners and logging live in `platform/`, stores, composables and components, never in the domain.
 - **An escape hatch needs a reason.** If a rule really doesn't fit, disable it on that line with an explanation: `// eslint-disable-next-line <rule> -- <why>`.
 

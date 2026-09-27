@@ -98,26 +98,33 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 - **Plain objects inherit keys.** A lookup table indexed by user data finds `constructor` unless it's checked with `Object.hasOwn`.
 - **Tool caches can leak between files.** A shared cache in `is-immutable-type` made lint results depend on which files were linted together; a small patch fixed it until upstream does.
 
-## 3. Domain: practice and scheduling ⏳ ([#3](https://codeberg.org/gobin/mouseless/issues/3))
+## 3. Domain: practice and scheduling 🚧 ([#3](https://codeberg.org/gobin/mouseless/issues/3))
 
 Branch `feature/practice-session`. The practice flow shared by learn and review, as a state machine, plus FSRS scheduling.
 
-**Deliverables:** the practice session (State + Command as a reducer), the next-item strategies (weighted buckets for learn, due queue for review), grading, the `Scheduler` port with FSRS, run snapshots (Memento), and `reconcileProgress`.
+**Deliverables:** the practice session (State + Command as an Elm-style update), the next-item strategies (weighted buckets for learn, due queue for review), grading, the `Scheduler` port with FSRS, run snapshots (Memento), and `reconcileProgress`.
 
-**Decisions:** keep the hand-written FSRS-5 or switch to `ts-fsrs`; whether skipped shortcuts survive across sessions; whether to use a pattern-matching library (`ts-pattern`) or plain `switch`.
+**Decisions**
+
+- FSRS: `ts-fsrs` 5.x (FSRS-6, by the algorithm's authors, no dependencies) behind the `Scheduler` port, instead of porting the hand-written FSRS-5. The adapter turns off its short-term learning steps and keeps our rules: `again` is due tomorrow, and a card is due until the end of its day. Upgrade to 6.0 once it's stable.
+- Skipped shortcuts last for the session only, as before: a skip means "not now", and a run with skips stays unfinished, so they come back next session.
+- Matching: a plain exhaustive `switch`, no `ts-pattern`.
+- Randomness and time are carried by messages: the shell puts `Math.random()` and `Date.now()` values into them (`advance { roll }`, `answer { keys, at }`), so the update stays pure and tests pass fixed numbers. No seeded random number generator.
+- [The Elm Architecture](https://guide.elm-lang.org/architecture/) (`architecture.md` §1.1): the session is a model with messages and `updateSession(session, msg) → { model, effects }`, in Elm's vocabulary (Model, Msg, update) but with `Effect` instead of `Cmd`, since GoF's Command is the message. Effects are data the shell carries out: results to save, and timers such as the 1 s pause after a success (`advanceAfter`), which makes that timing a tested domain rule. The shell's runtime (`useProgram`) comes in step 5. One model per concern, not one for the app.
+- Grading uses only what was measured, never the user's own estimate: a mistake → again, over 6 s → hard, a fast first try → easy, otherwise good (the old app never used easy). Using the whole scale lets fluent shortcuts space out faster. Every review is logged from step 4 on, so FSRS's weights can later be fitted to the user's own data.
 
 **Sub-steps**
 
-- [ ] 3.1 Practice session reducer (State + Command)
+- [ ] 3.1 Practice session update (State + Command, Elm style)
 - [ ] 3.2 Next-item strategies: weighted buckets for learn, due queue for review
 - [ ] 3.3 Grading
 - [ ] 3.4 `Scheduler` port and FSRS
 - [ ] 3.5 Run snapshots (Memento)
 - [ ] 3.6 `reconcileProgress`
 
-**Concepts:** state machines and reducers, injecting randomness and time for determinism (seeded random numbers), property-style tests, spaced repetition.
+**Concepts:** state machines and reducers, The Elm Architecture (model, update, effects as data), injecting randomness and time for determinism (values carried in messages), property-style tests, spaced repetition.
 
-**Resources:** [statecharts.dev](https://statecharts.dev/) · [refactoring.guru: State, Command, Strategy, Memento](https://refactoring.guru/design-patterns/catalog) · [FSRS algorithm](https://github.com/open-spaced-repetition/fsrs4anki/wiki/The-Algorithm) · [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) · [ts-pattern](https://github.com/gvergnaud/ts-pattern) · [legacy-architecture.md](legacy-architecture.md) §8–9
+**Resources:** [statecharts.dev](https://statecharts.dev/) · [The Elm guide](https://guide.elm-lang.org/), especially [The Elm Architecture](https://guide.elm-lang.org/architecture/) and [Commands and Subscriptions](https://guide.elm-lang.org/effects/) · [refactoring.guru: State, Command, Strategy, Memento](https://refactoring.guru/design-patterns/catalog) · [FSRS algorithm](https://github.com/open-spaced-repetition/fsrs4anki/wiki/The-Algorithm) · [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) · [legacy-architecture.md](legacy-architecture.md) §8–9
 
 ## 4. Persistence and IPC ⏳ ([#4](https://codeberg.org/gobin/mouseless/issues/4))
 
@@ -125,7 +132,7 @@ Branch `feature/persistence`. Settings and progress stored by Rust and reached t
 
 **Deliverables:** the Rust `AppError`, a settings store, a SQLite progress repository with migrations, typed commands and events (`tauri-specta` if it's stable), the `platform/` facade, and Pinia stores.
 
-**Decisions:** SQLite or JSON for progress; whether `tauri-specta` is ready; the settings schema (`trigger` as a union).
+**Decisions:** SQLite or JSON for progress; whether `tauri-specta` is ready; the settings schema (`trigger` as a union); how data from IPC and disk is decoded into domain types (hand-written decoders or a schema library); the review log's shape (every review with its measurements and grade, so FSRS can later be fitted to it).
 
 **Sub-steps**
 
@@ -144,7 +151,7 @@ Branch `feature/persistence`. Settings and progress stored by Rust and reached t
 
 Branch `feature/main-window`. The library, sets, set detail, learn, review and options screens, with transitions and keyboard navigation.
 
-**Deliverables:** presentational components (`KeyCap`, `BaseButton`, `CircleProgress`, …), feature routes, composables (`useKeyCapture`, `usePracticeSession`, `useSpatialNav`), styles ported from the old app.
+**Deliverables:** presentational components (`KeyCap`, `BaseButton`, `CircleProgress`, …), feature routes, composables (`useProgram`, the Elm runtime; `useKeyCapture`, `usePracticeSession`, `useSpatialNav`), styles ported from the old app.
 
 **Decisions:** spatial navigation (library or our own composable); design tokens as CSS custom properties; vue-i18n setup and the UI's language (the data is translatable from step 2); app titles the vendor translates itself (Apple's Notes is `Notizen` on a German Mac, hard-coded in the data for now).
 
