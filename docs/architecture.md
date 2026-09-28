@@ -156,7 +156,7 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 
 **Facade: simple entry points to subsystems**
 
-- Frontend `platform/` is the only code that imports `@tauri-apps/api` or the generated bindings. Stores see `settings.load()`, `progress.saveRun()` and `lookup.onResult(cb)`.
+- Frontend `platform/` is the only code that imports `@tauri-apps/api`. Its repositories take Tauri's `invoke` as an argument (`settingsRepository(invoke)`), so they're tested with a fake one, and every call returns a `Result` instead of rejecting. Stores see `settings.load()`, `progress.saveSet(record)` and later `lookup.onResult(cb)`.
 - Rust `commands/` is a facade over the services for the frontend.
 
 **Mediator: window coordination** (`src-tauri/src/app/coordinator.rs`)
@@ -201,10 +201,10 @@ src/
 │  ├─ practice/     session.ts (Model, Msg, update), items.ts, learn.ts, review.ts, grading.ts
 │  ├─ scheduling/   scheduler.ts (port), fsrs.ts
 │  ├─ progress/     setProgress.ts, storedProgress.ts, repository.ts (port), reconcile.ts
-│  ├─ settings/     settings.ts (types, decoder)
-│  └─ shared/       result.ts (errors as values), decode.ts (JSON decoders)
+│  ├─ settings/     settings.ts (types, decoder), repository.ts (port)
+│  └─ shared/       result.ts (errors as values), decode.ts (JSON decoders), storage.ts (StorageError)
 ├─ data/apps/<id>/   index.ts, de.json
-├─ platform/        tauri.ts (bindings), settings.ts, progress.ts, keymap.ts, lookup.ts, window.ts
+├─ platform/        ipc.ts (commandCaller), settings.ts, progress.ts, keymap.ts, lookup.ts, window.ts
 ├─ stores/          settings.ts, keymap.ts, catalog.ts, progress.ts
 ├─ composables/     useKeyCapture.ts, usePracticeSession.ts, useSpatialNav.ts
 ├─ features/        library/, learn/, review/, lookup/, settings/
