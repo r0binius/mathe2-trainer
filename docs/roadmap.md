@@ -173,7 +173,7 @@ Branch `fix/review-findings`. A review of the whole codebase before step 4 found
 - **Time has more than one clock.** A library's idea of a day (UTC) and the app's (local) must agree, and an `advance` has to say which success it ends, or an old timer acts on a new state.
 - **Flat config replaces rule options per rule**, which also applies to `no-restricted-syntax`: one rule's selectors live in one place per zone.
 
-## 4. Persistence and IPC 🚧 ([#4](https://codeberg.org/gobin/mouseless/issues/4))
+## 4. Persistence and IPC ✅ ([#4](https://codeberg.org/gobin/mouseless/issues/4))
 
 Branch `feature/persistence`. Settings and progress stored by Rust and reached through a typed platform facade.
 
@@ -206,6 +206,17 @@ Branch `feature/persistence`. Settings and progress stored by Rust and reached t
 **Concepts:** Rust ownership and borrowing, `Result` and `?`, traits, `thiserror`; the Tauri process model, commands, state management and capabilities; Pinia setup stores; ports and adapters.
 
 **Resources:** [Rust book: Ownership](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html), [Error handling](https://doc.rust-lang.org/book/ch09-00-error-handling.html), [Traits](https://doc.rust-lang.org/book/ch10-02-traits.html) · [Rust by Example](https://doc.rust-lang.org/rust-by-example/) · [thiserror](https://docs.rs/thiserror/latest/thiserror/) · [rusqlite](https://docs.rs/rusqlite/latest/rusqlite/) · [Tauri process model](https://tauri.app/concept/process-model/), [IPC](https://tauri.app/concept/inter-process-communication/), [Calling Rust](https://tauri.app/develop/calling-rust/), [State management](https://tauri.app/develop/state-management/), [Capabilities](https://tauri.app/security/capabilities/) · [tauri-specta](https://github.com/specta-rs/tauri-specta) · [Pinia](https://pinia.vuejs.org/core-concepts/)
+
+**What we learned**
+
+- **Decode at the boundary, and generated types matter less.** Every answer from Rust goes through a decoder anyway, so `tauri-specta`'s generated types would have added a build step for little. Decoders written like Elm's `Json.Decode` read like the types they produce, and their errors say where (`cards[0].reps`).
+- **Only the running app proves the wire.** Unit tests on both sides pinned the same JSON shapes, but only a round trip in `pnpm tauri dev` showed that the argument names, `null` for `Option<Card>` and the error shape really fit together.
+- **Inject what talks to the outside.** Passing Tauri's `invoke` into the repositories, and the repositories into the stores via `provide`/`inject`, made every layer testable without Tauri or a DOM. The real `invoke` appears in one function.
+- **Store only what differs from the defaults.** Settings as key/value rows of changed values keep the defaults in one place, need no migration for a new setting, and let a stored value that no longer fits fall back on its own.
+- **Model loading and saving honestly.** `Loadable` (Elm's `RemoteData`) makes "not loaded yet" and "failed" states the UI has to handle, and saving before showing, plus `notLoaded`, means the UI never shows progress that isn't on disk, or overwrites progress it hasn't read.
+- **The linters teach idiom.** `unused_async` led to `#[tauri::command(async)]`, `needless_pass_by_value` to one module-wide `expect` for Tauri's by-value arguments, a forbidden `throw` to `inject(key, fallback)`, and a forbidden rest parameter to inferring `oneOf` from a tuple. `expect` instead of `allow` removes itself once it's no longer needed.
+- **Refactor with a rule of three, and recheck defaults.** A shared `firstViolation` for two call sites cost more than it saved and went again. `satisfies` replaced an identity function, and TypeScript 6 and `@vue/tsconfig` already set flags we repeated.
+- **Review your own diff before handing it over.** Rereading `oneOf` found a tie that reported "one of no decoders" instead of the real error; a test pinned it first.
 
 ## 5. Main window UI ⏳ ([#5](https://codeberg.org/gobin/mouseless/issues/5))
 
