@@ -170,19 +170,28 @@ Branch `fix/review-findings`. A review of the whole codebase before step 4 found
 - **Time has more than one clock.** A library's idea of a day (UTC) and the app's (local) must agree, and an `advance` has to say which success it ends, or an old timer acts on a new state.
 - **Flat config replaces rule options per rule**, which also applies to `no-restricted-syntax`: one rule's selectors live in one place per zone.
 
-## 4. Persistence and IPC ⏳ ([#4](https://codeberg.org/gobin/mouseless/issues/4))
+## 4. Persistence and IPC 🚧 ([#4](https://codeberg.org/gobin/mouseless/issues/4))
 
 Branch `feature/persistence`. Settings and progress stored by Rust and reached through a typed platform facade.
 
-**Deliverables:** the Rust `AppError`, a settings store, a SQLite progress repository with migrations, typed commands and events (`tauri-specta` if it's stable), the `platform/` facade, and Pinia stores.
+**Deliverables:** the Rust `AppError`, a settings store, a SQLite progress repository with migrations, typed commands and events, the `platform/` facade, and Pinia stores.
 
-**Decisions:** SQLite or JSON for progress; whether `tauri-specta` is ready; the settings schema (`trigger` as a union); how data from IPC and disk is decoded into domain types (hand-written decoders or a schema library); the review log's shape (every review with its measurements and grade, so FSRS can later be fitted to it).
+**Decisions**
+
+- Storage: one SQLite database, `mouseless.db` in the app data directory, owned by Rust through `rusqlite` (with bundled SQLite) and `rusqlite_migration`. The frontend reaches it only through our own commands, never through SQL, so `tauri-plugin-sql` isn't used: it would put the queries in TypeScript and give the webview raw database access. A JSON file, as in the old app, would be rewritten in full on every save and need hand-rolled migrations, while the review log only ever grows and saving a review writes a card and a log entry together, in one transaction.
+- Settings live in the same database, in a `settings` table, not in `tauri-plugin-store`: one storage mechanism, one file, and no extra plugin, package or permission for four values. Rust reads them too (the trigger in step 7, the dock icon, autostart). The schema: `trigger: { kind: 'holdCommand' } | { kind: 'shortcut'; keys: Combination }`, `showMenuBarIcon`, `showDockIcon` and `launchAtLogin`, by default hold ⌘ and all on, as before. The UI language is added in step 5.
+- Typed IPC: hand-written typed wrappers in `platform/`. `tauri-specta` is still a release candidate (`2.0.0-rc.25`, with `specta-typescript` at `0.0.12`), and since every response is decoded at the boundary anyway, generated types would add little. Revisit once it's stable.
+- Decoding: hand-written decoders that return our `Result`, built on a few small helpers, with no schema library. There are only a few types (settings, set records, cards, review log entries), and the branded ones (`ShortcutId`, `LayoutId`, `CardMemory`) need our own parsers either way. `valibot` and `zod` would each bring their own issue model next to `Result`.
+- The review log gets one entry per `tested` effect, including a failed first test that creates no card: `shortcut_id`, `layout`, `reviewed_at`, `utc_offset_minutes`, `grade`, `failed` and `duration_ms`. That's what the FSRS optimizer needs (card, time, rating, duration), plus the measurements, so the grading limits can be fitted later too.
+- Times are stored as epoch milliseconds (`INTEGER`), as in the domain. The old app mixed two ISO formats.
+- Reset clears set progress, cards and the review log in one transaction. The old app left the cards, so reviews kept showing up.
+- Commands are `async`, and the connection sits behind a `Mutex` in Tauri's managed state, held only for one query or transaction.
 
 **Sub-steps**
 
 - [ ] 4.1 Rust `AppError`
-- [ ] 4.2 Settings store
-- [ ] 4.3 SQLite progress repository and migrations
+- [ ] 4.2 SQLite database, migrations and the settings table
+- [ ] 4.3 Progress repository and review log
 - [ ] 4.4 Typed commands and events
 - [ ] 4.5 `platform/` facade
 - [ ] 4.6 Pinia stores

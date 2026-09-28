@@ -35,7 +35,7 @@ The app's flows (a practice session, and later the stores' changes) follow [The 
 | `Sub`                 | Composables that turn outside events (key presses, Tauri events) into messages and remove their listeners in `onScopeDispose`.                                                                                                                                                                                                                                                         |
 | `view`                | Components render the model and dispatch messages. They hold no flow logic.                                                                                                                                                                                                                                                                                                            |
 | The runtime           | `useProgram({ init, update, run })` (step 5): holds the model in a `shallowRef`, applies `update` on `dispatch(msg)` and passes the effects to `run`, whose results come back as messages.                                                                                                                                                                                             |
-| JSON decoders         | Data from IPC and disk is parsed into domain types, as a `Result`, before the domain sees it ([parse, don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/)). How is decided in step 4.                                                                                                                                                                 |
+| JSON decoders         | Data from IPC and disk is parsed into domain types, as a `Result`, before the domain sees it ([parse, don't validate](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/)), with hand-written decoders and no schema library (step 4).                                                                                                                                |
 | `Maybe`, `Result`     | `Result` for failures, `undefined` for absence, and no exceptions in the domain (§1).                                                                                                                                                                                                                                                                                                  |
 | One model for the app | **Not adopted:** one model per concern. Pinia setup stores hold app-wide data (settings, progress, keymap) and change it through pure domain functions, and each flow, such as a practice screen, runs its own program. That keeps Vue's component-local state instead of fighting it.                                                                                                 |
 
@@ -64,18 +64,18 @@ State + Command (§5) are this loop in pattern terms: the model is the State, an
 
 ## 3. Tauri 2 best practices we follow
 
-| Practice                             | How                                                                                                                                                                                                         |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Least privilege                      | One capability file per window (`main`, `popover`) that grants only the commands and plugin permissions that window uses. A strict CSP (the scaffold has `csp: null`, which we replace).                    |
-| Typed IPC                            | `tauri-specta` generates TS bindings for commands and events from Rust, so no string channels. (Check its release status when we reach the IPC step; fallback: hand-written typed wrappers in `platform/`.) |
-| Thin commands                        | Commands parse input, call a service and map errors. No logic in them.                                                                                                                                      |
-| Errors as values                     | Commands return `Result<T, AppError>`. `AppError` uses `thiserror`, is serializable and has a `kind`, so the frontend can handle it. No `unwrap()` outside tests and setup.                                 |
-| State                                | Services are registered with `app.manage()` and received as `State<'_, T>`. Mutable state goes behind `Mutex`/`RwLock`, with locks held as briefly as possible.                                             |
-| Threads                              | AppKit and AX calls that need the main thread go through `run_on_main_thread`. Slow work (AX menu walk, SQLite) runs in async commands or `spawn_blocking`, never on the UI thread.                         |
-| Official plugins for solved problems | `single-instance` (registered first), `autostart`, `global-shortcut`, `store`, `opener`, `positioner`, `log`.                                                                                               |
-| Platform code isolated               | `#[cfg(target_os = "macos")]` only inside `platform/`. Everything else sees traits.                                                                                                                         |
-| Structure                            | `main.rs` only calls `lib::run()`. `lib.rs` builds the app from modules.                                                                                                                                    |
-| Quality gates                        | `cargo fmt`, `cargo clippy -- -D warnings`, `cargo test`.                                                                                                                                                   |
+| Practice                             | How                                                                                                                                                                                          |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Least privilege                      | One capability file per window (`main`, `popover`) that grants only the commands and plugin permissions that window uses. A strict CSP (the scaffold has `csp: null`, which we replace).     |
+| Typed IPC                            | Hand-written typed wrappers in `platform/`, one per command and event, that decode what they receive. `tauri-specta` is still a release candidate (step 4); revisit once it's stable.        |
+| Thin commands                        | Commands parse input, call a service and map errors. No logic in them.                                                                                                                       |
+| Errors as values                     | Commands return `Result<T, AppError>`. `AppError` uses `thiserror`, is serializable and has a `kind`, so the frontend can handle it. No `unwrap()` outside tests and setup.                  |
+| State                                | Services are registered with `app.manage()` and received as `State<'_, T>`. Mutable state goes behind `Mutex`/`RwLock`, with locks held as briefly as possible.                              |
+| Threads                              | AppKit and AX calls that need the main thread go through `run_on_main_thread`. Slow work (AX menu walk, SQLite) runs in async commands or `spawn_blocking`, never on the UI thread.          |
+| Official plugins for solved problems | `single-instance` (registered first), `autostart`, `global-shortcut`, `opener`, `positioner`, `log`. Settings and progress share one SQLite database instead of the `store` plugin (step 4). |
+| Platform code isolated               | `#[cfg(target_os = "macos")]` only inside `platform/`. Everything else sees traits.                                                                                                          |
+| Structure                            | `main.rs` only calls `lib::run()`. `lib.rs` builds the app from modules.                                                                                                                     |
+| Quality gates                        | `cargo fmt`, `cargo clippy -- -D warnings`, `cargo test`.                                                                                                                                    |
 
 ## 4. Vue 3 best practices we follow
 
@@ -172,7 +172,7 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 
 **Repository (not in the catalog, the standard persistence pattern)**
 
-- `ProgressRepository` (set progress, cards, review log) and `SettingsRepository` interfaces in the domain. Production uses SQLite and the store plugin through Rust; tests use in-memory versions.
+- `ProgressRepository` (set progress, cards, review log) and `SettingsRepository` interfaces in the domain. Production uses one SQLite database through Rust; tests use in-memory versions.
 
 **Memento: resumable learning** (`practice/snapshot.ts`, `practice/learn.ts`, `progress/setProgress.ts`)
 
@@ -214,7 +214,7 @@ src-tauri/src/
 ├─ main.rs, lib.rs, error.rs
 ├─ commands/        settings.rs, progress.rs, keymap.rs, lookup.rs, window.rs
 ├─ app/             coordinator.rs, tray.rs, trigger.rs, windows.rs
-├─ services/        lookup.rs, progress/ (sqlite + migrations)
+├─ services/        lookup.rs, database/ (sqlite + migrations: settings, progress)
 └─ platform/        mod.rs (traits, Capabilities, current()), macos/, linux/
 ```
 
