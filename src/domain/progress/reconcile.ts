@@ -1,20 +1,22 @@
+import type { LayoutId } from '../keyboard/keymap';
 import type { Card } from '../scheduling/scheduler';
 import type { ShortcutId } from '../shortcuts/shortcutId';
 import { shortcutId } from '../shortcuts/shortcutId';
 import type { AppDefinition, ShortcutSet } from '../shortcuts/types';
 import type { SetProgress } from './setProgress';
 
-/** A set's progress with the set it belongs to. The repository may add its own keys. */
+/** A set's progress on one keyboard layout. */
 export type SetRecord = {
   readonly appId: string;
   readonly setId: string;
+  readonly layout: LayoutId;
   readonly progress: SetProgress;
 };
 
 /** The stored progress that depends on which shortcuts exist. */
-export type ReconciledProgress<S extends SetRecord, C extends Card> = {
-  readonly sets: readonly S[];
-  readonly cards: readonly C[];
+export type ReconciledProgress = {
+  readonly sets: readonly SetRecord[];
+  readonly cards: readonly Card[];
 };
 
 /**
@@ -25,10 +27,10 @@ export type ReconciledProgress<S extends SetRecord, C extends Card> = {
  * isn't touched.
  * @see `CleanUp.run` in §9 of `docs/legacy-architecture.md`
  */
-export function reconcileProgress<S extends SetRecord, C extends Card>(
-  { sets, cards }: ReconciledProgress<S, C>,
+export function reconcileProgress(
+  { sets, cards }: ReconciledProgress,
   apps: readonly AppDefinition[],
-): ReconciledProgress<S, C> {
+): ReconciledProgress {
   const known = new Set(
     apps.flatMap((app) => app.sets.flatMap((set) => setShortcutIds(app.id, set))),
   );
@@ -39,10 +41,7 @@ export function reconcileProgress<S extends SetRecord, C extends Card>(
   };
 }
 
-function reconcileSet<S extends SetRecord>(
-  record: S,
-  apps: readonly AppDefinition[],
-): readonly S[] {
+function reconcileSet(record: SetRecord, apps: readonly AppDefinition[]): readonly SetRecord[] {
   const set = apps
     .find(({ id }) => id === record.appId)
     ?.sets.find(({ id }) => id === record.setId);

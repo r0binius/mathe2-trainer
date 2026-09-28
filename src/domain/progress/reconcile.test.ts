@@ -36,11 +36,16 @@ const memory = validMemory({
 });
 
 function card(id: Card['id']): Card {
-  return { ...memory, id };
+  return { ...memory, id, layout: 'com.apple.keylayout.German' };
 }
 
 function record(setId: string, learned: SetRecord['progress']['learned']): SetRecord {
-  return { appId: 'app', setId, progress: { learned, completedAt: 5, updatedAt: 10 } };
+  return {
+    appId: 'app',
+    setId,
+    layout: 'com.apple.keylayout.German',
+    progress: { learned, completedAt: 5, updatedAt: 10 },
+  };
 }
 
 describe('reconcileProgress', () => {
@@ -82,17 +87,5 @@ describe('reconcileProgress', () => {
       card('app/Meta+f'),
       card('app/Meta+s'),
     ]);
-  });
-
-  it('keeps the fields a caller adds to its records, such as the keyboard layout', () => {
-    const withLayout = {
-      ...record('basics', ['app/Meta+g']),
-      layout: 'com.apple.keylayout.German',
-    };
-
-    expect(reconcileProgress({ sets: [withLayout], cards: [] }, apps).sets[0]).toMatchObject({
-      layout: 'com.apple.keylayout.German',
-      progress: { learned: [] },
-    });
   });
 });

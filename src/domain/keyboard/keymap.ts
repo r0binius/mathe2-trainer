@@ -93,3 +93,10 @@ export type KeyCharacters = {
  * Partial, because a layout may leave keys out (a keyboard without a numpad, say).
  */
 export type Keymap = Readonly<Partial<Record<KeyCode, KeyCharacters>>>;
+
+/**
+ * Identifies a keyboard layout, such as `com.apple.keylayout.German` (the macOS input source ID).
+ * Progress is kept per layout. The ID stays the same when the system language changes, unlike the
+ * layout's localized name, which the old app used.
+ */
+export type LayoutId = string;

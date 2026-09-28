@@ -1,3 +1,4 @@
+import type { LayoutId } from '../keyboard/keymap';
 import type { Result } from '../shared/result';
 import { err, ok } from '../shared/result';
 import type { ShortcutId } from '../shortcuts/shortcutId';
@@ -42,8 +43,11 @@ export type InvalidMemory = {
   readonly reason: 'not-finite' | 'stability' | 'difficulty' | 'counts' | 'dates';
 };
 
-/** A shortcut's review card, one per shortcut (and keyboard layout, from step 4 on). */
-export type Card = CardMemory & { readonly id: ShortcutId };
+/** A shortcut's review card, one per shortcut and keyboard layout. */
+export type Card = CardMemory & {
+  readonly id: ShortcutId;
+  readonly layout: LayoutId;
+};
 
 /**
  * Computes a card's next memory after a review, or a new card's first one (the port an FSRS
@@ -55,6 +59,7 @@ export type Scheduler = (memory: CardMemory | undefined, grade: Grade, at: numbe
 /** A graded test of a shortcut. */
 export type Review = {
   readonly id: ShortcutId;
+  readonly layout: LayoutId;
   readonly grade: Grade;
   readonly at: number;
 };
@@ -95,7 +100,7 @@ export function parseCardMemory(fields: CardMemoryFields): Result<CardMemory, In
 export function reviewCard(
   scheduler: Scheduler,
   card: Card | undefined,
-  { id, grade, at }: Review,
+  { id, layout, grade, at }: Review,
 ): Card | undefined {
   if (card === undefined && grade === 'again') {
     return undefined;
@@ -104,16 +109,27 @@ export function reviewCard(
   const memory = scheduler(card, grade, at);
 
   // From the scheduler's review time, which may be later than `at` if the clock went back.
-  return { ...memory, id, dueAt: grade === 'again' ? memory.lastReviewAt + dayMs : memory.dueAt };
+  return {
+    ...memory,
+    id,
+    layout,
+    dueAt: grade === 'again' ? memory.lastReviewAt + dayMs : memory.dueAt,
+  };
 }
 
 /**
- * The cards due today, the longest overdue first. A card due any time today counts, so a session
- * in the morning also covers the evening. The shell passes the local end of today, since it
- * depends on the time zone.
+ * The layout's cards due today, the longest overdue first. A card due any time today counts, so a
+ * session in the morning also covers the evening. The shell passes the local end of today, since
+ * it depends on the time zone.
  */
-export function dueCards(cards: readonly Card[], endOfToday: number): readonly Card[] {
-  return cards.filter(({ dueAt }) => dueAt < endOfToday).sort((a, b) => a.dueAt - b.dueAt);
+export function dueCards(
+  cards: readonly Card[],
+  layout: LayoutId,
+  endOfToday: number,
+): readonly Card[] {
+  return cards
+    .filter((card) => card.layout === layout && card.dueAt < endOfToday)
+    .sort((a, b) => a.dueAt - b.dueAt);
 }
 
 function finite(fields: CardMemoryFields): InvalidMemory | undefined {

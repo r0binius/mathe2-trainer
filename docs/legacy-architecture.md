@@ -390,5 +390,5 @@ In the renderer:
 - FSRS: decided in step 3, `ts-fsrs` behind the `Scheduler` port.
 - Whether runs remember skipped shortcuts across sessions: decided in step 3, they don't (as today).
 - Where progress lives: SQLite in Rust (per REWRITE.md) or a JSON store to begin with.
-- What progress is keyed by per layout: the old `localizedName` depends on the system language ("Deutsch" or "German"), so switching it orphans progress. The macOS input source ID (`com.apple.keylayout.German`) is stable. Decided in step 4 or 6.
+- What progress is keyed by per layout: the old `localizedName` depends on the system language ("Deutsch" or "German"), so switching it orphans progress. The macOS input source ID (`com.apple.keylayout.German`) is stable. Decided in the review after step 3: the input source ID, as `LayoutId` on cards and set records.
 - `reconcileProgress` (step 3) no longer needs `importLearnedShortcuts`, which only migrated data from before spaced repetition. Decided in step 3: it prunes progress of removed shortcuts on every layout, and keeps the progress of shortcuts that are only impossible on the current layout.

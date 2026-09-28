@@ -6,6 +6,7 @@ import type { Card, CardMemory, CardMemoryFields, Grade } from './scheduler';
 import { dayMs, dueCards, parseCardMemory, reviewCard } from './scheduler';
 
 const at = Date.UTC(2026, 8, 28, 10);
+const german = 'com.apple.keylayout.German';
 
 /** Schedules every grade two days out, so the rules around the scheduler show. */
 function twoDays(memory: CardMemory | undefined, grade: Grade, reviewedAt: number): CardMemory {
@@ -28,7 +29,7 @@ const fields: CardMemoryFields = {
   lapses: 0,
 };
 
-const card: Card = { ...validMemory(fields), id: 'app/Meta+a' };
+const card: Card = { ...validMemory(fields), id: 'app/Meta+a', layout: german };
 
 describe('parseCardMemory', () => {
   it('accepts memory in the ranges FSRS works with', () => {
@@ -54,8 +55,11 @@ describe('parseCardMemory', () => {
 
 describe('reviewCard', () => {
   it('creates a card on the first success', () => {
-    expect(reviewCard(twoDays, undefined, { id: card.id, grade: 'good', at })).toStrictEqual({
+    expect(
+      reviewCard(twoDays, undefined, { id: card.id, layout: german, grade: 'good', at }),
+    ).toStrictEqual({
       id: card.id,
+      layout: german,
       stability: 2,
       difficulty: 5,
       lastReviewAt: at,
@@ -66,18 +70,24 @@ describe('reviewCard', () => {
   });
 
   it('creates no card when the first test fails: that is still learning', () => {
-    expect(reviewCard(twoDays, undefined, { id: card.id, grade: 'again', at })).toBeUndefined();
+    expect(
+      reviewCard(twoDays, undefined, { id: card.id, layout: german, grade: 'again', at }),
+    ).toBeUndefined();
   });
 
   it('reschedules an existing card with the scheduler', () => {
-    expect(reviewCard(twoDays, card, { id: card.id, grade: 'hard', at })).toMatchObject({
+    expect(
+      reviewCard(twoDays, card, { id: card.id, layout: german, grade: 'hard', at }),
+    ).toMatchObject({
       reps: 2,
       dueAt: at + 2 * dayMs,
     });
   });
 
   it('makes a forgotten card due a day after its review, however stable it still is', () => {
-    expect(reviewCard(twoDays, card, { id: card.id, grade: 'again', at })?.dueAt).toBe(at + dayMs);
+    expect(
+      reviewCard(twoDays, card, { id: card.id, layout: german, grade: 'again', at })?.dueAt,
+    ).toBe(at + dayMs);
   });
 });
 
@@ -92,9 +102,15 @@ describe('dueCards', () => {
     const later = dueAt(endOfToday - 1);
     const earlier = dueAt(at - dayMs);
 
-    expect(dueCards([later, dueAt(endOfToday), earlier], endOfToday)).toStrictEqual([
+    expect(dueCards([later, dueAt(endOfToday), earlier], german, endOfToday)).toStrictEqual([
       earlier,
       later,
     ]);
+  });
+
+  it('leaves out the cards of other keyboard layouts, since progress is kept per layout', () => {
+    const us = { ...dueAt(at), layout: 'com.apple.keylayout.US' };
+
+    expect(dueCards([us, dueAt(at)], german, endOfToday)).toStrictEqual([dueAt(at)]);
   });
 });
