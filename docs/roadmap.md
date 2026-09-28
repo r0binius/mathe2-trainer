@@ -238,6 +238,7 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 - Router: vue-router 5 with hash history, so the route survives a reload during development.
 - Library: _recent_ apps and sets are those with something learned, as before, but ordered by when they were last practiced (`updatedAt`), newest first. A shortcut in two sets counts once for its app (the old app counted it twice), and an app's due count is what its review session would offer. Categories show in a fixed order (`appCategories`).
 - Catalog: `data/apps.ts` lists the apps explicitly, so the list is type-checked and adding an app is one visible line. Each definition carries its texts (`catalogs: { de }`, imported from its `de.json`), so an app folder describes itself completely and there's no second list of catalogs to keep in step; the health test checks the list against the folders. Each app folder holds its `logo.svg`, which the screens find by folder name, so the domain types carry no asset URLs.
+- A failed save during practice doesn't stop the session: what was just pressed is still right. A notice in the footer says progress couldn't be saved, and the error is logged. The next successful save writes the set's whole record again, so only the failed review log entry is lost.
 - A route to an app or set that doesn't exist (a hash route left over after the data changed) redirects to the library, so screens always get a real app and set. The old app crashed.
 
 **Sub-steps**
@@ -251,7 +252,12 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
   - [x] 5.3.4 Loading at startup, summary context and logos
   - [x] 5.3.5 Library, app and set screens
 - [x] 5.4 Route transitions and fade-in
-- [ ] 5.5 Learn and review screens (`useKeyCapture`, `usePracticeSession`)
+- 5.5 Learn and review screens
+  - [x] 5.5.1 `useProgram`, the Elm runtime
+  - [ ] 5.5.2 `useKeyCapture`
+  - [ ] 5.5.3 `usePracticeSession`
+  - [ ] 5.5.4 Learn screen
+  - [ ] 5.5.5 Review screen
 - [ ] 5.6 Options screen
 - [ ] 5.7 Spatial navigation
 
