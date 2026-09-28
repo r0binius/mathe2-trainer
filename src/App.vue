@@ -4,7 +4,8 @@ import { useRoute } from 'vue-router';
 
 import { useSummaryContext } from './composables/useSummaryContext';
 import { apps } from './data/apps';
-import { useText } from './i18n';
+import { uiLanguageFor } from './domain/settings/language';
+import { useText, useUiLanguage } from './i18n';
 import { depthOf } from './router';
 import { useKeymapStore } from './stores/keymap';
 import { useProgressStore } from './stores/progress';
@@ -16,6 +17,12 @@ const progress = useProgressStore();
 const context = useSummaryContext();
 const route = useRoute();
 const text = useText();
+
+useUiLanguage(() =>
+  settings.settings.status === 'loaded'
+    ? uiLanguageFor(settings.settings.value.language, navigator.languages)
+    : undefined,
+);
 
 /** Deeper screens slide in over the current one; going back slides it away again. */
 const slide = ref<'deeper' | 'back'>('deeper');

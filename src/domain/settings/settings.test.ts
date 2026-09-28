@@ -9,6 +9,7 @@ const defaults = {
   showMenuBarIcon: true,
   showDockIcon: true,
   launchAtLogin: true,
+  language: 'system',
 };
 
 describe('decodeSettings', () => {
@@ -20,6 +21,12 @@ describe('decodeSettings', () => {
     const settings = { ...defaults, trigger: { kind: 'shortcut', keys: ['Shift', 'Meta', 'm'] } };
 
     expect(decodeSettings(settings)).toStrictEqual(ok(settings));
+  });
+
+  it('decodes a chosen language', () => {
+    expect(decodeSettings({ ...defaults, language: 'de' })).toStrictEqual(
+      ok({ ...defaults, language: 'de' }),
+    );
   });
 
   it('rejects an unknown trigger', () => {

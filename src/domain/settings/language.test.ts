@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { uiLanguageOf } from './language';
+import { uiLanguageFor, uiLanguageOf } from './language';
 
 describe('uiLanguageOf', () => {
   it('takes the first preferred language the UI is written in', () => {
@@ -19,5 +19,15 @@ describe('uiLanguageOf', () => {
   it('falls back to English when no preferred language is available', () => {
     expect(uiLanguageOf(['fr-FR', 'ja'])).toBe('en');
     expect(uiLanguageOf([])).toBe('en');
+  });
+});
+
+describe('uiLanguageFor', () => {
+  it('uses the language the user chose', () => {
+    expect(uiLanguageFor('de', ['en-US'])).toBe('de');
+  });
+
+  it("follows the system's preferred languages when set to the system's", () => {
+    expect(uiLanguageFor('system', ['de-DE'])).toBe('de');
   });
 });

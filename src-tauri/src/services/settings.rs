@@ -26,6 +26,18 @@ pub enum Trigger {
     },
 }
 
+/// The language of the interface.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Language {
+    /// The system's preferred language, if the interface is written in it, else English.
+    System,
+    /// English.
+    En,
+    /// German.
+    De,
+}
+
 /// Everything the user can set, in the shape the frontend sends and receives.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -38,6 +50,8 @@ pub struct Settings {
     pub show_dock_icon: bool,
     /// Whether the app starts when the user logs in.
     pub launch_at_login: bool,
+    /// The language of the interface.
+    pub language: Language,
 }
 
 /// The old app's defaults.
@@ -48,6 +62,7 @@ impl Default for Settings {
             show_menu_bar_icon: true,
             show_dock_icon: true,
             launch_at_login: true,
+            language: Language::System,
         }
     }
 }
@@ -123,6 +138,7 @@ mod tests {
                 keys: vec!["Meta".to_owned(), "Shift".to_owned(), "m".to_owned()],
             },
             show_dock_icon: false,
+            language: Language::De,
             ..Settings::default()
         }
     }
@@ -152,6 +168,7 @@ mod tests {
                 "showMenuBarIcon": true,
                 "showDockIcon": false,
                 "launchAtLogin": true,
+                "language": "de",
             })),
         );
         assert_eq!(
@@ -167,6 +184,7 @@ mod tests {
             "showMenuBarIcon": true,
             "showDockIcon": true,
             "launchAtLogin": true,
+            "language": "system",
             "showDockIcons": false,
         });
 
@@ -203,6 +221,7 @@ mod tests {
         assert_eq!(
             stored(&database)?,
             [
+                ("language".to_owned(), r#""de""#.to_owned()),
                 ("showDockIcon".to_owned(), "false".to_owned()),
                 (
                     "trigger".to_owned(),
@@ -232,6 +251,7 @@ mod tests {
         insert(&database, "trigger", r#"{"kind":"doubleTap"}"#)?;
         insert(&database, "showDockIcons", "false")?;
         insert(&database, "launchAtLogin", "false")?;
+        insert(&database, "language", r#""fr""#)?;
 
         assert_eq!(
             database.with(|connection| load(connection))?,

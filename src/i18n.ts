@@ -1,4 +1,5 @@
 import type { Plugin } from 'vue';
+import { watchEffect } from 'vue';
 import { createI18n, useI18n } from 'vue-i18n';
 
 import type { UiLanguage } from '@/domain/settings/language';
@@ -75,4 +76,22 @@ export function useText(): Text {
   }
 
   return { ui, count, app, inDays };
+}
+
+/**
+ * Keeps the UI in the given language while the calling component lives, switching as soon as it
+ * changes; `undefined` keeps the current one. Also sets the document's language, which macOS
+ * uses for text services such as hyphenation and VoiceOver.
+ */
+export function useUiLanguage(language: () => UiLanguage | undefined): void {
+  const { locale } = useI18n();
+
+  watchEffect(() => {
+    const current = language();
+
+    if (current !== undefined) {
+      locale.value = current;
+      document.documentElement.setAttribute('lang', current);
+    }
+  });
 }

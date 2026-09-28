@@ -2,6 +2,8 @@ import type { KeyCombination } from '../keyboard/combination';
 import { macosReserved } from '../keyboard/policy';
 import type { Decoder } from '../shared/decode';
 import { array, boolean, literal, object, oneOf, string } from '../shared/decode';
+import type { LanguageSetting } from './language';
+import { decodeLanguageSetting } from './language';
 
 /** How the popover is opened: by holding ⌘ on its own for a moment, or by a global shortcut. */
 export type Trigger =
@@ -13,6 +15,7 @@ export type Settings = {
   readonly showMenuBarIcon: boolean;
   readonly showDockIcon: boolean;
   readonly launchAtLogin: boolean;
+  readonly language: LanguageSetting;
 };
 
 const decodeTrigger: Decoder<Trigger> = oneOf([
@@ -26,6 +29,7 @@ export const decodeSettings: Decoder<Settings> = object({
   showMenuBarIcon: boolean,
   showDockIcon: boolean,
   launchAtLogin: boolean,
+  language: decodeLanguageSetting,
 });
 
 /**

@@ -10,6 +10,7 @@ const settings: Settings = {
   showMenuBarIcon: true,
   showDockIcon: false,
   launchAtLogin: true,
+  language: 'system',
 };
 
 describe('settingsRepository', () => {

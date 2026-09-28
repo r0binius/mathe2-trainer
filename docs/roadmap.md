@@ -239,6 +239,7 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 - Library: _recent_ apps and sets are those with something learned, as before, but ordered by when they were last practiced (`updatedAt`), newest first. A shortcut in two sets counts once for its app (the old app counted it twice), and an app's due count is what its review session would offer. Categories show in a fixed order (`appCategories`).
 - Catalog: `data/apps.ts` lists the apps explicitly, so the list is type-checked and adding an app is one visible line. Each definition carries its texts (`catalogs: { de }`, imported from its `de.json`), so an app folder describes itself completely and there's no second list of catalogs to keep in step; the health test checks the list against the folders. Each app folder holds its `logo.svg`, which the screens find by folder name, so the domain types carry no asset URLs.
 - A failed save during practice doesn't stop the session: what was just pressed is still right. A notice in the footer says progress couldn't be saved, and the error is logged. The next successful save writes the set's whole record again, so only the failed review log entry is lost.
+- Options: an overlay, as in the old app, that slides up over the current screen, so closing it returns exactly there, even mid-practice. It holds only what works in step 5: the language and resetting progress. The trigger, the menu bar and Dock icons and launching at login join in step 7, together with the Rust side that applies them, so no toggle is ever without an effect. Reset is confirmed with a second click on the same button rather than `window.confirm`, which WKWebView doesn't reliably show. The language switches live and sets the document's `lang`.
 - A route to an app or set that doesn't exist (a hash route left over after the data changed) redirects to the library, so screens always get a real app and set. The old app crashed.
 
 **Sub-steps**
@@ -258,7 +259,9 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
   - [x] 5.5.3 `usePracticeSession`
   - [x] 5.5.4 Learn screen
   - [x] 5.5.5 Review screen
-- [ ] 5.6 Options screen
+- 5.6 Options
+  - [x] 5.6.1 Language setting
+  - [ ] 5.6.2 Options overlay
 - [ ] 5.7 Spatial navigation
 
 **Concepts:** Vue reactivity (`ref`, `computed`, `watch`), composables and effect cleanup, presentational vs. container components, typed props and emits, the router.
