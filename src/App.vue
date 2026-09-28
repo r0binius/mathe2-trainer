@@ -28,7 +28,10 @@ watch(context, (loaded) => {
 </script>
 
 <template>
-  <RouterView v-if="context.status === 'loaded'" />
+  <!-- Every screen summarizes progress, so each gets the loaded context. -->
+  <RouterView v-if="context.status === 'loaded'" v-slot="{ Component }">
+    <component :is="Component" :context="context.value" />
+  </RouterView>
   <p v-else-if="context.status === 'failed'" class="failed">{{ text.ui('startup.failed') }}</p>
 </template>
 

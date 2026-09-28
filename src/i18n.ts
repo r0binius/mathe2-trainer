@@ -27,6 +27,8 @@ export type Text = {
   readonly count: (key: UiKey, count: number) => string;
   /** A text of an app's shortcut data, such as a set's title. */
   readonly app: (appId: string, key: MessageKey) => string;
+  /** When something is, in days from today: "today", "tomorrow", "in 3 days". */
+  readonly inDays: (days: number) => string;
 };
 
 /**
@@ -54,7 +56,7 @@ function germanCatalogOf(app: AppDefinition): readonly [string, Catalog] {
 
 /** The translations of a component's texts. Components use it instead of vue-i18n's `t`. */
 export function useText(): Text {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   function ui(key: UiKey, values: Readonly<Record<string, string | number>> = {}): string {
     return t(key, values);
@@ -68,5 +70,9 @@ export function useText(): Text {
     return t(`apps.${appId}.${key}`);
   }
 
-  return { ui, count, app };
+  function inDays(days: number): string {
+    return new Intl.RelativeTimeFormat(locale.value, { numeric: 'auto' }).format(days, 'day');
+  }
+
+  return { ui, count, app, inDays };
 }

@@ -244,15 +244,16 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 
 - [x] 5.1 Styles and design tokens
 - [x] 5.2 Presentational components
-- 5.3 Router, library and set screens
+- [x] 5.3 Router, library and set screens
   - [x] 5.3.1 Keymap store, app list and progress summaries
   - [x] 5.3.2 vue-i18n with English and German UI text
   - [x] 5.3.3 Router, page layout and window chrome
   - [x] 5.3.4 Loading at startup, summary context and logos
-  - [ ] 5.3.5 Library, app and set screens
-- [ ] 5.4 Learn and review screens (`useKeyCapture`, `usePracticeSession`)
-- [ ] 5.5 Options screen
-- [ ] 5.6 Spatial navigation and transitions
+  - [x] 5.3.5 Library, app and set screens
+- [ ] 5.4 Route transitions and fade-in
+- [ ] 5.5 Learn and review screens (`useKeyCapture`, `usePracticeSession`)
+- [ ] 5.6 Options screen
+- [ ] 5.7 Spatial navigation
 
 **Concepts:** Vue reactivity (`ref`, `computed`, `watch`), composables and effect cleanup, presentational vs. container components, typed props and emits, the router.
 
