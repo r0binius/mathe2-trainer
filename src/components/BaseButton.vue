@@ -5,6 +5,8 @@ import type { IconName } from './icons';
 const { variant = 'neutral', size = 'regular' } = defineProps<{
   /** An icon before the label, or instead of one. */
   icon?: IconName;
+  /** What an icon-only button does, for VoiceOver and as its tooltip. */
+  label?: string;
   /**
    * How much the button stands out: `neutral` for most, `accent` for the one main action on a
    * screen, `danger` for destructive actions and `dangerText` for a destructive action next to
@@ -22,7 +24,14 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <button class="button" :class="[variant, size]" type="button" @click="emit('click', $event)">
+  <button
+    class="button"
+    :class="[variant, size]"
+    type="button"
+    :aria-label="label"
+    :title="label"
+    @click="emit('click', $event)"
+  >
     <BaseIcon v-if="icon" :name="icon" />
     <slot />
   </button>

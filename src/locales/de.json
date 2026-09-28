@@ -42,5 +42,15 @@
   "review": {
     "title": "Wiederholen",
     "back": "Sets"
+  },
+  "options": {
+    "title": "Einstellungen",
+    "close": "Schließen",
+    "language": "Sprache",
+    "system": "Wie im System",
+    "progress": "Fortschritt",
+    "reset": "Fortschritt zurücksetzen",
+    "confirmReset": "Zum Zurücksetzen erneut klicken",
+    "saveFailed": "Änderung konnte nicht gespeichert werden"
   }
 }

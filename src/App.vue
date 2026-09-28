@@ -2,9 +2,11 @@
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
+import BaseButton from './components/BaseButton.vue';
 import { useSummaryContext } from './composables/useSummaryContext';
 import { apps } from './data/apps';
 import { uiLanguageFor } from './domain/settings/language';
+import OptionsPanel from './features/options/OptionsPanel.vue';
 import { useText, useUiLanguage } from './i18n';
 import { depthOf } from './router';
 import { useKeymapStore } from './stores/keymap';
@@ -23,6 +25,9 @@ useUiLanguage(() =>
     ? uiLanguageFor(settings.settings.value.language, navigator.languages)
     : undefined,
 );
+
+/** Whether the options panel is open over the screens. */
+const optionsOpen = ref(false);
 
 /** Deeper screens slide in over the current one; going back slides it away again. */
 const slide = ref<'deeper' | 'back'>('deeper');
@@ -52,14 +57,28 @@ watch(context, (loaded) => {
   <!-- The window fades in once there's something to show. -->
   <Transition name="fade" appear>
     <div v-if="context.status === 'loaded'" class="window">
-      <!-- Every screen summarizes progress, so each gets the loaded context. -->
-      <RouterView v-slot="{ Component, route: shown }">
-        <Transition :name="slide">
-          <div :key="shown.path" class="screen">
-            <component :is="Component" :context="context.value" />
-          </div>
-        </Transition>
-      </RouterView>
+      <!-- With options open, the screens step back and can't be reached until they close. -->
+      <div class="screens" :class="{ behind: optionsOpen }" :inert="optionsOpen">
+        <!-- Every screen summarizes progress, so each gets the loaded context. -->
+        <RouterView v-slot="{ Component, route: shown }">
+          <Transition :name="slide">
+            <div :key="shown.path" class="screen">
+              <component :is="Component" :context="context.value" />
+            </div>
+          </Transition>
+        </RouterView>
+
+        <BaseButton
+          class="options-button"
+          icon="options"
+          :label="text.ui('page.options')"
+          @click="optionsOpen = true"
+        />
+      </div>
+
+      <Transition name="options">
+        <OptionsPanel v-if="optionsOpen" class="options" @close="optionsOpen = false" />
+      </Transition>
     </div>
     <p v-else-if="context.status === 'failed'" class="failed">{{ text.ui('startup.failed') }}</p>
   </Transition>
@@ -70,6 +89,61 @@ watch(context, (loaded) => {
   position: relative;
   height: 100vh;
   overflow: hidden;
+}
+
+/* Steps back and darkens while the options panel is open. */
+.screens {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  transform-origin: center 100%;
+  transition:
+    transform 0.6s var(--ease-in-out-quint),
+    border-radius 0.6s var(--ease-in-out-quint);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background-color: var(--color-black);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s var(--ease-in-out-quint);
+  }
+}
+
+.behind {
+  transform: scale(0.9) translateY(-8px);
+  border-radius: 12px;
+
+  &::after {
+    opacity: 1;
+  }
+}
+
+/* In the title bar's right corner, above whichever screen is shown. */
+.options-button {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+}
+
+.options {
+  position: absolute;
+  inset: 60px 16px 0;
+}
+
+.options-enter-active,
+.options-leave-active {
+  transform-origin: center 0%;
+  transition: transform 0.6s var(--ease-in-out-quint);
+}
+
+.options-enter-from,
+.options-leave-to {
+  transform: translateY(100%) scale(1.1);
 }
 
 /* Both screens overlap while one slides over the other. */
@@ -121,6 +195,10 @@ watch(context, (loaded) => {
 
 @media (prefers-reduced-motion: reduce) {
   .screen,
+  .screens,
+  .screens::after,
+  .options-enter-active,
+  .options-leave-active,
   .fade-enter-active {
     transition: none;
   }

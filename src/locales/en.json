@@ -42,5 +42,15 @@
   "review": {
     "title": "Review",
     "back": "Sets"
+  },
+  "options": {
+    "title": "Options",
+    "close": "Close",
+    "language": "Language",
+    "system": "Same as system",
+    "progress": "Progress",
+    "reset": "Reset progress",
+    "confirmReset": "Click again to reset",
+    "saveFailed": "Couldn't save the change"
   }
 }

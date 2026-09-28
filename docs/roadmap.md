@@ -259,9 +259,9 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
   - [x] 5.5.3 `usePracticeSession`
   - [x] 5.5.4 Learn screen
   - [x] 5.5.5 Review screen
-- 5.6 Options
+- [x] 5.6 Options
   - [x] 5.6.1 Language setting
-  - [ ] 5.6.2 Options overlay
+  - [x] 5.6.2 Options overlay
 - [ ] 5.7 Spatial navigation
 
 **Concepts:** Vue reactivity (`ref`, `computed`, `watch`), composables and effect cleanup, presentational vs. container components, typed props and emits, the router.
