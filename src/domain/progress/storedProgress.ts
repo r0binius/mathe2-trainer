@@ -6,13 +6,18 @@ import { array, at, integer, map, object, optional, sift, string } from '../shar
 import { decodeShortcutId } from '../shortcuts/shortcutId';
 import type { SetProgress } from './setProgress';
 
-/** A set's progress on one keyboard layout. */
-export type SetRecord = {
+/** Which set a progress record is for: a set of an app, on one keyboard layout. */
+export type SetKey = {
   readonly appId: string;
   readonly setId: string;
   readonly layout: LayoutId;
-  readonly progress: SetProgress;
 };
+
+/** A set's progress on one keyboard layout. */
+export type SetRecord = SetKey & { readonly progress: SetProgress };
+
+/** Which card: a shortcut, on one keyboard layout. */
+export type CardKey = Pick<Card, 'id' | 'layout'>;
 
 /**
  * The stored progress that depends on which shortcuts exist, on every layout: what's loaded at
@@ -59,3 +64,43 @@ export const decodeStoredProgress: Decoder<LoadedProgress> = map(
     ],
   }),
 );
+
+/** The progress of the given set, or `undefined` if it was never learned on that layout. */
+export function setProgressOf(stored: StoredProgress, key: SetKey): SetProgress | undefined {
+  return stored.sets.find((record) => isSameSet(record, key))?.progress;
+}
+
+/** The stored progress with the record of its set and layout replaced, or added. */
+export function withSetRecord(stored: StoredProgress, record: SetRecord): StoredProgress {
+  return { ...stored, sets: replaceOrAdd(stored.sets, record, isSameSet) };
+}
+
+/** The card of the given shortcut and layout, or `undefined` if it was never recalled there. */
+export function cardOf(stored: StoredProgress, key: CardKey): Card | undefined {
+  return stored.cards.find((card) => isSameCard(card, key));
+}
+
+/** The stored progress with the card of its shortcut and layout replaced, or added. */
+export function withCard(stored: StoredProgress, card: Card): StoredProgress {
+  return { ...stored, cards: replaceOrAdd(stored.cards, card, isSameCard) };
+}
+
+function isSameSet(first: SetKey, second: SetKey): boolean {
+  return (
+    first.appId === second.appId && first.setId === second.setId && first.layout === second.layout
+  );
+}
+
+function isSameCard(first: CardKey, second: CardKey): boolean {
+  return first.id === second.id && first.layout === second.layout;
+}
+
+function replaceOrAdd<T>(
+  items: readonly T[],
+  item: T,
+  isSame: (first: T, second: T) => boolean,
+): readonly T[] {
+  return items.some((existing) => isSame(existing, item))
+    ? items.map((existing) => (isSame(existing, item) ? item : existing))
+    : [...items, item];
+}

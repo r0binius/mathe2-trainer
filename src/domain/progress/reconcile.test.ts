@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { validMemory } from '../scheduling/memory.fixture';
 import type { Card } from '../scheduling/scheduler';
 import type { AppDefinition } from '../shortcuts/types';
-import { reconcileProgress } from './reconcile';
+import { progressChanged, reconcileProgress } from './reconcile';
 import type { SetRecord } from './storedProgress';
 
 const apps: readonly AppDefinition[] = [
@@ -87,5 +87,21 @@ describe('reconcileProgress', () => {
       card('app/Meta+f'),
       card('app/Meta+s'),
     ]);
+  });
+});
+
+describe('progressChanged', () => {
+  const stored = { sets: [record('basics', [])], cards: [card('app/Meta+f')] };
+
+  it('is false when reconciling kept every record and card', () => {
+    expect(progressChanged(stored, reconcileProgress(stored, apps))).toBe(false);
+  });
+
+  it('is true when reconciling changed or removed a record, or removed a card', () => {
+    const changedRecord = { ...stored, sets: [record('basics', ['app/Meta+x'])] };
+    const removedCard = { ...stored, cards: [card('app/Meta+x')] };
+
+    expect(progressChanged(changedRecord, reconcileProgress(changedRecord, apps))).toBe(true);
+    expect(progressChanged(removedCard, reconcileProgress(removedCard, apps))).toBe(true);
   });
 });

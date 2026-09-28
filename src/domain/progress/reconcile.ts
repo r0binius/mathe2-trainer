@@ -25,6 +25,18 @@ export function reconcileProgress(
   };
 }
 
+/**
+ * Whether reconciling changed the stored progress, so it has to be written back. It relies on
+ * {@link reconcileProgress} returning what it didn't change as it was.
+ */
+export function progressChanged(before: StoredProgress, after: StoredProgress): boolean {
+  return (
+    after.cards.length !== before.cards.length ||
+    after.sets.length !== before.sets.length ||
+    after.sets.some((record, index) => record !== before.sets[index])
+  );
+}
+
 function reconcileSet(record: SetRecord, apps: readonly AppDefinition[]): readonly SetRecord[] {
   const set = apps
     .find(({ id }) => id === record.appId)
