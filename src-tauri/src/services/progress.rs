@@ -3,11 +3,11 @@
 //! The types mirror the frontend's domain types. Rust stores them as they come; checks such as
 //! the valid ranges of a card's memory belong to the frontend's decoders.
 
-use rusqlite::types::Type;
 use rusqlite::{Connection, Row, ToSql};
 use serde::{Deserialize, Serialize};
 
 use crate::error::AppError;
+use crate::services::database::{Json, query_all};
 
 /// Which shortcuts of a set are learned on one keyboard layout.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -60,7 +60,7 @@ pub struct Card {
 }
 
 /// How well a shortcut was recalled, on FSRS's scale.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Grade {
     /// Forgotten.
@@ -73,8 +73,9 @@ pub enum Grade {
     Easy,
 }
 
-/// A graded test of a shortcut and what was measured, one entry of the review log.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+/// A graded test of a shortcut and what was measured, one entry of the review log. It only comes
+/// from the frontend, so it's never serialized.
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Review {
     /// The shortcut's ID.
@@ -94,10 +95,10 @@ pub struct Review {
 }
 
 /// All stored progress that depends on which shortcuts exist, as the frontend's
-/// `ReconciledProgress`.
+/// `StoredProgress`.
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
-pub struct Progress {
+pub struct StoredProgress {
     /// Every set's progress, on every layout.
     pub sets: Vec<SetRecord>,
     /// Every card, on every layout.
@@ -135,11 +136,11 @@ const SELECT_CARDS: &str = "
 /// # Errors
 ///
 /// Returns a database error if they can't be read.
-pub fn load(connection: &Connection) -> Result<Progress, AppError> {
-    let sets = all(connection, SELECT_SETS, set_record)?;
-    let cards = all(connection, SELECT_CARDS, card)?;
+pub fn load(connection: &Connection) -> Result<StoredProgress, AppError> {
+    let sets = query_all(connection, SELECT_SETS, read_set_record)?;
+    let cards = query_all(connection, SELECT_CARDS, read_card)?;
 
-    Ok(Progress { sets, cards })
+    Ok(StoredProgress { sets, cards })
 }
 
 /// Stores a set's progress, replacing what was stored for that set and layout.
@@ -148,7 +149,20 @@ pub fn load(connection: &Connection) -> Result<Progress, AppError> {
 ///
 /// Returns a database error if it can't be written.
 pub fn save_set(connection: &Connection, record: &SetRecord) -> Result<(), AppError> {
-    Ok(insert_set(connection, record)?)
+    connection.execute(
+        "INSERT OR REPLACE INTO set_progress
+            (app_id, set_id, layout, learned, completed_at, updated_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+        (
+            &record.app_id,
+            &record.set_id,
+            &record.layout,
+            Json(&record.progress.learned),
+            record.progress.completed_at,
+            record.progress.updated_at,
+        ),
+    )?;
+    Ok(())
 }
 
 /// Adds a review to the log and stores the card it produced, together. A failed test of a
@@ -190,13 +204,12 @@ pub fn record_review(
 /// # Errors
 ///
 /// Returns a database error if they can't be written. Nothing is changed then.
-pub fn replace(connection: &mut Connection, progress: &Progress) -> Result<(), AppError> {
+pub fn replace(connection: &mut Connection, progress: &StoredProgress) -> Result<(), AppError> {
     let transaction = connection.transaction()?;
 
-    transaction.execute("DELETE FROM set_progress", ())?;
-    transaction.execute("DELETE FROM cards", ())?;
+    delete_sets_and_cards(&transaction)?;
     for record in &progress.sets {
-        insert_set(&transaction, record)?;
+        save_set(&transaction, record)?;
     }
     for card in &progress.cards {
         insert_card(&transaction, card)?;
@@ -212,28 +225,14 @@ pub fn replace(connection: &mut Connection, progress: &Progress) -> Result<(), A
 pub fn reset(connection: &mut Connection) -> Result<(), AppError> {
     let transaction = connection.transaction()?;
 
-    transaction.execute("DELETE FROM set_progress", ())?;
-    transaction.execute("DELETE FROM cards", ())?;
+    delete_sets_and_cards(&transaction)?;
     transaction.execute("DELETE FROM reviews", ())?;
     Ok(transaction.commit()?)
 }
 
-fn insert_set(connection: &Connection, record: &SetRecord) -> rusqlite::Result<()> {
-    let learned = serde_json::to_string(&record.progress.learned)
-        .map_err(|error| rusqlite::Error::ToSqlConversionFailure(error.into()))?;
-    connection.execute(
-        "INSERT OR REPLACE INTO set_progress
-            (app_id, set_id, layout, learned, completed_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-        (
-            &record.app_id,
-            &record.set_id,
-            &record.layout,
-            learned,
-            record.progress.completed_at,
-            record.progress.updated_at,
-        ),
-    )?;
+fn delete_sets_and_cards(connection: &Connection) -> rusqlite::Result<()> {
+    connection.execute("DELETE FROM set_progress", ())?;
+    connection.execute("DELETE FROM cards", ())?;
     Ok(())
 }
 
@@ -256,19 +255,10 @@ fn insert_card(connection: &Connection, card: &Card) -> rusqlite::Result<()> {
     Ok(())
 }
 
-/// Every row `sql` selects, read by `from_row`.
-fn all<T>(
-    connection: &Connection,
-    sql: &str,
-    from_row: fn(&Row<'_>) -> rusqlite::Result<T>,
-) -> rusqlite::Result<Vec<T>> {
-    let mut statement = connection.prepare(sql)?;
-    statement.query_map((), from_row)?.collect()
-}
-
-fn set_record(row: &Row<'_>) -> rusqlite::Result<SetRecord> {
+fn read_set_record(row: &Row<'_>) -> rusqlite::Result<SetRecord> {
+    let Json(learned) = row.get("learned")?;
     let progress = SetProgress {
-        learned: learned_ids(row)?,
+        learned,
         completed_at: row.get("completed_at")?,
         updated_at: row.get("updated_at")?,
     };
@@ -281,17 +271,7 @@ fn set_record(row: &Row<'_>) -> rusqlite::Result<SetRecord> {
     })
 }
 
-/// The row's learned shortcut IDs, stored as a JSON array.
-fn learned_ids(row: &Row<'_>) -> rusqlite::Result<Vec<String>> {
-    let column = row.as_ref().column_index("learned")?;
-    let json: String = row.get(column)?;
-
-    serde_json::from_str(&json).map_err(|error| {
-        rusqlite::Error::FromSqlConversionFailure(column, Type::Text, error.into())
-    })
-}
-
-fn card(row: &Row<'_>) -> rusqlite::Result<Card> {
+fn read_card(row: &Row<'_>) -> rusqlite::Result<Card> {
     Ok(Card {
         id: row.get("shortcut_id")?,
         layout: row.get("layout")?,
@@ -380,10 +360,10 @@ mod tests {
     }
 
     fn logged(database: &Database) -> Result<Vec<LoggedReview>, AppError> {
-        database.with(|connection| Ok(all(connection, SELECT_LOG, logged_review)?))
+        database.with(|connection| Ok(query_all(connection, SELECT_LOG, logged_review)?))
     }
 
-    fn loaded(database: &Database) -> Result<Progress, AppError> {
+    fn loaded(database: &Database) -> Result<StoredProgress, AppError> {
         database.with(|connection| load(connection))
     }
 
@@ -446,12 +426,12 @@ mod tests {
         }]});
 
         assert!(serde_json::from_value::<SetRecord>(with_unknown_field).is_err());
-        assert!(serde_json::from_value::<Progress>(with_fractional_time).is_err());
+        assert!(serde_json::from_value::<StoredProgress>(with_fractional_time).is_err());
     }
 
     #[test]
     fn starts_empty() -> Result<(), AppError> {
-        assert_eq!(loaded(&Database::in_memory()?)?, Progress::default());
+        assert_eq!(loaded(&Database::in_memory()?)?, StoredProgress::default());
         Ok(())
     }
 
@@ -506,7 +486,7 @@ mod tests {
     #[test]
     fn replacing_keeps_the_review_log() -> Result<(), AppError> {
         let database = Database::in_memory()?;
-        let reconciled = Progress {
+        let reconciled = StoredProgress {
             sets: vec![record(US, &[], None)],
             cards: vec![card(US, 1)],
         };
@@ -528,7 +508,7 @@ mod tests {
         reviewed(&database, &review(Grade::Good), Some(&card(GERMAN, 1)))?;
         database.with(reset)?;
 
-        assert_eq!(loaded(&database)?, Progress::default());
+        assert_eq!(loaded(&database)?, StoredProgress::default());
         assert_eq!(logged(&database)?, []);
         Ok(())
     }

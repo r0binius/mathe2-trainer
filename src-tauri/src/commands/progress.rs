@@ -4,7 +4,7 @@ use tauri::State;
 
 use crate::error::AppError;
 use crate::services::database::Database;
-use crate::services::progress::{self, Card, Progress, Review, SetRecord};
+use crate::services::progress::{self, Card, Review, SetRecord, StoredProgress};
 
 /// Returns all set records and cards, on every layout.
 ///
@@ -12,7 +12,7 @@ use crate::services::progress::{self, Card, Progress, Review, SetRecord};
 ///
 /// Returns a database error if they can't be read.
 #[tauri::command(async)]
-pub fn load_progress(database: State<'_, Database>) -> Result<Progress, AppError> {
+pub fn load_progress(database: State<'_, Database>) -> Result<StoredProgress, AppError> {
     database.with(|connection| progress::load(connection))
 }
 
@@ -46,7 +46,10 @@ pub fn record_review(
 ///
 /// Returns a database error if they can't be written.
 #[tauri::command(async)]
-pub fn replace_progress(database: State<'_, Database>, progress: Progress) -> Result<(), AppError> {
+pub fn replace_progress(
+    database: State<'_, Database>,
+    progress: StoredProgress,
+) -> Result<(), AppError> {
     database.with(|connection| progress::replace(connection, &progress))
 }
 

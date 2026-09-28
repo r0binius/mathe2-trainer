@@ -3,11 +3,15 @@
 //! Only settings that differ from their defaults are stored, one row each, so a default that
 //! changes in a later version reaches everyone who never changed that setting.
 
-use rusqlite::Connection;
+use rusqlite::{Connection, Row};
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use crate::error::AppError;
+use crate::services::database::query_all;
+
+/// A stored setting: its name and its value as JSON text.
+type Entry = (String, String);
 
 /// How the popover is opened.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -55,12 +59,7 @@ impl Default for Settings {
 ///
 /// Returns a database error if the settings can't be read.
 pub fn load(connection: &Connection) -> Result<Settings, AppError> {
-    let mut statement = connection.prepare("SELECT key, value FROM settings")?;
-    let stored = statement
-        .query_map((), |row| {
-            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?))
-        })?
-        .collect::<Result<Vec<_>, _>>()?;
+    let stored = query_all(connection, "SELECT key, value FROM settings", read_entry)?;
 
     Ok(stored
         .iter()
@@ -88,6 +87,12 @@ pub fn save(connection: &mut Connection, settings: &Settings) -> Result<(), AppE
         }
     }
     Ok(transaction.commit()?)
+}
+
+// The value is read as text, not as JSON, so a value that no longer parses only loses its own
+// setting instead of failing the whole query.
+fn read_entry(row: &Row<'_>) -> rusqlite::Result<Entry> {
+    Ok((row.get("key")?, row.get("value")?))
 }
 
 /// `settings` with one stored value in place, or `None` if the key is no longer a setting or the
@@ -122,15 +127,10 @@ mod tests {
         }
     }
 
-    fn stored(database: &Database) -> Result<Vec<(String, String)>, AppError> {
-        database.with(|connection| {
-            let mut statement =
-                connection.prepare("SELECT key, value FROM settings ORDER BY key")?;
-            let rows = statement
-                .query_map((), |row| Ok((row.get(0)?, row.get(1)?)))?
-                .collect::<Result<_, _>>()?;
-            Ok(rows)
-        })
+    fn stored(database: &Database) -> Result<Vec<Entry>, AppError> {
+        let sql = "SELECT key, value FROM settings ORDER BY key";
+
+        database.with(|connection| Ok(query_all(connection, sql, read_entry)?))
     }
 
     fn insert(database: &Database, key: &str, value: &str) -> Result<(), AppError> {
