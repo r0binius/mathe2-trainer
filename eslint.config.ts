@@ -96,6 +96,9 @@ const config: ReturnType<typeof withVueTs> = withVueTs(
       'vue/prefer-true-attribute-shorthand': 'error',
       'vue/prefer-use-template-ref': 'error',
       'vue/require-typed-ref': 'error',
+      // Typed props say when one is optional, and an absent one is `undefined`, which the
+      // types make every use handle. A default would only restate that.
+      'vue/require-default-prop': 'off',
     },
   },
 

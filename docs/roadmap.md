@@ -240,7 +240,7 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 **Sub-steps**
 
 - [x] 5.1 Styles and design tokens
-- [ ] 5.2 Presentational components
+- [x] 5.2 Presentational components
 - [ ] 5.3 Router, library and set screens
 - [ ] 5.4 Learn and review screens (`useKeyCapture`, `usePracticeSession`)
 - [ ] 5.5 Options screen

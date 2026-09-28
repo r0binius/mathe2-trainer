@@ -1,0 +1,79 @@
+<script setup lang="ts">
+import BaseIcon from './BaseIcon.vue';
+import type { IconName } from './icons';
+
+const { variant = 'neutral' } = defineProps<{
+  /** An icon before the label, or instead of one. */
+  icon?: IconName;
+  /**
+   * How much the button stands out: `neutral` for most, `accent` for the one main action on a
+   * screen, `danger` for destructive actions and `dangerText` for a destructive action next to
+   * text.
+   */
+  variant?: 'neutral' | 'accent' | 'danger' | 'dangerText';
+}>();
+
+const emit = defineEmits<{
+  /** The button was clicked, or pressed with Enter or Space while focused. */
+  click: [event: MouseEvent];
+}>();
+</script>
+
+<template>
+  <button class="button" :class="variant" type="button" @click="emit('click', $event)">
+    <BaseIcon v-if="icon" :name="icon" />
+    <slot />
+  </button>
+</template>
+
+<style scoped>
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.neutral {
+  background-color: color-mix(in srgb, var(--color-white) 8%, transparent);
+  color: color-mix(in srgb, var(--color-white) 50%, transparent);
+
+  &:hover,
+  &:focus-visible {
+    background-color: color-mix(in srgb, var(--color-white) 12%, transparent);
+    color: var(--color-white);
+  }
+}
+
+.accent {
+  background-color: var(--color-yellow);
+  color: var(--color-black);
+
+  &:hover,
+  &:focus-visible {
+    background-color: color-mix(in srgb, var(--color-yellow) 90%, transparent);
+  }
+}
+
+.danger {
+  background-color: var(--color-red);
+  color: var(--color-black);
+
+  &:hover,
+  &:focus-visible {
+    background-color: color-mix(in srgb, var(--color-red) 90%, transparent);
+  }
+}
+
+.dangerText {
+  padding: 0;
+  color: var(--color-red);
+}
+</style>
