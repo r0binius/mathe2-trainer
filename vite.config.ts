@@ -6,6 +6,14 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   plugins: [vue()],
 
+  // vue-i18n's feature flags. Only the Composition API is used, without the global `<i18n-t>` and
+  // `v-t`, so the rest is left out of the bundle, and declaring them silences its warning.
+  define: {
+    __VUE_I18N_FULL_INSTALL__: false,
+    __VUE_I18N_LEGACY_API__: false,
+    __INTLIFY_PROD_DEVTOOLS__: false,
+  },
+
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

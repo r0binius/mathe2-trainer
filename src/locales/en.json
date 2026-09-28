@@ -1,0 +1,31 @@
+{
+  "page": {
+    "options": "Options"
+  },
+  "categories": {
+    "communication": "Communication",
+    "development": "Development",
+    "internet": "Internet",
+    "music": "Music",
+    "productivity": "Productivity",
+    "system": "System"
+  },
+  "library": {
+    "recent": "Recent",
+    "shortcuts": "{n} shortcut | {n} shortcuts",
+    "mastered": "mastered",
+    "due": "{n} due"
+  },
+  "app": {
+    "back": "Apps",
+    "sets": "Sets",
+    "review": "Review {n}",
+    "nextReview": "Next review {when}"
+  },
+  "set": {
+    "back": "Sets",
+    "learned": "learned",
+    "start": "Start learning",
+    "continue": "Continue"
+  }
+}

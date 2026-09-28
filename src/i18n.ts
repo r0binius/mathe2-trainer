@@ -1,0 +1,72 @@
+import type { Plugin } from 'vue';
+import { createI18n, useI18n } from 'vue-i18n';
+
+import type { UiLanguage } from '@/domain/settings/language';
+import type { AppDefinition, Catalog, MessageKey } from '@/domain/shortcuts/types';
+
+import { apps } from './data/apps';
+import de from './locales/de.json';
+import en from './locales/en.json';
+
+/** The shape of the UI text, taken from the English messages. */
+export type UiMessages = typeof en;
+
+/** The dotted paths to the texts of a message tree, such as `library.recent`. */
+type TextPaths<T> = {
+  readonly [K in keyof T & string]: T[K] extends string ? K : `${K}.${TextPaths<T[K]>}`;
+}[keyof T & string];
+
+/** A text of the UI. A misspelled key is a type error, which vue-i18n's own `t` doesn't catch. */
+export type UiKey = TextPaths<UiMessages>;
+
+/** Translates texts in the current language, and follows it when it changes. */
+export type Text = {
+  /** A UI text, with its `{placeholders}` filled in from `values`. */
+  readonly ui: (key: UiKey, values?: Readonly<Record<string, string | number>>) => string;
+  /** A UI text in the plural form for `count`, which also fills its `{n}`. */
+  readonly count: (key: UiKey, count: number) => string;
+  /** A text of an app's shortcut data, such as a set's title. */
+  readonly app: (appId: string, key: MessageKey) => string;
+};
+
+/**
+ * Sets up the translations of the UI and of the shortcut data, in the given language. Data that
+ * isn't translated into it yet shows in German.
+ */
+export function createAppI18n(language: UiLanguage): Plugin {
+  return createI18n({
+    legacy: false,
+    locale: language,
+    fallbackLocale: 'de',
+    // Falling back to the German data is expected until the data is translated.
+    fallbackWarn: false,
+    // `satisfies` keeps the German UI text complete: a key missing from it is a type error.
+    messages: {
+      en,
+      de: { ...(de satisfies UiMessages), apps: Object.fromEntries(apps.map(germanCatalogOf)) },
+    },
+  });
+}
+
+function germanCatalogOf(app: AppDefinition): readonly [string, Catalog] {
+  return [app.id, app.catalogs.de];
+}
+
+/** The translations of a component's texts. Components use it instead of vue-i18n's `t`. */
+export function useText(): Text {
+  const { t } = useI18n();
+
+  function ui(key: UiKey, values: Readonly<Record<string, string | number>> = {}): string {
+    return t(key, values);
+  }
+
+  function count(key: UiKey, n: number): string {
+    return t(key, n);
+  }
+
+  function app(appId: string, key: MessageKey): string {
+    return t(`apps.${appId}.${key}`);
+  }
+
+  return { ui, count, app };
+}

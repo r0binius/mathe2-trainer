@@ -1,0 +1,31 @@
+{
+  "page": {
+    "options": "Einstellungen"
+  },
+  "categories": {
+    "communication": "Kommunikation",
+    "development": "Entwicklung",
+    "internet": "Internet",
+    "music": "Musik",
+    "productivity": "Produktivität",
+    "system": "System"
+  },
+  "library": {
+    "recent": "Zuletzt",
+    "shortcuts": "{n} Kurzbefehl | {n} Kurzbefehle",
+    "mastered": "gelernt",
+    "due": "{n} fällig"
+  },
+  "app": {
+    "back": "Apps",
+    "sets": "Sets",
+    "review": "{n} wiederholen",
+    "nextReview": "Nächste Wiederholung {when}"
+  },
+  "set": {
+    "back": "Sets",
+    "learned": "gelernt",
+    "start": "Lernen",
+    "continue": "Weiterlernen"
+  }
+}
