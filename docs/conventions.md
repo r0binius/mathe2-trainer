@@ -69,6 +69,7 @@ In practice:
 ## Rust
 
 - `cargo fmt` formats, and `cargo clippy` runs with `pedantic` and `-D warnings`.
+- Nesting depth of at most 3, as in TypeScript: Clippy's `excessive_nesting` with the threshold in `src-tauri/clippy.toml`. It counts nested blocks (closures, `if`, `match`, loops), not struct literals or tuples, so data can still be written out in its own shape.
 - No `unwrap()` (denied). `expect()` only where failure is a bug, with a message saying why it can't happen.
 - `unsafe` is denied crate-wide. FFI modules opt in with `#[allow(unsafe_code)]`, and every `unsafe` block gets a `// SAFETY:` comment.
 - Errors: `Result<T, AppError>` with `thiserror`. Commands return errors to the frontend and never panic.
