@@ -187,6 +187,7 @@ Branch `feature/persistence`. Settings and progress stored by Rust and reached t
 - The review log gets one entry per `tested` effect, including a failed first test that creates no card: `shortcut_id`, `layout`, `reviewed_at`, `utc_offset_minutes`, `grade`, `failed` and `duration_ms`. That's what the FSRS optimizer needs (card, time, rating, duration), plus the measurements, so the grading limits can be fitted later too. The grade is stored as its word (`'good'`), which a `CHECK` constraint limits to the four grades, and mapped to FSRS's 1–4 only when exporting for the optimizer.
 - Progress tables: `set_progress` (one row per set and layout, the learned IDs as a JSON array that a `CHECK` keeps an array, since the list is always read and written whole), `cards` (one per shortcut and layout) and the append-only `reviews`. Recording a review writes its log entry and its card in one transaction. Reconciling writes back by replacing all set records and cards in one transaction: the data is small, it only happens at startup when something changed, and there's no second wire format for changes. The review log stays.
 - The `platform/` facade: the domain declares the ports (`SettingsRepository`, `ProgressRepository`, each a record of functions) and `StorageError` (`storage`, `database`, `ipc`, `invalidResponse`, plus a message for logs). `platform/ipc.ts` turns a command into a `Promise<Result<T, StorageError>>` that never rejects: it decodes the answer, passes on the command's `AppError`, and reports a failed call. The repositories take Tauri's `invoke` as an argument, so tests pass a fake one and need neither Tauri nor a DOM.
+- Stores: Pinia 4 setup stores. They get their repositories through Vue's `provide`/`inject` with typed keys, and `platform/tauri.ts` is the one place that hands the real `invoke` to the repositories. Loaded data is a `Loadable` (`loading | loaded | failed`, like Elm's `RemoteData`), so the UI can't show data that isn't there. Writes are pessimistic: the domain computes the change, the repository saves it, and the store shows it only then, returning the `Result`. A change that needs the stored progress before it's loaded fails with `notLoaded` instead of overwriting what it hasn't seen. Loading progress reconciles it with the app data and writes it back only if something changed.
 - Each sub-step brings its own commands (settings in 4.2, progress in 4.3), so nothing sits unused. Events move to step 7: the only one planned so far, `settings-changed`, matters once a second window exists.
 - Times are stored as epoch milliseconds (`INTEGER`), as in the domain. The old app mixed two ISO formats.
 - Reset clears set progress, cards and the review log in one transaction. The old app left the cards, so reviews kept showing up.
@@ -199,7 +200,7 @@ Branch `feature/persistence`. Settings and progress stored by Rust and reached t
 - [x] 4.2 SQLite database, migrations and the settings table
 - [x] 4.3 Progress repository and review log
 - [x] 4.4 `platform/` facade
-- [ ] 4.5 Pinia stores
+- [x] 4.5 Pinia stores
 
 **Concepts:** Rust ownership and borrowing, `Result` and `?`, traits, `thiserror`; the Tauri process model, commands, state management and capabilities; Pinia setup stores; ports and adapters.
 

@@ -1,0 +1,32 @@
+import { defineStore } from 'pinia';
+import { inject, shallowRef } from 'vue';
+
+import type { Settings } from '@/domain/settings/settings';
+import type { Loadable } from '@/domain/shared/loadable';
+import { loadableOf } from '@/domain/shared/loadable';
+import type { Result } from '@/domain/shared/result';
+import type { StorageError } from '@/domain/shared/storage';
+
+import { missingSettingsRepository, settingsRepositoryKey } from './repositories';
+
+/** The user's settings, loaded once at startup and changed only once they're saved. */
+export const useSettingsStore = defineStore('settings', () => {
+  const repository = inject(settingsRepositoryKey, missingSettingsRepository);
+  const settings = shallowRef<Loadable<Settings>>({ status: 'loading' });
+
+  async function load(): Promise<void> {
+    settings.value = loadableOf(await repository.load());
+  }
+
+  async function save(changed: Settings): Promise<Result<void, StorageError>> {
+    const saved = await repository.save(changed);
+
+    if (saved.kind === 'ok') {
+      settings.value = { status: 'loaded', value: changed };
+    }
+
+    return saved;
+  }
+
+  return { settings, load, save };
+});
