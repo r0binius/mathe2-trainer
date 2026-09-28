@@ -124,7 +124,7 @@ const continues = computed(() => {
 
 .meta {
   margin-top: 4px;
-  color: color-mix(in srgb, var(--color-white) 50%, transparent);
+  color: var(--color-text-muted);
   font-size: 14px;
   font-weight: 600;
 }
@@ -142,7 +142,7 @@ const continues = computed(() => {
   align-items: center;
   gap: 10px;
   padding: 12px 20px;
-  background-color: color-mix(in srgb, var(--color-white) 8%, transparent);
+  background-color: var(--color-surface);
 }
 
 .check {
@@ -165,7 +165,7 @@ const continues = computed(() => {
 
 .description {
   margin-top: 2px;
-  color: color-mix(in srgb, var(--color-white) 50%, transparent);
+  color: var(--color-text-muted);
   font-size: 12px;
 }
 

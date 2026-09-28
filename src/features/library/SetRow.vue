@@ -41,12 +41,12 @@ const text = useText();
   align-items: center;
   gap: 8px;
   padding: 16px 20px;
-  background-color: color-mix(in srgb, var(--color-white) 8%, transparent);
+  background-color: var(--color-surface);
   transition: background-color 0.2s ease;
 
   &:hover,
   &:focus-visible {
-    background-color: color-mix(in srgb, var(--color-white) 12%, transparent);
+    background-color: var(--color-surface-hover);
   }
 }
 
@@ -61,7 +61,7 @@ const text = useText();
   flex: none;
   align-items: center;
   gap: 8px;
-  color: color-mix(in srgb, var(--color-white) 50%, transparent);
+  color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 700;
 }

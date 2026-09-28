@@ -119,7 +119,7 @@ const nextReview = computed(() => {
 
 .meta {
   margin-top: 4px;
-  color: color-mix(in srgb, var(--color-white) 50%, transparent);
+  color: var(--color-text-muted);
   font-size: 14px;
   font-weight: 600;
 }

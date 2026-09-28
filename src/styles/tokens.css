@@ -12,6 +12,11 @@
   --color-yellow: #fdd231;
   --color-red: #ff6159;
 
+  /* Roles, derived from the palette: what the screens use most. */
+  --color-surface: color-mix(in srgb, var(--color-white) 8%, transparent);
+  --color-surface-hover: color-mix(in srgb, var(--color-white) 12%, transparent);
+  --color-text-muted: color-mix(in srgb, var(--color-white) 50%, transparent);
+
   /* Robert Penner's curves, approximated as cubic Béziers. */
   --ease-in-out-quad: cubic-bezier(0.455, 0.03, 0.515, 0.955);
   --ease-in-out-quint: cubic-bezier(0.86, 0, 0.07, 1);

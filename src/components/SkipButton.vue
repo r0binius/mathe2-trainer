@@ -26,7 +26,7 @@ defineSlots<{
   gap: 4px;
   padding: 6px;
   border-radius: 6px;
-  color: color-mix(in srgb, var(--color-white) 50%, transparent);
+  color: var(--color-text-muted);
   font-size: 14px;
   font-weight: 600;
   line-height: 1;
@@ -36,7 +36,7 @@ defineSlots<{
 
   &:hover,
   &:focus-visible {
-    background-color: color-mix(in srgb, var(--color-white) 8%, transparent);
+    background-color: var(--color-surface);
     color: var(--color-white);
   }
 }

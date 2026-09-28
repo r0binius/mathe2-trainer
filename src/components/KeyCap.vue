@@ -52,7 +52,7 @@ defineProps<{
 
 .outline {
   border: 3px solid color-mix(in srgb, var(--color-white) 20%, transparent);
-  color: color-mix(in srgb, var(--color-white) 50%, transparent);
+  color: var(--color-text-muted);
 
   .hidden & {
     border-style: dashed;

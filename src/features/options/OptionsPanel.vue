@@ -131,14 +131,14 @@ onScopeDispose(() => {
 .label {
   flex: none;
   width: 120px;
-  color: color-mix(in srgb, var(--color-white) 50%, transparent);
+  color: var(--color-text-muted);
   font-weight: 600;
 }
 
 .select {
   padding: 4px 6px;
   border-radius: 6px;
-  background-color: color-mix(in srgb, var(--color-white) 8%, transparent);
+  background-color: var(--color-surface);
 }
 
 .failed {

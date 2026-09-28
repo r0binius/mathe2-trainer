@@ -144,7 +144,7 @@ watch(
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: color-mix(in srgb, var(--color-white) 50%, transparent);
+  color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 700;
 }

@@ -189,7 +189,7 @@ watch(context, (loaded) => {
   place-items: center;
   height: 100vh;
   padding: 32px;
-  color: color-mix(in srgb, var(--color-white) 50%, transparent);
+  color: var(--color-text-muted);
   text-align: center;
 }
 

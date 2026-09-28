@@ -40,12 +40,12 @@ const text = useText();
   flex-direction: column;
   padding: 20px;
   border-radius: 12px;
-  background-color: color-mix(in srgb, var(--color-white) 8%, transparent);
+  background-color: var(--color-surface);
   transition: background-color 0.2s ease;
 
   &:hover,
   &:focus-visible {
-    background-color: color-mix(in srgb, var(--color-white) 12%, transparent);
+    background-color: var(--color-surface-hover);
   }
 }
 
@@ -80,7 +80,7 @@ const text = useText();
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: color-mix(in srgb, var(--color-white) 50%, transparent);
+  color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 600;
 }

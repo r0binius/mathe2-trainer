@@ -57,12 +57,12 @@ const emit = defineEmits<{
 }
 
 .neutral {
-  background-color: color-mix(in srgb, var(--color-white) 8%, transparent);
-  color: color-mix(in srgb, var(--color-white) 50%, transparent);
+  background-color: var(--color-surface);
+  color: var(--color-text-muted);
 
   &:hover,
   &:focus-visible {
-    background-color: color-mix(in srgb, var(--color-white) 12%, transparent);
+    background-color: var(--color-surface-hover);
     color: var(--color-white);
   }
 }
