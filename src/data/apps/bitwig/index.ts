@@ -1,5 +1,7 @@
 import type { AppDefinition } from '@/domain/shortcuts/types';
 
+import de from './de.json';
+
 /**
  * Bitwig Studio's default shortcuts, from a community cheat sheet. Its Ctrl is ⌘ on the Mac.
  * @see https://github.com/tomasmark79/bitwig-cheatsheet/blob/main/bitwig-cheatsheet.typ
@@ -8,6 +10,7 @@ export const bitwig = {
   id: 'bitwig',
   title: 'Bitwig Studio',
   category: 'music',
+  catalogs: { de },
   sets: [
     {
       id: 'essentials',

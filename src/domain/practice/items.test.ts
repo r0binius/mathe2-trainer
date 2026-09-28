@@ -33,6 +33,7 @@ const app: AppDefinition = {
   id: 'app',
   title: 'App',
   category: 'productivity',
+  catalogs: { de: {} },
   sets: [basics, more],
 };
 

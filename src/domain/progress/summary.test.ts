@@ -37,6 +37,7 @@ const app: AppDefinition = {
   id: 'app',
   title: 'App',
   category: 'productivity',
+  catalogs: { de: {} },
   sets: [basics, more],
 };
 
@@ -155,7 +156,12 @@ describe('recentFirst', () => {
 
 describe('groupByCategory', () => {
   function summaryOf(id: string, category: AppDefinition['category']): AppSummary {
-    return { app: { id, title: id, category, sets: [] }, shortcuts: 0, learned: 0, due: 0 };
+    return {
+      app: { id, title: id, category, catalogs: { de: {} }, sets: [] },
+      shortcuts: 0,
+      learned: 0,
+      due: 0,
+    };
   }
 
   it('groups apps by category in a fixed order, leaving out empty categories', () => {

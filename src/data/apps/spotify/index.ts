@@ -1,10 +1,13 @@
 import type { AppDefinition } from '@/domain/shortcuts/types';
 
+import de from './de.json';
+
 /** The shortcuts in Spotify's menu bar, as of 2026-09-25. */
 export const spotify = {
   id: 'spotify',
   title: 'Spotify',
   category: 'music',
+  catalogs: { de },
   sets: [
     {
       id: 'playback',

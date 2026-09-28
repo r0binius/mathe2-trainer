@@ -237,7 +237,7 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 - Tests in the shell: `useProgram`, the spatial navigation geometry and the composables. `happy-dom` only for the test files that need a DOM, added in the sub-step that first does; no `@vue/test-utils`, as presentational components are checked in the running app.
 - Router: vue-router 5 with hash history, so the route survives a reload during development.
 - Library: _recent_ apps and sets are those with something learned, as before, but ordered by when they were last practiced (`updatedAt`), newest first. A shortcut in two sets counts once for its app (the old app counted it twice), and an app's due count is what its review session would offer. Categories show in a fixed order (`appCategories`).
-- Catalog: `data/apps.ts` lists the apps explicitly, so the list is type-checked and adding an app is one visible line. Each app folder holds its `logo.svg`, which the screens find by folder name, so the domain types carry no asset URLs.
+- Catalog: `data/apps.ts` lists the apps explicitly, so the list is type-checked and adding an app is one visible line. Each definition carries its texts (`catalogs: { de }`, imported from its `de.json`), so an app folder describes itself completely and there's no second list of catalogs to keep in step; the health test checks the list against the folders. Each app folder holds its `logo.svg`, which the screens find by folder name, so the domain types carry no asset URLs.
 - A route to an app or set that doesn't exist (a hash route left over after the data changed) redirects to the library, so screens always get a real app and set. The old app crashed.
 
 **Sub-steps**

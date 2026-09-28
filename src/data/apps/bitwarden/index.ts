@@ -1,10 +1,13 @@
 import type { AppDefinition } from '@/domain/shortcuts/types';
 
+import de from './de.json';
+
 /** The shortcuts in the menu bar of Bitwarden's desktop app, as of 2026-09-25. */
 export const bitwarden = {
   id: 'bitwarden',
   title: 'Bitwarden',
   category: 'system',
+  catalogs: { de },
   sets: [
     {
       id: 'essentials',

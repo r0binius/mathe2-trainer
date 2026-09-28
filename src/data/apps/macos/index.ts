@@ -1,5 +1,7 @@
 import type { AppDefinition } from '@/domain/shortcuts/types';
 
+import de from './de.json';
+
 /**
  * The shortcuts of Apple's macOS keyboard shortcuts page.
  *
@@ -13,6 +15,7 @@ export const macos = {
   id: 'macos',
   title: 'macOS',
   category: 'system',
+  catalogs: { de },
   sets: [
     {
       id: 'essentials',

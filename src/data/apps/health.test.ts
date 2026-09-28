@@ -12,25 +12,22 @@ import type { Rejection } from '@/domain/keyboard/policy';
 import { checkShortcut, practicePolicy } from '@/domain/keyboard/policy';
 import { keyOf, resolveKeys } from '@/domain/keyboard/resolve';
 import { shortcutId } from '@/domain/shortcuts/shortcutId';
-import type { AppDefinition, ShortcutDefinition, ShortcutSet } from '@/domain/shortcuts/types';
+import type {
+  AppDefinition,
+  Catalog,
+  ShortcutDefinition,
+  ShortcutSet,
+} from '@/domain/shortcuts/types';
+
+import { apps } from '../apps';
 
 // Rules that types can't express, checked over the data of every app. Each rule lists all its
 // violations, so a failure shows every problem at once.
 
 const keymap: Keymap = germanKeymap;
 
-const modules = import.meta.glob<Readonly<Record<string, AppDefinition>>>('./*/index.ts', {
-  eager: true,
-});
-const catalogs = import.meta.glob<unknown>('./*/de.json', { eager: true, import: 'default' });
-
-function folderOf(path: string): string {
-  return path.split('/')[1] ?? path;
-}
-
-const apps = Object.entries(modules).flatMap(([path, module]) =>
-  Object.values(module).map((app) => ({ folder: folderOf(path), app })),
-);
+// Only the folder names: the apps themselves come from the list the app uses.
+const folders = Object.keys(import.meta.glob('./*/index.ts')).map((path) => path.split('/')[1]);
 
 type ShortcutEntry = {
   readonly app: AppDefinition;
@@ -38,7 +35,7 @@ type ShortcutEntry = {
   readonly shortcut: ShortcutDefinition;
 };
 
-const shortcuts: readonly ShortcutEntry[] = apps.flatMap(({ app }) =>
+const shortcuts: readonly ShortcutEntry[] = apps.flatMap((app) =>
   app.sets.flatMap((set) => set.shortcuts.map((shortcut) => ({ app, set, shortcut }))),
 );
 
@@ -95,17 +92,13 @@ function describeRejection(rejection: Rejection): string {
   }
 }
 
-// Flattens a nested catalog into `a.b` keys, keeping only entries that are text.
-function flattenCatalog(catalog: unknown, prefix = ''): readonly string[] {
-  if (typeof catalog === 'string') {
-    return [prefix];
-  }
+// Flattens a nested catalog into `a.b` keys.
+function flattenCatalog(catalog: Catalog, prefix = ''): readonly string[] {
+  return Object.entries(catalog).flatMap(([key, value]) => {
+    const path = prefix === '' ? key : `${prefix}.${key}`;
 
-  return typeof catalog === 'object' && catalog !== null
-    ? Object.entries(catalog).flatMap(([key, value]) =>
-        flattenCatalog(value, prefix === '' ? key : `${prefix}.${key}`),
-      )
-    : [];
+    return typeof value === 'string' ? [path] : flattenCatalog(value, path);
+  });
 }
 
 function messageKeysOf(app: AppDefinition): readonly string[] {
@@ -119,26 +112,18 @@ function messageKeysOf(app: AppDefinition): readonly string[] {
   ]);
 }
 
-function catalogKeysOf(folder: string): readonly string[] {
-  return flattenCatalog(catalogs[`./${folder}/de.json`]);
+function catalogKeysOf(app: AppDefinition): readonly string[] {
+  return flattenCatalog(app.catalogs.de);
 }
 
 describe('app data', () => {
-  it('finds one app in each folder', () => {
-    expect(apps.map(({ app }) => app.id)).toHaveLength(Object.keys(modules).length);
-    expect(apps.length).toBeGreaterThanOrEqual(10);
-  });
-
-  it('names each app folder after its app ID', () => {
-    const mismatches = apps
-      .filter(({ folder, app }) => folder !== app.id)
-      .map(({ folder, app }) => `${folder}: ${app.id}`);
-
-    expect(mismatches).toStrictEqual([]);
+  it('lists every app folder in `apps.ts`, each under its app ID', () => {
+    // The screens find an app's logo by its folder, so the two have to match.
+    expect(apps.map((app) => app.id).sort()).toStrictEqual([...folders].sort());
   });
 
   it('uses each set ID once per app', () => {
-    const duplicates = apps.flatMap(({ app }) =>
+    const duplicates = apps.flatMap((app) =>
       duplicatesIn(app.sets.map((set) => set.id)).map((id) => `${app.id}/${id}`),
     );
 
@@ -147,7 +132,7 @@ describe('app data', () => {
 
   it('uses the same keys only once per set', () => {
     // Across sets, the same keys are allowed: they share one shortcut ID and its progress.
-    const duplicates = apps.flatMap(({ app }) =>
+    const duplicates = apps.flatMap((app) =>
       app.sets.flatMap((set) =>
         duplicatesIn(set.shortcuts.map((shortcut) => shortcutId(app.id, shortcut.keys))).map(
           (id) => `${app.id}/${set.id}: ${id}`,
@@ -224,8 +209,8 @@ describe('app data', () => {
   });
 
   it('has every message key in the German catalog', () => {
-    const missing = apps.flatMap(({ folder, app }) => {
-      const catalogKeys = new Set(catalogKeysOf(folder));
+    const missing = apps.flatMap((app) => {
+      const catalogKeys = new Set(catalogKeysOf(app));
 
       return messageKeysOf(app)
         .filter((key) => !catalogKeys.has(key))
@@ -236,10 +221,10 @@ describe('app data', () => {
   });
 
   it('uses every entry of the German catalog', () => {
-    const unused = apps.flatMap(({ folder, app }) => {
+    const unused = apps.flatMap((app) => {
       const messageKeys = new Set(messageKeysOf(app));
 
-      return catalogKeysOf(folder)
+      return catalogKeysOf(app)
         .filter((key) => !messageKeys.has(key))
         .map((key) => `${app.id}: ${key}`);
     });

@@ -45,16 +45,28 @@ export const appCategories = [
 export type AppCategory = (typeof appCategories)[number];
 
 /**
- * An app and its shortcuts, as written in `src/data/apps/<id>/index.ts`. The data files check
+ * An app's texts in one language: message keys, nested by their dotted parts, mapped to the text.
+ * @example
+ * ```json
+ * { "essentials": { "title": "Grundlagen", "newNote": "Neue Notiz" } }
+ * ```
+ */
+export type Catalog = { readonly [key: string]: string | Catalog };
+
+/**
+ * An app, its shortcuts and their texts, as written in `src/data/apps/<id>/index.ts`. The data files check
  * their literal with `satisfies`, which keeps it type-checked and autocompleted. Rules that types
  * can't express, such as unique IDs, keys that exist and message keys that are in the catalog, are
  * checked by the data health test.
  * @example
  * ```ts
+ * import de from './de.json';
+ *
  * export const rectangle = {
  *   id: 'rectangle',
  *   title: 'Rectangle',
  *   category: 'system',
+ *   catalogs: { de },
  *   sets: [
  *     {
  *       id: 'halves',
@@ -71,5 +83,10 @@ export type AppDefinition = {
   /** The app's product name, which isn't translated. */
   readonly title: string;
   readonly category: AppCategory;
+  /**
+   * The texts its message keys point to, by language. The data is written in German, which is
+   * also what other languages fall back to.
+   */
+  readonly catalogs: { readonly de: Catalog };
   readonly sets: readonly ShortcutSet[];
 };

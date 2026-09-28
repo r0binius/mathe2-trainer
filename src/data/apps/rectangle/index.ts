@@ -1,5 +1,7 @@
 import type { AppDefinition } from '@/domain/shortcuts/types';
 
+import de from './de.json';
+
 /**
  * Rectangle's recommended default shortcuts, plus the Todo shortcuts set in its settings, as of
  * 2026-09-25.
@@ -8,6 +10,7 @@ export const rectangle = {
   id: 'rectangle',
   title: 'Rectangle',
   category: 'system',
+  catalogs: { de },
   sets: [
     {
       id: 'halves',

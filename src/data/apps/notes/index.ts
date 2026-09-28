@@ -1,10 +1,13 @@
 import type { AppDefinition } from '@/domain/shortcuts/types';
 
+import de from './de.json';
+
 /** The shortcuts in the menu bar of Apple's Notes, as of 2026-09-25. */
 export const notes = {
   id: 'notes',
   title: 'Notizen',
   category: 'productivity',
+  catalogs: { de },
   sets: [
     {
       id: 'essentials',
