@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router';
 import BaseButton from '@/components/BaseButton.vue';
 import ListSection from '@/components/ListSection.vue';
 import PageLayout from '@/components/PageLayout.vue';
+import ScreenHeading from '@/components/ScreenHeading.vue';
 import { useSpatialNav } from '@/composables/useSpatialNav';
 import type { SummaryContext } from '@/domain/progress/summary';
 import { recentFirst, summarizeApp, summarizeSet } from '@/domain/progress/summary';
@@ -62,21 +63,15 @@ const nextReview = computed(() => {
     </template>
 
     <nav ref="nav">
-      <header class="header">
-        <img class="logo" :src="logoOf(app.id)" alt="" />
-        <div class="heading">
-          <h1 class="title truncate">{{ app.title }}</h1>
-          <p v-if="nextReview !== undefined" class="meta">{{ nextReview }}</p>
-        </div>
-        <BaseButton
-          v-if="summary.due > 0"
-          variant="accent"
-          size="large"
-          @click="router.push(toReview(app.id))"
-        >
-          {{ text.ui('app.review', { n: summary.due }) }}
-        </BaseButton>
-      </header>
+      <ScreenHeading :title="app.title">
+        <template #leading><img class="logo" :src="logoOf(app.id)" alt="" /></template>
+        <template v-if="nextReview !== undefined" #meta>{{ nextReview }}</template>
+        <template v-if="summary.due > 0" #action>
+          <BaseButton variant="accent" size="large" @click="router.push(toReview(app.id))">
+            {{ text.ui('app.review', { n: summary.due }) }}
+          </BaseButton>
+        </template>
+      </ScreenHeading>
 
       <div class="sections">
         <ListSection v-if="recent.length > 0" :title="text.ui('library.recent')">
@@ -96,32 +91,8 @@ const nextReview = computed(() => {
 </template>
 
 <style scoped>
-.header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 40px 0;
-}
-
 .logo {
   height: 40px;
-}
-
-.heading {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.title {
-  font-size: 34px;
-  font-weight: 700;
-}
-
-.meta {
-  margin-top: 4px;
-  color: var(--color-text-muted);
-  font-size: 14px;
-  font-weight: 600;
 }
 
 .sections {

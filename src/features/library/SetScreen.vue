@@ -6,6 +6,7 @@ import BaseButton from '@/components/BaseButton.vue';
 import KeyCapSmall from '@/components/KeyCapSmall.vue';
 import PageLayout from '@/components/PageLayout.vue';
 import ResultBadge from '@/components/ResultBadge.vue';
+import ScreenHeading from '@/components/ScreenHeading.vue';
 import TextProgress from '@/components/TextProgress.vue';
 import { useSpatialNav } from '@/composables/useSpatialNav';
 import { labelKey, macosKeyLabels } from '@/domain/keyboard/labels';
@@ -55,26 +56,20 @@ const continues = computed(() => {
     </template>
 
     <nav ref="nav">
-      <header class="header">
-        <div class="heading">
-          <h1 class="title truncate">{{ title }}</h1>
-          <p class="meta">
-            <template v-if="summary.learned.length > 0">
-              <TextProgress :value="summary.learned.length" :max="summary.items.length" />
-              {{ text.ui('set.learned') }}
-            </template>
-            <template v-else>{{ text.count('library.shortcuts', summary.items.length) }}</template>
-          </p>
-        </div>
-        <BaseButton
-          v-if="summary.items.length > 0"
-          variant="accent"
-          size="large"
-          @click="router.push(toLearn(app.id, set.id))"
-        >
-          {{ text.ui(continues ? 'set.continue' : 'set.start') }}
-        </BaseButton>
-      </header>
+      <ScreenHeading :title="title">
+        <template #meta>
+          <template v-if="summary.learned.length > 0">
+            <TextProgress :value="summary.learned.length" :max="summary.items.length" />
+            {{ text.ui('set.learned') }}
+          </template>
+          <template v-else>{{ text.count('library.shortcuts', summary.items.length) }}</template>
+        </template>
+        <template v-if="summary.items.length > 0" #action>
+          <BaseButton variant="accent" size="large" @click="router.push(toLearn(app.id, set.id))">
+            {{ text.ui(continues ? 'set.continue' : 'set.start') }}
+          </BaseButton>
+        </template>
+      </ScreenHeading>
 
       <ul class="rows">
         <li
@@ -105,30 +100,6 @@ const continues = computed(() => {
 </template>
 
 <style scoped>
-.header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 40px 0 24px;
-}
-
-.heading {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.title {
-  font-size: 34px;
-  font-weight: 700;
-}
-
-.meta {
-  margin-top: 4px;
-  color: var(--color-text-muted);
-  font-size: 14px;
-  font-weight: 600;
-}
-
 .rows {
   display: grid;
   gap: 2px;
