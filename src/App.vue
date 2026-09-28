@@ -1,3 +1,3 @@
 <template>
-  <main>Mouseless</main>
+  <RouterView />
 </template>

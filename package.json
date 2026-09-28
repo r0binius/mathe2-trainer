@@ -27,7 +27,8 @@
     "pinia": "^4.0.3",
     "ts-fsrs": "^5.4.2",
     "vue": "^3.5.43",
-    "vue-i18n": "^11.4.12"
+    "vue-i18n": "^11.4.12",
+    "vue-router": "^5.3.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",

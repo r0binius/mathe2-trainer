@@ -5,6 +5,7 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
+    "core:window:allow-start-dragging",
     "allow-load-progress",
     "allow-save-set-progress",
     "allow-record-review",
