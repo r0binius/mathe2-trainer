@@ -22,7 +22,7 @@ export function shortcutId(appId: string, alternatives: KeyAlternatives): Shortc
   const combinations = alternatives.map((keys) => orderModifiersFirst(keys).join('+'));
 
   // Default sort compares UTF-16 code units, which, unlike `localeCompare`, is the same everywhere.
-  return `${appId}/${[...combinations].sort().join('|')}`;
+  return `${appId}/${combinations.toSorted().join('|')}`;
 }
 
 /** Decodes a {@link ShortcutId}, such as one stored with progress. */

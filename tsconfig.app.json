@@ -3,6 +3,9 @@
   "extends": ["@vue/tsconfig/tsconfig.dom.json", "./tsconfig.json"],
   "compilerOptions": {
     "composite": true,
+    // ES2023 for `toSorted` and friends, which sort without mutating. The app runs in the
+    // system's WebKit, which has them since Safari 16; step 9 requires macOS 14.
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "types": ["vite/client"],
     "paths": {

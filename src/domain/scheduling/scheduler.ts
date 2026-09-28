@@ -168,7 +168,7 @@ export function dueCards(
 ): readonly Card[] {
   return cards
     .filter((card) => card.layout === layout && card.dueAt < endOfToday)
-    .sort((a, b) => a.dueAt - b.dueAt);
+    .toSorted((a, b) => a.dueAt - b.dueAt);
 }
 
 function finite(fields: CardMemoryFields): InvalidMemory | undefined {

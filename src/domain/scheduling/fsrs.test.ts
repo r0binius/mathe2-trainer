@@ -43,7 +43,7 @@ describe('scheduleWithFsrs', () => {
       daysUntilDue(schedule(undefined, grade, at)),
     );
 
-    expect(days).toStrictEqual([...days].sort((a, b) => a - b));
+    expect(days).toStrictEqual(days.toSorted((a, b) => a - b));
     expect(new Set(days).size).toBe(4);
   });
 

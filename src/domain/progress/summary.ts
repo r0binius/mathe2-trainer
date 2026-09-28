@@ -100,7 +100,7 @@ export function recentFirst<T extends { readonly practicedAt?: number }>(
 ): readonly T[] {
   return summaries
     .filter((summary) => summary.practicedAt !== undefined)
-    .sort((a, b) => (b.practicedAt ?? 0) - (a.practicedAt ?? 0));
+    .toSorted((a, b) => (b.practicedAt ?? 0) - (a.practicedAt ?? 0));
 }
 
 /** The apps grouped by category, in the order of {@link appCategories}, without empty groups. */

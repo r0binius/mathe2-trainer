@@ -119,7 +119,7 @@ function catalogKeysOf(app: AppDefinition): readonly string[] {
 describe('app data', () => {
   it('lists every app folder in `apps.ts`, each under its app ID', () => {
     // The screens find an app's logo by its folder, so the two have to match.
-    expect(apps.map((app) => app.id).sort()).toStrictEqual([...folders].sort());
+    expect(apps.map((app) => app.id).toSorted()).toStrictEqual(folders.toSorted());
   });
 
   it('has a logo in every app folder', () => {
