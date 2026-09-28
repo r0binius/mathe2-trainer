@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
 
 import BaseButton from '@/components/BaseButton.vue';
 import ListSection from '@/components/ListSection.vue';
 import PageLayout from '@/components/PageLayout.vue';
+import { useSpatialNav } from '@/composables/useSpatialNav';
 import type { SummaryContext } from '@/domain/progress/summary';
 import { recentFirst, summarizeApp, summarizeSet } from '@/domain/progress/summary';
 import { daysUntil } from '@/domain/scheduling/days';
@@ -24,6 +25,14 @@ const props = defineProps<{
 
 const router = useRouter();
 const text = useText();
+const nav = useTemplateRef<HTMLElement>('nav');
+
+useSpatialNav(
+  () => nav.value,
+  () => {
+    void router.push(toLibrary());
+  },
+);
 
 const summary = computed(() => summarizeApp(props.app, props.context));
 const sets = computed(() =>
@@ -52,35 +61,37 @@ const nextReview = computed(() => {
       </BaseButton>
     </template>
 
-    <header class="header">
-      <img class="logo" :src="logoOf(app.id)" alt="" />
-      <div class="heading">
-        <h1 class="title truncate">{{ app.title }}</h1>
-        <p v-if="nextReview !== undefined" class="meta">{{ nextReview }}</p>
+    <nav ref="nav">
+      <header class="header">
+        <img class="logo" :src="logoOf(app.id)" alt="" />
+        <div class="heading">
+          <h1 class="title truncate">{{ app.title }}</h1>
+          <p v-if="nextReview !== undefined" class="meta">{{ nextReview }}</p>
+        </div>
+        <BaseButton
+          v-if="summary.due > 0"
+          variant="accent"
+          size="large"
+          @click="router.push(toReview(app.id))"
+        >
+          {{ text.ui('app.review', { n: summary.due }) }}
+        </BaseButton>
+      </header>
+
+      <div class="sections">
+        <ListSection v-if="recent.length > 0" :title="text.ui('library.recent')">
+          <div class="rows">
+            <SetRow v-for="set in recent" :key="set.set.id" :app-id="app.id" :summary="set" />
+          </div>
+        </ListSection>
+
+        <ListSection v-if="others.length > 0" :title="text.ui('app.sets')">
+          <div class="rows">
+            <SetRow v-for="set in others" :key="set.set.id" :app-id="app.id" :summary="set" />
+          </div>
+        </ListSection>
       </div>
-      <BaseButton
-        v-if="summary.due > 0"
-        variant="accent"
-        size="large"
-        @click="router.push(toReview(app.id))"
-      >
-        {{ text.ui('app.review', { n: summary.due }) }}
-      </BaseButton>
-    </header>
-
-    <div class="sections">
-      <ListSection v-if="recent.length > 0" :title="text.ui('library.recent')">
-        <div class="rows">
-          <SetRow v-for="set in recent" :key="set.set.id" :app-id="app.id" :summary="set" />
-        </div>
-      </ListSection>
-
-      <ListSection v-if="others.length > 0" :title="text.ui('app.sets')">
-        <div class="rows">
-          <SetRow v-for="set in others" :key="set.set.id" :app-id="app.id" :summary="set" />
-        </div>
-      </ListSection>
-    </div>
+    </nav>
   </PageLayout>
 </template>
 

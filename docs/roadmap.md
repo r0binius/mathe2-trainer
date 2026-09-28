@@ -230,7 +230,7 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 
 - Styles: plain modern CSS, no Sass. Tokens are CSS custom properties (`styles/tokens.css`), components use scoped `<style>` with native nesting, and `color-mix()` replaces Sass's `rgba($color, 0.5)`. Once tokens are custom properties, Sass would only add BEM's `&__part`, which scoped styles make unnecessary. Only the tokens components use are ported: six colours, the window's black and two easing curves (the old `$ease` and `$easeInOut` are CSS's `ease` and `ease-in-out`). Modern CSS needs a recent WebKit, so step 9 sets `minimumSystemVersion`.
 - Font: Source Sans 3 instead of Inter, from `@fontsource-variable/source-sans-3` (OFL): one variable file per subset covering all weights, bundled offline, and `unicode-range` loads only the subsets a text needs. The old app's Fira Code was never used and is dropped.
-- Spatial navigation: our own `useSpatialNav`. A pure function picks the nearest element in the arrow's direction from rectangles, and a composable wires it to the DOM. `spatial-navigation-js` hasn't been released since 2022, is untyped and a global singleton.
+- Spatial navigation: our own `useSpatialNav`. A pure function picks the nearest element in the arrow's direction from rectangles, and a composable wires it to the DOM. `spatial-navigation-js` hasn't been released since 2022, is untyped and a global singleton. The arrows move focus; Escape goes back a level, and so does ← once nothing lies to the left, while → there opens the focused item, as the old set rows did. A screen focuses its first element, which is its main action (Start, Review or the first item). Practice screens don't navigate, since every key there is an answer.
 - UI language: vue-i18n 11 in composition mode (its JIT compiler needs no `eval`, so it fits a strict CSP), with English and German UI text. It follows the system language from 5.3 on; 5.6 adds a `language: 'system' | 'en' | 'de'` setting (default `system`). UI text lives in `src/locales/{en,de}.json`, and the apps' catalogs, read from `data/apps.ts`, join the same instance as `apps.<id>.*`. Components translate through our own `useText()` rather than vue-i18n's `t`: its key type accepts any string, so vue-i18n's typed keys only add autocomplete, while `useText` types keys as the paths of `en.json` and makes a typo a type error. `satisfies` keeps the German text complete. Shortcut titles stay German until English catalogs are written, and app titles the vendor translates itself (Apple's Notes is `Notizen` on a German Mac) stay hard-coded in the data for now.
 - Keymap until step 6: a `keymap` store reads through a `KeymapSource` port whose adapter returns the German fixture as `com.apple.keylayout.German`. Step 6 swaps only the adapter.
 - No `parseTime`: the scheduler throws if a review's `at` isn't a finite number (noted in step 3.4), but the shell's `Date.now()` is the only source of message times and never produces one, so the guard would cover an input that can't occur.
@@ -262,7 +262,7 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 - [x] 5.6 Options
   - [x] 5.6.1 Language setting
   - [x] 5.6.2 Options overlay
-- [ ] 5.7 Spatial navigation
+- [x] 5.7 Spatial navigation
 
 **Concepts:** Vue reactivity (`ref`, `computed`, `watch`), composables and effect cleanup, presentational vs. container components, typed props and emits, the router.
 

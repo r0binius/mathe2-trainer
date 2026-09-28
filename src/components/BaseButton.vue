@@ -75,6 +75,12 @@ const emit = defineEmits<{
   &:focus-visible {
     background-color: color-mix(in srgb, var(--color-yellow) 90%, transparent);
   }
+
+  /* The main action is often focused from the start, so its focus also shows as a ring. */
+  &:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--color-yellow) 40%, transparent);
+    outline-offset: 2px;
+  }
 }
 
 .danger {
