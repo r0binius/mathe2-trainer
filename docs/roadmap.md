@@ -149,6 +149,7 @@ Branch `fix/review-findings`. A review of the whole codebase before step 4 found
 - `keyOf(keymap, code)` names a physical key the same way for key resolution and key capture: its character for the main keys, and its code for `Space` and the numpad, which the data names by code. Without it, the space bar would be captured as `" "` and never match `Space`.
 - The session numbers its presentations. `advanceAfter` carries that number and `advance` sends it back, so an `advance` from an old timer is ignored.
 - FSRS counts days in local time: reviews carry the local UTC offset, and the adapter shifts the dates it hands to `ts-fsrs`, which counts UTC calendar days.
+- A shortcut is practiced with the shortest alternative the practice policy allows (`practicableKeys`, replacing `resolveShortest`). The old app took the shortest and hid the shortcut if that one was reserved or unpressable, even when another alternative worked. `practiceItems`, `appPracticeItems` and `reviewItems` build what a session practices, and `PracticeItem` carries the shortcut's title and description keys for the UI.
 - Only `*.test.ts` files may import `*.fixture.*` files (a lint rule).
 
 **Sub-steps**
@@ -156,7 +157,7 @@ Branch `fix/review-findings`. A review of the whole codebase before step 4 found
 - [x] R.1 Learning progress: completion ignores skipped learned shortcuts, and saving keeps learned shortcuts the session didn't cover
 - [x] R.2 Keyboard: one combination comparison, `keyOf`, and turning a key press into a combination
 - [x] R.3 Layout in the domain types
-- [ ] R.4 Practice items and the review queue
+- [x] R.4 Practice items and the review queue
 - [ ] R.5 Session and FSRS: the advance token and local days
 - [ ] R.6 Cleanup: fixture lint rule, brand comment, doc wording, merged branches
 

@@ -1,12 +1,15 @@
 import type { KeyCombination } from '../keyboard/resolve';
 import { isSameCombination } from '../keyboard/resolve';
 import type { ShortcutId } from '../shortcuts/shortcutId';
+import type { MessageKey } from '../shortcuts/types';
 import type { LearnSnapshot } from './snapshot';
 
 /** A shortcut to practice, with its keys already resolved for the current keyboard layout. */
 export type PracticeItem = {
   readonly id: ShortcutId;
   readonly keys: KeyCombination;
+  readonly title: MessageKey;
+  readonly description?: MessageKey;
 };
 
 /** Whether the keys are shown (`training`) or have to be recalled (`testing`). */

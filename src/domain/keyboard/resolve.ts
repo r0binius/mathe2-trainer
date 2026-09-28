@@ -107,21 +107,3 @@ export function isSameCombination(first: KeyCombination, second: KeyCombination)
 export function resolveKeys(keymap: Keymap, keys: KeyCombination): KeyCombination {
   return orderModifiersFirst(keys.flatMap((key) => resolveKey(keymap, key)));
 }
-
-/**
- * Resolves each alternative of a shortcut definition and picks the one with the fewest keys.
- *
- * When several are equally short, the first one wins.
- */
-export function resolveShortest(keymap: Keymap, alternatives: KeyAlternatives): KeyCombination {
-  const [first, ...rest] = alternatives;
-
-  return rest.reduce(
-    (shortest, alternative) => {
-      const resolved = resolveKeys(keymap, alternative);
-
-      return resolved.length < shortest.length ? resolved : shortest;
-    },
-    resolveKeys(keymap, first),
-  );
-}

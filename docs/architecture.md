@@ -198,7 +198,7 @@ src/
 ├─ domain/
 │  ├─ keyboard/     keymap.ts (types), resolve.ts, policy.ts, labels.ts
 │  ├─ shortcuts/    types.ts, defineApp.ts, shortcutId.ts
-│  ├─ practice/     session.ts (Model, Msg, update), learn.ts, review.ts, grading.ts
+│  ├─ practice/     session.ts (Model, Msg, update), items.ts, learn.ts, review.ts, grading.ts
 │  ├─ scheduling/   scheduler.ts (port), fsrs.ts
 │  ├─ progress/     setProgress.ts, repository.ts (port), reconcile.ts
 │  └─ shared/       result.ts (errors as values)

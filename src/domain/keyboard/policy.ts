@@ -1,7 +1,8 @@
 import type { Result } from '../shared/result';
 import { err, ok } from '../shared/result';
-import type { KeyCombination } from './resolve';
-import { isModifier, isSameCombination } from './resolve';
+import type { Keymap } from './keymap';
+import type { KeyAlternatives, KeyCombination } from './resolve';
+import { isModifier, isSameCombination, resolveKeys } from './resolve';
 
 /** Why a combination can't be practiced. */
 export type Rejection =
@@ -88,4 +89,25 @@ export function checkShortcut(
   );
 
   return rejection === undefined ? ok(keys) : err(rejection);
+}
+
+/**
+ * The keys to practice a shortcut with on the given keymap: the shortest of its alternatives that
+ * the policy allows, the first one if several are equally short, or `undefined` if the policy
+ * rejects them all. Unlike the old app, a reserved shortest alternative doesn't hide a shortcut
+ * that another alternative lets you practice.
+ */
+export function practicableKeys(
+  keymap: Keymap,
+  alternatives: KeyAlternatives,
+  policy: ShortcutPolicy,
+): KeyCombination | undefined {
+  return alternatives
+    .map((keys) => resolveKeys(keymap, keys))
+    .filter((keys) => checkShortcut(policy, keys).kind === 'ok')
+    .reduce<KeyCombination | undefined>(
+      (shortest, keys) =>
+        shortest === undefined || keys.length < shortest.length ? keys : shortest,
+      undefined,
+    );
 }

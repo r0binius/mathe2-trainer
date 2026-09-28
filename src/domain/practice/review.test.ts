@@ -4,7 +4,7 @@ import { reviewPool, reviewStrategy } from './review';
 import type { Attempt, PracticeItem } from './session';
 
 function item(key: string): PracticeItem {
-  return { id: `app/Meta+${key}`, keys: ['Meta', key] };
+  return { id: `app/Meta+${key}`, keys: ['Meta', key], title: key };
 }
 
 const [a, b, c] = [item('a'), item('b'), item('c')];

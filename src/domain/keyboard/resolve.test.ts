@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import germanKeymap from './germanKeymap.fixture.json';
-import { isSameCombination, keyOf, resolveKeys, resolveShortest } from './resolve';
+import { isSameCombination, keyOf, resolveKeys } from './resolve';
 
 describe('resolveKeys', () => {
   describe('on a German keymap', () => {
@@ -80,30 +80,6 @@ describe('resolveKeys', () => {
     };
 
     expect(resolveKeys(keymap, ['x'])).toStrictEqual(['Shift', 'a']);
-  });
-});
-
-describe('resolveShortest', () => {
-  it('picks the alternative with the fewest keys after resolving', () => {
-    expect(
-      resolveShortest(germanKeymap, [
-        ['Meta', '\\'],
-        ['Control', 'Alt', 'k'],
-      ]),
-    ).toStrictEqual(['Control', 'Alt', 'k']);
-  });
-
-  it('picks the first alternative when several are equally short', () => {
-    expect(
-      resolveShortest(germanKeymap, [
-        ['Meta', 'k'],
-        ['Meta', 't'],
-      ]),
-    ).toStrictEqual(['Meta', 'k']);
-  });
-
-  it('resolves a single alternative', () => {
-    expect(resolveShortest(germanKeymap, [['Meta', '?']])).toStrictEqual(['Shift', 'Meta', 'ß']);
   });
 });
 

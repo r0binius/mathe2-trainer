@@ -8,6 +8,7 @@ import {
   noDuplicateKeys,
   notModifierOnly,
   notReserved,
+  practicableKeys,
   practicePolicy,
 } from './policy';
 import { resolveKeys } from './resolve';
@@ -108,5 +109,54 @@ describe('practicePolicy', () => {
     expect(
       checkShortcut(practicePolicy([['Shift', 'Meta', 'm']]), ['Shift', 'Meta', 'm']),
     ).toStrictEqual(err({ reason: 'reserved' }));
+  });
+});
+
+describe('practicableKeys', () => {
+  const anything = practicePolicy([]);
+
+  it('picks the alternative with the fewest keys after resolving', () => {
+    expect(
+      practicableKeys(
+        germanKeymap,
+        [
+          ['Meta', '\\'],
+          ['Control', 'Alt', 'k'],
+        ],
+        anything,
+      ),
+    ).toStrictEqual(['Control', 'Alt', 'k']);
+  });
+
+  it('picks the first alternative when several are equally short', () => {
+    expect(
+      practicableKeys(
+        germanKeymap,
+        [
+          ['Meta', 'k'],
+          ['Meta', 't'],
+        ],
+        anything,
+      ),
+    ).toStrictEqual(['Meta', 'k']);
+  });
+
+  it('skips alternatives the policy rejects, even shorter ones', () => {
+    expect(
+      practicableKeys(
+        germanKeymap,
+        [
+          ['Meta', 'Space'],
+          ['Control', 'Meta', 'Space'],
+        ],
+        practicePolicy(macosReserved),
+      ),
+    ).toStrictEqual(['Control', 'Meta', 'Space']);
+  });
+
+  it('finds nothing when the policy rejects every alternative', () => {
+    expect(
+      practicableKeys(germanKeymap, [['Meta', 'Space']], practicePolicy(macosReserved)),
+    ).toBeUndefined();
   });
 });

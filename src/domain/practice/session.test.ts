@@ -10,8 +10,8 @@ import type {
 } from './session';
 import { startSession, successPauseMs, updateSession } from './session';
 
-const find: PracticeItem = { id: 'vscodium/Meta+f', keys: ['Meta', 'f'] };
-const save: PracticeItem = { id: 'vscodium/Meta+s', keys: ['Meta', 's'] };
+const find: PracticeItem = { id: 'vscodium/Meta+f', keys: ['Meta', 'f'], title: 'find' };
+const save: PracticeItem = { id: 'vscodium/Meta+s', keys: ['Meta', 's'], title: 'save' };
 
 /** Presents a list in order, drawing with the roll, and reports what it's asked to do as effects. */
 const inOrder: PracticeStrategy<readonly Presentation[]> = {
