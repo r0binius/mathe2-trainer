@@ -62,13 +62,14 @@ export function testedEffect({ item, failed, durationMs }: Attempt): ProgressEff
 
 /**
  * Work the session asks the shell to do, as data (Elm's `Cmd`): save a result, or send
- * `advance` after a pause.
+ * `advance` with the given presentation number after a pause.
  */
 export type SessionEffect =
   | ProgressEffect
   | {
       readonly type: 'advanceAfter';
       readonly ms: number;
+      readonly presentation: number;
     };
 
 /** A strategy's new pool, and the results to save because of the change. */
@@ -100,6 +101,8 @@ export type Session<Pool> =
       readonly pool: Pool;
       readonly item: PracticeItem;
       readonly mode: Mode;
+      /** Counts the items shown, from 1, so an `advance` can name the success it ends. */
+      readonly presentation: number;
       readonly shownAt: number;
       /** How many wrong answers were given, so the UI can react to each one. */
       readonly misses: number;
@@ -111,6 +114,7 @@ export type Session<Pool> =
       readonly phase: 'succeeded';
       readonly pool: Pool;
       readonly item: PracticeItem;
+      readonly presentation: number;
     }
   | {
       readonly phase: 'finished';
@@ -125,7 +129,13 @@ type Presenting<Pool> = Extract<Session<Pool>, { readonly phase: 'presenting' }>
  */
 export type SessionMsg =
   | { readonly type: 'answer'; readonly keys: KeyCombination; readonly at: number }
-  | { readonly type: 'advance'; readonly roll: number; readonly at: number }
+  | {
+      readonly type: 'advance';
+      /** The presentation whose success ends, as its `advanceAfter` named it. */
+      readonly presentation: number;
+      readonly roll: number;
+      readonly at: number;
+    }
   | { readonly type: 'skip'; readonly roll: number; readonly at: number };
 
 /** The session after a message, and the effects the shell has to carry out because of it. */
@@ -137,8 +147,8 @@ export type SessionUpdate<Pool> = {
 /** How long a success is shown before the next item, as in the old app. */
 export const successPauseMs = 1000;
 
-/** Where the next presentation comes from: a roll, its time and the item shown before. */
-type NextDraw = Draw & { readonly at: number };
+/** Where the next presentation comes from: a roll, its time, its number and the item before. */
+type NextDraw = Draw & { readonly at: number; readonly presentation: number };
 
 /** Starts a session by presenting the strategy's first pick, or finishes it if there's none. */
 export function startSession<Pool>(
@@ -146,12 +156,13 @@ export function startSession<Pool>(
   pool: Pool,
   start: { readonly roll: number; readonly at: number },
 ): Session<Pool> {
-  return present(strategy, pool, { ...start, previous: undefined });
+  return present(strategy, pool, { ...start, presentation: 1, previous: undefined });
 }
 
 /**
  * Applies a message to the session (Elm's `update`). A message that doesn't fit the phase, such
- * as an answer while a success is shown, leaves the session unchanged.
+ * as an answer while a success is shown or an `advance` for an earlier success, leaves the session
+ * unchanged.
  * @see §8–9 of `docs/legacy-architecture.md` for the flow this replaces
  */
 export function updateSession<Pool>(
@@ -163,11 +174,8 @@ export function updateSession<Pool>(
     case 'answer':
       return session.phase === 'presenting' ? answer(strategy, session, msg) : unchanged(session);
     case 'advance':
-      return session.phase === 'succeeded'
-        ? {
-            model: present(strategy, session.pool, { ...msg, previous: session.item }),
-            effects: [],
-          }
+      return session.phase === 'succeeded' && msg.presentation === session.presentation
+        ? { model: next(strategy, session, msg), effects: [] }
         : unchanged(session);
     case 'skip':
       return session.phase === 'presenting' ? skip(strategy, session, msg) : unchanged(session);
@@ -177,13 +185,26 @@ export function updateSession<Pool>(
 function present<Pool>(
   strategy: PracticeStrategy<Pool>,
   pool: Pool,
-  { roll, at, previous }: NextDraw,
+  { roll, at, presentation, previous }: NextDraw,
 ): Session<Pool> {
-  const presentation = strategy.next(pool, { roll, previous });
+  const picked = strategy.next(pool, { roll, previous });
 
-  return presentation === undefined
+  return picked === undefined
     ? { phase: 'finished', pool }
-    : { phase: 'presenting', pool, ...presentation, shownAt: at, misses: 0 };
+    : { phase: 'presenting', pool, ...picked, presentation, shownAt: at, misses: 0 };
+}
+
+/** Presents what follows the session's current item, from the given pool. */
+function next<Pool>(
+  strategy: PracticeStrategy<Pool>,
+  {
+    pool,
+    item,
+    presentation,
+  }: { readonly pool: Pool; readonly item: PracticeItem; readonly presentation: number },
+  { roll, at }: { readonly roll: number; readonly at: number },
+): Session<Pool> {
+  return present(strategy, pool, { roll, at, presentation: presentation + 1, previous: item });
 }
 
 function answer<Pool>(
@@ -191,7 +212,7 @@ function answer<Pool>(
   session: Presenting<Pool>,
   { keys, at }: { readonly keys: KeyCombination; readonly at: number },
 ): SessionUpdate<Pool> {
-  const { item, mode, shownAt, mistake } = session;
+  const { item, mode, presentation, shownAt, mistake } = session;
 
   if (!isSameCombination(keys, item.keys)) {
     return { model: miss(session, keys), effects: [] };
@@ -205,8 +226,8 @@ function answer<Pool>(
   });
 
   return {
-    model: { phase: 'succeeded', pool, item },
-    effects: [...effects, { type: 'advanceAfter', ms: successPauseMs }],
+    model: { phase: 'succeeded', pool, item, presentation },
+    effects: [...effects, { type: 'advanceAfter', ms: successPauseMs, presentation }],
   };
 }
 
@@ -224,7 +245,7 @@ function skip<Pool>(
 ): SessionUpdate<Pool> {
   const { pool, effects } = strategy.skip(session.pool, session.item);
 
-  return { model: present(strategy, pool, { roll, at, previous: session.item }), effects };
+  return { model: next(strategy, { ...session, pool }, { roll, at }), effects };
 }
 
 function unchanged<Pool>(session: Session<Pool>): SessionUpdate<Pool> {

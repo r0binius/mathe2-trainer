@@ -6,8 +6,15 @@ import type { CardMemory, Grade, Scheduler } from './scheduler';
 import { dayMs, parseCardMemory } from './scheduler';
 
 const at = Date.UTC(2026, 8, 28, 10);
+const hourMs = 60 * 60 * 1000;
+
 // Typed as the port, so this also checks that the adapter fits it.
-const schedule: Scheduler = scheduleWithFsrs;
+const port: Scheduler = scheduleWithFsrs;
+
+/** Schedules a review in UTC, where local days are UTC days. */
+function schedule(memory: CardMemory | undefined, grade: Grade, reviewedAt: number): CardMemory {
+  return port(memory, grade, { at: reviewedAt, utcOffsetMinutes: 0 });
+}
 
 function daysUntilDue({ dueAt, lastReviewAt }: CardMemory): number {
   return (dueAt - lastReviewAt) / dayMs;
@@ -118,5 +125,24 @@ describe('scheduleWithFsrs', () => {
     );
 
     expect(invalid).toStrictEqual([]);
+  });
+
+  it('counts days in local time: a review just after local midnight is on the next day', () => {
+    // 23:30 and 00:30 in German summer time (UTC+2) are 21:30 and 22:30 UTC, one UTC day.
+    const lateEvening = Date.UTC(2026, 8, 28, 21, 30);
+    const afterMidnight = lateEvening + hourMs;
+    const first = port(undefined, 'good', { at: lateEvening, utcOffsetMinutes: 120 });
+
+    expect(
+      port(first, 'good', { at: afterMidnight, utcOffsetMinutes: 120 }).stability,
+    ).toBeGreaterThan(first.stability + 1);
+    expect(schedule(first, 'good', afterMidnight).stability).toBeCloseTo(first.stability, 4);
+  });
+
+  it('keeps times real: a card is due whole days after its review, whatever the offset', () => {
+    const memory = port(undefined, 'good', { at, utcOffsetMinutes: 120 });
+
+    expect(memory.lastReviewAt).toBe(at);
+    expect(Number.isInteger(daysUntilDue(memory))).toBe(true);
   });
 });

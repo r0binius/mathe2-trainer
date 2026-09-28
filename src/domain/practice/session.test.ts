@@ -43,14 +43,21 @@ function presenting(
   presentation: Presentation,
   pool: readonly Presentation[] = [presentation],
 ): Session<readonly Presentation[]> {
-  return { phase: 'presenting', pool, ...presentation, shownAt: 1000, misses: 0 };
+  return {
+    phase: 'presenting',
+    pool,
+    ...presentation,
+    presentation: 1,
+    shownAt: 1000,
+    misses: 0,
+  };
 }
 
 function succeeded(
   pool: readonly Presentation[],
   item: PracticeItem = find,
 ): Session<readonly Presentation[]> {
-  return { phase: 'succeeded', pool, item };
+  return { phase: 'succeeded', pool, item, presentation: 1 };
 }
 
 describe('startSession', () => {
@@ -62,6 +69,7 @@ describe('startSession', () => {
       pool,
       item: save,
       mode: 'testing',
+      presentation: 1,
       shownAt: 1000,
       misses: 0,
     });
@@ -87,7 +95,7 @@ describe('answering', () => {
       model: succeeded([]),
       effects: [
         { type: 'tested', id: find.id, failed: false, durationMs: 2500 },
-        { type: 'advanceAfter', ms: successPauseMs },
+        { type: 'advanceAfter', ms: successPauseMs, presentation: 1 },
       ],
     });
   });
@@ -162,22 +170,46 @@ describe('advancing', () => {
     const pool = [training, next];
 
     expect(
-      updateSession(inOrder, succeeded(pool), { type: 'advance', roll: 0, at: 5000 }),
-    ).toStrictEqual({ model: { ...presenting(next, pool), shownAt: 5000 }, effects: [] });
+      updateSession(inOrder, succeeded(pool), {
+        type: 'advance',
+        presentation: 1,
+        roll: 0,
+        at: 5000,
+      }),
+    ).toStrictEqual({
+      model: { ...presenting(next, pool), presentation: 2, shownAt: 5000 },
+      effects: [],
+    });
   });
 
   it('finishes when the strategy has nothing left to present', () => {
     expect(
-      updateSession(inOrder, succeeded([]), { type: 'advance', roll: 0, at: 5000 }),
+      updateSession(inOrder, succeeded([]), {
+        type: 'advance',
+        presentation: 1,
+        roll: 0,
+        at: 5000,
+      }),
     ).toStrictEqual({ model: { phase: 'finished', pool: [] }, effects: [] });
   });
 
   it('is ignored while an item waits for its answer', () => {
     const session = presenting(training);
 
-    expect(updateSession(inOrder, session, { type: 'advance', roll: 0, at: 5000 }).model).toBe(
-      session,
-    );
+    expect(
+      updateSession(inOrder, session, { type: 'advance', presentation: 1, roll: 0, at: 5000 })
+        .model,
+    ).toBe(session);
+  });
+});
+
+describe('an advance from an earlier success', () => {
+  it('is ignored, so an old timer can’t cut a later success short', () => {
+    const later = { ...succeeded([training]), presentation: 2 };
+
+    expect(
+      updateSession(inOrder, later, { type: 'advance', presentation: 1, roll: 0, at: 5000 }).model,
+    ).toBe(later);
   });
 });
 
@@ -191,7 +223,10 @@ describe('skipping', () => {
         roll: 0,
         at: 5000,
       }),
-    ).toStrictEqual({ model: { ...presenting(next, [next]), shownAt: 5000 }, effects: [] });
+    ).toStrictEqual({
+      model: { ...presenting(next, [next]), presentation: 2, shownAt: 5000 },
+      effects: [],
+    });
   });
 
   it('passes on what the strategy reports', () => {
@@ -224,7 +259,7 @@ describe('a finished session', () => {
     const session: Session<readonly Presentation[]> = { phase: 'finished', pool: [] };
     const msgs: readonly SessionMsg[] = [
       { type: 'answer', keys: ['Meta', 'f'], at: 0 },
-      { type: 'advance', roll: 0, at: 0 },
+      { type: 'advance', presentation: 1, roll: 0, at: 0 },
       { type: 'skip', roll: 0, at: 0 },
     ];
 

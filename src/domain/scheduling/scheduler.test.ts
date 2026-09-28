@@ -2,17 +2,22 @@ import { describe, expect, it } from 'vitest';
 
 import { err } from '../shared/result';
 import { validMemory } from './memory.fixture';
-import type { Card, CardMemory, CardMemoryFields, Grade } from './scheduler';
+import type { Card, CardMemory, CardMemoryFields, Grade, ReviewTime } from './scheduler';
 import { dayMs, dueCards, parseCardMemory, reviewCard } from './scheduler';
 
 const at = Date.UTC(2026, 8, 28, 10);
 const german = 'com.apple.keylayout.German';
 
 /** Schedules every grade two days out, so the rules around the scheduler show. */
-function twoDays(memory: CardMemory | undefined, grade: Grade, reviewedAt: number): CardMemory {
+function twoDays(
+  memory: CardMemory | undefined,
+  grade: Grade,
+  { at: reviewedAt, utcOffsetMinutes }: ReviewTime,
+): CardMemory {
   return validMemory({
     stability: grade === 'again' ? 0.5 : 2,
-    difficulty: 5,
+    // Shows which offset the scheduler got.
+    difficulty: 5 + utcOffsetMinutes / 60,
     lastReviewAt: reviewedAt,
     dueAt: reviewedAt + 2 * dayMs,
     reps: (memory?.reps ?? 0) + 1,
@@ -56,7 +61,13 @@ describe('parseCardMemory', () => {
 describe('reviewCard', () => {
   it('creates a card on the first success', () => {
     expect(
-      reviewCard(twoDays, undefined, { id: card.id, layout: german, grade: 'good', at }),
+      reviewCard(twoDays, undefined, {
+        id: card.id,
+        layout: german,
+        grade: 'good',
+        at,
+        utcOffsetMinutes: 0,
+      }),
     ).toStrictEqual({
       id: card.id,
       layout: german,
@@ -69,15 +80,39 @@ describe('reviewCard', () => {
     });
   });
 
+  it('passes the review time and its UTC offset to the scheduler', () => {
+    expect(
+      reviewCard(twoDays, card, {
+        id: card.id,
+        layout: german,
+        grade: 'good',
+        at,
+        utcOffsetMinutes: 120,
+      })?.difficulty,
+    ).toBe(7);
+  });
+
   it('creates no card when the first test fails: that is still learning', () => {
     expect(
-      reviewCard(twoDays, undefined, { id: card.id, layout: german, grade: 'again', at }),
+      reviewCard(twoDays, undefined, {
+        id: card.id,
+        layout: german,
+        grade: 'again',
+        at,
+        utcOffsetMinutes: 0,
+      }),
     ).toBeUndefined();
   });
 
   it('reschedules an existing card with the scheduler', () => {
     expect(
-      reviewCard(twoDays, card, { id: card.id, layout: german, grade: 'hard', at }),
+      reviewCard(twoDays, card, {
+        id: card.id,
+        layout: german,
+        grade: 'hard',
+        at,
+        utcOffsetMinutes: 0,
+      }),
     ).toMatchObject({
       reps: 2,
       dueAt: at + 2 * dayMs,
@@ -86,7 +121,13 @@ describe('reviewCard', () => {
 
   it('makes a forgotten card due a day after its review, however stable it still is', () => {
     expect(
-      reviewCard(twoDays, card, { id: card.id, layout: german, grade: 'again', at })?.dueAt,
+      reviewCard(twoDays, card, {
+        id: card.id,
+        layout: german,
+        grade: 'again',
+        at,
+        utcOffsetMinutes: 0,
+      })?.dueAt,
     ).toBe(at + dayMs);
   });
 });

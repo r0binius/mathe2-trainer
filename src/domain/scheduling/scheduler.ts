@@ -54,14 +54,27 @@ export type Card = CardMemory & {
  * implementation fills). It takes only valid memory, so it never has to fail. The rules of this
  * app, such as when a card is created, stay outside it.
  */
-export type Scheduler = (memory: CardMemory | undefined, grade: Grade, at: number) => CardMemory;
+export type Scheduler = (
+  memory: CardMemory | undefined,
+  grade: Grade,
+  time: ReviewTime,
+) => CardMemory;
+
+/**
+ * When a review happened, and the local UTC offset at that moment in minutes east of UTC (+120 in
+ * German summer time; `-new Date(at).getTimezoneOffset()` in the shell). The scheduler counts days
+ * in local time, the same days as {@link dueCards}.
+ */
+export type ReviewTime = {
+  readonly at: number;
+  readonly utcOffsetMinutes: number;
+};
 
 /** A graded test of a shortcut. */
-export type Review = {
+export type Review = ReviewTime & {
   readonly id: ShortcutId;
   readonly layout: LayoutId;
   readonly grade: Grade;
-  readonly at: number;
 };
 
 type MemoryRule = (fields: CardMemoryFields) => InvalidMemory | undefined;
@@ -100,13 +113,13 @@ export function parseCardMemory(fields: CardMemoryFields): Result<CardMemory, In
 export function reviewCard(
   scheduler: Scheduler,
   card: Card | undefined,
-  { id, layout, grade, at }: Review,
+  { id, layout, grade, ...time }: Review,
 ): Card | undefined {
   if (card === undefined && grade === 'again') {
     return undefined;
   }
 
-  const memory = scheduler(card, grade, at);
+  const memory = scheduler(card, grade, time);
 
   // From the scheduler's review time, which may be later than `at` if the clock went back.
   return {
