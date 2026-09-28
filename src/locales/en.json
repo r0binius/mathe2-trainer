@@ -30,5 +30,13 @@
     "learned": "learned",
     "start": "Start learning",
     "continue": "Continue"
+  },
+  "learn": {
+    "back": "Overview",
+    "mastered": "{n} mastered"
+  },
+  "practice": {
+    "skip": "Skip",
+    "saveFailed": "Progress couldn't be saved"
   }
 }

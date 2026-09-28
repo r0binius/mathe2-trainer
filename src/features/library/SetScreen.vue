@@ -12,7 +12,7 @@ import type { SummaryContext } from '@/domain/progress/summary';
 import { summarizeSet } from '@/domain/progress/summary';
 import type { AppDefinition, ShortcutSet } from '@/domain/shortcuts/types';
 import { useText } from '@/i18n';
-import { toApp } from '@/router';
+import { toApp, toLearn } from '@/router';
 
 const props = defineProps<{
   /** The app the set belongs to. */
@@ -28,6 +28,13 @@ const text = useText();
 
 const summary = computed(() => summarizeSet(props.app.id, props.set, props.context));
 const title = computed(() => text.app(props.app.id, props.set.title));
+
+/** Continues a set started before; a completed set is learned again from the start. */
+const continues = computed(() => {
+  const { learned, items } = summary.value;
+
+  return learned.length > 0 && learned.length < items.length;
+});
 </script>
 
 <template>
@@ -39,14 +46,24 @@ const title = computed(() => text.app(props.app.id, props.set.title));
     </template>
 
     <header class="header">
-      <h1 class="title truncate">{{ title }}</h1>
-      <p class="meta">
-        <template v-if="summary.learned.length > 0">
-          <TextProgress :value="summary.learned.length" :max="summary.items.length" />
-          {{ text.ui('set.learned') }}
-        </template>
-        <template v-else>{{ text.count('library.shortcuts', summary.items.length) }}</template>
-      </p>
+      <div class="heading">
+        <h1 class="title truncate">{{ title }}</h1>
+        <p class="meta">
+          <template v-if="summary.learned.length > 0">
+            <TextProgress :value="summary.learned.length" :max="summary.items.length" />
+            {{ text.ui('set.learned') }}
+          </template>
+          <template v-else>{{ text.count('library.shortcuts', summary.items.length) }}</template>
+        </p>
+      </div>
+      <BaseButton
+        v-if="summary.items.length > 0"
+        variant="accent"
+        size="large"
+        @click="router.push(toLearn(app.id, set.id))"
+      >
+        {{ text.ui(continues ? 'set.continue' : 'set.start') }}
+      </BaseButton>
     </header>
 
     <ul class="rows">
@@ -74,7 +91,15 @@ const title = computed(() => text.app(props.app.id, props.set.title));
 
 <style scoped>
 .header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   padding: 40px 0 24px;
+}
+
+.heading {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .title {

@@ -7,6 +7,7 @@ import type { AppDefinition } from '@/domain/shortcuts/types';
 import AppScreen from './features/library/AppScreen.vue';
 import LibraryScreen from './features/library/LibraryScreen.vue';
 import SetScreen from './features/library/SetScreen.vue';
+import LearnScreen from './features/practice/LearnScreen.vue';
 
 /** The route to the list of apps. */
 export function toLibrary(): RouteLocationRaw {
@@ -21,6 +22,11 @@ export function toApp(appId: string): RouteLocationRaw {
 /** The route to a set's shortcuts. */
 export function toSet(appId: string, setId: string): RouteLocationRaw {
   return { name: 'set', params: { appId, setId } };
+}
+
+/** The route to learning a set. */
+export function toLearn(appId: string, setId: string): RouteLocationRaw {
+  return { name: 'learn', params: { appId, setId } };
 }
 
 /**
@@ -60,6 +66,14 @@ export function createAppRouter(apps: readonly AppDefinition[]): Router {
         name: 'set',
         component: SetScreen,
         meta: { depth: 2 },
+        beforeEnter: (to) => (setOf(to) === undefined ? toLibrary() : true),
+        props: (to) => ({ ...setOf(to) }),
+      },
+      {
+        path: '/apps/:appId/sets/:setId/learn',
+        name: 'learn',
+        component: LearnScreen,
+        meta: { depth: 3 },
         beforeEnter: (to) => (setOf(to) === undefined ? toLibrary() : true),
         props: (to) => ({ ...setOf(to) }),
       },

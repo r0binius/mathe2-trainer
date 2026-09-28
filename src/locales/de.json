@@ -30,5 +30,13 @@
     "learned": "gelernt",
     "start": "Lernen",
     "continue": "Weiterlernen"
+  },
+  "learn": {
+    "back": "Übersicht",
+    "mastered": "{n} gelernt"
+  },
+  "practice": {
+    "skip": "Überspringen",
+    "saveFailed": "Fortschritt konnte nicht gespeichert werden"
   }
 }

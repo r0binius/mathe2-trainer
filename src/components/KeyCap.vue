@@ -11,7 +11,7 @@ defineProps<{
   /** Whether the key is down, or shown as pressed: the keycap pops up over its outline. */
   pressed?: boolean;
   /** Whether pressing it was right, shown as a badge; no badge while undecided. */
-  result?: 'correct' | 'wrong';
+  result?: 'correct' | 'wrong' | undefined;
 }>();
 </script>
 
