@@ -40,11 +40,18 @@ export function createAppRouter(apps: readonly AppDefinition[]): Router {
   return createRouter({
     history: createWebHashHistory(),
     routes: [
-      { path: '/', name: 'library', component: LibraryScreen, props: { apps } },
+      {
+        path: '/',
+        name: 'library',
+        component: LibraryScreen,
+        props: { apps },
+        meta: { depth: 0 },
+      },
       {
         path: '/apps/:appId',
         name: 'app',
         component: AppScreen,
+        meta: { depth: 1 },
         beforeEnter: (to) => (appOf(to) === undefined ? toLibrary() : true),
         props: (to) => ({ app: appOf(to) }),
       },
@@ -52,12 +59,23 @@ export function createAppRouter(apps: readonly AppDefinition[]): Router {
         path: '/apps/:appId/sets/:setId',
         name: 'set',
         component: SetScreen,
+        meta: { depth: 2 },
         beforeEnter: (to) => (setOf(to) === undefined ? toLibrary() : true),
         props: (to) => ({ ...setOf(to) }),
       },
       { path: '/:unknown(.*)*', redirect: toLibrary() },
     ],
   });
+}
+
+/**
+ * How deep a route lies below the library, which decides the direction screens slide in: deeper
+ * slides in from the right, back towards the library slides out to the right.
+ */
+export function depthOf(route: RouteLocationNormalized): number {
+  const { depth } = route.meta;
+
+  return typeof depth === 'number' ? depth : 0;
 }
 
 /** A single route parameter; a repeated one, which none of our routes has, reads as empty. */
