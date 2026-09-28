@@ -254,7 +254,7 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 - [x] 5.4 Route transitions and fade-in
 - 5.5 Learn and review screens
   - [x] 5.5.1 `useProgram`, the Elm runtime
-  - [ ] 5.5.2 `useKeyCapture`
+  - [x] 5.5.2 `useKeyCapture`
   - [ ] 5.5.3 `usePracticeSession`
   - [ ] 5.5.4 Learn screen
   - [ ] 5.5.5 Review screen

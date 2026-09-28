@@ -34,16 +34,31 @@ const modifierCodes: readonly string[] = [
  * ```
  */
 export function combinationOf(keymap: Keymap, press: KeyPress): KeyCombination | undefined {
-  if (modifierCodes.includes(press.code)) {
-    return undefined;
-  }
+  return isModifierCode(press.code) ? undefined : heldKeysOf(keymap, press);
+}
 
-  const held = [
+/**
+ * What's down during a key press, to show while a combination is being pressed: the modifiers
+ * held and, unless the key is one of them, the key itself, named as in {@link combinationOf}.
+ */
+export function heldKeysOf(keymap: Keymap, press: KeyPress): KeyCombination {
+  const modifiers = heldModifiersOf(press);
+
+  return isModifierCode(press.code)
+    ? modifiers
+    : orderModifiersFirst([...modifiers, keyOf(keymap, press.code)]);
+}
+
+/** The modifiers down during a key event, such as those still held after a key went up. */
+export function heldModifiersOf(press: KeyPress): KeyCombination {
+  return [
     press.control ? 'Control' : undefined,
     press.alt ? 'Alt' : undefined,
     press.shift ? 'Shift' : undefined,
     press.meta ? 'Meta' : undefined,
   ].filter((modifier) => modifier !== undefined);
+}
 
-  return orderModifiersFirst([...held, keyOf(keymap, press.code)]);
+function isModifierCode(code: string): boolean {
+  return modifierCodes.includes(code);
 }

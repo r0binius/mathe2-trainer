@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { KeyPress } from './capture';
-import { combinationOf } from './capture';
+import { combinationOf, heldKeysOf, heldModifiersOf } from './capture';
 import germanKeymap from './germanKeymap.fixture.json';
 import { resolveKeys } from './resolve';
 
@@ -37,5 +37,31 @@ describe('combinationOf', () => {
   it('waits for the key when only a modifier is pressed', () => {
     expect(combinationOf(germanKeymap, press('MetaLeft', { meta: true }))).toBeUndefined();
     expect(combinationOf(germanKeymap, press('ShiftRight', { shift: true }))).toBeUndefined();
+  });
+});
+
+describe('heldKeysOf', () => {
+  it('shows the modifiers alone while only they are down', () => {
+    expect(heldKeysOf(germanKeymap, press('MetaLeft', { meta: true, shift: true }))).toStrictEqual([
+      'Shift',
+      'Meta',
+    ]);
+  });
+
+  it('adds the key once it goes down, named as in an answer', () => {
+    expect(heldKeysOf(germanKeymap, press('KeyY', { meta: true }))).toStrictEqual(['Meta', 'z']);
+  });
+
+  it('holds nothing when a released modifier was the last key down', () => {
+    expect(heldKeysOf(germanKeymap, press('MetaLeft'))).toStrictEqual([]);
+  });
+});
+
+describe('heldModifiersOf', () => {
+  it('keeps only the modifiers still down, as after a key goes up', () => {
+    expect(heldModifiersOf(press('KeyY', { control: true, meta: true }))).toStrictEqual([
+      'Control',
+      'Meta',
+    ]);
   });
 });
