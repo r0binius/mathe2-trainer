@@ -1,6 +1,7 @@
+import type { KeyCombination } from './combination';
+import { orderModifiersFirst } from './combination';
 import type { Keymap } from './keymap';
-import type { KeyCombination } from './resolve';
-import { keyOf, orderModifiersFirst } from './resolve';
+import { keyOf } from './resolve';
 
 /** A key going down, as a `KeyboardEvent` reports it: the physical key and the modifiers held. */
 export type KeyPress = {

@@ -1,23 +1,7 @@
-import type { LayoutId } from '../keyboard/keymap';
-import type { Card } from '../scheduling/scheduler';
 import type { ShortcutId } from '../shortcuts/shortcutId';
 import { shortcutId } from '../shortcuts/shortcutId';
 import type { AppDefinition, ShortcutSet } from '../shortcuts/types';
-import type { SetProgress } from './setProgress';
-
-/** A set's progress on one keyboard layout. */
-export type SetRecord = {
-  readonly appId: string;
-  readonly setId: string;
-  readonly layout: LayoutId;
-  readonly progress: SetProgress;
-};
-
-/** The stored progress that depends on which shortcuts exist. */
-export type ReconciledProgress = {
-  readonly sets: readonly SetRecord[];
-  readonly cards: readonly Card[];
-};
+import type { SetRecord, StoredProgress } from './storedProgress';
 
 /**
  * Removes progress of shortcuts and sets that are no longer in the data, on every keyboard
@@ -28,9 +12,9 @@ export type ReconciledProgress = {
  * @see `CleanUp.run` in §9 of `docs/legacy-architecture.md`
  */
 export function reconcileProgress(
-  { sets, cards }: ReconciledProgress,
+  { sets, cards }: StoredProgress,
   apps: readonly AppDefinition[],
-): ReconciledProgress {
+): StoredProgress {
   const known = new Set(
     apps.flatMap((app) => app.sets.flatMap((set) => setShortcutIds(app.id, set))),
   );

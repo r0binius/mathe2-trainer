@@ -2,11 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import type { LearnEntry, LearnPool, LearnStage } from './learn';
 import { learnPool, learnStrategy, snapshotLearning } from './learn';
-import type { Attempt, PracticeItem } from './session';
-
-function item(key: string): PracticeItem {
-  return { id: `app/Meta+${key}`, keys: ['Meta', key], title: key };
-}
+import { attempt, item } from './practice.fixture';
+import type { PracticeItem } from './session';
 
 const [a, b, c, d] = [item('a'), item('b'), item('c'), item('d')];
 
@@ -25,10 +22,6 @@ const mixed = poolOf(
   entry(c, 'unseen'),
   entry(d, 'learned'),
 );
-
-function attempt(overrides: Partial<Attempt> = {}): Attempt {
-  return { item: a, mode: 'testing', failed: false, durationMs: 1000, ...overrides };
-}
 
 describe('learnPool', () => {
   it('starts the shortcuts learned in earlier sessions as learned, the rest as unseen', () => {

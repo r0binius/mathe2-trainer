@@ -1,17 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
+import { attempt, item } from './practice.fixture';
 import { reviewPool, reviewStrategy } from './review';
-import type { Attempt, PracticeItem } from './session';
-
-function item(key: string): PracticeItem {
-  return { id: `app/Meta+${key}`, keys: ['Meta', key], title: key };
-}
 
 const [a, b, c] = [item('a'), item('b'), item('c')];
-
-function attempt(overrides: Partial<Attempt> = {}): Attempt {
-  return { item: a, mode: 'testing', failed: false, durationMs: 1000, ...overrides };
-}
 
 describe('reviewPool', () => {
   it('queues the due shortcuts in the order given, with none done yet', () => {

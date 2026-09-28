@@ -1,5 +1,5 @@
-import type { KeyAlternatives } from '../keyboard/resolve';
-import { orderModifiersFirst } from '../keyboard/resolve';
+import type { KeyAlternatives } from '../keyboard/combination';
+import { orderModifiersFirst } from '../keyboard/combination';
 
 /**
  * Identifies a shortcut of an app, such as `vscodium/Meta+k|Meta+t`. Progress is keyed by it.

@@ -1,8 +1,9 @@
 import type { Result } from '../shared/result';
 import { err, ok } from '../shared/result';
+import type { KeyAlternatives, KeyCombination } from './combination';
+import { isModifier, isSameCombination } from './combination';
 import type { Keymap } from './keymap';
-import type { KeyAlternatives, KeyCombination } from './resolve';
-import { isModifier, isSameCombination, resolveKeys } from './resolve';
+import { resolveKeys } from './resolve';
 
 /** Why a combination can't be practiced. */
 export type Rejection =

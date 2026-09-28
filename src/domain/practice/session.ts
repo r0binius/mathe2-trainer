@@ -1,5 +1,5 @@
-import type { KeyCombination } from '../keyboard/resolve';
-import { isSameCombination } from '../keyboard/resolve';
+import type { KeyCombination } from '../keyboard/combination';
+import { isSameCombination } from '../keyboard/combination';
 import type { ShortcutId } from '../shortcuts/shortcutId';
 import type { MessageKey } from '../shortcuts/types';
 import type { LearnSnapshot } from './snapshot';
@@ -123,20 +123,24 @@ export type Session<Pool> =
 
 type Presenting<Pool> = Extract<Session<Pool>, { readonly phase: 'presenting' }>;
 
+/** A session showing an item, while it waits for the keys or shows the success. */
+type Showing<Pool> = Exclude<Session<Pool>, { readonly phase: 'finished' }>;
+
+/** A random number in `[0, 1)` the shell rolled for picking the next item, and when. */
+export type Roll = { readonly roll: number; readonly at: number };
+
 /**
  * What happened, as a message to the session. Messages carry the time and a random number, both
  * from the shell, so the session itself stays pure.
  */
 export type SessionMsg =
   | { readonly type: 'answer'; readonly keys: KeyCombination; readonly at: number }
-  | {
+  | (Roll & {
       readonly type: 'advance';
       /** The presentation whose success ends, as its `advanceAfter` named it. */
       readonly presentation: number;
-      readonly roll: number;
-      readonly at: number;
-    }
-  | { readonly type: 'skip'; readonly roll: number; readonly at: number };
+    })
+  | (Roll & { readonly type: 'skip' });
 
 /** The session after a message, and the effects the shell has to carry out because of it. */
 export type SessionUpdate<Pool> = {
@@ -144,17 +148,19 @@ export type SessionUpdate<Pool> = {
   readonly effects: readonly SessionEffect[];
 };
 
+type AnswerMsg = Extract<SessionMsg, { readonly type: 'answer' }>;
+
 /** How long a success is shown before the next item, as in the old app. */
 export const successPauseMs = 1000;
 
 /** Where the next presentation comes from: a roll, its time, its number and the item before. */
-type NextDraw = Draw & { readonly at: number; readonly presentation: number };
+type NextDraw = Draw & Roll & { readonly presentation: number };
 
 /** Starts a session by presenting the strategy's first pick, or finishes it if there's none. */
 export function startSession<Pool>(
   strategy: PracticeStrategy<Pool>,
   pool: Pool,
-  start: { readonly roll: number; readonly at: number },
+  start: Roll,
 ): Session<Pool> {
   return present(strategy, pool, { ...start, presentation: 1, previous: undefined });
 }
@@ -197,12 +203,8 @@ function present<Pool>(
 /** Presents what follows the session's current item, from the given pool. */
 function next<Pool>(
   strategy: PracticeStrategy<Pool>,
-  {
-    pool,
-    item,
-    presentation,
-  }: { readonly pool: Pool; readonly item: PracticeItem; readonly presentation: number },
-  { roll, at }: { readonly roll: number; readonly at: number },
+  { pool, item, presentation }: Showing<Pool>,
+  { roll, at }: Roll,
 ): Session<Pool> {
   return present(strategy, pool, { roll, at, presentation: presentation + 1, previous: item });
 }
@@ -210,7 +212,7 @@ function next<Pool>(
 function answer<Pool>(
   strategy: PracticeStrategy<Pool>,
   session: Presenting<Pool>,
-  { keys, at }: { readonly keys: KeyCombination; readonly at: number },
+  { keys, at }: AnswerMsg,
 ): SessionUpdate<Pool> {
   const { item, mode, presentation, shownAt, mistake } = session;
 
@@ -241,11 +243,11 @@ function miss<Pool>(session: Presenting<Pool>, keys: KeyCombination): Presenting
 function skip<Pool>(
   strategy: PracticeStrategy<Pool>,
   session: Presenting<Pool>,
-  { roll, at }: { readonly roll: number; readonly at: number },
+  rolled: Roll,
 ): SessionUpdate<Pool> {
   const { pool, effects } = strategy.skip(session.pool, session.item);
 
-  return { model: next(strategy, { ...session, pool }, { roll, at }), effects };
+  return { model: next(strategy, { ...session, pool }, rolled), effects };
 }
 
 function unchanged<Pool>(session: Session<Pool>): SessionUpdate<Pool> {

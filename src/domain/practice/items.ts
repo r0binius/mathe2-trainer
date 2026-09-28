@@ -1,7 +1,7 @@
+import type { KeyCombination } from '../keyboard/combination';
 import type { Keymap } from '../keyboard/keymap';
 import type { ShortcutPolicy } from '../keyboard/policy';
 import { practicableKeys } from '../keyboard/policy';
-import type { KeyCombination } from '../keyboard/resolve';
 import type { Card } from '../scheduling/scheduler';
 import { shortcutId } from '../shortcuts/shortcutId';
 import type { AppDefinition, ShortcutDefinition, ShortcutSet } from '../shortcuts/types';

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import germanKeymap from './germanKeymap.fixture.json';
-import { isSameCombination, keyOf, resolveKeys } from './resolve';
+import { keyOf, resolveKeys } from './resolve';
 
 describe('resolveKeys', () => {
   describe('on a German keymap', () => {
@@ -103,16 +103,5 @@ describe('keyOf', () => {
 describe('resolving the space bar', () => {
   it('names a character typed by the space bar Space, as capture does', () => {
     expect(resolveKeys(germanKeymap, ['Control', ' '])).toStrictEqual(['Control', 'Space']);
-  });
-});
-
-describe('isSameCombination', () => {
-  it('ignores the order of the keys', () => {
-    expect(isSameCombination(['Meta', 'Shift', 'k'], ['k', 'Shift', 'Meta'])).toBe(true);
-  });
-
-  it('tells combinations with different or extra keys apart', () => {
-    expect(isSameCombination(['Meta', 'k'], ['Meta', 'j'])).toBe(false);
-    expect(isSameCombination(['Meta', 'k'], ['Shift', 'Meta', 'k'])).toBe(false);
   });
 });

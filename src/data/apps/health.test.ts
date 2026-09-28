@@ -2,14 +2,15 @@ import { describe, expect, it } from 'vitest';
 
 import type { KeyPress } from '@/domain/keyboard/capture';
 import { combinationOf } from '@/domain/keyboard/capture';
+import type { KeyCombination } from '@/domain/keyboard/combination';
+import { isModifier, isSameCombination } from '@/domain/keyboard/combination';
 import germanKeymap from '@/domain/keyboard/germanKeymap.fixture.json';
 import type { Keymap } from '@/domain/keyboard/keymap';
 import { keyCodes } from '@/domain/keyboard/keymap';
 import { macosKeyLabels } from '@/domain/keyboard/labels';
 import type { Rejection } from '@/domain/keyboard/policy';
 import { checkShortcut, practicePolicy } from '@/domain/keyboard/policy';
-import type { KeyCombination } from '@/domain/keyboard/resolve';
-import { isModifier, isSameCombination, keyOf, resolveKeys } from '@/domain/keyboard/resolve';
+import { keyOf, resolveKeys } from '@/domain/keyboard/resolve';
 import { shortcutId } from '@/domain/shortcuts/shortcutId';
 import type { AppDefinition, ShortcutDefinition, ShortcutSet } from '@/domain/shortcuts/types';
 

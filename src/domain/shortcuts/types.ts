@@ -1,4 +1,4 @@
-import type { KeyAlternatives } from '../keyboard/resolve';
+import type { KeyAlternatives } from '../keyboard/combination';
 
 /**
  * A key into the app's catalogs (`src/data/apps/<id>/<locale>.json`), such as `essentials.find`.

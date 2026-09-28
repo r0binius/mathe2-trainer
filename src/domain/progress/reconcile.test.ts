@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { validMemory } from '../scheduling/memory.fixture';
 import type { Card } from '../scheduling/scheduler';
 import type { AppDefinition } from '../shortcuts/types';
-import type { SetRecord } from './reconcile';
 import { reconcileProgress } from './reconcile';
+import type { SetRecord } from './storedProgress';
 
 const apps: readonly AppDefinition[] = [
   {
