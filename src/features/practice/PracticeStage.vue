@@ -3,8 +3,8 @@ import { computed, ref, watch } from 'vue';
 
 import KeyCap from '@/components/KeyCap.vue';
 import SkipButton from '@/components/SkipButton.vue';
+import { useKeyLabels } from '@/composables/useKeyLabels';
 import type { KeyCombination } from '@/domain/keyboard/combination';
-import { labelKey, macosKeyLabels } from '@/domain/keyboard/labels';
 import type { Session } from '@/domain/practice/session';
 import { useText } from '@/i18n';
 
@@ -32,6 +32,7 @@ defineSlots<{
 }>();
 
 const text = useText();
+const labelOf = useKeyLabels();
 const keyCaps = computed(() =>
   props.session.phase === 'finished' ? [] : keyCapsOf(props.session, props.held),
 );
@@ -66,7 +67,7 @@ watch(
             <KeyCap
               v-for="cap in row"
               :key="cap.key"
-              :label="labelKey(macosKeyLabels, cap.key)"
+              :label="labelOf(cap.key)"
               :hidden="cap.hidden"
               :pressed="cap.pressed"
               :result="cap.result"

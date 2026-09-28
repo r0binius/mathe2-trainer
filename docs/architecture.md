@@ -210,7 +210,7 @@ src/
 ├─ features/        library/, learn/, review/, lookup/, settings/
 ├─ components/
 ├─ styles/
-├─ ports.ts         injection keys for what main.ts provides (repositories, keymap source)
+├─ ports.ts         injection keys for what main.ts provides (repositories, keymap source, key labels)
 ├─ router.ts, App.vue, main.ts
 src-tauri/
 ├─ migrations/      0001_settings.sql, … (one SQL file per schema change)

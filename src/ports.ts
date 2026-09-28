@@ -4,6 +4,7 @@
 import type { InjectionKey } from 'vue';
 
 import type { KeymapSource } from '@/domain/keyboard/keymap';
+import type { KeyLabels } from '@/domain/keyboard/labels';
 import type { ProgressRepository } from '@/domain/progress/repository';
 import type { SettingsRepository } from '@/domain/settings/repository';
 import type { Err } from '@/domain/shared/result';
@@ -20,6 +21,12 @@ export const progressRepositoryKey: InjectionKey<ProgressRepository> =
 
 /** Where the app provides the source of the current keyboard layout to the stores. */
 export const keymapSourceKey: InjectionKey<KeymapSource> = Symbol('keymap source');
+
+/** Where the app provides the platform's key labels (⌘, ⌥, …) to the screens. */
+export const keyLabelsKey: InjectionKey<KeyLabels> = Symbol('key labels');
+
+/** What a screen injects when the app provided no key labels: keys show by their names. */
+export const missingKeyLabels: KeyLabels = {};
 
 const notProvided: StorageError = {
   kind: 'storage',

@@ -8,8 +8,8 @@ import PageLayout from '@/components/PageLayout.vue';
 import ResultBadge from '@/components/ResultBadge.vue';
 import ScreenHeading from '@/components/ScreenHeading.vue';
 import TextProgress from '@/components/TextProgress.vue';
+import { useKeyLabels } from '@/composables/useKeyLabels';
 import { useSpatialNav } from '@/composables/useSpatialNav';
-import { labelKey, macosKeyLabels } from '@/domain/keyboard/labels';
 import type { SummaryContext } from '@/domain/progress/summary';
 import { summarizeSet } from '@/domain/progress/summary';
 import type { AppDefinition, ShortcutSet } from '@/domain/shortcuts/types';
@@ -27,6 +27,7 @@ const props = defineProps<{
 
 const router = useRouter();
 const text = useText();
+const labelOf = useKeyLabels();
 const nav = useTemplateRef<HTMLElement>('nav');
 
 useSpatialNav(
@@ -87,11 +88,7 @@ const continues = computed(() => {
             </div>
           </div>
           <div class="keys">
-            <KeyCapSmall
-              v-for="key in item.keys"
-              :key="key"
-              :label="labelKey(macosKeyLabels, key)"
-            />
+            <KeyCapSmall v-for="key in item.keys" :key="key" :label="labelOf(key)" />
           </div>
         </li>
       </ul>

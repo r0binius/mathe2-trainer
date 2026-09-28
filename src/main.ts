@@ -5,11 +5,17 @@ import { createApp } from 'vue';
 
 import App from './App.vue';
 import { apps } from './data/apps';
+import { macosKeyLabels } from './domain/keyboard/labels';
 import { uiLanguageOf } from './domain/settings/language';
 import { createAppI18n } from './i18n';
 import { germanKeymapSource } from './platform/keymap';
 import { tauriRepositories } from './platform/tauri';
-import { keymapSourceKey, progressRepositoryKey, settingsRepositoryKey } from './ports';
+import {
+  keyLabelsKey,
+  keymapSourceKey,
+  progressRepositoryKey,
+  settingsRepositoryKey,
+} from './ports';
 import { createAppRouter } from './router';
 
 const repositories = tauriRepositories();
@@ -21,4 +27,5 @@ createApp(App)
   .provide(settingsRepositoryKey, repositories.settings)
   .provide(progressRepositoryKey, repositories.progress)
   .provide(keymapSourceKey, germanKeymapSource)
+  .provide(keyLabelsKey, macosKeyLabels)
   .mount('#app');
