@@ -248,7 +248,8 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
   - [x] 5.3.1 Keymap store, app list and progress summaries
   - [x] 5.3.2 vue-i18n with English and German UI text
   - [x] 5.3.3 Router, page layout and window chrome
-  - [ ] 5.3.4 Library, app and set screens
+  - [x] 5.3.4 Loading at startup, summary context and logos
+  - [ ] 5.3.5 Library, app and set screens
 - [ ] 5.4 Learn and review screens (`useKeyCapture`, `usePracticeSession`)
 - [ ] 5.5 Options screen
 - [ ] 5.6 Spatial navigation and transitions

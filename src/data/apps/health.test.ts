@@ -122,6 +122,12 @@ describe('app data', () => {
     expect(apps.map((app) => app.id).sort()).toStrictEqual([...folders].sort());
   });
 
+  it('has a logo in every app folder', () => {
+    const logos = Object.keys(import.meta.glob('./*/logo.svg')).map((path) => path.split('/')[1]);
+
+    expect(logos).toStrictEqual(folders);
+  });
+
   it('uses each set ID once per app', () => {
     const duplicates = apps.flatMap((app) =>
       duplicatesIn(app.sets.map((set) => set.id)).map((id) => `${app.id}/${id}`),
