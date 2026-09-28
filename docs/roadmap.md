@@ -218,7 +218,7 @@ Branch `feature/persistence`. Settings and progress stored by Rust and reached t
 - **Refactor with a rule of three, and recheck defaults.** A shared `firstViolation` for two call sites cost more than it saved and went again. `satisfies` replaced an identity function, and TypeScript 6 and `@vue/tsconfig` already set flags we repeated.
 - **Review your own diff before handing it over.** Rereading `oneOf` found a tie that reported "one of no decoders" instead of the real error; a test pinned it first.
 
-## 5. Main window UI 🚧 ([#5](https://codeberg.org/gobin/mouseless/issues/5))
+## 5. Main window UI ✅ ([#5](https://codeberg.org/gobin/mouseless/issues/5))
 
 Branch `feature/main-window`. The library, sets, set detail, learn, review and options screens, with transitions and keyboard navigation.
 
@@ -267,6 +267,17 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 **Concepts:** Vue reactivity (`ref`, `computed`, `watch`), composables and effect cleanup, presentational vs. container components, typed props and emits, the router.
 
 **Resources:** [Vue: Reactivity in depth](https://vuejs.org/guide/extras/reactivity-in-depth.html) · [Composables](https://vuejs.org/guide/reusability/composables.html) · [TypeScript with the Composition API](https://vuejs.org/guide/typescript/composition-api.html)
+
+**What we learned**
+
+- **The Elm Architecture carries the UI.** With the session pure since step 3, `useProgram` (a `shallowRef`, `dispatch` and an `AbortSignal` for effects) and `usePracticeSession` (clock, randomness, keys, timers and saving) were small, and each screen differs only in its strategy and its `save`. Leaving a screen aborts the signal, so a late timer never changes a model nobody shows.
+- **Pure view logic belongs next to the view, with tests.** `keyCapsOf`, `nearestInDirection`, the progress summaries and `allLoaded` replaced what the old app spread over `v-if` branches and component methods, and each got its tests before its component.
+- **Our lint shapes the composables.** `functional/no-mixed-types` turned `{ init, update, run }` into `useProgram(init, { update, run })` returning a tuple, and `prefer-immutable-types` turned `Ref` parameters into getters, which also read the current value at each use. Both read well, so the rules stayed on; one that only restated TypeScript (`vue/require-default-prop`) went.
+- **Library types aren't always checks.** vue-i18n's typed keys accept any string, so our own `useText()` types keys as the paths of `en.json`, and a test on the types proves a typo fails. `satisfies` and a runtime test keep German and English in step.
+- **Only the running app proves the platform.** Unit tests couldn't say whether macOS menu shortcuts (⌘W, ⌘Q, ⌘H) reach the webview in Tauri; a throwaway probe in the app showed they do, so practice needs no Rust menu. A look into the development database settled that "progress isn't saved" was the old rule that only a first-try test counts as learned.
+- **Tooling caches can hide changes.** `vue-tsc --build` didn't notice a changed `vueCompilerOptions` or `lib` until its build info was deleted; `node_modules/.tmp/*.tsbuildinfo` goes when such options change.
+- **Split big steps when they turn out big.** 5.3 became five sub-steps and 5.5 five, each one diff with a look at the running app. Transitions moved forward once navigation existed, so later screens were reviewed with their final motion.
+- **Modern CSS is enough.** Custom properties, native nesting, `color-mix()` and scoped styles replaced Sass, and naming colours by role (`--color-surface`, `--color-text-muted`) came once the same shades had repeated 21 times.
 
 ## 6. Native keyboard layout ⏳ ([#6](https://codeberg.org/gobin/mouseless/issues/6))
 

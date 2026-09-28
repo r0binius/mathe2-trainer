@@ -45,10 +45,10 @@ State + Command (§5) are this loop in pattern terms: the model is the State, an
 
 ```
 ┌─────────────────────────────── Vue frontend (src/) ───────────────────────────────┐
-│ features/   library · learn · review · lookup · settings    (routes, containers) │
-│ components/ Key · Btn · Page · CircleProgress …              (presentational)     │
-│ composables/ useKeyCapture · usePracticeSession · useSpatialNav                   │
-│ stores/     Pinia: settings · keymap · progress · catalog    (app state)          │
+│ features/   library · practice · options · (lookup)         (screens, containers) │
+│ components/ KeyCap · BaseButton · PageLayout · CircleProgress … (presentational)  │
+│ composables/ useProgram · usePracticeSession · useKeyCapture · useSpatialNav …    │
+│ stores/     Pinia: settings · keymap · progress              (app state)          │
 │ platform/   Facade over generated Tauri bindings            (adapters)            │
 │ domain/     keyboard · shortcuts · practice · scheduling · progress   (pure TS)   │
 │ data/apps/  shortcut definitions                                                  │
@@ -84,7 +84,7 @@ State + Command (§5) are this loop in pattern terms: the model is the State, an
 | `<script setup lang="ts">`               | Everywhere, with typed `defineProps`/`defineEmits`/`defineModel`. No Options API and no `this`.                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | Strict TypeScript                        | Every strictness flag TypeScript offers (`tsconfig.json`) plus `strictTemplates` for templates. `vue-tsc --build` in `pnpm check`.                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | Presentational vs. container components  | `components/` only take props and emit events. `features/*` wire stores and composables to them.                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| Composables for stateful, reusable logic | `useKeyCapture()` owns its listeners and cleans them up in `onScopeDispose`, replacing the manual `new Keyboard()` + `destroy()`.                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Composables for stateful, reusable logic | `useKeyCapture()` owns its listeners and cleans them up in `onScopeDispose`, replacing the manual `new Keyboard()` + `destroy()`. `useProgram` runs Elm programs; `usePracticeSession` connects a session to keys, timers and saving.                                                                                                                                                                                                                                                                                                                |
 | Pinia setup stores                       | State as `shallowRef` of immutable values, derived values as `computed`, actions as functions. A store gets its repository with `inject(key, fallback)`: `main.ts` provides the Tauri-backed ones, tests provide fakes, and the fallback fails every call, so a missing `provide` shows as unavailable storage instead of a crash. Data loaded from storage is a `Loadable` (`loading`, `loaded`, `failed`), and a change is saved first and shown only once it's stored. Stores call `platform/` through the repositories, never `invoke` directly. |
 | `computed` over `watch`                  | Derived state (progress, due counts, recent apps) is computed from store state, so reactivity keeps the UI correct instead of route remounts.                                                                                                                                                                                                                                                                                                                                                                                                        |
 | No global properties                     | Replace `$db` and `$key` with imports or `inject`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
@@ -197,19 +197,24 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 src/
 ├─ domain/
 │  ├─ keyboard/     keymap.ts (types), combination.ts, resolve.ts, capture.ts, policy.ts, labels.ts
-│  ├─ shortcuts/    types.ts, shortcutId.ts
+│  ├─ shortcuts/    types.ts, shortcutId.ts, lookup.ts
 │  ├─ practice/     session.ts (Model, Msg, update), items.ts, learn.ts, review.ts, grading.ts
-│  ├─ scheduling/   scheduler.ts (port), fsrs.ts
-│  ├─ progress/     setProgress.ts, storedProgress.ts, repository.ts (port), reconcile.ts
-│  ├─ settings/     settings.ts (types, decoder), repository.ts (port)
-│  └─ shared/       result.ts (errors as values), decode.ts (JSON decoders), storage.ts (StorageError)
-├─ data/apps/<id>/   index.ts, de.json
+│  ├─ scheduling/   scheduler.ts (port), fsrs.ts, days.ts
+│  ├─ progress/     setProgress.ts, storedProgress.ts, repository.ts (port), reconcile.ts, summary.ts
+│  ├─ settings/     settings.ts (types, decoder), language.ts, repository.ts (port)
+│  └─ shared/       result.ts (errors as values), decode.ts (JSON decoders), storage.ts (StorageError), loadable.ts
+├─ data/            apps.ts (the list), apps/<id>/ index.ts, de.json, logo.svg
 ├─ platform/        ipc.ts (commandCaller), settings.ts, progress.ts, keymap.ts, lookup.ts, window.ts
 ├─ stores/          settings.ts, progress.ts, keymap.ts
-├─ composables/     useKeyCapture.ts, usePracticeSession.ts, useSpatialNav.ts
-├─ features/        library/, learn/, review/, lookup/, settings/
-├─ components/
-├─ styles/
+├─ composables/     useProgram.ts (Elm runtime), usePracticeSession.ts, useKeyCapture.ts, useSpatialNav.ts
+│                   (+ spatial.ts), useStartup.ts, useSummaryContext.ts, useKeyLabels.ts
+├─ features/        library/ (screens, AppCard, SetRow), practice/ (Learn, Review, PracticeStage),
+│                   options/ (OptionsPanel); lookup/ in step 7
+├─ components/      BaseButton, BaseIcon, KeyCap, KeyCapSmall, ResultBadge, CircleProgress, TextProgress,
+│                   PageLayout, ScreenHeading, ListSection, SkipButton
+├─ styles/          main.css, tokens.css (custom properties), base.css
+├─ locales/         en.json, de.json (UI text)
+├─ i18n.ts          vue-i18n setup, useText, useUiLanguage
 ├─ ports.ts         injection keys for what main.ts provides (repositories, keymap source, key labels)
 ├─ router.ts, App.vue, main.ts
 src-tauri/
