@@ -1,4 +1,9 @@
-import type { RouteLocationNormalized, RouteLocationRaw, Router } from 'vue-router';
+import type {
+  NavigationGuardWithThis,
+  RouteLocationNormalized,
+  RouteLocationRaw,
+  Router,
+} from 'vue-router';
 import { createRouter, createWebHashHistory } from 'vue-router';
 
 import { findApp, findSet } from '@/domain/shortcuts/lookup';
@@ -42,7 +47,9 @@ export function toLearn(appId: string, setId: string): RouteLocationRaw {
  */
 export function createAppRouter(apps: readonly AppDefinition[]): Router {
   function appOf(route: RouteLocationNormalized) {
-    return findApp(apps, paramOf(route, 'appId'));
+    const app = findApp(apps, paramOf(route, 'appId'));
+
+    return app && { app };
   }
 
   function setOf(route: RouteLocationNormalized) {
@@ -64,32 +71,28 @@ export function createAppRouter(apps: readonly AppDefinition[]): Router {
         name: 'app',
         component: AppScreen,
         meta: { depth: 1 },
-        beforeEnter: (to) => (appOf(to) === undefined ? toLibrary() : true),
-        props: (to) => ({ app: appOf(to) }),
+        ...lookedUp(appOf),
       },
       {
         path: '/apps/:appId/review',
         name: 'review',
         component: ReviewScreen,
         meta: { depth: 2 },
-        beforeEnter: (to) => (appOf(to) === undefined ? toLibrary() : true),
-        props: (to) => ({ app: appOf(to) }),
+        ...lookedUp(appOf),
       },
       {
         path: '/apps/:appId/sets/:setId',
         name: 'set',
         component: SetScreen,
         meta: { depth: 2 },
-        beforeEnter: (to) => (setOf(to) === undefined ? toLibrary() : true),
-        props: (to) => ({ ...setOf(to) }),
+        ...lookedUp(setOf),
       },
       {
         path: '/apps/:appId/sets/:setId/learn',
         name: 'learn',
         component: LearnScreen,
         meta: { depth: 3 },
-        beforeEnter: (to) => (setOf(to) === undefined ? toLibrary() : true),
-        props: (to) => ({ ...setOf(to) }),
+        ...lookedUp(setOf),
       },
       { path: '/:unknown(.*)*', redirect: toLibrary() },
     ],
@@ -104,6 +107,21 @@ export function depthOf(route: RouteLocationNormalized): number {
   const { depth } = route.meta;
 
   return typeof depth === 'number' ? depth : 0;
+}
+
+/**
+ * A route guarded by a lookup of its IDs: the screen gets what was found as its props, and a
+ * route to something that doesn't exist goes to the library. vue-router doesn't check `props`
+ * against the screen's props, so the guard is what makes them safe.
+ */
+function lookedUp(find: (route: RouteLocationNormalized) => object | undefined): {
+  readonly beforeEnter: NavigationGuardWithThis<undefined>;
+  readonly props: (route: RouteLocationNormalized) => object;
+} {
+  return {
+    beforeEnter: (to) => (find(to) === undefined ? toLibrary() : true),
+    props: (to) => ({ ...find(to) }),
+  };
 }
 
 /** A single route parameter; a repeated one, which none of our routes has, reads as empty. */
