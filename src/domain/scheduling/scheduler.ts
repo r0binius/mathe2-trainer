@@ -35,6 +35,9 @@ declare const parsed: unique symbol;
 /**
  * {@link CardMemoryFields} known to be valid, so a scheduler can rely on them. Only
  * {@link parseCardMemory} and a {@link Scheduler} create one.
+ *
+ * The brand only guards creation: spreading a `CardMemory` with a changed field keeps it. So
+ * memory is only ever changed here in `scheduling`, where each such change keeps it valid.
  */
 export type CardMemory = CardMemoryFields & { readonly [parsed]: true };
 

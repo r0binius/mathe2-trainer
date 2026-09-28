@@ -21,6 +21,14 @@ const frameworkImports = {
   message: 'The domain is framework-free. Pass data in, or move this code to the shell.',
 };
 
+const namedExportsOnly = { selector: 'ExportDefaultDeclaration', message: 'Use named exports.' };
+
+// Fixtures (`*.fixture.*`) are test data and may import test tools; production code never uses them.
+const noFixtureImports = {
+  selector: 'ImportDeclaration[source.value=/\\.fixture(\\.\\w+)?$/]',
+  message: 'Only tests import fixtures.',
+};
+
 const domainImports = [
   frameworkImports,
   {
@@ -95,10 +103,7 @@ const config: ReturnType<typeof withVueTs> = withVueTs(
     name: 'mouseless/modules',
     files: ['src/**/*.ts'],
     rules: {
-      'no-restricted-syntax': [
-        'error',
-        { selector: 'ExportDefaultDeclaration', message: 'Use named exports.' },
-      ],
+      'no-restricted-syntax': ['error', namedExportsOnly, noFixtureImports],
       '@typescript-eslint/explicit-module-boundary-types': 'error',
     },
   },
@@ -207,6 +212,8 @@ const config: ReturnType<typeof withVueTs> = withVueTs(
       'functional/functional-parameters': 'off',
       'functional/no-expression-statements': 'off',
       'functional/no-return-void': 'off',
+      // Rule options replace rather than merge: this keeps named exports and allows fixtures.
+      'no-restricted-syntax': ['error', namedExportsOnly],
     },
   },
 

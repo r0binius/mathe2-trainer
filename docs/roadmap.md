@@ -139,7 +139,7 @@ Branch `feature/practice-session`. The practice flow shared by learn and review,
 - **Legacy behaviour is a reference, not a spec.** Reading the old code closely surfaced a just-trained shortcut being tested right away, and progress deleted for shortcuts that were only reserved; both were changed on purpose and pinned by tests.
 - **Flat config replaces rule options, it doesn't merge them.** An exception for one file has to repeat the zone's other restrictions.
 
-## Review after step 3 🚧 ([#11](https://codeberg.org/gobin/mouseless/issues/11))
+## Review after step 3 ✅ ([#11](https://codeberg.org/gobin/mouseless/issues/11))
 
 Branch `fix/review-findings`. A review of the whole codebase before step 4 found two bugs and some risks for the next steps. They're fixed first, one reviewable diff each.
 
@@ -159,7 +159,16 @@ Branch `fix/review-findings`. A review of the whole codebase before step 4 found
 - [x] R.3 Layout in the domain types
 - [x] R.4 Practice items and the review queue
 - [x] R.5 Session and FSRS: the advance token and local days
-- [ ] R.6 Cleanup: fixture lint rule, brand comment, doc wording, merged branches
+- [x] R.6 Cleanup: fixture lint rule, brand comment, doc wording, merged branches
+
+**What we learned**
+
+- **Review the seams, not only the modules.** Every module was tested, yet both bugs lived between them: the snapshot's completion rule against `learnPool`'s restart, and saving a session against shortcuts it never saw. Writing a scenario across three modules exposed both in minutes.
+- **Contracts between two directions need their own test.** Resolution and capture each looked right on their own, but named the space bar differently. One data health rule that feeds every shortcut through both now pins the contract, and it lists the 14 shortcuts that would have broken.
+- **Break a fix on purpose.** Disabling each fix and watching its test fail (clock skew, the Space rule, local days) proved the tests guard what they claim.
+- **Put invariants in the types.** The layout on every card and set record replaces a rule every caller would have had to remember.
+- **Time has more than one clock.** A library's idea of a day (UTC) and the app's (local) must agree, and an `advance` has to say which success it ends, or an old timer acts on a new state.
+- **Flat config replaces rule options per rule**, which also applies to `no-restricted-syntax`: one rule's selectors live in one place per zone.
 
 ## 4. Persistence and IPC ⏳ ([#4](https://codeberg.org/gobin/mouseless/issues/4))
 
@@ -187,6 +196,8 @@ Branch `feature/persistence`. Settings and progress stored by Rust and reached t
 Branch `feature/main-window`. The library, sets, set detail, learn, review and options screens, with transitions and keyboard navigation.
 
 **Deliverables:** presentational components (`KeyCap`, `BaseButton`, `CircleProgress`, …), feature routes, composables (`useProgram`, the Elm runtime; `useKeyCapture`, `usePracticeSession`, `useSpatialNav`), styles ported from the old app.
+
+**From the domain:** `practiceItems` / `appPracticeItems` / `reviewItems` build what a session practices, `combinationOf` turns a `KeyboardEvent`'s code and modifiers into an answer (named like resolved keys, see `keyOf`), `startSession` / `updateSession` run the session, and `reviewCard`, `recordLearning` and `reconcileProgress` update progress. The shell supplies what the domain can't compute purely: `Date.now()` and `Math.random()` in messages, the presentation number from `advanceAfter` back in `advance`, the local UTC offset with each review (`-new Date(at).getTimezoneOffset()`), the local end of today for `dueCards`, and the current `LayoutId`.
 
 **Decisions:** spatial navigation (library or our own composable); design tokens as CSS custom properties; vue-i18n setup and the UI's language (the data is translatable from step 2); app titles the vendor translates itself (Apple's Notes is `Notizen` on a German Mac, hard-coded in the data for now). Guarding message times: the scheduler still throws if a review's `at` isn't a finite number (`ts-fsrs` rejects an invalid date). The shell's `Date.now()` never produces one, but parsing times where messages are built (a `parseTime` returning a `Result`) would close the last way an invalid input reaches `ts-fsrs` (noted in step 3.4).
 
