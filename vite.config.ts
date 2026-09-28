@@ -3,9 +3,6 @@ import { fileURLToPath, URL } from 'node:url';
 import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vitest/config';
 
-// Set by `tauri dev` when developing on a physical device.
-const devHost = process.env['TAURI_DEV_HOST'];
-
 export default defineConfig({
   plugins: [vue()],
 
@@ -22,8 +19,6 @@ export default defineConfig({
     // Tauri expects the dev server on a fixed port.
     port: 1420,
     strictPort: true,
-    host: devHost ?? false,
-    hmr: devHost === undefined ? true : { protocol: 'ws', host: devHost, port: 1421 },
     watch: {
       ignored: ['**/src-tauri/**'],
     },
@@ -31,6 +26,5 @@ export default defineConfig({
 
   test: {
     include: ['src/**/*.test.ts'],
-    passWithNoTests: true,
   },
 });
