@@ -2,6 +2,10 @@
 //!
 //! The library builds the Tauri app, and `main.rs` only calls [`run`].
 
+// Until the first command returns it (step 4.2). `expect` fails the build once that happens.
+#[cfg_attr(not(test), expect(dead_code, reason = "commands arrive in step 4.2"))]
+mod error;
+
 /// Builds and runs the app until it quits.
 ///
 /// # Errors

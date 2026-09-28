@@ -189,7 +189,7 @@ Branch `feature/persistence`. Settings and progress stored by Rust and reached t
 
 **Sub-steps**
 
-- [ ] 4.1 Rust `AppError`
+- [x] 4.1 Rust `AppError`
 - [ ] 4.2 SQLite database, migrations and the settings table
 - [ ] 4.3 Progress repository and review log
 - [ ] 4.4 Typed commands and events

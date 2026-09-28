@@ -1793,8 +1793,11 @@ dependencies = [
 name = "mouseless"
 version = "0.1.0"
 dependencies = [
+ "serde",
+ "serde_json",
  "tauri",
  "tauri-build",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
