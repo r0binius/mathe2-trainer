@@ -10,8 +10,9 @@ The rewrite is built in small steps. Claude writes the code; you decide and revi
 4. **Check:** `pnpm check` passes.
 5. **Commit:** one Conventional Commit per sub-step, after your review, with its box ticked in the sub-step list.
 6. **Refactor:** once the sub-steps are done, a cleanup round over the whole app, not only the step's code, reviewed and committed like a sub-step. What counts, in order: idiomatic Vue and Rust; as much functional programming and The Elm Architecture as possible; clean code; each language's documentation standard (TSDoc, rustdoc). Design patterns are guidelines, not goals.
-7. **Merge:** the step's last commit ends with `Closes #N` (the step's issue), so the fast-forward into `main` closes it once pushed.
-8. **Log:** add a short _What we learned_ section to the step below.
+7. **Diagram:** bring [`uml.drawio`](uml.drawio) up to date with what the step changed (components, classes, states, sequences), in the step's last commit, so the diagram always matches `main`.
+8. **Merge:** the step's last commit ends with `Closes #N` (the step's issue), so the fast-forward into `main` closes it once pushed.
+9. **Log:** add a short _What we learned_ section to the step below.
 
 Status: ✅ done · 🚧 in progress · ⏳ planned
 
