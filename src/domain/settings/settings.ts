@@ -1,4 +1,5 @@
 import type { KeyCombination } from '../keyboard/combination';
+import { macosReserved } from '../keyboard/policy';
 import type { Decoder } from '../shared/decode';
 import { array, boolean, literal, object, oneOf, string } from '../shared/decode';
 
@@ -26,3 +27,16 @@ export const decodeSettings: Decoder<Settings> = object({
   showDockIcon: boolean,
   launchAtLogin: boolean,
 });
+
+/**
+ * The combinations practice can't use with this trigger: those macOS handles itself, plus the
+ * popover's shortcut, which Mouseless catches before practice sees it.
+ */
+export function reservedFor(trigger: Trigger): readonly KeyCombination[] {
+  switch (trigger.kind) {
+    case 'holdCommand':
+      return macosReserved;
+    case 'shortcut':
+      return [...macosReserved, trigger.keys];
+  }
+}

@@ -1,3 +1,6 @@
+import type { Result } from '../shared/result';
+import type { StorageError } from '../shared/storage';
+
 /**
  * The physical keys that type characters, in keyboard order, named by their
  * {@link https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/code | KeyboardEvent.code}.
@@ -100,3 +103,14 @@ export type Keymap = Readonly<Partial<Record<KeyCode, KeyCharacters>>>;
  * layout's localized name, which the old app used.
  */
 export type LayoutId = string;
+
+/** The keyboard layout in use, and what its keys type. */
+export type CurrentLayout = {
+  readonly id: LayoutId;
+  readonly keymap: Keymap;
+};
+
+/** Reads the keyboard layout in use from the system. */
+export type KeymapSource = {
+  readonly load: () => Promise<Result<CurrentLayout, StorageError>>;
+};

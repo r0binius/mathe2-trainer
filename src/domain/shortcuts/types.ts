@@ -31,9 +31,18 @@ export type ShortcutSet = {
   readonly shortcuts: readonly ShortcutDefinition[];
 };
 
-/** The groups the app list is sorted into. The UI translates their names. */
-export type AppCategory =
-  'communication' | 'development' | 'internet' | 'music' | 'productivity' | 'system';
+/** The groups the app list is sorted into, in the order it shows them. The UI translates their names. */
+export const appCategories = [
+  'communication',
+  'development',
+  'internet',
+  'music',
+  'productivity',
+  'system',
+] as const;
+
+/** One of the {@link appCategories}. */
+export type AppCategory = (typeof appCategories)[number];
 
 /**
  * An app and its shortcuts, as written in `src/data/apps/<id>/index.ts`. The data files check

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { macosReserved } from '../keyboard/policy';
 import { err, ok } from '../shared/result';
-import { decodeSettings } from './settings';
+import { decodeSettings, reservedFor } from './settings';
 
 const defaults = {
   trigger: { kind: 'holdCommand' },
@@ -25,5 +26,17 @@ describe('decodeSettings', () => {
     expect(decodeSettings({ ...defaults, trigger: { kind: 'doubleTap' } })).toStrictEqual(
       err({ path: 'trigger.kind', expected: '"holdCommand"' }),
     );
+  });
+});
+
+describe('reservedFor', () => {
+  it('reserves only what macOS handles itself while ⌘ is held to open the popover', () => {
+    expect(reservedFor({ kind: 'holdCommand' })).toStrictEqual(macosReserved);
+  });
+
+  it("also reserves the popover's shortcut, which the app catches before practice can", () => {
+    const keys = ['Shift', 'Meta', 'm'];
+
+    expect(reservedFor({ kind: 'shortcut', keys })).toStrictEqual([...macosReserved, keys]);
   });
 });

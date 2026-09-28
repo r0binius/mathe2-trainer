@@ -236,12 +236,19 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 - No `parseTime`: the scheduler throws if a review's `at` isn't a finite number (noted in step 3.4), but the shell's `Date.now()` is the only source of message times and never produces one, so the guard would cover an input that can't occur.
 - Tests in the shell: `useProgram`, the spatial navigation geometry and the composables. `happy-dom` only for the test files that need a DOM, added in the sub-step that first does; no `@vue/test-utils`, as presentational components are checked in the running app.
 - Router: vue-router 5 with hash history, so the route survives a reload during development.
+- Library: _recent_ apps and sets are those with something learned, as before, but ordered by when they were last practiced (`updatedAt`), newest first. A shortcut in two sets counts once for its app (the old app counted it twice), and an app's due count is what its review session would offer. Categories show in a fixed order (`appCategories`).
+- Catalog: `data/apps.ts` lists the apps explicitly, so the list is type-checked and adding an app is one visible line. Each app folder holds its `logo.svg`, which the screens find by folder name, so the domain types carry no asset URLs.
+- A route to an app or set that doesn't exist (a hash route left over after the data changed) redirects to the library, so screens always get a real app and set. The old app crashed.
 
 **Sub-steps**
 
 - [x] 5.1 Styles and design tokens
 - [x] 5.2 Presentational components
-- [ ] 5.3 Router, library and set screens
+- 5.3 Router, library and set screens
+  - [x] 5.3.1 Keymap store, app list and progress summaries
+  - [ ] 5.3.2 vue-i18n with English and German UI text
+  - [ ] 5.3.3 Router, page layout and window chrome
+  - [ ] 5.3.4 Library, app and set screens
 - [ ] 5.4 Learn and review screens (`useKeyCapture`, `usePracticeSession`)
 - [ ] 5.5 Options screen
 - [ ] 5.6 Spatial navigation and transitions

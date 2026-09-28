@@ -1,5 +1,6 @@
 import type { InjectionKey } from 'vue';
 
+import type { KeymapSource } from '@/domain/keyboard/keymap';
 import type { ProgressRepository } from '@/domain/progress/repository';
 import type { SettingsRepository } from '@/domain/settings/repository';
 import type { Err } from '@/domain/shared/result';
@@ -13,6 +14,9 @@ export const settingsRepositoryKey: InjectionKey<SettingsRepository> =
 /** Where the app provides the progress repository to the stores. */
 export const progressRepositoryKey: InjectionKey<ProgressRepository> =
   Symbol('progress repository');
+
+/** Where the app provides the source of the current keyboard layout to the stores. */
+export const keymapSourceKey: InjectionKey<KeymapSource> = Symbol('keymap source');
 
 const notProvided: StorageError = {
   kind: 'storage',
@@ -40,3 +44,6 @@ export const missingProgressRepository: ProgressRepository = {
   replace: unavailable,
   reset: unavailable,
 };
+
+/** What a store injects when the app provided no keymap source: loading fails. */
+export const missingKeymapSource: KeymapSource = { load: unavailable };
