@@ -4,7 +4,15 @@ use tauri_build::{AppManifest, Attributes};
 
 /// The app's own commands. Tauri generates an `allow-…` permission for each, and a window can only
 /// invoke the ones its capability grants.
-const COMMANDS: &[&str] = &["get_settings", "set_settings"];
+const COMMANDS: &[&str] = &[
+    "load_progress",
+    "save_set_progress",
+    "record_review",
+    "replace_progress",
+    "reset_progress",
+    "get_settings",
+    "set_settings",
+];
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(tauri_build::try_build(

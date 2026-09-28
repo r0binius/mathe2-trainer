@@ -18,7 +18,10 @@ const FILE_NAME: &str = if cfg!(debug_assertions) {
 
 /// Schema changes in order. Only append: a database remembers how many it has applied (in
 /// SQLite's `user_version`), so editing a released one would never reach existing databases.
-const MIGRATIONS: &[M<'static>] = &[M::up(include_str!("../../migrations/0001_settings.sql"))];
+const MIGRATIONS: &[M<'static>] = &[
+    M::up(include_str!("../../migrations/0001_settings.sql")),
+    M::up(include_str!("../../migrations/0002_progress.sql")),
+];
 
 /// The app's one connection, shared by the commands through Tauri's managed state.
 pub struct Database(Mutex<Connection>);

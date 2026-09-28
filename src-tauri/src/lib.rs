@@ -24,6 +24,11 @@ pub fn run() -> tauri::Result<()> {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            commands::progress::load_progress,
+            commands::progress::save_set_progress,
+            commands::progress::record_review,
+            commands::progress::replace_progress,
+            commands::progress::reset_progress,
             commands::settings::get_settings,
             commands::settings::set_settings,
         ])

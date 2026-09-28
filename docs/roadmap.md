@@ -174,7 +174,7 @@ Branch `fix/review-findings`. A review of the whole codebase before step 4 found
 
 Branch `feature/persistence`. Settings and progress stored by Rust and reached through a typed platform facade.
 
-**Deliverables:** the Rust `AppError`, a settings store, a SQLite progress repository with migrations, typed commands and events, the `platform/` facade, and Pinia stores.
+**Deliverables:** the Rust `AppError`, a settings store, a SQLite progress repository with migrations, their commands, the `platform/` facade, and Pinia stores.
 
 **Decisions**
 
@@ -182,7 +182,9 @@ Branch `feature/persistence`. Settings and progress stored by Rust and reached t
 - Settings live in the same database, in a `settings` table, not in `tauri-plugin-store`: one storage mechanism, one file, and no extra plugin, package or permission for four values. Rust reads them too (the trigger in step 7, the dock icon, autostart). The schema: `trigger: { kind: 'holdCommand' } | { kind: 'shortcut'; keys: KeyCombination }`, `showMenuBarIcon`, `showDockIcon` and `launchAtLogin`, by default hold ⌘ and all on, as before. The UI language is added in step 5. The table holds only the settings that differ from their defaults, one key/value row each with the value as JSON, so a new setting needs no migration and a changed default reaches everyone who never changed that setting. The defaults live in one place, `Settings::default()` in Rust, and a stored value that no longer fits its setting falls back to its default instead of spoiling the rest.
 - Typed IPC: hand-written typed wrappers in `platform/`. `tauri-specta` is still a release candidate (`2.0.0-rc.25`, with `specta-typescript` at `0.0.12`), and since every response is decoded at the boundary anyway, generated types would add little. Revisit once it's stable.
 - Decoding: hand-written decoders that return our `Result`, built on a few small helpers, with no schema library. There are only a few types (settings, set records, cards, review log entries), and the branded ones (`ShortcutId`, `LayoutId`, `CardMemory`) need our own parsers either way. `valibot` and `zod` would each bring their own issue model next to `Result`.
-- The review log gets one entry per `tested` effect, including a failed first test that creates no card: `shortcut_id`, `layout`, `reviewed_at`, `utc_offset_minutes`, `grade`, `failed` and `duration_ms`. That's what the FSRS optimizer needs (card, time, rating, duration), plus the measurements, so the grading limits can be fitted later too.
+- The review log gets one entry per `tested` effect, including a failed first test that creates no card: `shortcut_id`, `layout`, `reviewed_at`, `utc_offset_minutes`, `grade`, `failed` and `duration_ms`. That's what the FSRS optimizer needs (card, time, rating, duration), plus the measurements, so the grading limits can be fitted later too. The grade is stored as its word (`'good'`), which a `CHECK` constraint limits to the four grades, and mapped to FSRS's 1–4 only when exporting for the optimizer.
+- Progress tables: `set_progress` (one row per set and layout, the learned IDs as a JSON array that a `CHECK` keeps an array, since the list is always read and written whole), `cards` (one per shortcut and layout) and the append-only `reviews`. Recording a review writes its log entry and its card in one transaction. Reconciling writes back by replacing all set records and cards in one transaction: the data is small, it only happens at startup when something changed, and there's no second wire format for changes. The review log stays.
+- Each sub-step brings its own commands (settings in 4.2, progress in 4.3), so nothing sits unused. Events move to step 7: the only one planned so far, `settings-changed`, matters once a second window exists.
 - Times are stored as epoch milliseconds (`INTEGER`), as in the domain. The old app mixed two ISO formats.
 - Reset clears set progress, cards and the review log in one transaction. The old app left the cards, so reviews kept showing up.
 - Commands run off the main thread (`#[tauri::command(async)]`), and the connection sits behind a `Mutex` in Tauri's managed state, held only for one query or transaction. Migrations are `.sql` files in `src-tauri/migrations/`, compiled in with `include_str!`.
@@ -192,10 +194,9 @@ Branch `feature/persistence`. Settings and progress stored by Rust and reached t
 
 - [x] 4.1 Rust `AppError`
 - [x] 4.2 SQLite database, migrations and the settings table
-- [ ] 4.3 Progress repository and review log
-- [ ] 4.4 Typed commands and events
-- [ ] 4.5 `platform/` facade
-- [ ] 4.6 Pinia stores
+- [x] 4.3 Progress repository and review log
+- [ ] 4.4 `platform/` facade
+- [ ] 4.5 Pinia stores
 
 **Concepts:** Rust ownership and borrowing, `Result` and `?`, traits, `thiserror`; the Tauri process model, commands, state management and capabilities; Pinia setup stores; ports and adapters.
 
@@ -243,7 +244,7 @@ Branch `feature/native-keymap`. Read the current keyboard layout in Rust, replac
 
 ## 7. Menu bar popover and trigger ⏳ ([#7](https://codeberg.org/gobin/mouseless/issues/7))
 
-Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcut, window coordination, dock icon, autostart, single instance, and a strict CSP.
+Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcut, window coordination, typed events between the windows (`settings-changed`, moved here from step 4), dock icon, autostart, single instance, and a strict CSP.
 
 **Sub-steps**
 

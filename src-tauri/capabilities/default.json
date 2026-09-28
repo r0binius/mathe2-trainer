@@ -3,5 +3,14 @@
   "identifier": "default",
   "description": "Capability for the main window",
   "windows": ["main"],
-  "permissions": ["core:default", "allow-get-settings", "allow-set-settings"]
+  "permissions": [
+    "core:default",
+    "allow-load-progress",
+    "allow-save-set-progress",
+    "allow-record-review",
+    "allow-replace-progress",
+    "allow-reset-progress",
+    "allow-get-settings",
+    "allow-set-settings"
+  ]
 }

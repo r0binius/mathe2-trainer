@@ -5,4 +5,5 @@
     reason = "Tauri passes command arguments by value, `State` included"
 )]
 
+pub mod progress;
 pub mod settings;
