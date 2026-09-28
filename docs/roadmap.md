@@ -98,7 +98,7 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 - **Plain objects inherit keys.** A lookup table indexed by user data finds `constructor` unless it's checked with `Object.hasOwn`.
 - **Tool caches can leak between files.** A shared cache in `is-immutable-type` made lint results depend on which files were linted together; a small patch fixed it until upstream does.
 
-## 3. Domain: practice and scheduling 🚧 ([#3](https://codeberg.org/gobin/mouseless/issues/3))
+## 3. Domain: practice and scheduling ✅ ([#3](https://codeberg.org/gobin/mouseless/issues/3))
 
 Branch `feature/practice-session`. The practice flow shared by learn and review, as a state machine, plus FSRS scheduling.
 
@@ -114,6 +114,7 @@ Branch `feature/practice-session`. The practice flow shared by learn and review,
 - Grading uses only what was measured, never the user's own estimate: a mistake → again, over 6 s → hard, under 2 s → easy, otherwise good (the old app never used easy). The 2 s limit is fixed for now and gets revisited with real data; a limit relative to the user's own speed needs the review log. `gradeRecall` is a plain function, not an injected strategy, while there's only one grading. Using the whole scale lets fluent shortcuts space out faster. Every review is logged from step 4 on, so FSRS's weights can later be fitted to the user's own data.
 - Scheduling: the `Scheduler` port is a function, `(memory, grade, at) → memory`, and `scheduleWithFsrs` in `domain/scheduling/fsrs.ts` adapts `ts-fsrs` to it. It's deterministic computation, not I/O, so it counts as core, and a lint rule keeps `ts-fsrs` out of every other file. Our rules stay outside the port (`reviewCard`, `dueCards`): a card is created on the first success, `again` is due tomorrow, and a card is due until the local end of today, which the shell computes and passes in. Settings: 90 % retention, at most 365 days between reviews (as before), fuzz on so cards learned together spread out (seeded by `ts-fsrs` from the card and review time, so still deterministic), and short-term steps off. Without them, a second review on the same day barely changes a card, where the old FSRS-5 code used a separate short-term formula. Times in the domain are epoch milliseconds; the storage format is decided in step 4. `Grade` moved to `scheduling`, since it's FSRS's scale. `ts-fsrs` throws on invalid input, so the port only takes valid memory: `CardMemory` is a branded type that only `parseCardMemory` (a `Result`: finite values, stability 0.001–36500, difficulty 1–10, consistent counts and dates) and a scheduler create, and step 4's decoders reuse the parser. A review timed before the last one (a clock set back) counts as made at the last one instead of failing, and a test over a grid of inputs checks that the adapter's output always parses.
 - Run snapshots (Memento): a `LearnSnapshot` holds the learned shortcut IDs and whether the set is complete (everything learned, nothing skipped). The learn strategy emits it as `learnedChanged` only when the learned shortcuts change. Instead of the old app's list of runs, the app keeps one `SetProgress` per set and layout (`{ learned, completedAt?, updatedAt }`): the screens only ever needed the latest progress and whether the set was completed. `learnPool` starts over when every shortcut is already learned, as a new run did before, and `completedAt` survives that, so the set still shows as done. Skipping is a flag on the entry, not a stage, so skipping a learned shortcut keeps it learned (the 3.2 pool lost it).
+- `reconcileProgress` deletes only what's gone from the data, on every layout: the progress of removed sets, learned IDs no longer in their set, and cards of shortcuts no longer in any set. Shortcuts that are only impossible on the current layout (unpressable, or reserved) keep their progress, since practice leaves them out and they can become possible again, for example when the trigger changes; the old app deleted them. The review log is history and stays, so FSRS can be fitted to every review. Unchanged records keep their identity, so the shell can write only what changed.
 
 **Sub-steps**
 
@@ -122,11 +123,21 @@ Branch `feature/practice-session`. The practice flow shared by learn and review,
 - [x] 3.3 Grading
 - [x] 3.4 `Scheduler` port and FSRS
 - [x] 3.5 Run snapshots (Memento)
-- [ ] 3.6 `reconcileProgress`
+- [x] 3.6 `reconcileProgress`
 
 **Concepts:** state machines and reducers, The Elm Architecture (model, update, effects as data), injecting randomness and time for determinism (values carried in messages), property-style tests, spaced repetition.
 
 **Resources:** [statecharts.dev](https://statecharts.dev/) · [The Elm guide](https://guide.elm-lang.org/), especially [The Elm Architecture](https://guide.elm-lang.org/architecture/) and [Commands and Subscriptions](https://guide.elm-lang.org/effects/) · [refactoring.guru: State, Command, Strategy, Memento](https://refactoring.guru/design-patterns/catalog) · [FSRS algorithm](https://github.com/open-spaced-repetition/fsrs4anki/wiki/The-Algorithm) · [ts-fsrs](https://github.com/open-spaced-repetition/ts-fsrs) · [legacy-architecture.md](legacy-architecture.md) §8–9
+
+**What we learned**
+
+- **Effects as data move rules into the core.** Once waiting is an effect, the old 1 s pause became a tested constant instead of a `setTimeout` in a component, and the session stayed small: it passes on what the strategies report.
+- **A library behind a port still has failure modes to read.** `ts-fsrs` throws on inputs our types allowed, including a real one (a clock set back gives negative elapsed time). A branded type that only a parser creates rules them out at compile time, a test over a grid of inputs shows the adapter's output always parses, and breaking the fix on purpose showed the tests catch it.
+- **One random number can make a two-stage choice.** Where a roll falls inside the chosen bucket's share is again evenly distributed, so it picks the item too, with the exact old odds.
+- **Designing the next piece tests the last one.** Writing the snapshot showed that skipping as a stage would forget a learned shortcut, a bug no test of 3.2 looked for.
+- **Store what the screens read.** The old list of runs existed to answer two questions, the latest progress and whether a set was completed, so one record per set answers them directly.
+- **Legacy behaviour is a reference, not a spec.** Reading the old code closely surfaced a just-trained shortcut being tested right away, and progress deleted for shortcuts that were only reserved; both were changed on purpose and pinned by tests.
+- **Flat config replaces rule options, it doesn't merge them.** An exception for one file has to repeat the zone's other restrictions.
 
 ## 4. Persistence and IPC ⏳ ([#4](https://codeberg.org/gobin/mouseless/issues/4))
 
