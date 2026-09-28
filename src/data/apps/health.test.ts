@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import type { KeyPress } from '@/domain/keyboard/capture';
+import { combinationOf } from '@/domain/keyboard/capture';
 import germanKeymap from '@/domain/keyboard/germanKeymap.fixture.json';
 import type { Keymap } from '@/domain/keyboard/keymap';
 import { keyCodes } from '@/domain/keyboard/keymap';
@@ -7,7 +9,7 @@ import { macosKeyLabels } from '@/domain/keyboard/labels';
 import type { Rejection } from '@/domain/keyboard/policy';
 import { checkShortcut, practicePolicy } from '@/domain/keyboard/policy';
 import type { KeyCombination } from '@/domain/keyboard/resolve';
-import { isModifier, resolveKeys } from '@/domain/keyboard/resolve';
+import { isModifier, isSameCombination, keyOf, resolveKeys } from '@/domain/keyboard/resolve';
 import { shortcutId } from '@/domain/shortcuts/shortcutId';
 import type { AppDefinition, ShortcutDefinition, ShortcutSet } from '@/domain/shortcuts/types';
 
@@ -67,6 +69,19 @@ function isCharacter(key: string): boolean {
 
 function describeKeys(keys: KeyCombination): string {
   return keys.join('+');
+}
+
+// The press that types resolved keys: the physical key named like the key, with its modifiers.
+function pressFor(keys: KeyCombination): KeyPress {
+  const key = keys.find((candidate) => !isModifier(candidate)) ?? '';
+
+  return {
+    code: keyCodes.find((code) => keyOf(keymap, code) === key) ?? key,
+    control: keys.includes('Control'),
+    alt: keys.includes('Alt'),
+    shift: keys.includes('Shift'),
+    meta: keys.includes('Meta'),
+  };
 }
 
 function describeRejection(rejection: Rejection): string {
@@ -189,6 +204,22 @@ describe('app data', () => {
     );
 
     expect(rejected).toStrictEqual([]);
+  });
+
+  it('captures the press of every combination as its keys on German', () => {
+    // Key capture and key resolution have to name keys alike, or a correct answer fails.
+    const mismatched = shortcuts.flatMap((entry) =>
+      entry.shortcut.keys
+        .map((keys) => resolveKeys(keymap, keys))
+        .filter((keys) => {
+          const captured = combinationOf(keymap, pressFor(keys));
+
+          return captured === undefined || !isSameCombination(captured, keys);
+        })
+        .map((keys) => `${nameOf(entry)}: ${describeKeys(keys)}`),
+    );
+
+    expect(mismatched).toStrictEqual([]);
   });
 
   it('has every message key in the German catalog', () => {

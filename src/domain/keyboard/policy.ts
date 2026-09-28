@@ -1,7 +1,7 @@
 import type { Result } from '../shared/result';
 import { err, ok } from '../shared/result';
 import type { KeyCombination } from './resolve';
-import { isModifier, orderModifiersFirst } from './resolve';
+import { isModifier, isSameCombination } from './resolve';
 
 /** Why a combination can't be practiced. */
 export type Rejection =
@@ -52,15 +52,6 @@ export function noDuplicateKeys(keys: KeyCombination): Rejection | undefined {
 /** Rejects a combination without a key that isn't a modifier, since pressing it does nothing. */
 export function notModifierOnly(keys: KeyCombination): Rejection | undefined {
   return keys.every(isModifier) ? { reason: 'modifier-only' } : undefined;
-}
-
-function isSameCombination(first: KeyCombination, second: KeyCombination): boolean {
-  const ordered = orderModifiersFirst(second);
-
-  return (
-    first.length === second.length &&
-    orderModifiersFirst(first).every((key, index) => key === ordered[index])
-  );
 }
 
 /**

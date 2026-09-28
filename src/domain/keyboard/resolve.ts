@@ -1,4 +1,4 @@
-import type { KeyCharacters, Keymap } from './keymap';
+import type { KeyCharacters, KeyCode, Keymap } from './keymap';
 import { keyCodes } from './keymap';
 
 /**
@@ -35,12 +35,36 @@ const modifierOrder = ['Control', 'Alt', 'Shift', 'Meta'] as const;
 // characters as the main keyboard's, so leaving them out doesn't change anything else.
 const mainKeyCodes = keyCodes.filter((code) => !code.startsWith('Numpad'));
 
-function findOnLayer(keymap: Keymap, layer: Layer, key: string): KeyCombination | undefined {
-  const characters = mainKeyCodes
-    .map((code) => keymap[code])
-    .find((candidate) => candidate?.[layer.field] === key);
+function isKeyCode(code: string): code is KeyCode {
+  return keyCodes.some((keyCode) => keyCode === code);
+}
 
-  return characters === undefined ? undefined : [...layer.modifiers, characters.value];
+// The data names these keys by their code: the space bar's character is a space, and the numpad
+// types the same characters as the main keys, which the data uses instead.
+function isNamedByCode(code: KeyCode): boolean {
+  return code === 'Space' || code.startsWith('Numpad');
+}
+
+/**
+ * How a physical key is named in a {@link KeyCombination} on the given keymap: by the character it
+ * types without a modifier, or by its code for the space bar, the numpad and keys that type
+ * nothing. Key resolution and key capture both name keys this way, so a correct press matches.
+ * @example
+ * ```ts
+ * keyOf(germanKeymap, 'KeyY'); // 'z'
+ * keyOf(germanKeymap, 'Space'); // 'Space'
+ * ```
+ */
+export function keyOf(keymap: Keymap, code: string): string {
+  const characters = isKeyCode(code) && !isNamedByCode(code) ? keymap[code] : undefined;
+
+  return characters?.value ?? code;
+}
+
+function findOnLayer(keymap: Keymap, layer: Layer, key: string): KeyCombination | undefined {
+  const code = mainKeyCodes.find((candidate) => keymap[candidate]?.[layer.field] === key);
+
+  return code === undefined ? undefined : [...layer.modifiers, keyOf(keymap, code)];
 }
 
 function resolveKey(keymap: Keymap, key: string): KeyCombination {
@@ -60,6 +84,11 @@ export function orderModifiersFirst(keys: KeyCombination): KeyCombination {
     ...modifierOrder.flatMap((modifier) => keys.filter((key) => key === modifier)),
     ...keys.filter((key) => !isModifier(key)),
   ];
+}
+
+/** Whether two combinations hold the same keys, in any order. */
+export function isSameCombination(first: KeyCombination, second: KeyCombination): boolean {
+  return first.length === second.length && first.every((key) => second.includes(key));
 }
 
 /**

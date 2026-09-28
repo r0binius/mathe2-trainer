@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import germanKeymap from './germanKeymap.fixture.json';
-import { resolveKeys, resolveShortest } from './resolve';
+import { isSameCombination, keyOf, resolveKeys, resolveShortest } from './resolve';
 
 describe('resolveKeys', () => {
   describe('on a German keymap', () => {
@@ -104,5 +104,39 @@ describe('resolveShortest', () => {
 
   it('resolves a single alternative', () => {
     expect(resolveShortest(germanKeymap, [['Meta', '?']])).toStrictEqual(['Shift', 'Meta', 'ß']);
+  });
+});
+
+describe('keyOf', () => {
+  it('names a main key by the character it types without a modifier', () => {
+    expect(keyOf(germanKeymap, 'KeyY')).toBe('z');
+    expect(keyOf(germanKeymap, 'Minus')).toBe('ß');
+  });
+
+  it('names the space bar and the numpad by their code, as the data does', () => {
+    expect(keyOf(germanKeymap, 'Space')).toBe('Space');
+    expect(keyOf(germanKeymap, 'Numpad1')).toBe('Numpad1');
+  });
+
+  it('names a key the keymap does not type by its code', () => {
+    expect(keyOf(germanKeymap, 'ArrowUp')).toBe('ArrowUp');
+    expect(keyOf({}, 'KeyA')).toBe('KeyA');
+  });
+});
+
+describe('resolving the space bar', () => {
+  it('names a character typed by the space bar Space, as capture does', () => {
+    expect(resolveKeys(germanKeymap, ['Control', ' '])).toStrictEqual(['Control', 'Space']);
+  });
+});
+
+describe('isSameCombination', () => {
+  it('ignores the order of the keys', () => {
+    expect(isSameCombination(['Meta', 'Shift', 'k'], ['k', 'Shift', 'Meta'])).toBe(true);
+  });
+
+  it('tells combinations with different or extra keys apart', () => {
+    expect(isSameCombination(['Meta', 'k'], ['Meta', 'j'])).toBe(false);
+    expect(isSameCombination(['Meta', 'k'], ['Shift', 'Meta', 'k'])).toBe(false);
   });
 });

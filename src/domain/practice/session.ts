@@ -1,4 +1,5 @@
 import type { KeyCombination } from '../keyboard/resolve';
+import { isSameCombination } from '../keyboard/resolve';
 import type { ShortcutId } from '../shortcuts/shortcutId';
 import type { LearnSnapshot } from './snapshot';
 
@@ -225,9 +226,4 @@ function skip<Pool>(
 
 function unchanged<Pool>(session: Session<Pool>): SessionUpdate<Pool> {
   return { model: session, effects: [] };
-}
-
-/** Compares as sets: the order keys are pressed in doesn't matter. */
-function isSameCombination(pressed: KeyCombination, expected: KeyCombination): boolean {
-  return pressed.length === expected.length && pressed.every((key) => expected.includes(key));
 }

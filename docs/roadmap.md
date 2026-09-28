@@ -154,7 +154,7 @@ Branch `fix/review-findings`. A review of the whole codebase before step 4 found
 **Sub-steps**
 
 - [x] R.1 Learning progress: completion ignores skipped learned shortcuts, and saving keeps learned shortcuts the session didn't cover
-- [ ] R.2 Keyboard: one combination comparison, `keyOf`, and turning a key press into a combination
+- [x] R.2 Keyboard: one combination comparison, `keyOf`, and turning a key press into a combination
 - [ ] R.3 Layout in the domain types
 - [ ] R.4 Practice items and the review queue
 - [ ] R.5 Session and FSRS: the advance token and local days
