@@ -1,42 +1,23 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import BaseButton from './components/BaseButton.vue';
-import { useSummaryContext } from './composables/useSummaryContext';
+import { useStartup } from './composables/useStartup';
 import { apps } from './data/apps';
-import { uiLanguageFor } from './domain/settings/language';
 import OptionsPanel from './features/options/OptionsPanel.vue';
-import { useText, useUiLanguage } from './i18n';
+import { useText } from './i18n';
 import { depthOf } from './router';
-import { useKeymapStore } from './stores/keymap';
-import { useProgressStore } from './stores/progress';
-import { useSettingsStore } from './stores/settings';
 
-const settings = useSettingsStore();
-const keymap = useKeymapStore();
-const progress = useProgressStore();
-const context = useSummaryContext();
+const context = useStartup(apps);
 const route = useRoute();
 const text = useText();
-
-useUiLanguage(() =>
-  settings.settings.status === 'loaded'
-    ? uiLanguageFor(settings.settings.value.language, navigator.languages)
-    : undefined,
-);
 
 /** Whether the options panel is open over the screens. */
 const optionsOpen = ref(false);
 
 /** Deeper screens slide in over the current one; going back slides it away again. */
 const slide = ref<'deeper' | 'back'>('deeper');
-
-onMounted(() => {
-  void settings.load();
-  void keymap.load();
-  void progress.load(apps);
-});
 
 // Runs before the new screen renders, so its transition already has the right direction.
 watch(
@@ -45,12 +26,6 @@ watch(
     slide.value = depth < previous ? 'back' : 'deeper';
   },
 );
-
-watch(context, (loaded) => {
-  if (loaded.status === 'failed') {
-    console.error(`Could not load: ${loaded.error.message}`);
-  }
-});
 </script>
 
 <template>
