@@ -9,7 +9,11 @@ const earlier = at - 1000;
 describe('recordLearning', () => {
   it('starts a set’s progress from the first snapshot', () => {
     expect(
-      recordLearning(undefined, { learned: ['app/Meta+a'], complete: false }, at),
+      recordLearning(
+        undefined,
+        { shortcuts: ['app/Meta+a'], learned: ['app/Meta+a'], complete: false },
+        at,
+      ),
     ).toStrictEqual({
       learned: ['app/Meta+a'],
       updatedAt: at,
@@ -18,7 +22,11 @@ describe('recordLearning', () => {
 
   it('marks the set completed when the snapshot is complete', () => {
     expect(
-      recordLearning(undefined, { learned: ['app/Meta+a'], complete: true }, at),
+      recordLearning(
+        undefined,
+        { shortcuts: ['app/Meta+a'], learned: ['app/Meta+a'], complete: true },
+        at,
+      ),
     ).toStrictEqual({
       learned: ['app/Meta+a'],
       completedAt: at,
@@ -33,7 +41,9 @@ describe('recordLearning', () => {
       updatedAt: earlier,
     };
 
-    expect(recordLearning(completed, { learned: [], complete: false }, at)).toStrictEqual({
+    expect(
+      recordLearning(completed, { shortcuts: ['app/Meta+a'], learned: [], complete: false }, at),
+    ).toStrictEqual({
       learned: [],
       completedAt: earlier,
       updatedAt: at,
@@ -44,7 +54,36 @@ describe('recordLearning', () => {
     const completed: SetProgress = { learned: [], completedAt: earlier, updatedAt: earlier };
 
     expect(
-      recordLearning(completed, { learned: ['app/Meta+a'], complete: true }, at).completedAt,
+      recordLearning(
+        completed,
+        { shortcuts: ['app/Meta+a'], learned: ['app/Meta+a'], complete: true },
+        at,
+      ).completedAt,
     ).toBe(at);
+  });
+
+  it('keeps learned shortcuts the session didn’t cover, such as ones impossible on this layout', () => {
+    // Regression: the session's snapshot used to replace everything learned before.
+    const progress: SetProgress = { learned: ['app/Meta+c'], updatedAt: earlier };
+
+    expect(
+      recordLearning(
+        progress,
+        { shortcuts: ['app/Meta+a', 'app/Meta+b'], learned: ['app/Meta+a'], complete: false },
+        at,
+      ).learned,
+    ).toStrictEqual(['app/Meta+c', 'app/Meta+a']);
+  });
+
+  it('replaces what the session covered, forgetting shortcuts it demoted', () => {
+    const progress: SetProgress = { learned: ['app/Meta+a', 'app/Meta+b'], updatedAt: earlier };
+
+    expect(
+      recordLearning(
+        progress,
+        { shortcuts: ['app/Meta+a', 'app/Meta+b'], learned: ['app/Meta+b'], complete: false },
+        at,
+      ).learned,
+    ).toStrictEqual(['app/Meta+b']);
   });
 });

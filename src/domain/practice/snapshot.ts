@@ -5,7 +5,15 @@ import type { ShortcutId } from '../shortcuts/shortcutId';
  * are learned. Trained and skipped ones start over, as in the old app.
  */
 export type LearnSnapshot = {
+  /**
+   * The shortcuts the session covered. Saving replaces only their progress, so shortcuts it left
+   * out, such as ones that can't be pressed on this layout, stay learned.
+   */
+  readonly shortcuts: readonly ShortcutId[];
   readonly learned: readonly ShortcutId[];
-  /** Every shortcut of the set is learned, and none was skipped on the way. */
+  /**
+   * Every shortcut the session covered is learned. A skipped shortcut that isn't learned keeps it
+   * incomplete; a skipped learned one doesn't.
+   */
   readonly complete: boolean;
 };

@@ -13,12 +13,18 @@ export type SetProgress = {
   readonly updatedAt: number;
 };
 
-/** Saves a learning session's snapshot into the set's progress (the Memento's caretaker). */
+/**
+ * Saves a learning session's snapshot into the set's progress (the Memento's caretaker). It
+ * replaces the progress of the shortcuts the session covered and keeps the rest, such as learned
+ * shortcuts that can't be pressed on this layout today.
+ */
 export function recordLearning(
   progress: SetProgress | undefined,
-  { learned, complete }: LearnSnapshot,
+  { shortcuts, learned: learnedNow, complete }: LearnSnapshot,
   at: number,
 ): SetProgress {
+  const uncovered = (progress?.learned ?? []).filter((id) => !shortcuts.includes(id));
+  const learned = [...uncovered, ...learnedNow];
   const completedAt = complete ? at : progress?.completedAt;
 
   return completedAt === undefined

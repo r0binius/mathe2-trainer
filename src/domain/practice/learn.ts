@@ -66,8 +66,9 @@ export function learnPool(
 /** Captures what the next session needs from this one (the Memento). */
 export function snapshotLearning({ entries }: LearnPool): LearnSnapshot {
   return {
+    shortcuts: entries.map(({ item }) => item.id),
     learned: entries.filter(({ stage }) => stage === 'learned').map(({ item }) => item.id),
-    complete: entries.every(({ stage, skipped }) => stage === 'learned' && !skipped),
+    complete: entries.every(({ stage }) => stage === 'learned'),
   };
 }
 

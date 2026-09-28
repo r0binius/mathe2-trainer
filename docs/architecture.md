@@ -176,7 +176,7 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 
 **Memento: resumable learning** (`practice/snapshot.ts`, `practice/learn.ts`, `progress/setProgress.ts`)
 
-- A learning session leaves a `LearnSnapshot`: the learned shortcut IDs, and whether the set is complete (everything learned, nothing skipped). `snapshotLearning(pool)` produces it, and `learnPool(items, learned)` restores it; the pool's internals (stages, skips, tested IDs) stay private to the domain.
+- A learning session leaves a `LearnSnapshot`: the shortcut IDs the session covered, the learned ones, and whether the set is complete (everything it covered is learned). `snapshotLearning(pool)` produces it, and `learnPool(items, learned)` restores it; the pool's internals (stages, skips, tested IDs) stay private to the domain.
 - The learn strategy emits it as a `learnedChanged` effect whenever the learned shortcuts change, and the shell saves it with `recordLearning` into one `SetProgress` per set and layout (the caretaker), instead of the old app's list of runs.
 
 ### 5.2 Considered and not used (for now)

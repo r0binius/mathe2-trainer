@@ -116,7 +116,10 @@ describe('learnStrategy.complete', () => {
       pool: { entries: [entry(a, 'learned'), entry(b, 'learned')], tested: [a.id] },
       effects: [
         { type: 'tested', id: a.id, failed: false, durationMs: 1000 },
-        { type: 'learnedChanged', snapshot: { learned: [a.id, b.id], complete: true } },
+        {
+          type: 'learnedChanged',
+          snapshot: { shortcuts: [a.id, b.id], learned: [a.id, b.id], complete: true },
+        },
       ],
     });
   });
@@ -126,7 +129,10 @@ describe('learnStrategy.complete', () => {
       pool: { entries: [entry(a, 'unseen'), entry(b, 'trained')], tested: [b.id] },
       effects: [
         { type: 'tested', id: b.id, failed: true, durationMs: 1000 },
-        { type: 'learnedChanged', snapshot: { learned: [], complete: false } },
+        {
+          type: 'learnedChanged',
+          snapshot: { shortcuts: [a.id, b.id], learned: [], complete: false },
+        },
       ],
     });
   });
@@ -160,21 +166,30 @@ describe('learnStrategy.skip', () => {
 });
 
 describe('snapshotLearning', () => {
-  it('lists the learned shortcuts, skipped ones included', () => {
+  it('lists the session’s shortcuts and the learned ones, skipped ones included', () => {
     const pool = poolOf(entry(a, 'learned', true), entry(b, 'trained'), entry(c, 'learned'));
 
-    expect(snapshotLearning(pool)).toStrictEqual({ learned: [a.id, c.id], complete: false });
-  });
-
-  it('is complete once every shortcut is learned and none was skipped', () => {
-    expect(snapshotLearning(poolOf(entry(a, 'learned'), entry(b, 'learned')))).toStrictEqual({
-      learned: [a.id, b.id],
-      complete: true,
+    expect(snapshotLearning(pool)).toStrictEqual({
+      shortcuts: [a.id, b.id, c.id],
+      learned: [a.id, c.id],
+      complete: false,
     });
   });
 
-  it('is not complete while a shortcut was skipped, as in the old app', () => {
+  it('is complete once every shortcut is learned', () => {
+    expect(snapshotLearning(poolOf(entry(a, 'learned'), entry(b, 'learned'))).complete).toBe(true);
+  });
+
+  it('is complete even if a learned shortcut was skipped on the way', () => {
+    // Regression: requiring no skips, as the old app did, lost the completion and then reset
+    // the set, since the next session saw every shortcut learned.
     expect(snapshotLearning(poolOf(entry(a, 'learned'), entry(b, 'learned', true))).complete).toBe(
+      true,
+    );
+  });
+
+  it('is not complete while a skipped shortcut is not learned', () => {
+    expect(snapshotLearning(poolOf(entry(a, 'learned'), entry(b, 'trained', true))).complete).toBe(
       false,
     );
   });
