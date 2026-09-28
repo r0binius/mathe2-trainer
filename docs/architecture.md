@@ -181,26 +181,26 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 
 ### 5.2 Considered and not used (for now)
 
-| Pattern                      | Why not                                                                                                                                                                                                                        |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Singleton                    | Hides dependencies and makes testing hard. This was the old app's main problem. Single instances come from injection instead (Tauri `manage`, Pinia, `provide`).                                                               |
-| Template Method              | Learn and review differ by strategy, so composition is simpler than a base class.                                                                                                                                              |
-| Builder (our own)            | Tauri already provides builders (`Builder`, `WebviewWindowBuilder`, `TrayIconBuilder`), which we use. For our data, object literals plus `defineApp()` are clearer. Test data builders may come later if fixtures get verbose. |
-| Composite                    | Apps → sets → shortcuts is a fixed three-level hierarchy, and plain typed data with `computed` aggregates is enough. The AX menu tree is walked recursively in Rust without class hierarchies.                                 |
-| Decorator, Proxy             | Caching resolved shortcuts per keymap is a `computed`. No wrapper objects are needed.                                                                                                                                          |
-| Flyweight                    | About 630 shortcuts don't need memory tricks.                                                                                                                                                                                  |
-| Prototype, Visitor, Iterator | No problem they would solve. Language features (spread, `for…of`, iterators) cover them.                                                                                                                                       |
+| Pattern                      | Why not                                                                                                                                                                                                                                            |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Singleton                    | Hides dependencies and makes testing hard. This was the old app's main problem. Single instances come from injection instead (Tauri `manage`, Pinia, `provide`).                                                                                   |
+| Template Method              | Learn and review differ by strategy, so composition is simpler than a base class.                                                                                                                                                                  |
+| Builder (our own)            | Tauri already provides builders (`Builder`, `WebviewWindowBuilder`, `TrayIconBuilder`), which we use. For our data, object literals checked with `satisfies AppDefinition` are clearer. Test data builders may come later if fixtures get verbose. |
+| Composite                    | Apps → sets → shortcuts is a fixed three-level hierarchy, and plain typed data with `computed` aggregates is enough. The AX menu tree is walked recursively in Rust without class hierarchies.                                                     |
+| Decorator, Proxy             | Caching resolved shortcuts per keymap is a `computed`. No wrapper objects are needed.                                                                                                                                                              |
+| Flyweight                    | About 630 shortcuts don't need memory tricks.                                                                                                                                                                                                      |
+| Prototype, Visitor, Iterator | No problem they would solve. Language features (spread, `for…of`, iterators) cover them.                                                                                                                                                           |
 
 ## 6. Module sketch
 
 ```
 src/
 ├─ domain/
-│  ├─ keyboard/     keymap.ts (types), resolve.ts, policy.ts, labels.ts
-│  ├─ shortcuts/    types.ts, defineApp.ts, shortcutId.ts
+│  ├─ keyboard/     keymap.ts (types), combination.ts, resolve.ts, capture.ts, policy.ts, labels.ts
+│  ├─ shortcuts/    types.ts, shortcutId.ts
 │  ├─ practice/     session.ts (Model, Msg, update), items.ts, learn.ts, review.ts, grading.ts
 │  ├─ scheduling/   scheduler.ts (port), fsrs.ts
-│  ├─ progress/     setProgress.ts, repository.ts (port), reconcile.ts
+│  ├─ progress/     setProgress.ts, storedProgress.ts, repository.ts (port), reconcile.ts
 │  └─ shared/       result.ts (errors as values)
 ├─ data/apps/<id>/   index.ts, de.json
 ├─ platform/        tauri.ts (bindings), settings.ts, progress.ts, keymap.ts, lookup.ts, window.ts
