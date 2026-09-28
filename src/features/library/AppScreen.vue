@@ -10,7 +10,7 @@ import { recentFirst, summarizeApp, summarizeSet } from '@/domain/progress/summa
 import { daysUntil } from '@/domain/scheduling/days';
 import type { AppDefinition } from '@/domain/shortcuts/types';
 import { useText } from '@/i18n';
-import { toLibrary } from '@/router';
+import { toLibrary, toReview } from '@/router';
 
 import { logoOf } from './logos';
 import SetRow from './SetRow.vue';
@@ -58,6 +58,14 @@ const nextReview = computed(() => {
         <h1 class="title truncate">{{ app.title }}</h1>
         <p v-if="nextReview !== undefined" class="meta">{{ nextReview }}</p>
       </div>
+      <BaseButton
+        v-if="summary.due > 0"
+        variant="accent"
+        size="large"
+        @click="router.push(toReview(app.id))"
+      >
+        {{ text.ui('app.review', { n: summary.due }) }}
+      </BaseButton>
     </header>
 
     <div class="sections">
@@ -89,6 +97,7 @@ const nextReview = computed(() => {
 }
 
 .heading {
+  flex: 1 1 auto;
   min-width: 0;
 }
 

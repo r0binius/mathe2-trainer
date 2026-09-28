@@ -38,5 +38,9 @@
   "practice": {
     "skip": "Skip",
     "saveFailed": "Progress couldn't be saved"
+  },
+  "review": {
+    "title": "Review",
+    "back": "Sets"
   }
 }

@@ -38,5 +38,9 @@
   "practice": {
     "skip": "Überspringen",
     "saveFailed": "Fortschritt konnte nicht gespeichert werden"
+  },
+  "review": {
+    "title": "Wiederholen",
+    "back": "Sets"
   }
 }

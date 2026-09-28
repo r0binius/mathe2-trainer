@@ -4,11 +4,8 @@ import { useRouter } from 'vue-router';
 
 import BaseButton from '@/components/BaseButton.vue';
 import CircleProgress from '@/components/CircleProgress.vue';
-import KeyCap from '@/components/KeyCap.vue';
 import PageLayout from '@/components/PageLayout.vue';
-import SkipButton from '@/components/SkipButton.vue';
 import { usePracticeSession } from '@/composables/usePracticeSession';
-import { labelKey, macosKeyLabels } from '@/domain/keyboard/labels';
 import { practiceItems } from '@/domain/practice/items';
 import { learnPool, learnStrategy } from '@/domain/practice/learn';
 import type { SummaryContext } from '@/domain/progress/summary';
@@ -18,7 +15,7 @@ import { useText } from '@/i18n';
 import { toSet } from '@/router';
 import { useProgressStore } from '@/stores/progress';
 
-import { keyCapsOf } from './keyCaps';
+import PracticeStage from './PracticeStage.vue';
 import { progressSaver } from './progressSaver';
 
 const props = defineProps<{
@@ -35,7 +32,7 @@ const text = useText();
 const target = { appId: props.app.id, setId: props.set.id, layout: props.context.layout };
 
 // The session starts from the progress as it is now, and owns it from then on.
-const [view, skip] = usePracticeSession(
+const [{ session, held, saveFailed }, skip] = usePracticeSession(
   learnStrategy,
   learnPool(
     practiceItems(props.app.id, props.set, props.context),
@@ -49,25 +46,12 @@ const [view, skip] = usePracticeSession(
   },
 );
 
-const { session, held, saveFailed } = view;
-const keyCaps = computed(() =>
-  session.value.phase === 'finished' ? [] : keyCapsOf(session.value, held.value),
-);
 const learned = computed(
   () => session.value.pool.entries.filter(({ stage }) => stage === 'learned').length,
 );
 
-/** Plays the shake after a wrong answer; the animation's end clears it. */
-const shaking = ref(false);
 /** The learned count to announce, while its message shows. */
 const announced = ref<number>();
-
-watch(
-  () => (session.value.phase === 'presenting' ? session.value.misses : 0),
-  (misses) => {
-    shaking.value = misses > 0;
-  },
-);
 
 watch(learned, (count) => {
   announced.value = count;
@@ -92,165 +76,32 @@ watch(
       </BaseButton>
     </template>
 
-    <div class="practice">
-      <Transition name="shortcut" mode="out-in">
-        <div
-          v-if="session.phase !== 'finished'"
-          :key="session.presentation"
-          class="shortcut"
-          :class="{ shaking }"
-          @animationend="shaking = false"
+    <PracticeStage
+      :app-id="app.id"
+      :session="session"
+      :held="held"
+      :save-failed="saveFailed"
+      @skip="skip"
+    >
+      <template #progress>
+        <CircleProgress v-if="learned > 0" :value="learned" :max="session.pool.entries.length" />
+        <span
+          v-if="announced !== undefined"
+          :key="announced"
+          class="announcement"
+          @animationend="announced = undefined"
         >
-          <h1 class="title">{{ text.app(app.id, session.item.title) }}</h1>
-          <p v-if="session.item.description !== undefined" class="description">
-            {{ text.app(app.id, session.item.description) }}
-          </p>
-          <div class="keys">
-            <div v-for="(row, index) in keyCaps" :key="index" class="row">
-              <KeyCap
-                v-for="cap in row"
-                :key="cap.key"
-                :label="labelKey(macosKeyLabels, cap.key)"
-                :hidden="cap.hidden"
-                :pressed="cap.pressed"
-                :result="cap.result"
-              />
-            </div>
-          </div>
-        </div>
-      </Transition>
-
-      <footer class="footer">
-        <div class="progress">
-          <CircleProgress v-if="learned > 0" :value="learned" :max="session.pool.entries.length" />
-          <span
-            v-if="announced !== undefined"
-            :key="announced"
-            class="announcement"
-            @animationend="announced = undefined"
-          >
-            {{ text.ui('learn.mastered', { n: announced }) }}
-          </span>
-          <span v-if="saveFailed" class="save-failed">
-            {{ text.ui('practice.saveFailed') }}
-          </span>
-        </div>
-        <SkipButton @click="skip">{{ text.ui('practice.skip') }}</SkipButton>
-      </footer>
-    </div>
+          {{ text.ui('learn.mastered', { n: announced }) }}
+        </span>
+      </template>
+    </PracticeStage>
   </PageLayout>
 </template>
 
 <style scoped>
-.practice {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  text-align: center;
-}
-
-.shortcut {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  justify-content: center;
-}
-
-/* A short, damped shake after a wrong answer. */
-.shaking {
-  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-}
-
-.title {
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.description {
-  max-width: 350px;
-  margin: 6px auto 0;
-  font-size: 14px;
-  font-weight: 600;
-  opacity: 0.5;
-}
-
-.keys {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 40px;
-  margin-top: 20px;
-}
-
-.row {
-  display: inline-flex;
-  gap: 8px;
-}
-
-.footer {
-  display: flex;
-  flex: none;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 16px;
-}
-
-.progress {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
 /* Shows for three seconds, then fades; its end removes it. */
 .announcement {
-  opacity: 0.5;
   animation: announce 3s both;
-}
-
-.save-failed {
-  color: var(--color-red);
-}
-
-.shortcut-enter-active,
-.shortcut-leave-active {
-  transition:
-    transform 0.2s var(--ease-in-out-quad),
-    opacity 0.2s var(--ease-in-out-quad);
-}
-
-.shortcut-enter-from {
-  transform: translateX(10px);
-  opacity: 0;
-}
-
-.shortcut-leave-to {
-  transform: translateX(-10px);
-  opacity: 0;
-}
-
-@keyframes shake {
-  10%,
-  90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-
-  20%,
-  80% {
-    transform: translate3d(2px, 0, 0);
-  }
-
-  30%,
-  50%,
-  70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-
-  40%,
-  60% {
-    transform: translate3d(4px, 0, 0);
-  }
 }
 
 @keyframes announce {
@@ -262,7 +113,7 @@ watch(
   7%,
   93% {
     transform: none;
-    opacity: 0.5;
+    opacity: 1;
   }
 
   100% {

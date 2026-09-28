@@ -8,6 +8,7 @@ import AppScreen from './features/library/AppScreen.vue';
 import LibraryScreen from './features/library/LibraryScreen.vue';
 import SetScreen from './features/library/SetScreen.vue';
 import LearnScreen from './features/practice/LearnScreen.vue';
+import ReviewScreen from './features/practice/ReviewScreen.vue';
 
 /** The route to the list of apps. */
 export function toLibrary(): RouteLocationRaw {
@@ -22,6 +23,11 @@ export function toApp(appId: string): RouteLocationRaw {
 /** The route to a set's shortcuts. */
 export function toSet(appId: string, setId: string): RouteLocationRaw {
   return { name: 'set', params: { appId, setId } };
+}
+
+/** The route to reviewing an app's due shortcuts. */
+export function toReview(appId: string): RouteLocationRaw {
+  return { name: 'review', params: { appId } };
 }
 
 /** The route to learning a set. */
@@ -58,6 +64,14 @@ export function createAppRouter(apps: readonly AppDefinition[]): Router {
         name: 'app',
         component: AppScreen,
         meta: { depth: 1 },
+        beforeEnter: (to) => (appOf(to) === undefined ? toLibrary() : true),
+        props: (to) => ({ app: appOf(to) }),
+      },
+      {
+        path: '/apps/:appId/review',
+        name: 'review',
+        component: ReviewScreen,
+        meta: { depth: 2 },
         beforeEnter: (to) => (appOf(to) === undefined ? toLibrary() : true),
         props: (to) => ({ app: appOf(to) }),
       },

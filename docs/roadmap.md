@@ -252,12 +252,12 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
   - [x] 5.3.4 Loading at startup, summary context and logos
   - [x] 5.3.5 Library, app and set screens
 - [x] 5.4 Route transitions and fade-in
-- 5.5 Learn and review screens
+- [x] 5.5 Learn and review screens
   - [x] 5.5.1 `useProgram`, the Elm runtime
   - [x] 5.5.2 `useKeyCapture`
   - [x] 5.5.3 `usePracticeSession`
   - [x] 5.5.4 Learn screen
-  - [ ] 5.5.5 Review screen
+  - [x] 5.5.5 Review screen
 - [ ] 5.6 Options screen
 - [ ] 5.7 Spatial navigation
 
