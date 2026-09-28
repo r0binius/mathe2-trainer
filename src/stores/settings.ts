@@ -14,10 +14,12 @@ export const useSettingsStore = defineStore('settings', () => {
   const repository = inject(settingsRepositoryKey, missingSettingsRepository);
   const settings = shallowRef<Loadable<Settings>>({ status: 'loading' });
 
+  /** Loads the settings. */
   async function load(): Promise<void> {
     settings.value = loadableOf(await repository.load());
   }
 
+  /** Saves the settings and shows them once they're stored. */
   async function save(changed: Settings): Promise<Result<void, StorageError>> {
     const saved = await repository.save(changed);
 

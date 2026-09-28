@@ -22,19 +22,17 @@ type Field = Decoder<unknown> | Optional<unknown>;
 
 type Shape = Readonly<Record<string, Field>>;
 
+type OptionalKeys<S extends Shape> = {
+  [K in keyof S]: S[K] extends Optional<unknown> ? K : never;
+}[keyof S];
+
+type DecodedField<F> = F extends Optional<infer T> ? T : F extends Decoder<infer T> ? T : never;
+
 /** The object an {@link object} decoder with the given fields returns. */
 export type Decoded<S extends Shape> = {
-  readonly [K in keyof S as S[K] extends Optional<unknown> ? never : K]: S[K] extends Decoder<
-    infer T
-  >
-    ? T
-    : never;
+  readonly [K in Exclude<keyof S, OptionalKeys<S>>]: DecodedField<S[K]>;
 } & {
-  readonly [K in keyof S as S[K] extends Optional<unknown> ? K : never]?: S[K] extends Optional<
-    infer T
-  >
-    ? T
-    : never;
+  readonly [K in OptionalKeys<S>]?: DecodedField<S[K]>;
 };
 
 /** What a {@link sift} decoder returns: the items that decode, and why the others don't. */

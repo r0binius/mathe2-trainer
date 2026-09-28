@@ -12,7 +12,7 @@ import { scheduleWithFsrs } from '@/domain/scheduling/fsrs';
 import { reviewCard } from '@/domain/scheduling/scheduler';
 import type { Loadable } from '@/domain/shared/loadable';
 import type { Result } from '@/domain/shared/result';
-import { err, ok } from '@/domain/shared/result';
+import { err } from '@/domain/shared/result';
 import type { StorageError } from '@/domain/shared/storage';
 import type { AppDefinition } from '@/domain/shortcuts/types';
 
@@ -31,13 +31,27 @@ export const useProgressStore = defineStore('progress', () => {
   const repository = inject(progressRepositoryKey, missingProgressRepository);
   const progress = shallowRef<Loadable<StoredProgress>>({ status: 'loading' });
 
-  /** Applies a saved change to the progress shown. */
-  function show(change: (stored: StoredProgress) => StoredProgress): void {
-    if (progress.value.status === 'loaded') {
+  /**
+   * Waits for a save and, once it's stored, applies the change to the progress shown. It applies
+   * it to the progress as it is by then, so saves close together don't undo each other.
+   */
+  async function saveThenShow(
+    saving: Promise<Result<void, StorageError>>,
+    change: (stored: StoredProgress) => StoredProgress,
+  ): Promise<Result<void, StorageError>> {
+    const saved = await saving;
+
+    if (saved.kind === 'ok' && progress.value.status === 'loaded') {
       progress.value = { status: 'loaded', value: change(progress.value.value) };
     }
+
+    return saved;
   }
 
+  /**
+   * Loads the progress on every layout and reconciles it with the app data. What reconciling
+   * removed is written back.
+   */
   async function load(apps: readonly AppDefinition[]): Promise<void> {
     const loaded = await repository.load();
 
@@ -66,6 +80,7 @@ export const useProgressStore = defineStore('progress', () => {
     }
   }
 
+  /** Saves a learning session's snapshot into its set's progress. */
   async function saveLearning(
     key: SetKey,
     snapshot: LearnSnapshot,
@@ -77,15 +92,10 @@ export const useProgressStore = defineStore('progress', () => {
 
     const current = setProgressOf(progress.value.value, key);
     const record = { ...key, progress: recordLearning(current, snapshot, at) };
-    const saved = await repository.saveSet(record);
-
-    if (saved.kind === 'ok') {
-      show((stored) => withSetRecord(stored, record));
-    }
-
-    return saved;
+    return saveThenShow(repository.saveSet(record), (stored) => withSetRecord(stored, record));
   }
 
+  /** Grades a test, schedules its card and logs it. A failed first test creates no card. */
   async function recordReview(test: TestResult): Promise<Result<void, StorageError>> {
     if (progress.value.status !== 'loaded') {
       return err(notLoaded);
@@ -93,15 +103,12 @@ export const useProgressStore = defineStore('progress', () => {
 
     const review = { ...test, grade: gradeRecall(test) };
     const card = reviewCard(scheduleWithFsrs, cardOf(progress.value.value, test), review);
-    const saved = await repository.recordReview(review, card);
-
-    if (saved.kind === 'ok' && card !== undefined) {
-      show((stored) => withCard(stored, card));
-    }
-
-    return saved;
+    return saveThenShow(repository.recordReview(review, card), (stored) =>
+      card === undefined ? stored : withCard(stored, card),
+    );
   }
 
+  /** Deletes all progress, cards and the review log, on every layout. */
   async function reset(): Promise<Result<void, StorageError>> {
     const deleted = await repository.reset();
 
@@ -109,7 +116,7 @@ export const useProgressStore = defineStore('progress', () => {
       progress.value = { status: 'loaded', value: { sets: [], cards: [] } };
     }
 
-    return deleted.kind === 'ok' ? ok(undefined) : deleted;
+    return deleted;
   }
 
   return { progress, load, saveLearning, recordReview, reset };
