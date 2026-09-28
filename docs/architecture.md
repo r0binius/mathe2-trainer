@@ -172,11 +172,12 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 
 **Repository (not in the catalog, the standard persistence pattern)**
 
-- `ProgressRepository` (runs, cards, review log) and `SettingsRepository` interfaces in the domain. Production uses SQLite and the store plugin through Rust; tests use in-memory versions.
+- `ProgressRepository` (set progress, cards, review log) and `SettingsRepository` interfaces in the domain. Production uses SQLite and the store plugin through Rust; tests use in-memory versions.
 
-**Memento: resumable runs**
+**Memento: resumable learning** (`practice/snapshot.ts`, `practice/learn.ts`, `progress/setProgress.ts`)
 
-- A run's persisted state (`learnedIds`, and possibly skipped ones, see open decisions) is a snapshot of the session. `createSession(snapshot)` restores it, and `snapshot(session)` produces it. The session's internals stay private to the domain.
+- A learning session leaves a `LearnSnapshot`: the learned shortcut IDs, and whether the set is complete (everything learned, nothing skipped). `snapshotLearning(pool)` produces it, and `learnPool(items, learned)` restores it; the pool's internals (stages, skips, tested IDs) stay private to the domain.
+- The learn strategy emits it as a `learnedChanged` effect whenever the learned shortcuts change, and the shell saves it with `recordLearning` into one `SetProgress` per set and layout (the caretaker), instead of the old app's list of runs.
 
 ### 5.2 Considered and not used (for now)
 
@@ -199,7 +200,7 @@ src/
 │  ├─ shortcuts/    types.ts, defineApp.ts, shortcutId.ts
 │  ├─ practice/     session.ts (Model, Msg, update), learn.ts, review.ts, grading.ts
 │  ├─ scheduling/   scheduler.ts (port), fsrs.ts
-│  ├─ progress/     types.ts, repository.ts (port), reconcile.ts
+│  ├─ progress/     setProgress.ts, repository.ts (port), reconcile.ts
 │  └─ shared/       result.ts (errors as values)
 ├─ data/apps/<id>/   index.ts, de.json
 ├─ platform/        tauri.ts (bindings), settings.ts, progress.ts, keymap.ts, lookup.ts, window.ts

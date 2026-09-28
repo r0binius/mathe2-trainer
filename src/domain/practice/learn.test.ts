@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { LearnPool } from './learn';
-import { learnPool, learnStrategy } from './learn';
+import type { LearnEntry, LearnPool, LearnStage } from './learn';
+import { learnPool, learnStrategy, snapshotLearning } from './learn';
 import type { Attempt, PracticeItem } from './session';
 
 function item(key: string): PracticeItem {
@@ -10,16 +10,21 @@ function item(key: string): PracticeItem {
 
 const [a, b, c, d] = [item('a'), item('b'), item('c'), item('d')];
 
+function entry(practiceItem: PracticeItem, stage: LearnStage, skipped = false): LearnEntry {
+  return { item: practiceItem, stage, skipped };
+}
+
+function poolOf(...entries: readonly LearnEntry[]): LearnPool {
+  return { entries, tested: [] };
+}
+
 /** Weights 90 + 50 + 10 = 150: rolls below 0.6 pick unseen, below 140/150 trained, the rest learned. */
-const mixed: LearnPool = {
-  entries: [
-    { item: a, stage: 'unseen' },
-    { item: b, stage: 'trained' },
-    { item: c, stage: 'unseen' },
-    { item: d, stage: 'learned' },
-  ],
-  tested: [],
-};
+const mixed = poolOf(
+  entry(a, 'unseen'),
+  entry(b, 'trained'),
+  entry(c, 'unseen'),
+  entry(d, 'learned'),
+);
 
 function attempt(overrides: Partial<Attempt> = {}): Attempt {
   return { item: a, mode: 'testing', failed: false, durationMs: 1000, ...overrides };
@@ -27,13 +32,15 @@ function attempt(overrides: Partial<Attempt> = {}): Attempt {
 
 describe('learnPool', () => {
   it('starts the shortcuts learned in earlier sessions as learned, the rest as unseen', () => {
-    expect(learnPool([a, b], [b.id, 'app/gone'])).toStrictEqual({
-      entries: [
-        { item: a, stage: 'unseen' },
-        { item: b, stage: 'learned' },
-      ],
-      tested: [],
-    });
+    expect(learnPool([a, b], [b.id, 'app/gone'])).toStrictEqual(
+      poolOf(entry(a, 'unseen'), entry(b, 'learned')),
+    );
+  });
+
+  it('starts over when every shortcut was already learned: the set was completed', () => {
+    expect(learnPool([a, b], [a.id, b.id])).toStrictEqual(
+      poolOf(entry(a, 'unseen'), entry(b, 'unseen')),
+    );
   });
 });
 
@@ -58,13 +65,7 @@ describe('learnStrategy.next', () => {
   });
 
   it('drops empty buckets from the weights', () => {
-    const pool: LearnPool = {
-      entries: [
-        { item: a, stage: 'trained' },
-        { item: b, stage: 'learned' },
-      ],
-      tested: [],
-    };
+    const pool = poolOf(entry(a, 'trained'), entry(b, 'learned'));
 
     // 50 + 10 = 60: trained up to 50/60.
     expect(next(pool, { roll: 0.83, previous: undefined })?.item).toBe(a);
@@ -77,94 +78,110 @@ describe('learnStrategy.next', () => {
   });
 
   it('repeats the shortcut just shown when it is the last one to practice', () => {
-    const pool: LearnPool = { entries: [{ item: a, stage: 'trained' }], tested: [] };
-
-    expect(next(pool, { roll: 0, previous: a })?.item).toBe(a);
+    expect(next(poolOf(entry(a, 'trained')), { roll: 0, previous: a })?.item).toBe(a);
   });
 
   it('leaves skipped shortcuts out', () => {
-    const pool: LearnPool = {
-      entries: [
-        { item: a, stage: 'skipped' },
-        { item: b, stage: 'unseen' },
-      ],
-      tested: [],
-    };
+    const pool = poolOf(entry(a, 'unseen', true), entry(b, 'unseen'));
 
     expect(next(pool, { roll: 0, previous: undefined })?.item).toBe(b);
   });
 
   it('ends when every shortcut that is not skipped is learned', () => {
-    const pool: LearnPool = {
-      entries: [
-        { item: a, stage: 'learned' },
-        { item: b, stage: 'skipped' },
-      ],
-      tested: [],
-    };
+    const pool = poolOf(entry(a, 'learned'), entry(b, 'trained', true));
 
     expect(next(pool, { roll: 0, previous: undefined })).toBeUndefined();
   });
 
   it('ends when every shortcut is skipped', () => {
-    const pool: LearnPool = { entries: [{ item: a, stage: 'skipped' }], tested: [] };
-
-    expect(next(pool, { roll: 0, previous: undefined })).toBeUndefined();
+    expect(
+      next(poolOf(entry(a, 'unseen', true)), { roll: 0, previous: undefined }),
+    ).toBeUndefined();
   });
 });
 
 describe('learnStrategy.complete', () => {
   const { complete } = learnStrategy;
-  const pool: LearnPool = { entries: [{ item: a, stage: 'unseen' }], tested: [] };
+  const pool = poolOf(entry(a, 'unseen'), entry(b, 'learned'));
 
   it('makes a trained shortcut trained, without a review', () => {
     expect(complete(pool, attempt({ mode: 'training' }))).toStrictEqual({
-      pool: { entries: [{ item: a, stage: 'trained' }], tested: [] },
+      pool: poolOf(entry(a, 'trained'), entry(b, 'learned')),
       effects: [],
     });
   });
 
-  it('makes a shortcut recalled without a mistake learned, and reports the test', () => {
+  it('makes a shortcut recalled without a mistake learned, reporting the test and the progress', () => {
     expect(complete(pool, attempt())).toStrictEqual({
-      pool: { entries: [{ item: a, stage: 'learned' }], tested: [a.id] },
-      effects: [{ type: 'tested', id: a.id, failed: false, durationMs: 1000 }],
+      pool: { entries: [entry(a, 'learned'), entry(b, 'learned')], tested: [a.id] },
+      effects: [
+        { type: 'tested', id: a.id, failed: false, durationMs: 1000 },
+        { type: 'learnedChanged', snapshot: { learned: [a.id, b.id], complete: true } },
+      ],
     });
   });
 
-  it('sends a shortcut tested with a mistake back to trained', () => {
-    const learned: LearnPool = { entries: [{ item: a, stage: 'learned' }], tested: [] };
-
-    expect(complete(learned, attempt({ failed: true })).pool.entries).toStrictEqual([
-      { item: a, stage: 'trained' },
-    ]);
+  it('sends a learned shortcut tested with a mistake back to trained, reporting the progress', () => {
+    expect(complete(pool, attempt({ item: b, failed: true }))).toStrictEqual({
+      pool: { entries: [entry(a, 'unseen'), entry(b, 'trained')], tested: [b.id] },
+      effects: [
+        { type: 'tested', id: b.id, failed: true, durationMs: 1000 },
+        { type: 'learnedChanged', snapshot: { learned: [], complete: false } },
+      ],
+    });
   });
 
   it('reports only the first test of a shortcut in a session', () => {
     const first = complete(pool, attempt({ failed: true }));
 
-    expect(complete(first.pool, attempt()).effects).toStrictEqual([]);
+    expect(complete(first.pool, attempt()).effects).not.toContainEqual(
+      expect.objectContaining({ type: 'tested' }),
+    );
+  });
+
+  it('reports no progress when a learned shortcut stays learned', () => {
+    expect(complete(pool, attempt({ item: b })).effects).toStrictEqual([
+      { type: 'tested', id: b.id, failed: false, durationMs: 1000 },
+    ]);
   });
 
   it('leaves the other shortcuts as they are', () => {
-    const two: LearnPool = {
-      entries: [
-        { item: a, stage: 'unseen' },
-        { item: b, stage: 'trained' },
-      ],
-      tested: [],
-    };
-
-    expect(complete(two, attempt({ mode: 'training' })).pool.entries[1]).toBe(two.entries[1]);
+    expect(complete(pool, attempt({ mode: 'training' })).pool.entries[1]).toBe(pool.entries[1]);
   });
 });
 
 describe('learnStrategy.skip', () => {
-  it('marks the shortcut as skipped for this session, without effects', () => {
-    const pool: LearnPool = { entries: [{ item: a, stage: 'trained' }], tested: [] };
-
-    expect(learnStrategy.skip(pool, a)).toStrictEqual({
-      pool: { entries: [{ item: a, stage: 'skipped' }], tested: [] },
+  it('marks the shortcut as skipped for this session, keeping its stage, without effects', () => {
+    expect(learnStrategy.skip(poolOf(entry(a, 'learned')), a)).toStrictEqual({
+      pool: poolOf(entry(a, 'learned', true)),
       effects: [],
     });
+  });
+});
+
+describe('snapshotLearning', () => {
+  it('lists the learned shortcuts, skipped ones included', () => {
+    const pool = poolOf(entry(a, 'learned', true), entry(b, 'trained'), entry(c, 'learned'));
+
+    expect(snapshotLearning(pool)).toStrictEqual({ learned: [a.id, c.id], complete: false });
+  });
+
+  it('is complete once every shortcut is learned and none was skipped', () => {
+    expect(snapshotLearning(poolOf(entry(a, 'learned'), entry(b, 'learned')))).toStrictEqual({
+      learned: [a.id, b.id],
+      complete: true,
+    });
+  });
+
+  it('is not complete while a shortcut was skipped, as in the old app', () => {
+    expect(snapshotLearning(poolOf(entry(a, 'learned'), entry(b, 'learned', true))).complete).toBe(
+      false,
+    );
+  });
+
+  it('restores through learnPool', () => {
+    const snapshot = snapshotLearning(mixed);
+
+    expect(snapshotLearning(learnPool([a, b, c, d], snapshot.learned))).toStrictEqual(snapshot);
   });
 });

@@ -1,5 +1,6 @@
 import type { KeyCombination } from '../keyboard/resolve';
 import type { ShortcutId } from '../shortcuts/shortcutId';
+import type { LearnSnapshot } from './snapshot';
 
 /** A shortcut to practice, with its keys already resolved for the current keyboard layout. */
 export type PracticeItem = {
@@ -34,13 +35,21 @@ export type Attempt = {
   readonly durationMs: number;
 };
 
-/** A practice result the shell has to save, such as a test that counts for reviews. */
-export type ProgressEffect = {
-  readonly type: 'tested';
-  readonly id: ShortcutId;
-  readonly failed: boolean;
-  readonly durationMs: number;
-};
+/**
+ * A practice result the shell has to save: a test that counts for reviews, or the progress of
+ * learning a set.
+ */
+export type ProgressEffect =
+  | {
+      readonly type: 'tested';
+      readonly id: ShortcutId;
+      readonly failed: boolean;
+      readonly durationMs: number;
+    }
+  | {
+      readonly type: 'learnedChanged';
+      readonly snapshot: LearnSnapshot;
+    };
 
 /** Reports an attempt as a test that counts for reviews. */
 export function testedEffect({ item, failed, durationMs }: Attempt): ProgressEffect {

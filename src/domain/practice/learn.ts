@@ -1,14 +1,23 @@
 import type { ShortcutId } from '../shortcuts/shortcutId';
-import type { PracticeItem, PracticeStrategy, Presentation } from './session';
+import type {
+  Attempt,
+  PracticeItem,
+  PracticeStrategy,
+  Presentation,
+  ProgressEffect,
+} from './session';
 import { testedEffect } from './session';
+import type { LearnSnapshot } from './snapshot';
 
-/** How far a shortcut got in this session. */
-export type LearnStage = 'unseen' | 'trained' | 'learned' | 'skipped';
+/** How far a shortcut got: seen with its keys (trained) or recalled without them (learned). */
+export type LearnStage = 'unseen' | 'trained' | 'learned';
 
-/** A shortcut of the set being learned, with its stage. */
+/** A shortcut of the set being learned. */
 export type LearnEntry = {
   readonly item: PracticeItem;
   readonly stage: LearnStage;
+  /** Left out for the rest of this session. It keeps its stage, so a learned one stays learned. */
+  readonly skipped: boolean;
 };
 
 /** The pool of a learning session: the set's shortcuts in a stable order. */
@@ -18,13 +27,11 @@ export type LearnPool = {
   readonly tested: readonly ShortcutId[];
 };
 
-type PickableStage = Exclude<LearnStage, 'skipped'>;
-
 /**
  * How likely each stage is to be picked next, as in the old app: mostly new shortcuts, now and
  * then a trained one, and rarely a learned one.
  */
-const stageWeights: readonly (readonly [PickableStage, number])[] = [
+const stageWeights: readonly (readonly [LearnStage, number])[] = [
   ['unseen', 90],
   ['trained', 50],
   ['learned', 10],
@@ -36,30 +43,43 @@ type Bucket = {
 };
 
 /**
- * Starts a learning session. Shortcuts learned in earlier sessions start as learned, and trained
- * ones start over as unseen, as in the old app.
+ * Starts a learning session from the shortcuts learned before (restoring a
+ * {@link LearnSnapshot}). Trained ones start over as unseen, as in the old app. When every
+ * shortcut is already learned, the set was completed and learning it again starts from scratch.
  */
 export function learnPool(
   items: readonly PracticeItem[],
   learned: readonly ShortcutId[],
 ): LearnPool {
+  const completed = items.every(({ id }) => learned.includes(id));
+
   return {
     entries: items.map((item) => ({
       item,
-      stage: learned.includes(item.id) ? 'learned' : 'unseen',
+      stage: !completed && learned.includes(item.id) ? 'learned' : 'unseen',
+      skipped: false,
     })),
     tested: [],
   };
 }
 
+/** Captures what the next session needs from this one (the Memento). */
+export function snapshotLearning({ entries }: LearnPool): LearnSnapshot {
+  return {
+    learned: entries.filter(({ stage }) => stage === 'learned').map(({ item }) => item.id),
+    complete: entries.every(({ stage, skipped }) => stage === 'learned' && !skipped),
+  };
+}
+
 /**
  * Learning a set: new shortcuts are shown with their keys (training), the others are tested, and
- * the session ends once every shortcut that wasn't skipped is learned.
+ * the session ends once every shortcut that wasn't skipped is learned. Reports the first test of
+ * each shortcut, and the progress whenever the learned shortcuts change.
  * @see §8 of `docs/legacy-architecture.md`
  */
 export const learnStrategy: PracticeStrategy<LearnPool> = {
   next: (pool, { roll, previous }) => {
-    const active = pool.entries.filter(({ stage }) => stage !== 'skipped');
+    const active = pool.entries.filter(({ skipped }) => !skipped);
     const others = active.filter(({ item }) => item.id !== previous?.id);
 
     return active.every(({ stage }) => stage === 'learned')
@@ -68,23 +88,46 @@ export const learnStrategy: PracticeStrategy<LearnPool> = {
   },
 
   complete: (pool, attempt) => {
-    const counts = attempt.mode === 'testing' && !pool.tested.includes(attempt.item.id);
     const stage = attempt.mode === 'testing' && !attempt.failed ? 'learned' : 'trained';
-    const entries = withStage(pool.entries, attempt.item, stage);
+    const firstTest = attempt.mode === 'testing' && !pool.tested.includes(attempt.item.id);
+    const entries = updateEntry(pool.entries, attempt.item, (entry) => ({ ...entry, stage }));
+    const next = {
+      entries,
+      tested: firstTest ? [...pool.tested, attempt.item.id] : pool.tested,
+    };
 
-    return counts
-      ? {
-          pool: { entries, tested: [...pool.tested, attempt.item.id] },
-          effects: [testedEffect(attempt)],
-        }
-      : { pool: { ...pool, entries }, effects: [] };
+    return {
+      pool: next,
+      effects: [
+        ...(firstTest ? [testedEffect(attempt)] : []),
+        ...progressChange(pool, next, attempt),
+      ],
+    };
   },
 
   skip: (pool, item) => ({
-    pool: { ...pool, entries: withStage(pool.entries, item, 'skipped') },
+    pool: {
+      ...pool,
+      entries: updateEntry(pool.entries, item, (entry) => ({ ...entry, skipped: true })),
+    },
     effects: [],
   }),
 };
+
+/** A `learnedChanged` effect if the attempt made its shortcut learned or took that away. */
+function progressChange(
+  before: LearnPool,
+  after: LearnPool,
+  { item }: Attempt,
+): readonly ProgressEffect[] {
+  return isLearnedIn(before, item) === isLearnedIn(after, item)
+    ? []
+    : [{ type: 'learnedChanged', snapshot: snapshotLearning(after) }];
+}
+
+function isLearnedIn({ entries }: LearnPool, item: PracticeItem): boolean {
+  return entries.some((entry) => entry.item.id === item.id && entry.stage === 'learned');
+}
 
 function buckets(entries: readonly LearnEntry[]): readonly Bucket[] {
   return stageWeights
@@ -125,10 +168,10 @@ function present({ entries }: Bucket, share: number): Presentation | undefined {
   return entry && { item: entry.item, mode: entry.stage === 'unseen' ? 'training' : 'testing' };
 }
 
-function withStage(
+function updateEntry(
   entries: readonly LearnEntry[],
   item: PracticeItem,
-  stage: LearnStage,
+  update: (entry: LearnEntry) => LearnEntry,
 ): readonly LearnEntry[] {
-  return entries.map((entry) => (entry.item.id === item.id ? { ...entry, stage } : entry));
+  return entries.map((entry) => (entry.item.id === item.id ? update(entry) : entry));
 }
