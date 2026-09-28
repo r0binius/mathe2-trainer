@@ -1,7 +1,7 @@
-import { defineApp } from '@/domain/shortcuts/defineApp';
+import type { AppDefinition } from '@/domain/shortcuts/types';
 
 /** The shortcuts in the menu bar of Bitwarden's desktop app, as of 2026-09-25. */
-export const bitwarden = defineApp({
+export const bitwarden = {
   id: 'bitwarden',
   title: 'Bitwarden',
   category: 'system',
@@ -41,4 +41,4 @@ export const bitwarden = defineApp({
       ],
     },
   ],
-});
+} satisfies AppDefinition;

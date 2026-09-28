@@ -1,7 +1,7 @@
-import { defineApp } from '@/domain/shortcuts/defineApp';
+import type { AppDefinition } from '@/domain/shortcuts/types';
 
 /** The shortcuts in WhatsApp's menu bar, as of 2026-09-25. */
-export const whatsapp = defineApp({
+export const whatsapp = {
   id: 'whatsapp',
   title: 'WhatsApp',
   category: 'communication',
@@ -32,4 +32,4 @@ export const whatsapp = defineApp({
       ],
     },
   ],
-});
+} satisfies AppDefinition;

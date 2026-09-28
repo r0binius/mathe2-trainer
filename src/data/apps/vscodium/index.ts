@@ -1,4 +1,4 @@
-import { defineApp } from '@/domain/shortcuts/defineApp';
+import type { AppDefinition } from '@/domain/shortcuts/types';
 
 /**
  * VS Code's default shortcuts, which VSCodium shares.
@@ -8,7 +8,7 @@ import { defineApp } from '@/domain/shortcuts/defineApp';
  * add Control: ⌘] becomes ⌃⌥⌘6.
  * @see https://code.visualstudio.com/docs/reference/default-keybindings
  */
-export const vscodium = defineApp({
+export const vscodium = {
   id: 'vscodium',
   title: 'VSCodium',
   category: 'development',
@@ -203,4 +203,4 @@ export const vscodium = defineApp({
       ],
     },
   ],
-});
+} satisfies AppDefinition;

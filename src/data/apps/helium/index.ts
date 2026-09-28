@@ -1,7 +1,7 @@
-import { defineApp } from '@/domain/shortcuts/defineApp';
+import type { AppDefinition } from '@/domain/shortcuts/types';
 
 /** The shortcuts in Helium's menu bar, as of 2026-09-25. */
-export const helium = defineApp({
+export const helium = {
   id: 'helium',
   title: 'Helium',
   category: 'internet',
@@ -94,4 +94,4 @@ export const helium = defineApp({
       ],
     },
   ],
-});
+} satisfies AppDefinition;

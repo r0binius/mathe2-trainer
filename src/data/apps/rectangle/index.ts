@@ -1,10 +1,10 @@
-import { defineApp } from '@/domain/shortcuts/defineApp';
+import type { AppDefinition } from '@/domain/shortcuts/types';
 
 /**
  * Rectangle's recommended default shortcuts, plus the Todo shortcuts set in its settings, as of
  * 2026-09-25.
  */
-export const rectangle = defineApp({
+export const rectangle = {
   id: 'rectangle',
   title: 'Rectangle',
   category: 'system',
@@ -57,4 +57,4 @@ export const rectangle = defineApp({
       ],
     },
   ],
-});
+} satisfies AppDefinition;

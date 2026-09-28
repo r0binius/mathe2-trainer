@@ -1,7 +1,7 @@
-import { defineApp } from '@/domain/shortcuts/defineApp';
+import type { AppDefinition } from '@/domain/shortcuts/types';
 
 /** The shortcuts in Spotify's menu bar, as of 2026-09-25. */
-export const spotify = defineApp({
+export const spotify = {
   id: 'spotify',
   title: 'Spotify',
   category: 'music',
@@ -47,4 +47,4 @@ export const spotify = defineApp({
       ],
     },
   ],
-});
+} satisfies AppDefinition;

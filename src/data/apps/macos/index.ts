@@ -1,4 +1,4 @@
-import { defineApp } from '@/domain/shortcuts/defineApp';
+import type { AppDefinition } from '@/domain/shortcuts/types';
 
 /**
  * The shortcuts of Apple's macOS keyboard shortcuts page.
@@ -9,7 +9,7 @@ import { defineApp } from '@/domain/shortcuts/defineApp';
  * because they can't be practiced.
  * @see https://support.apple.com/de-de/102650
  */
-export const macos = defineApp({
+export const macos = {
   id: 'macos',
   title: 'macOS',
   category: 'system',
@@ -262,4 +262,4 @@ export const macos = defineApp({
       ],
     },
   ],
-});
+} satisfies AppDefinition;

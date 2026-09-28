@@ -1,10 +1,10 @@
-import { defineApp } from '@/domain/shortcuts/defineApp';
+import type { AppDefinition } from '@/domain/shortcuts/types';
 
 /**
  * Bitwig Studio's default shortcuts, from a community cheat sheet. Its Ctrl is ⌘ on the Mac.
  * @see https://github.com/tomasmark79/bitwig-cheatsheet/blob/main/bitwig-cheatsheet.typ
  */
-export const bitwig = defineApp({
+export const bitwig = {
   id: 'bitwig',
   title: 'Bitwig Studio',
   category: 'music',
@@ -217,4 +217,4 @@ export const bitwig = defineApp({
       ],
     },
   ],
-});
+} satisfies AppDefinition;

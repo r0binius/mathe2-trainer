@@ -1,7 +1,7 @@
-import { defineApp } from '@/domain/shortcuts/defineApp';
+import type { AppDefinition } from '@/domain/shortcuts/types';
 
 /** The shortcuts in the menu bar of Apple's Notes, as of 2026-09-25. */
-export const notes = defineApp({
+export const notes = {
   id: 'notes',
   title: 'Notizen',
   category: 'productivity',
@@ -79,4 +79,4 @@ export const notes = defineApp({
       ],
     },
   ],
-});
+} satisfies AppDefinition;

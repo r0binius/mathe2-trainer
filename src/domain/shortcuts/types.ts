@@ -35,7 +35,27 @@ export type ShortcutSet = {
 export type AppCategory =
   'communication' | 'development' | 'internet' | 'music' | 'productivity' | 'system';
 
-/** An app and its shortcuts, as written in `src/data/apps/<id>/index.ts`. */
+/**
+ * An app and its shortcuts, as written in `src/data/apps/<id>/index.ts`. The data files check
+ * their literal with `satisfies`, which keeps it type-checked and autocompleted. Rules that types
+ * can't express, such as unique IDs, keys that exist and message keys that are in the catalog, are
+ * checked by the data health test.
+ * @example
+ * ```ts
+ * export const rectangle = {
+ *   id: 'rectangle',
+ *   title: 'Rectangle',
+ *   category: 'system',
+ *   sets: [
+ *     {
+ *       id: 'halves',
+ *       title: 'halves.title',
+ *       shortcuts: [{ title: 'halves.left', keys: [['Control', 'Alt', 'ArrowLeft']] }],
+ *     },
+ *   ],
+ * } satisfies AppDefinition;
+ * ```
+ */
 export type AppDefinition = {
   /** Unique, and the first part of every `ShortcutId` of the app. */
   readonly id: string;

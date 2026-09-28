@@ -1,10 +1,10 @@
-import { defineApp } from '@/domain/shortcuts/defineApp';
+import type { AppDefinition } from '@/domain/shortcuts/types';
 
 /**
  * The shortcuts in Terminal's menu bar, as of 2026-09-25, plus the line-editing shortcuts of zsh in
  * Emacs mode.
  */
-export const terminal = defineApp({
+export const terminal = {
   id: 'terminal',
   title: 'Terminal',
   category: 'development',
@@ -91,4 +91,4 @@ export const terminal = defineApp({
       ],
     },
   ],
-});
+} satisfies AppDefinition;
