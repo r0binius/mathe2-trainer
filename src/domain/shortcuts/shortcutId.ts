@@ -1,5 +1,8 @@
 import type { KeyAlternatives } from '../keyboard/combination';
 import { orderModifiersFirst } from '../keyboard/combination';
+import type { Decoder } from '../shared/decode';
+import { andThen, string } from '../shared/decode';
+import { err, ok } from '../shared/result';
 
 /**
  * Identifies a shortcut of an app, such as `vscodium/Meta+k|Meta+t`. Progress is keyed by it.
@@ -20,4 +23,13 @@ export function shortcutId(appId: string, alternatives: KeyAlternatives): Shortc
 
   // Default sort compares UTF-16 code units, which, unlike `localeCompare`, is the same everywhere.
   return `${appId}/${[...combinations].sort().join('|')}`;
+}
+
+/** Decodes a {@link ShortcutId}, such as one stored with progress. */
+export const decodeShortcutId: Decoder<ShortcutId> = andThen(string, (value) =>
+  isShortcutId(value) ? ok(value) : err({ path: '', expected: 'a shortcut ID' }),
+);
+
+function isShortcutId(value: string): value is ShortcutId {
+  return value.includes('/');
 }

@@ -1,7 +1,10 @@
 import type { LayoutId } from '../keyboard/keymap';
+import type { Decoder } from '../shared/decode';
+import { andThen, integer, number, object, string } from '../shared/decode';
 import type { Result } from '../shared/result';
 import { err, ok } from '../shared/result';
 import type { ShortcutId } from '../shortcuts/shortcutId';
+import { decodeShortcutId } from '../shortcuts/shortcutId';
 
 /** How well a shortcut was recalled, on the scale FSRS schedules with. */
 export type Grade = 'again' | 'hard' | 'good' | 'easy';
@@ -106,6 +109,26 @@ export function parseCardMemory(fields: CardMemoryFields): Result<CardMemory, In
     ? ok({ stability, difficulty, lastReviewAt, dueAt, reps, lapses } as CardMemory)
     : err(invalid);
 }
+
+const decodeCardFields = object({
+  id: decodeShortcutId,
+  layout: string,
+  stability: number,
+  difficulty: number,
+  lastReviewAt: integer,
+  dueAt: integer,
+  reps: integer,
+  lapses: integer,
+});
+
+/** Decodes a stored card, checking its memory with {@link parseCardMemory}. */
+export const decodeCard: Decoder<Card> = andThen(decodeCardFields, ({ id, layout, ...fields }) => {
+  const memory = parseCardMemory(fields);
+
+  return memory.kind === 'ok'
+    ? ok({ ...memory.value, id, layout })
+    : err({ path: '', expected: `valid card memory (${memory.error.reason})` });
+});
 
 /**
  * Applies a review to a shortcut's card. A shortcut only gets a card once it's recalled: failing

@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { err } from '../shared/result';
+import { err, ok } from '../shared/result';
 import { validMemory } from './memory.fixture';
 import type { Card, CardMemory, CardMemoryFields, Grade, ReviewTime } from './scheduler';
-import { dayMs, dueCards, parseCardMemory, reviewCard } from './scheduler';
+import { dayMs, decodeCard, dueCards, parseCardMemory, reviewCard } from './scheduler';
 
 const at = Date.UTC(2026, 8, 28, 10);
 const german = 'com.apple.keylayout.German';
@@ -153,5 +153,25 @@ describe('dueCards', () => {
     const us = { ...dueAt(at), layout: 'com.apple.keylayout.US' };
 
     expect(dueCards([us, dueAt(at)], german, endOfToday)).toStrictEqual([dueAt(at)]);
+  });
+});
+
+describe('decodeCard', () => {
+  const stored = { ...fields, id: 'app/Meta+a', layout: german };
+
+  it('decodes a stored card, as Rust sends it', () => {
+    expect(decodeCard(stored)).toStrictEqual(ok(card));
+  });
+
+  it('rejects memory FSRS cannot work with, saying why', () => {
+    expect(decodeCard({ ...stored, stability: 0 })).toStrictEqual(
+      err({ path: '', expected: 'valid card memory (stability)' }),
+    );
+  });
+
+  it('rejects a card with a field of the wrong type', () => {
+    expect(decodeCard({ ...stored, reps: 1.5 })).toStrictEqual(
+      err({ path: 'reps', expected: 'an integer' }),
+    );
   });
 });
