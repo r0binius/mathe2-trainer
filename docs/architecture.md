@@ -210,11 +210,13 @@ src/
 ├─ components/
 ├─ styles/
 ├─ router.ts, App.vue, main.ts
+src-tauri/
+├─ migrations/      0001_settings.sql, … (one SQL file per schema change)
 src-tauri/src/
 ├─ main.rs, lib.rs, error.rs
 ├─ commands/        settings.rs, progress.rs, keymap.rs, lookup.rs, window.rs
 ├─ app/             coordinator.rs, tray.rs, trigger.rs, windows.rs
-├─ services/        lookup.rs, database/ (sqlite + migrations: settings, progress)
+├─ services/        database.rs (connection, migrations), settings.rs, progress.rs, lookup.rs
 └─ platform/        mod.rs (traits, Capabilities, current()), macos/, linux/
 ```
 

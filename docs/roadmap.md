@@ -178,19 +178,20 @@ Branch `feature/persistence`. Settings and progress stored by Rust and reached t
 
 **Decisions**
 
-- Storage: one SQLite database, `mouseless.db` in the app data directory, owned by Rust through `rusqlite` (with bundled SQLite) and `rusqlite_migration`. The frontend reaches it only through our own commands, never through SQL, so `tauri-plugin-sql` isn't used: it would put the queries in TypeScript and give the webview raw database access. A JSON file, as in the old app, would be rewritten in full on every save and need hand-rolled migrations, while the review log only ever grows and saving a review writes a card and a log entry together, in one transaction.
-- Settings live in the same database, in a `settings` table, not in `tauri-plugin-store`: one storage mechanism, one file, and no extra plugin, package or permission for four values. Rust reads them too (the trigger in step 7, the dock icon, autostart). The schema: `trigger: { kind: 'holdCommand' } | { kind: 'shortcut'; keys: Combination }`, `showMenuBarIcon`, `showDockIcon` and `launchAtLogin`, by default hold ⌘ and all on, as before. The UI language is added in step 5.
+- Storage: one SQLite database, `mouseless.db` in the app data directory (`mouseless-dev.db` in debug builds, so development never touches the progress of an installed build), owned by Rust through `rusqlite` (with bundled SQLite) and `rusqlite_migration`. The frontend reaches it only through our own commands, never through SQL, so `tauri-plugin-sql` isn't used: it would put the queries in TypeScript and give the webview raw database access. A JSON file, as in the old app, would be rewritten in full on every save and need hand-rolled migrations, while the review log only ever grows and saving a review writes a card and a log entry together, in one transaction.
+- Settings live in the same database, in a `settings` table, not in `tauri-plugin-store`: one storage mechanism, one file, and no extra plugin, package or permission for four values. Rust reads them too (the trigger in step 7, the dock icon, autostart). The schema: `trigger: { kind: 'holdCommand' } | { kind: 'shortcut'; keys: KeyCombination }`, `showMenuBarIcon`, `showDockIcon` and `launchAtLogin`, by default hold ⌘ and all on, as before. The UI language is added in step 5. The table holds only the settings that differ from their defaults, one key/value row each with the value as JSON, so a new setting needs no migration and a changed default reaches everyone who never changed that setting. The defaults live in one place, `Settings::default()` in Rust, and a stored value that no longer fits its setting falls back to its default instead of spoiling the rest.
 - Typed IPC: hand-written typed wrappers in `platform/`. `tauri-specta` is still a release candidate (`2.0.0-rc.25`, with `specta-typescript` at `0.0.12`), and since every response is decoded at the boundary anyway, generated types would add little. Revisit once it's stable.
 - Decoding: hand-written decoders that return our `Result`, built on a few small helpers, with no schema library. There are only a few types (settings, set records, cards, review log entries), and the branded ones (`ShortcutId`, `LayoutId`, `CardMemory`) need our own parsers either way. `valibot` and `zod` would each bring their own issue model next to `Result`.
 - The review log gets one entry per `tested` effect, including a failed first test that creates no card: `shortcut_id`, `layout`, `reviewed_at`, `utc_offset_minutes`, `grade`, `failed` and `duration_ms`. That's what the FSRS optimizer needs (card, time, rating, duration), plus the measurements, so the grading limits can be fitted later too.
 - Times are stored as epoch milliseconds (`INTEGER`), as in the domain. The old app mixed two ISO formats.
 - Reset clears set progress, cards and the review log in one transaction. The old app left the cards, so reviews kept showing up.
-- Commands are `async`, and the connection sits behind a `Mutex` in Tauri's managed state, held only for one query or transaction.
+- Commands run off the main thread (`#[tauri::command(async)]`), and the connection sits behind a `Mutex` in Tauri's managed state, held only for one query or transaction. Migrations are `.sql` files in `src-tauri/migrations/`, compiled in with `include_str!`.
+- Our own commands go through Tauri's permission system: `build.rs` declares them in an app manifest, Tauri generates an `allow-…` permission for each, and a window's capability grants the ones it uses. The popover in step 7 then gets only what it needs.
 
 **Sub-steps**
 
 - [x] 4.1 Rust `AppError`
-- [ ] 4.2 SQLite database, migrations and the settings table
+- [x] 4.2 SQLite database, migrations and the settings table
 - [ ] 4.3 Progress repository and review log
 - [ ] 4.4 Typed commands and events
 - [ ] 4.5 `platform/` facade

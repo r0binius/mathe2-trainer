@@ -12,6 +12,12 @@ pub enum AppError {
     /// The app's data directory couldn't be found or created.
     #[error("the data directory is unavailable: {0}")]
     DataDirectory(#[source] tauri::Error),
+    /// A database query failed.
+    #[error("the database failed: {0}")]
+    Database(#[from] rusqlite::Error),
+    /// The database couldn't be brought up to this version's schema.
+    #[error("the database couldn't be migrated: {0}")]
+    Migration(#[from] rusqlite_migration::Error),
 }
 
 /// What kind of error the frontend received, so it can decide what to show.
@@ -23,6 +29,8 @@ pub enum AppError {
 pub enum ErrorKind {
     /// Where the app keeps its data isn't available.
     Storage,
+    /// Reading or writing stored data failed.
+    Database,
 }
 
 impl AppError {
@@ -31,6 +39,7 @@ impl AppError {
     pub fn kind(&self) -> ErrorKind {
         match self {
             Self::DataDirectory(_) => ErrorKind::Storage,
+            Self::Database(_) | Self::Migration(_) => ErrorKind::Database,
         }
     }
 }
