@@ -88,7 +88,7 @@ Each language documents code its own standard way, so editors and doc tools pick
 
 ## Formatting
 
-Prettier formats TypeScript, Vue, SCSS, JSON and Markdown, and rustfmt formats Rust. Prettier uses its defaults except for single quotes and 100 columns (the `prettier` key in `package.json`); rustfmt uses its defaults. Formatting is never discussed in review.
+Prettier formats TypeScript, Vue, CSS, JSON and Markdown, and rustfmt formats Rust. Prettier uses its defaults except for single quotes and 100 columns (the `prettier` key in `package.json`); rustfmt uses its defaults. Formatting is never discussed in review.
 
 ## Git
 

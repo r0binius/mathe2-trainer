@@ -1,0 +1,20 @@
+/*
+ * The design tokens, taken over from the old app. Only what components use is here: the old
+ * app's other easing curves were never used, and its `ease` and `easeInOut` are CSS's own
+ * `ease` and `ease-in-out`.
+ */
+:root {
+  --color-window: #000;
+  --color-white: #f2f2f2;
+  --color-black: #121212;
+  --color-dark-grey: #1f1f1f;
+  --color-green: #28c941;
+  --color-yellow: #fdd231;
+  --color-red: #ff6159;
+
+  /* Robert Penner's curves, approximated as cubic Béziers. */
+  --ease-in-out-quad: cubic-bezier(0.455, 0.03, 0.515, 0.955);
+  --ease-in-out-quint: cubic-bezier(0.86, 0, 0.07, 1);
+
+  --font-sans: 'Source Sans 3 Variable', system-ui, sans-serif;
+}
