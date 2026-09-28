@@ -5,8 +5,8 @@ import { createApp } from 'vue';
 import type { SettingsRepository } from '@/domain/settings/repository';
 import type { Settings } from '@/domain/settings/settings';
 import { err, ok } from '@/domain/shared/result';
+import { settingsRepositoryKey } from '@/ports';
 
-import { settingsRepositoryKey } from './repositories';
 import { useSettingsStore } from './settings';
 
 const settings: Settings = {

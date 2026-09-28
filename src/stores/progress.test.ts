@@ -8,9 +8,9 @@ import { validMemory } from '@/domain/scheduling/memory.fixture';
 import type { Card } from '@/domain/scheduling/scheduler';
 import { err, ok } from '@/domain/shared/result';
 import type { AppDefinition } from '@/domain/shortcuts/types';
+import { progressRepositoryKey } from '@/ports';
 
 import { useProgressStore } from './progress';
-import { progressRepositoryKey } from './repositories';
 
 const german = 'com.apple.keylayout.German';
 const at = Date.UTC(2026, 8, 28, 10);

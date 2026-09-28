@@ -4,8 +4,7 @@ import { inject, shallowRef } from 'vue';
 import type { CurrentLayout } from '@/domain/keyboard/keymap';
 import type { Loadable } from '@/domain/shared/loadable';
 import { loadableOf } from '@/domain/shared/loadable';
-
-import { keymapSourceKey, missingKeymapSource } from './repositories';
+import { keymapSourceKey, missingKeymapSource } from '@/ports';
 
 /** The keyboard layout in use, which decides how shortcuts are pressed and whose progress shows. */
 export const useKeymapStore = defineStore('keymap', () => {

@@ -205,11 +205,12 @@ src/
 │  └─ shared/       result.ts (errors as values), decode.ts (JSON decoders), storage.ts (StorageError)
 ├─ data/apps/<id>/   index.ts, de.json
 ├─ platform/        ipc.ts (commandCaller), settings.ts, progress.ts, keymap.ts, lookup.ts, window.ts
-├─ stores/          repositories.ts (injection keys), settings.ts, progress.ts, keymap.ts, catalog.ts
+├─ stores/          settings.ts, progress.ts, keymap.ts
 ├─ composables/     useKeyCapture.ts, usePracticeSession.ts, useSpatialNav.ts
 ├─ features/        library/, learn/, review/, lookup/, settings/
 ├─ components/
 ├─ styles/
+├─ ports.ts         injection keys for what main.ts provides (repositories, keymap source)
 ├─ router.ts, App.vue, main.ts
 src-tauri/
 ├─ migrations/      0001_settings.sql, … (one SQL file per schema change)

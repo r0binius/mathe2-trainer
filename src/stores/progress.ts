@@ -15,8 +15,7 @@ import type { Result } from '@/domain/shared/result';
 import { err } from '@/domain/shared/result';
 import type { StorageError } from '@/domain/shared/storage';
 import type { AppDefinition } from '@/domain/shortcuts/types';
-
-import { missingProgressRepository, progressRepositoryKey } from './repositories';
+import { missingProgressRepository, progressRepositoryKey } from '@/ports';
 
 /** A test that counts for reviews, as the session reports it, plus when and on which layout. */
 export type TestResult = Omit<LoggedReview, 'grade'>;

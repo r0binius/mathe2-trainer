@@ -4,9 +4,9 @@ import { createApp } from 'vue';
 
 import type { CurrentLayout, KeymapSource } from '@/domain/keyboard/keymap';
 import { err, ok } from '@/domain/shared/result';
+import { keymapSourceKey } from '@/ports';
 
 import { useKeymapStore } from './keymap';
-import { keymapSourceKey } from './repositories';
 
 const us: CurrentLayout = {
   id: 'com.apple.keylayout.US',

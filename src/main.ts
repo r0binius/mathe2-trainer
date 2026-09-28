@@ -9,12 +9,8 @@ import { uiLanguageOf } from './domain/settings/language';
 import { createAppI18n } from './i18n';
 import { germanKeymapSource } from './platform/keymap';
 import { tauriRepositories } from './platform/tauri';
+import { keymapSourceKey, progressRepositoryKey, settingsRepositoryKey } from './ports';
 import { createAppRouter } from './router';
-import {
-  keymapSourceKey,
-  progressRepositoryKey,
-  settingsRepositoryKey,
-} from './stores/repositories';
 
 const repositories = tauriRepositories();
 

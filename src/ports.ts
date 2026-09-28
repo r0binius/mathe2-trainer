@@ -1,3 +1,6 @@
+// The dependencies main.ts provides to the app, each under a typed injection key, and what's
+// injected when one wasn't provided. Tests provide their own.
+
 import type { InjectionKey } from 'vue';
 
 import type { KeymapSource } from '@/domain/keyboard/keymap';
