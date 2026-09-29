@@ -288,6 +288,7 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
 - Resetting progress (and, from step 6, changing the layout) ends a running practice session, which returns to its set or app. A session never writes from a stale snapshot.
 - No hosted CI for now: Codeberg's runners require a free license, and the app is for personal use. `pnpm check` stays the local gate; CI comes back once the repository moves to its own Forgejo instance with its own runner.
 - Logging goes through `tauri-plugin-log`, for Rust and the webview, into the macOS log folder.
+- Trained shortcuts are kept between learning sessions (`SetProgress.trained`, migration `0003_trained.sql`), unlike in the old app, so leaving a session loses only what wasn't pressed yet; they come back as tests. The effect that saves learning progress fires whenever a shortcut changes its stage and is called `learningChanged`.
 
 **Sub-steps**
 
@@ -300,7 +301,7 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
 - [x] TD.7 Small fixes
 - [x] TD.8 CI (dropped, see the decisions)
 - [x] TD.9 Docs and smoke test
-- [ ] TD.10 Keep trained progress
+- [x] TD.10 Keep trained progress
 - [ ] TD.11 US keymap fixture
 - [ ] TD.12 English shortcut texts
 - [ ] TD.13 Notes for the future

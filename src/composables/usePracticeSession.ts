@@ -64,7 +64,7 @@ export function usePracticeSession<Pool>(
         return;
       }
       case 'tested':
-      case 'learnedChanged':
+      case 'learningChanged':
         void save(effect).then(reportFailure);
         return;
     }

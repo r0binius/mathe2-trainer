@@ -25,13 +25,23 @@ const mixed = poolOf(
 
 describe('learnPool', () => {
   it('starts the shortcuts learned in earlier sessions as learned, the rest as unseen', () => {
-    expect(learnPool([a, b], [b.id, 'app/gone'])).toStrictEqual(
+    expect(learnPool([a, b], { learned: [b.id, 'app/gone'], trained: [] })).toStrictEqual(
       poolOf(entry(a, 'unseen'), entry(b, 'learned')),
     );
   });
 
+  it('starts the shortcuts trained in earlier sessions as trained, so they come as tests', () => {
+    expect(learnPool([a, b, c], { learned: [a.id], trained: [b.id] })).toStrictEqual(
+      poolOf(entry(a, 'learned'), entry(b, 'trained'), entry(c, 'unseen')),
+    );
+  });
+
+  it('starts from scratch without earlier progress', () => {
+    expect(learnPool([a], undefined)).toStrictEqual(poolOf(entry(a, 'unseen')));
+  });
+
   it('starts over when every shortcut was already learned: the set was completed', () => {
-    expect(learnPool([a, b], [a.id, b.id])).toStrictEqual(
+    expect(learnPool([a, b], { learned: [a.id, b.id], trained: [] })).toStrictEqual(
       poolOf(entry(a, 'unseen'), entry(b, 'unseen')),
     );
   });
@@ -97,11 +107,22 @@ describe('learnStrategy.complete', () => {
   const { complete } = learnStrategy;
   const pool = poolOf(entry(a, 'unseen'), entry(b, 'learned'));
 
-  it('makes a trained shortcut trained, without a review', () => {
+  it('makes a trained shortcut trained, without a review, reporting the progress', () => {
     expect(complete(pool, attempt({ mode: 'training' }))).toStrictEqual({
       pool: poolOf(entry(a, 'trained'), entry(b, 'learned')),
-      effects: [],
+      effects: [
+        {
+          type: 'learningChanged',
+          snapshot: { shortcuts: [a.id, b.id], learned: [b.id], trained: [a.id], complete: false },
+        },
+      ],
     });
+  });
+
+  it('reports no progress when a trained shortcut is trained again', () => {
+    const trained = poolOf(entry(a, 'trained'), entry(b, 'learned'));
+
+    expect(complete(trained, attempt({ mode: 'training' })).effects).toStrictEqual([]);
   });
 
   it('makes a shortcut recalled without a mistake learned, reporting the test and the progress', () => {
@@ -110,8 +131,8 @@ describe('learnStrategy.complete', () => {
       effects: [
         { type: 'tested', id: a.id, failed: false, durationMs: 1000 },
         {
-          type: 'learnedChanged',
-          snapshot: { shortcuts: [a.id, b.id], learned: [a.id, b.id], complete: true },
+          type: 'learningChanged',
+          snapshot: { shortcuts: [a.id, b.id], learned: [a.id, b.id], trained: [], complete: true },
         },
       ],
     });
@@ -123,8 +144,8 @@ describe('learnStrategy.complete', () => {
       effects: [
         { type: 'tested', id: b.id, failed: true, durationMs: 1000 },
         {
-          type: 'learnedChanged',
-          snapshot: { shortcuts: [a.id, b.id], learned: [], complete: false },
+          type: 'learningChanged',
+          snapshot: { shortcuts: [a.id, b.id], learned: [], trained: [b.id], complete: false },
         },
       ],
     });
@@ -159,12 +180,18 @@ describe('learnStrategy.skip', () => {
 });
 
 describe('snapshotLearning', () => {
-  it('lists the session’s shortcuts and the learned ones, skipped ones included', () => {
-    const pool = poolOf(entry(a, 'learned', true), entry(b, 'trained'), entry(c, 'learned'));
+  it('lists the session’s shortcuts, the learned and the trained ones, skipped ones included', () => {
+    const pool = poolOf(
+      entry(a, 'learned', true),
+      entry(b, 'trained'),
+      entry(c, 'learned'),
+      entry(d, 'unseen'),
+    );
 
     expect(snapshotLearning(pool)).toStrictEqual({
-      shortcuts: [a.id, b.id, c.id],
+      shortcuts: [a.id, b.id, c.id, d.id],
       learned: [a.id, c.id],
+      trained: [b.id],
       complete: false,
     });
   });
@@ -190,6 +217,6 @@ describe('snapshotLearning', () => {
   it('restores through learnPool', () => {
     const snapshot = snapshotLearning(mixed);
 
-    expect(snapshotLearning(learnPool([a, b, c, d], snapshot.learned))).toStrictEqual(snapshot);
+    expect(snapshotLearning(learnPool([a, b, c, d], snapshot))).toStrictEqual(snapshot);
   });
 });

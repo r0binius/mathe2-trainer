@@ -8,6 +8,8 @@ import type { ShortcutId } from '../shortcuts/shortcutId';
  */
 export type SetProgress = {
   readonly learned: readonly ShortcutId[];
+  /** Trained, but not yet recalled; they come back as tests. */
+  readonly trained: readonly ShortcutId[];
   /** When the set was last completed. Kept while it's learned again, so it still shows as done. */
   readonly completedAt?: number;
   readonly updatedAt: number;
@@ -20,14 +22,18 @@ export type SetProgress = {
  */
 export function recordLearning(
   progress: SetProgress | undefined,
-  { shortcuts, learned: learnedNow, complete }: LearnSnapshot,
+  { shortcuts, learned: learnedNow, trained: trainedNow, complete }: LearnSnapshot,
   at: number,
 ): SetProgress {
-  const uncovered = (progress?.learned ?? []).filter((id) => !shortcuts.includes(id));
-  const learned = [...uncovered, ...learnedNow];
+  function uncovered(ids: readonly ShortcutId[] | undefined): readonly ShortcutId[] {
+    return (ids ?? []).filter((id) => !shortcuts.includes(id));
+  }
+
+  const learned = [...uncovered(progress?.learned), ...learnedNow];
+  const trained = [...uncovered(progress?.trained), ...trainedNow];
   const completedAt = complete ? at : progress?.completedAt;
 
   return completedAt === undefined
-    ? { learned, updatedAt: at }
-    : { learned, completedAt, updatedAt: at };
+    ? { learned, trained, updatedAt: at }
+    : { learned, trained, completedAt, updatedAt: at };
 }

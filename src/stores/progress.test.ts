@@ -37,7 +37,10 @@ const apps: readonly AppDefinition[] = [
 
 const basics = { appId: 'app', setId: 'basics', layout: german } as const;
 
-const record: SetRecord = { ...basics, progress: { learned: ['app/Meta+f'], updatedAt: at } };
+const record: SetRecord = {
+  ...basics,
+  progress: { learned: ['app/Meta+f'], trained: [], updatedAt: at },
+};
 
 const card: Card = {
   ...validMemory({ stability: 2, difficulty: 5, lastReviewAt: 0, dueAt: 1000, reps: 1, lapses: 0 }),
@@ -132,9 +135,13 @@ describe('saveLearning', () => {
   const snapshot = {
     shortcuts: ['app/Meta+f', 'app/Meta+s'],
     learned: ['app/Meta+s'],
+    trained: [],
     complete: false,
   } as const;
-  const saved = { ...basics, progress: { learned: ['app/Meta+s'], updatedAt: at + 1 } };
+  const saved = {
+    ...basics,
+    progress: { learned: ['app/Meta+s'], trained: [], updatedAt: at + 1 },
+  };
 
   it('saves the session into the set record, then shows it', async () => {
     const repository = repositoryWith({});

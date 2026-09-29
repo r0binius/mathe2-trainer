@@ -37,6 +37,7 @@ describe('progressSaver', () => {
     const snapshot = {
       shortcuts: ['app/Meta+k'],
       learned: ['app/Meta+k'],
+      trained: [],
       complete: true,
     } as const;
     const save = progressSaver(
@@ -45,7 +46,7 @@ describe('progressSaver', () => {
       () => at,
     );
 
-    await save({ type: 'learnedChanged', snapshot });
+    await save({ type: 'learningChanged', snapshot });
 
     expect(progress.saveLearning).toHaveBeenCalledWith(
       { appId: 'app', setId: 'basics', layout: german },
@@ -56,9 +57,9 @@ describe('progressSaver', () => {
 
   it('fails to save learning without a set, as in a review', async () => {
     const save = progressSaver(actions(), { appId: 'app', layout: german }, () => at);
-    const snapshot = { shortcuts: [], learned: [], complete: true } as const;
+    const snapshot = { shortcuts: [], learned: [], trained: [], complete: true } as const;
 
-    await expect(save({ type: 'learnedChanged', snapshot })).resolves.toMatchObject({
+    await expect(save({ type: 'learningChanged', snapshot })).resolves.toMatchObject({
       kind: 'err',
     });
   });

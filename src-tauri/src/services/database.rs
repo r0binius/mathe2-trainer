@@ -24,6 +24,7 @@ const FILE_NAME: &str = if cfg!(debug_assertions) {
 const MIGRATIONS: &[M<'static>] = &[
     M::up(include_str!("../../migrations/0001_settings.sql")),
     M::up(include_str!("../../migrations/0002_progress.sql")),
+    M::up(include_str!("../../migrations/0003_trained.sql")),
 ];
 
 /// The app's one connection, shared by the commands through Tauri's managed state (in an [`Arc`],
@@ -167,6 +168,29 @@ mod tests {
             tauri::async_runtime::block_on(database.run(|_| panic!("work failed")));
 
         assert!(matches!(result, Err(AppError::Interrupted(_))));
+        Ok(())
+    }
+
+    #[test]
+    fn adding_trained_shortcuts_keeps_the_records_stored_before() -> Result<(), AppError> {
+        let mut connection = Connection::open_in_memory()?;
+        let before = &MIGRATIONS[..2];
+        let insert = "
+            INSERT INTO set_progress (app_id, set_id, layout, learned, updated_at)
+            VALUES ('macos', 'windows', 'German', '[\"macos:cmd+m\"]', 1000)";
+
+        Migrations::from_slice(before).to_latest(&mut connection)?;
+        connection.execute(insert, ())?;
+        Migrations::from_slice(MIGRATIONS).to_latest(&mut connection)?;
+        let (learned, trained): (String, String) =
+            connection.query_row("SELECT learned, trained FROM set_progress", (), |row| {
+                Ok((row.get(0)?, row.get(1)?))
+            })?;
+
+        assert_eq!(
+            (learned.as_str(), trained.as_str()),
+            (r#"["macos:cmd+m"]"#, "[]")
+        );
         Ok(())
     }
 

@@ -8,8 +8,8 @@ import PageLayout from '@/components/PageLayout.vue';
 import { usePracticeSession } from '@/composables/usePracticeSession';
 import { practiceItems } from '@/domain/practice/items';
 import { learnPool, learnStrategy } from '@/domain/practice/learn';
+import { setProgressOf } from '@/domain/progress/storedProgress';
 import type { SummaryContext } from '@/domain/progress/summary';
-import { summarizeSet } from '@/domain/progress/summary';
 import type { AppDefinition, ShortcutSet } from '@/domain/shortcuts/types';
 import { useText } from '@/i18n';
 import { toSet } from '@/routes';
@@ -38,7 +38,7 @@ const [{ session, held, saveFailed }, skip] = usePracticeSession(
   learnStrategy,
   learnPool(
     practiceItems(props.app.id, props.set, props.context),
-    summarizeSet(props.app.id, props.set, props.context).learned,
+    setProgressOf(props.context.progress, target),
   ),
   {
     keymap: () => props.context.keymap,

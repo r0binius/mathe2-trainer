@@ -48,10 +48,12 @@ function reconcileSet(record: SetRecord, apps: readonly AppDefinition[]): readon
 
   const ids = setShortcutIds(record.appId, set);
   const learned = record.progress.learned.filter((id) => ids.includes(id));
+  const trained = record.progress.trained.filter((id) => ids.includes(id));
+  const unchanged =
+    learned.length === record.progress.learned.length &&
+    trained.length === record.progress.trained.length;
 
-  return learned.length === record.progress.learned.length
-    ? [record]
-    : [{ ...record, progress: { ...record.progress, learned } }];
+  return unchanged ? [record] : [{ ...record, progress: { ...record.progress, learned, trained } }];
 }
 
 function setShortcutIds(appId: string, set: ShortcutSet): readonly ShortcutId[] {

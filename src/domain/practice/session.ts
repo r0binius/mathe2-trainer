@@ -51,7 +51,7 @@ export type ProgressEffect =
       readonly durationMs: number;
     }
   | {
-      readonly type: 'learnedChanged';
+      readonly type: 'learningChanged';
       readonly snapshot: LearnSnapshot;
     };
 

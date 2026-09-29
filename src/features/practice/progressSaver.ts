@@ -39,7 +39,7 @@ export function progressSaver(
 
         return progress.recordReview({ id, layout, at, utcOffsetMinutes, failed, durationMs });
       }
-      case 'learnedChanged':
+      case 'learningChanged':
         return setId === undefined
           ? Promise.resolve(err(noSet))
           : progress.saveLearning({ appId, setId, layout }, effect.snapshot, at);

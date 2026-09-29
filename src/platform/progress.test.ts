@@ -14,7 +14,7 @@ const record: SetRecord = {
   appId: 'macos',
   setId: 'windows',
   layout: german,
-  progress: { learned: ['macos/Meta+m'], updatedAt: 1000 },
+  progress: { learned: ['macos/Meta+m'], trained: [], updatedAt: 1000 },
 };
 
 const card: Card = {

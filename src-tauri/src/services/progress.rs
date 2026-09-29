@@ -29,6 +29,8 @@ pub struct SetRecord {
 pub struct SetProgress {
     /// The learned shortcut IDs.
     pub learned: Vec<String>,
+    /// The trained shortcut IDs: pressed right with their keys shown, not yet recalled.
+    pub trained: Vec<String>,
     /// When the set was last completed. Left out, not `null`, when it never was, as the
     /// frontend's optional property.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -124,7 +126,7 @@ impl ToSql for Grade {
 }
 
 const SELECT_SETS: &str = "
-    SELECT app_id, set_id, layout, learned, completed_at, updated_at FROM set_progress
+    SELECT app_id, set_id, layout, learned, trained, completed_at, updated_at FROM set_progress
     ORDER BY app_id, set_id, layout";
 
 const SELECT_CARDS: &str = "
@@ -151,13 +153,14 @@ pub fn load(connection: &Connection) -> Result<StoredProgress, AppError> {
 pub fn save_set(connection: &Connection, record: &SetRecord) -> Result<(), AppError> {
     connection.execute(
         "INSERT OR REPLACE INTO set_progress
-            (app_id, set_id, layout, learned, completed_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            (app_id, set_id, layout, learned, trained, completed_at, updated_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
         (
             &record.app_id,
             &record.set_id,
             &record.layout,
             Json(&record.progress.learned),
+            Json(&record.progress.trained),
             record.progress.completed_at,
             record.progress.updated_at,
         ),
@@ -257,8 +260,10 @@ fn insert_card(connection: &Connection, card: &Card) -> rusqlite::Result<()> {
 
 fn read_set_record(row: &Row<'_>) -> rusqlite::Result<SetRecord> {
     let Json(learned) = row.get("learned")?;
+    let Json(trained) = row.get("trained")?;
     let progress = SetProgress {
         learned,
+        trained,
         completed_at: row.get("completed_at")?,
         updated_at: row.get("updated_at")?,
     };
@@ -300,6 +305,7 @@ mod tests {
             layout: layout.to_owned(),
             progress: SetProgress {
                 learned: learned.iter().map(|&id| id.to_owned()).collect(),
+                trained: Vec::new(),
                 completed_at,
                 updated_at: 1_000,
             },
@@ -381,7 +387,7 @@ mod tests {
             "appId": "macos",
             "setId": "windows",
             "layout": GERMAN,
-            "progress": { "learned": ["macos:cmd+m"], "updatedAt": 1_000 },
+            "progress": { "learned": ["macos:cmd+m"], "trained": [], "updatedAt": 1_000 },
         });
         let card_json = json!({
             "id": "macos:cmd+m",
@@ -418,7 +424,7 @@ mod tests {
             "appId": "macos",
             "setId": "windows",
             "layout": GERMAN,
-            "progress": { "learned": [], "updatedAt": 1_000, "runs": [] },
+            "progress": { "learned": [], "trained": [], "updatedAt": 1_000, "runs": [] },
         });
         let with_fractional_time = json!({ "sets": [], "cards": [{
             "id": "macos:cmd+m", "layout": GERMAN, "stability": 3.17, "difficulty": 5.3,
@@ -510,6 +516,31 @@ mod tests {
 
         assert_eq!(loaded(&database)?, StoredProgress::default());
         assert_eq!(logged(&database)?, []);
+        Ok(())
+    }
+
+    #[test]
+    fn keeps_trained_shortcuts() -> Result<(), AppError> {
+        let database = Database::in_memory()?;
+        let mut trained = record(GERMAN, &["macos:cmd+m"], None);
+        trained.progress.trained = vec!["macos:cmd+w".to_owned()];
+
+        saved(&database, &trained)?;
+
+        assert_eq!(loaded(&database)?.sets, [trained]);
+        Ok(())
+    }
+
+    #[test]
+    fn the_schema_rejects_trained_ids_that_are_no_list() -> Result<(), AppError> {
+        let database = Database::in_memory()?;
+        let not_a_list = "
+            INSERT INTO set_progress (app_id, set_id, layout, learned, trained, updated_at)
+            VALUES ('macos', 'windows', 'German', '[]', 'x', 1000)";
+
+        let inserted = database.with(|connection| Ok(connection.execute(not_a_list, ())))?;
+
+        assert!(inserted.is_err());
         Ok(())
     }
 

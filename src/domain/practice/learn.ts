@@ -43,20 +43,22 @@ type Bucket = {
 };
 
 /**
- * Starts a learning session from the shortcuts learned before (restoring a
- * {@link LearnSnapshot}). Trained ones start over as unseen, as in the old app. When every
+ * Starts a learning session from the progress of earlier ones (restoring a {@link LearnSnapshot}):
+ * learned shortcuts start as learned and trained ones as trained, so they come as tests. When every
  * shortcut is already learned, the set was completed and learning it again starts from scratch.
  */
 export function learnPool(
   items: readonly PracticeItem[],
-  learned: readonly ShortcutId[],
+  progress: Pick<LearnSnapshot, 'learned' | 'trained'> | undefined,
 ): LearnPool {
+  const learned = progress?.learned ?? [];
+  const trained = progress?.trained ?? [];
   const completed = items.every(({ id }) => learned.includes(id));
 
   return {
     entries: items.map((item) => ({
       item,
-      stage: !completed && learned.includes(item.id) ? 'learned' : 'unseen',
+      stage: completed ? 'unseen' : stageFrom(item.id, learned, trained),
       skipped: false,
     })),
     tested: [],
@@ -68,6 +70,7 @@ export function snapshotLearning({ entries }: LearnPool): LearnSnapshot {
   return {
     shortcuts: entries.map(({ item }) => item.id),
     learned: entries.filter(({ stage }) => stage === 'learned').map(({ item }) => item.id),
+    trained: entries.filter(({ stage }) => stage === 'trained').map(({ item }) => item.id),
     complete: entries.every(({ stage }) => stage === 'learned'),
   };
 }
@@ -75,7 +78,7 @@ export function snapshotLearning({ entries }: LearnPool): LearnSnapshot {
 /**
  * Learning a set: new shortcuts are shown with their keys (training), the others are tested, and
  * the session ends once every shortcut that wasn't skipped is learned. Reports the first test of
- * each shortcut, and the progress whenever the learned shortcuts change.
+ * each shortcut, and the progress whenever a shortcut changes its stage.
  * @see §8 of `docs/legacy-architecture.md`
  */
 export const learnStrategy: PracticeStrategy<LearnPool> = {
@@ -115,19 +118,31 @@ export const learnStrategy: PracticeStrategy<LearnPool> = {
   }),
 };
 
-/** A `learnedChanged` effect if the attempt made its shortcut learned or took that away. */
+/** A `learningChanged` effect if the attempt moved its shortcut to another stage. */
 function progressChange(
   before: LearnPool,
   after: LearnPool,
   { item }: Attempt,
 ): readonly ProgressEffect[] {
-  return isLearnedIn(before, item) === isLearnedIn(after, item)
+  return stageIn(before, item) === stageIn(after, item)
     ? []
-    : [{ type: 'learnedChanged', snapshot: snapshotLearning(after) }];
+    : [{ type: 'learningChanged', snapshot: snapshotLearning(after) }];
 }
 
-function isLearnedIn({ entries }: LearnPool, item: PracticeItem): boolean {
-  return entries.some((entry) => entry.item.id === item.id && entry.stage === 'learned');
+function stageIn({ entries }: LearnPool, item: PracticeItem): LearnStage | undefined {
+  return entries.find((entry) => entry.item.id === item.id)?.stage;
+}
+
+function stageFrom(
+  id: ShortcutId,
+  learned: readonly ShortcutId[],
+  trained: readonly ShortcutId[],
+): LearnStage {
+  if (learned.includes(id)) {
+    return 'learned';
+  }
+
+  return trained.includes(id) ? 'trained' : 'unseen';
 }
 
 function buckets(entries: readonly LearnEntry[]): readonly Bucket[] {

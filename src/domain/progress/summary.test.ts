@@ -42,7 +42,7 @@ const app: AppDefinition = {
 };
 
 function record(setId: string, learned: SetRecord['progress']['learned'], updatedAt: number) {
-  return { appId: 'app', setId, layout: german, progress: { learned, updatedAt } };
+  return { appId: 'app', setId, layout: german, progress: { learned, trained: [], updatedAt } };
 }
 
 function card(id: Card['id'], dueAt: number, layout = german): Card {
@@ -90,7 +90,7 @@ describe('summarizeSet', () => {
   it('shows a completed set as completed, even while it is learned again', () => {
     const completed = {
       ...record('basics', [], 5),
-      progress: { learned: [], completedAt: 3, updatedAt: 5 },
+      progress: { learned: [], trained: [], completedAt: 3, updatedAt: 5 },
     };
 
     expect(

@@ -37,6 +37,7 @@ export type LoadedProgress = {
 
 const decodeSetProgress = object({
   learned: array(decodeShortcutId),
+  trained: array(decodeShortcutId),
   completedAt: optional(integer),
   updatedAt: integer,
 });

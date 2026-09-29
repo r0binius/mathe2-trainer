@@ -19,7 +19,7 @@ const record: SetRecord = {
   appId: 'macos',
   setId: 'windows',
   layout: german,
-  progress: { learned: ['macos/Meta+m'], completedAt: 900, updatedAt: 1000 },
+  progress: { learned: ['macos/Meta+m'], trained: [], completedAt: 900, updatedAt: 1000 },
 };
 
 const memory = { stability: 2, difficulty: 5, lastReviewAt: 0, dueAt: 1000, reps: 1, lapses: 0 };
@@ -32,8 +32,8 @@ describe('decodeSetRecord', () => {
   });
 
   it('leaves out a completion that never happened', () => {
-    const { learned, updatedAt } = record.progress;
-    const neverCompleted = { ...record, progress: { learned, updatedAt } };
+    const { learned, trained, updatedAt } = record.progress;
+    const neverCompleted = { ...record, progress: { learned, trained, updatedAt } };
 
     expect(decodeSetRecord(neverCompleted)).toStrictEqual(ok(neverCompleted));
   });
@@ -85,7 +85,7 @@ describe('setProgressOf and withSetRecord', () => {
   });
 
   it('replace the record of the same set and layout, or add a new one', () => {
-    const relearned = { ...record, progress: { learned: [], updatedAt: 2000 } };
+    const relearned = { ...record, progress: { learned: [], trained: [], updatedAt: 2000 } };
 
     expect(withSetRecord(stored, relearned)).toStrictEqual({ sets: [relearned], cards: [] });
     expect(withSetRecord(stored, us)).toStrictEqual({ sets: [record, us], cards: [] });

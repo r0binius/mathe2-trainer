@@ -45,7 +45,7 @@ function record(setId: string, learned: SetRecord['progress']['learned']): SetRe
     appId: 'app',
     setId,
     layout: 'com.apple.keylayout.German',
-    progress: { learned, completedAt: 5, updatedAt: 10 },
+    progress: { learned, trained: [], completedAt: 5, updatedAt: 10 },
   };
 }
 
@@ -74,6 +74,16 @@ describe('reconcileProgress', () => {
     expect(reconcileProgress(progress, apps).sets).toStrictEqual([
       record('basics', ['app/Meta+f']),
     ]);
+  });
+
+  it('drops trained shortcuts that are no longer in their set, like learned ones', () => {
+    const trained = {
+      ...record('basics', []),
+      progress: { ...record('basics', []).progress, trained: ['app/Meta+f', 'app/Meta+g'] },
+    } as const;
+    const [reconciled] = reconcileProgress({ sets: [trained], cards: [] }, apps).sets;
+
+    expect(reconciled?.progress.trained).toStrictEqual(['app/Meta+f']);
   });
 
   it('drops the cards of shortcuts that are no longer in any set', () => {
