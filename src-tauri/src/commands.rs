@@ -1,9 +1,5 @@
-//! The commands the frontend invokes. Each one only calls a service and returns its result.
-
-#![expect(
-    clippy::needless_pass_by_value,
-    reason = "Tauri passes command arguments by value, `State` included"
-)]
+//! The commands the frontend invokes. Each one only calls a service and returns its result, doing
+//! the database work on a blocking thread ([`Database::run`](crate::services::database::Database::run)).
 
 pub mod progress;
 pub mod settings;

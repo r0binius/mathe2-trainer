@@ -1,5 +1,7 @@
 //! Reading and changing learning progress and the review log.
 
+use std::sync::Arc;
+
 use tauri::State;
 
 use crate::error::AppError;
@@ -11,9 +13,11 @@ use crate::services::progress::{self, Card, Review, SetRecord, StoredProgress};
 /// # Errors
 ///
 /// Returns a database error if they can't be read.
-#[tauri::command(async)]
-pub fn load_progress(database: State<'_, Database>) -> Result<StoredProgress, AppError> {
-    database.with(|connection| progress::load(connection))
+#[tauri::command]
+pub async fn load_progress(database: State<'_, Arc<Database>>) -> Result<StoredProgress, AppError> {
+    database
+        .run(move |connection| progress::load(connection))
+        .await
 }
 
 /// Stores a set's progress on one layout.
@@ -21,9 +25,14 @@ pub fn load_progress(database: State<'_, Database>) -> Result<StoredProgress, Ap
 /// # Errors
 ///
 /// Returns a database error if it can't be written.
-#[tauri::command(async)]
-pub fn save_set_progress(database: State<'_, Database>, record: SetRecord) -> Result<(), AppError> {
-    database.with(|connection| progress::save_set(connection, &record))
+#[tauri::command]
+pub async fn save_set_progress(
+    database: State<'_, Arc<Database>>,
+    record: SetRecord,
+) -> Result<(), AppError> {
+    database
+        .run(move |connection| progress::save_set(connection, &record))
+        .await
 }
 
 /// Logs a review and stores the card it produced, if any.
@@ -31,13 +40,15 @@ pub fn save_set_progress(database: State<'_, Database>, record: SetRecord) -> Re
 /// # Errors
 ///
 /// Returns a database error if they can't be written.
-#[tauri::command(async)]
-pub fn record_review(
-    database: State<'_, Database>,
+#[tauri::command]
+pub async fn record_review(
+    database: State<'_, Arc<Database>>,
     review: Review,
     card: Option<Card>,
 ) -> Result<(), AppError> {
-    database.with(|connection| progress::record_review(connection, &review, card.as_ref()))
+    database
+        .run(move |connection| progress::record_review(connection, &review, card.as_ref()))
+        .await
 }
 
 /// Replaces all set records and cards with reconciled ones.
@@ -45,12 +56,14 @@ pub fn record_review(
 /// # Errors
 ///
 /// Returns a database error if they can't be written.
-#[tauri::command(async)]
-pub fn replace_progress(
-    database: State<'_, Database>,
+#[tauri::command]
+pub async fn replace_progress(
+    database: State<'_, Arc<Database>>,
     progress: StoredProgress,
 ) -> Result<(), AppError> {
-    database.with(|connection| progress::replace(connection, &progress))
+    database
+        .run(move |connection| progress::replace(connection, &progress))
+        .await
 }
 
 /// Deletes all progress and the review log.
@@ -58,7 +71,7 @@ pub fn replace_progress(
 /// # Errors
 ///
 /// Returns a database error if it can't be deleted.
-#[tauri::command(async)]
-pub fn reset_progress(database: State<'_, Database>) -> Result<(), AppError> {
-    database.with(progress::reset)
+#[tauri::command]
+pub async fn reset_progress(database: State<'_, Arc<Database>>) -> Result<(), AppError> {
+    database.run(progress::reset).await
 }

@@ -18,6 +18,9 @@ pub enum AppError {
     /// The database couldn't be brought up to this version's schema.
     #[error("the database couldn't be migrated: {0}")]
     Migration(#[from] rusqlite_migration::Error),
+    /// Work on the database stopped before it finished, such as by panicking.
+    #[error("the database work was interrupted: {0}")]
+    Interrupted(#[source] tauri::Error),
 }
 
 /// What kind of error the frontend received, so it can decide what to show.
@@ -39,7 +42,7 @@ impl AppError {
     pub fn kind(&self) -> ErrorKind {
         match self {
             Self::DataDirectory(_) => ErrorKind::Storage,
-            Self::Database(_) | Self::Migration(_) => ErrorKind::Database,
+            Self::Database(_) | Self::Migration(_) | Self::Interrupted(_) => ErrorKind::Database,
         }
     }
 }
@@ -71,6 +74,13 @@ mod tests {
                 "message": "the data directory is unavailable: unknown path",
             })),
         );
+    }
+
+    #[test]
+    fn interrupted_work_counts_as_a_database_error() {
+        let error = AppError::Interrupted(tauri::Error::UnknownPath);
+
+        assert_eq!(error.kind(), ErrorKind::Database);
     }
 
     #[test]

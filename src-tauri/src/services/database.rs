@@ -1,7 +1,7 @@
 //! The SQLite database that holds settings and progress, and its migrations.
 
 use std::path::Path;
-use std::sync::{Mutex, PoisonError};
+use std::sync::{Arc, Mutex, PoisonError};
 
 use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSqlOutput, ValueRef};
 use rusqlite::{Connection, Row, ToSql};
@@ -26,7 +26,8 @@ const MIGRATIONS: &[M<'static>] = &[
     M::up(include_str!("../../migrations/0002_progress.sql")),
 ];
 
-/// The app's one connection, shared by the commands through Tauri's managed state.
+/// The app's one connection, shared by the commands through Tauri's managed state (in an [`Arc`],
+/// so work can move to a blocking thread with it).
 pub struct Database(Mutex<Connection>);
 
 impl Database {
@@ -63,6 +64,24 @@ impl Database {
         // over instead of failing every later command.
         let mut connection = self.0.lock().unwrap_or_else(PoisonError::into_inner);
         work(&mut connection)
+    }
+
+    /// Runs `work` with the connection on a thread meant for blocking work, and waits for it
+    /// without blocking: SQLite blocks, and the async runtime's few threads must stay free.
+    ///
+    /// # Errors
+    ///
+    /// Returns what `work` returns, or [`AppError::Interrupted`] if it didn't finish, such as when
+    /// it panicked.
+    pub async fn run<T: Send + 'static>(
+        self: &Arc<Self>,
+        work: impl FnOnce(&mut Connection) -> Result<T, AppError> + Send + 'static,
+    ) -> Result<T, AppError> {
+        let database = Arc::clone(self);
+
+        tauri::async_runtime::spawn_blocking(move || database.with(work))
+            .await
+            .map_err(AppError::Interrupted)?
     }
 
     /// Brings the connection's schema up to date and wraps it.
@@ -126,6 +145,28 @@ mod tests {
 
         assert_eq!(read, ids);
         assert!(wrong_shape.is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn runs_work_and_returns_its_result() -> Result<(), AppError> {
+        let database = Arc::new(Database::in_memory()?);
+        let answer: i64 = tauri::async_runtime::block_on(
+            database.run(|connection| Ok(connection.query_row("SELECT 42", (), |row| row.get(0))?)),
+        )?;
+
+        assert_eq!(answer, 42);
+        Ok(())
+    }
+
+    #[test]
+    #[expect(clippy::panic, reason = "the panic is what's being tested")]
+    fn reports_work_that_panicked_as_interrupted() -> Result<(), AppError> {
+        let database = Arc::new(Database::in_memory()?);
+        let result: Result<(), AppError> =
+            tauri::async_runtime::block_on(database.run(|_| panic!("work failed")));
+
+        assert!(matches!(result, Err(AppError::Interrupted(_))));
         Ok(())
     }
 

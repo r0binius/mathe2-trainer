@@ -6,6 +6,8 @@ mod commands;
 mod error;
 mod services;
 
+use std::sync::Arc;
+
 use tauri::Manager;
 
 use crate::error::AppError;
@@ -25,7 +27,7 @@ pub fn run() -> tauri::Result<()> {
         )
         .setup(|app| {
             let directory = app.path().app_data_dir().map_err(AppError::DataDirectory)?;
-            app.manage(Database::open_in(&directory)?);
+            app.manage(Arc::new(Database::open_in(&directory)?));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
