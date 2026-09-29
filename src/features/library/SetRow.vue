@@ -5,7 +5,7 @@ import ResultBadge from '@/components/ResultBadge.vue';
 import TextProgress from '@/components/TextProgress.vue';
 import type { SetSummary } from '@/domain/progress/summary';
 import { useText } from '@/i18n';
-import { toSet } from '@/router';
+import { toSet } from '@/routes';
 
 defineProps<{
   /** The app the set belongs to. */

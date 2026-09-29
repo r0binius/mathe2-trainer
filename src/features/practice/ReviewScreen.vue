@@ -12,7 +12,7 @@ import type { SummaryContext } from '@/domain/progress/summary';
 import { dueCards } from '@/domain/scheduling/scheduler';
 import type { AppDefinition } from '@/domain/shortcuts/types';
 import { useText } from '@/i18n';
-import { toApp } from '@/router';
+import { toApp } from '@/routes';
 import { useProgressStore } from '@/stores/progress';
 
 import PracticeStage from './PracticeStage.vue';

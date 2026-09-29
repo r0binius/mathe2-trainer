@@ -12,7 +12,7 @@ import { recentFirst, summarizeApp, summarizeSet } from '@/domain/progress/summa
 import { daysUntil } from '@/domain/scheduling/days';
 import type { AppDefinition } from '@/domain/shortcuts/types';
 import { useText } from '@/i18n';
-import { toLibrary, toReview } from '@/router';
+import { toLibrary, toReview } from '@/routes';
 
 import { logoOf } from './logos';
 import SetRow from './SetRow.vue';

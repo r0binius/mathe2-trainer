@@ -7,7 +7,7 @@ import { useStartup } from './composables/useStartup';
 import { apps } from './data/apps';
 import OptionsPanel from './features/options/OptionsPanel.vue';
 import { useText } from './i18n';
-import { depthOf } from './router';
+import { depthOf } from './routes';
 
 const context = useStartup(apps);
 const route = useRoute();

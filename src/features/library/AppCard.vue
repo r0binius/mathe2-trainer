@@ -3,7 +3,7 @@ import CircleProgress from '@/components/CircleProgress.vue';
 import TextProgress from '@/components/TextProgress.vue';
 import type { AppSummary } from '@/domain/progress/summary';
 import { useText } from '@/i18n';
-import { toApp } from '@/router';
+import { toApp } from '@/routes';
 
 import { logoOf } from './logos';
 

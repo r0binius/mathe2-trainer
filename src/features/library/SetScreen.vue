@@ -14,7 +14,7 @@ import type { SummaryContext } from '@/domain/progress/summary';
 import { summarizeSet } from '@/domain/progress/summary';
 import type { AppDefinition, ShortcutSet } from '@/domain/shortcuts/types';
 import { useText } from '@/i18n';
-import { toApp, toLearn } from '@/router';
+import { toApp, toLearn } from '@/routes';
 
 const props = defineProps<{
   /** The app the set belongs to. */

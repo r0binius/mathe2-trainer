@@ -12,7 +12,7 @@ import type { SummaryContext } from '@/domain/progress/summary';
 import { summarizeSet } from '@/domain/progress/summary';
 import type { AppDefinition, ShortcutSet } from '@/domain/shortcuts/types';
 import { useText } from '@/i18n';
-import { toSet } from '@/router';
+import { toSet } from '@/routes';
 import { useProgressStore } from '@/stores/progress';
 
 import PracticeStage from './PracticeStage.vue';

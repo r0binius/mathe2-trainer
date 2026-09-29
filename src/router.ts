@@ -1,8 +1,9 @@
+import type { Component } from 'vue';
 import type {
   NavigationGuardWithThis,
   RouteLocationNormalized,
-  RouteLocationRaw,
   Router,
+  RouteRecordRaw,
 } from 'vue-router';
 import { createRouter, createWebHashHistory } from 'vue-router';
 
@@ -14,31 +15,16 @@ import LibraryScreen from './features/library/LibraryScreen.vue';
 import SetScreen from './features/library/SetScreen.vue';
 import LearnScreen from './features/practice/LearnScreen.vue';
 import ReviewScreen from './features/practice/ReviewScreen.vue';
+import type { RouteName } from './routes';
+import { routePaths, toLibrary } from './routes';
 
-/** The route to the list of apps. */
-export function toLibrary(): RouteLocationRaw {
-  return { name: 'library' };
-}
-
-/** The route to an app's sets. */
-export function toApp(appId: string): RouteLocationRaw {
-  return { name: 'app', params: { appId } };
-}
-
-/** The route to a set's shortcuts. */
-export function toSet(appId: string, setId: string): RouteLocationRaw {
-  return { name: 'set', params: { appId, setId } };
-}
-
-/** The route to reviewing an app's due shortcuts. */
-export function toReview(appId: string): RouteLocationRaw {
-  return { name: 'review', params: { appId } };
-}
-
-/** The route to learning a set. */
-export function toLearn(appId: string, setId: string): RouteLocationRaw {
-  return { name: 'learn', params: { appId, setId } };
-}
+/** How a screen gets its props: fixed ones, or a lookup of the route's IDs guarding it. */
+type ScreenProps =
+  | { readonly props: object }
+  | {
+      readonly beforeEnter: NavigationGuardWithThis<undefined>;
+      readonly props: (route: RouteLocationNormalized) => object;
+    };
 
 /**
  * The main window's router. A route's IDs are looked up in `apps` before its screen opens: the
@@ -59,65 +45,27 @@ export function createAppRouter(apps: readonly AppDefinition[]): Router {
   return createRouter({
     history: createWebHashHistory(),
     routes: [
-      {
-        path: '/',
-        name: 'library',
-        component: LibraryScreen,
-        props: { apps },
-        meta: { depth: 0 },
-      },
-      {
-        path: '/apps/:appId',
-        name: 'app',
-        component: AppScreen,
-        meta: { depth: 1 },
-        ...lookedUp(appOf),
-      },
-      {
-        path: '/apps/:appId/review',
-        name: 'review',
-        component: ReviewScreen,
-        meta: { depth: 2 },
-        ...lookedUp(appOf),
-      },
-      {
-        path: '/apps/:appId/sets/:setId',
-        name: 'set',
-        component: SetScreen,
-        meta: { depth: 2 },
-        ...lookedUp(setOf),
-      },
-      {
-        path: '/apps/:appId/sets/:setId/learn',
-        name: 'learn',
-        component: LearnScreen,
-        meta: { depth: 3 },
-        ...lookedUp(setOf),
-      },
+      screen('library', LibraryScreen, { props: { apps } }),
+      screen('app', AppScreen, lookedUp(appOf)),
+      screen('review', ReviewScreen, lookedUp(appOf)),
+      screen('set', SetScreen, lookedUp(setOf)),
+      screen('learn', LearnScreen, lookedUp(setOf)),
       { path: '/:unknown(.*)*', redirect: toLibrary() },
     ],
   });
 }
 
-/**
- * How deep a route lies below the library, which decides the direction screens slide in: deeper
- * slides in from the right, back towards the library slides out to the right.
- */
-export function depthOf(route: RouteLocationNormalized): number {
-  const { depth } = route.meta;
-
-  return typeof depth === 'number' ? depth : 0;
+/** A screen's route, at its path from `routes.ts`. */
+function screen(name: RouteName, component: Component, props: ScreenProps): RouteRecordRaw {
+  return { path: routePaths[name], name, component, ...props };
 }
 
 /**
- * A route guarded by a lookup of its IDs: the screen gets what was found as its props, and a
+ * Guards a route by a lookup of its IDs: the screen gets what was found as its props, and a
  * route to something that doesn't exist goes to the library. vue-router doesn't check `props`
  * against the screen's props, so the guard is what makes them safe.
  */
-function lookedUp(find: (route: RouteLocationNormalized) => object | undefined): {
-  readonly beforeEnter: NavigationGuardWithThis<undefined>;
-  readonly props: (route: RouteLocationNormalized) => object;
-} {
+function lookedUp(find: (route: RouteLocationNormalized) => object | undefined): ScreenProps {
   return {
     beforeEnter: (to) => (find(to) === undefined ? toLibrary() : true),
     props: (to) => ({ ...find(to) }),
