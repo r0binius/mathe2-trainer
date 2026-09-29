@@ -297,7 +297,7 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
 - [x] TD.4 Accessible practice
 - [x] TD.5 Logging
 - [x] TD.6 Database off the async threads
-- [ ] TD.7 Small fixes
+- [x] TD.7 Small fixes
 - [ ] TD.8 CI
 - [ ] TD.9 Docs and smoke test
 - [ ] TD.10 Keep trained progress

@@ -63,7 +63,8 @@ export function summarizeSet(appId: string, set: ShortcutSet, context: SummaryCo
     setId: set.id,
     layout: context.layout,
   });
-  const learned = (progress?.learned ?? []).filter((id) => items.some((item) => item.id === id));
+  const practicable = new Set(items.map(({ id }) => id));
+  const learned = (progress?.learned ?? []).filter((id) => practicable.has(id));
   const summary = { set, items, learned, completed: progress?.completedAt !== undefined };
 
   return progress === undefined || learned.length === 0
@@ -79,7 +80,8 @@ export function summarizeApp(app: AppDefinition, context: SummaryContext): AppSu
   const items = appPracticeItems(app, context);
   const sets = app.sets.map((set) => summarizeSet(app.id, set, context));
   const learned = new Set(sets.flatMap((set) => set.learned));
-  const cards = context.progress.cards.filter((card) => items.some(({ id }) => id === card.id));
+  const practicable = new Set(items.map(({ id }) => id));
+  const cards = context.progress.cards.filter((card) => practicable.has(card.id));
   const due = reviewItems(dueCards(cards, context.layout, context.endOfToday), items).length;
   const next = earliest(cards.filter((card) => isLater(card, context)).map(({ dueAt }) => dueAt));
   const practicedAt = latest(sets.flatMap((set) => set.practicedAt ?? []));

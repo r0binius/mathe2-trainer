@@ -1,5 +1,5 @@
 import type { Plugin } from 'vue';
-import { watchEffect } from 'vue';
+import { computed, watchEffect } from 'vue';
 import { createI18n, useI18n } from 'vue-i18n';
 
 import type { UiLanguage } from '@/domain/settings/language';
@@ -71,8 +71,13 @@ export function useText(): Text {
     return t(`apps.${appId}.${key}`);
   }
 
+  // Made once per language rather than for every date shown.
+  const relativeTime = computed(
+    () => new Intl.RelativeTimeFormat(locale.value, { numeric: 'auto' }),
+  );
+
   function inDays(days: number): string {
-    return new Intl.RelativeTimeFormat(locale.value, { numeric: 'auto' }).format(days, 'day');
+    return relativeTime.value.format(days, 'day');
   }
 
   return { ui, count, app, inDays };
