@@ -12,7 +12,8 @@ The original Mouseless was abandoned about four years ago. I really like the ide
 - [Conventions](docs/conventions.md): functional style, clean code, TypeScript, Vue and Rust rules
 - [Roadmap](docs/roadmap.md): the steps, decisions and what we learned
 - [Legacy architecture](docs/legacy-architecture.md): how the old app works and what the rewrite keeps
-- [UML](docs/uml.drawio): components, classes, the practice session's states and two sequences, as a draw.io file (open it in draw.io or the VS Code draw.io extension)
+- [UML](docs/uml.drawio): components, classes, the practice session's states and three sequences, as a draw.io file (open it in draw.io or the VS Code draw.io extension)
+- [Smoke test](docs/smoke-test.md): what to check by hand in the running app before a step is merged
 
 ## Requirements
 

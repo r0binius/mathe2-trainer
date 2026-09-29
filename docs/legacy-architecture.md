@@ -365,7 +365,7 @@ In the renderer:
 | Domain logic inside components; Test and Review duplicate the same state machine                | `TestRoute`, `ReviewRoute`                                      | One pure `practice` state machine (show → answer → success/fail) used by learn and review; components only render it and run timers |
 | Global singletons, module-level keymap, sync IPC in getters                                     | `DB`, `Keyboard`, `Reviews`, `Store`                            | Pure functions that take the keymap and progress as arguments; async platform layer; Pinia stores loaded once                       |
 | Not reactive, correct only because routes remount                                               | models                                                          | Derived state as `computed` over Pinia state                                                                                        |
-| No types, no tests                                                                              | everywhere                                                      | Strict TS, Vitest for the domain, fixture keymaps (German/US)                                                                       |
+| No types, no tests                                                                              | everywhere                                                      | Strict TS, Vitest for the domain, fixture keymaps (German, and US from the technical debt round after step 5)                       |
 | App matched by localized name                                                                   | `ShortcutsRoute`                                                | Match by bundle ID                                                                                                                  |
 | `['Meta']` as a special value                                                                   | `Store`, `MenuBar`, `OptionsOverlay`                            | `{ kind: 'holdCommand' } \| { kind: 'shortcut', keys }`                                                                             |
 | Two separate lists of forbidden shortcuts, and the blocked list reads the current shortcut once | `Keyboard.blockedShortcuts`, `OptionsOverlay.isAllowedShortcut` | One `shortcutPolicy` module, parameterized by the current trigger                                                                   |
@@ -386,7 +386,7 @@ In the renderer:
 
 ## 17. Open decisions (made step by step during the rewrite)
 
-- UI language: the data is translatable from step 2 (message keys, per-app catalogs, German as the fallback). Which language the UI starts in and the vue-i18n setup are decided in step 5.
+- UI language: the data is translatable from step 2 (message keys, per-app catalogs, German as the fallback). Decided in step 5: vue-i18n with English and German UI text, following the system language or the language setting; the shortcut texts get English catalogs in the technical debt round after step 5.
 - FSRS: decided in step 3, `ts-fsrs` behind the `Scheduler` port.
 - Whether runs remember skipped shortcuts across sessions: decided in step 3, they don't (as today).
 - Where progress lives: decided in step 4, one SQLite database in Rust (`rusqlite`) for progress and settings.

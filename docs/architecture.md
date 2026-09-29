@@ -49,7 +49,7 @@ State + Command (§5) are this loop in pattern terms: the model is the State, an
 │ components/ KeyCap · BaseButton · PageLayout · CircleProgress … (presentational)  │
 │ composables/ useProgram · usePracticeSession · useKeyCapture · useSpatialNav …    │
 │ stores/     Pinia: settings · keymap · progress              (app state)          │
-│ platform/   Facade over generated Tauri bindings            (adapters)            │
+│ platform/   Facade over Tauri: typed commands, decoded      (adapters)            │
 │ domain/     keyboard · shortcuts · practice · scheduling · progress   (pure TS)   │
 │ data/apps/  shortcut definitions                                                  │
 └──────────────────────────────▲──────────────────────────┬─────────────────────────┘
@@ -142,7 +142,7 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 **Adapter: foreign APIs to our interfaces**
 
 - Rust `platform/macos/*` adapts NSWorkspace, AXUIElement and UCKeyTranslate to our traits and data types (`Keymap`, `MenuShortcut { title, keys, group }`).
-- Frontend `platform/*` adapts the generated Tauri bindings to the domain ports (`ProgressRepository`, `SettingsRepository`).
+- Frontend `platform/*` adapts Tauri's `invoke`, through hand-written wrappers that decode every answer, to the domain ports (`ProgressRepository`, `SettingsRepository`).
 
 **Bridge: features independent of the OS** (`src-tauri/src/platform/`)
 
@@ -234,4 +234,4 @@ src-tauri/src/
 - **Data (Vitest):** a health test over all `data/apps` (duplicates, unknown key codes, message keys missing from or unused in `de`, several trigger keys, impossible shortcuts on the fixture layout).
 - **Stores:** with in-memory repositories.
 - **Rust (`cargo test`):** SQLite migrations, repository queries and keymap helpers. Platform adapters are covered by the manual smoke test.
-- **Manual smoke test:** the checklist in `REWRITE.md` §9.
+- **Manual smoke test:** [smoke-test.md](smoke-test.md), walked through with `pnpm tauri dev` before a step is merged.

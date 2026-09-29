@@ -7,7 +7,7 @@ The rewrite is built in small steps. Claude writes the code; you decide and revi
 1. **Decide:** go through the step's open decisions. Claude recommends an option; you decide.
 2. **Build:** on a branch named per [Conventional Branch](https://conventionalbranch.org), e.g. `feature/keyboard-domain`. Claude writes the code, domain code test first, one sub-step at a time.
 3. **Review:** after each sub-step, Claude walks you through the diff. Feedback is applied before committing.
-4. **Check:** `pnpm check` passes.
+4. **Check:** `pnpm check` passes, and before the merge the [smoke test](smoke-test.md) in the running app.
 5. **Commit:** one Conventional Commit per sub-step, after your review, with its box ticked in the sub-step list.
 6. **Refactor:** once the sub-steps are done, a cleanup round over the whole app, not only the step's code, reviewed and committed like a sub-step. What counts, in order: idiomatic Vue and Rust; as much functional programming and The Elm Architecture as possible; clean code; each language's documentation standard (TSDoc, rustdoc). Design patterns are guidelines, not goals.
 7. **Diagram:** bring [`uml.drawio`](uml.drawio) up to date with what the step changed (components, classes, states, sequences), in the step's last commit, so the diagram always matches `main`.
@@ -299,7 +299,7 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
 - [x] TD.6 Database off the async threads
 - [x] TD.7 Small fixes
 - [x] TD.8 CI (dropped, see the decisions)
-- [ ] TD.9 Docs and smoke test
+- [x] TD.9 Docs and smoke test
 - [ ] TD.10 Keep trained progress
 - [ ] TD.11 US keymap fixture
 - [ ] TD.12 English shortcut texts
