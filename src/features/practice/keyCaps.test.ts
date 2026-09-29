@@ -39,7 +39,12 @@ describe('keyCapsOf', () => {
   });
 
   it('after a wrong test, shows what was pressed, marked, above the right keys', () => {
-    const session = shown({ ...presenting, mode: 'testing', misses: 1, mistake: ['Meta', 'j'] });
+    const session = shown({
+      ...presenting,
+      mode: 'testing',
+      misses: 1,
+      failure: { kind: 'wrong', keys: ['Meta', 'j'] },
+    });
 
     expect(keyCapsOf(session, [])).toStrictEqual([
       [
@@ -48,6 +53,17 @@ describe('keyCapsOf', () => {
       ],
       [
         { key: 'Meta', hidden: false, pressed: false },
+        { key: 'k', hidden: false, pressed: false },
+      ],
+    ]);
+  });
+
+  it('shows the right keys once a test is forgotten', () => {
+    const session = shown({ ...presenting, mode: 'testing', failure: { kind: 'forgot' } });
+
+    expect(keyCapsOf(session, ['Meta'])).toStrictEqual([
+      [
+        { key: 'Meta', hidden: false, pressed: true },
         { key: 'k', hidden: false, pressed: false },
       ],
     ]);

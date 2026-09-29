@@ -289,6 +289,7 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
 - No hosted CI for now: Codeberg's runners require a free license, and the app is for personal use. `pnpm check` stays the local gate; CI comes back once the repository moves to its own Forgejo instance with its own runner.
 - Logging goes through `tauri-plugin-log`, for Rust and the webview, into the macOS log folder.
 - Trained shortcuts are kept between learning sessions (`SetProgress.trained`, migration `0003_trained.sql`), unlike in the old app, so leaving a session loses only what wasn't pressed yet; they come back as tests. The effect that saves learning progress fires whenever a shortcut changes its stage and is called `learningChanged`.
+- A test can be given up with **Forgot**: the right keys show, and it counts as a wrong answer (failed, graded _again_, back to trained, requeued in review) until the keys are pressed. The session records why a test failed as `failure: { kind: 'wrong', keys } | { kind: 'forgot' }`. It's a button only: every key is an answer during practice, and the data has shortcuts without modifiers.
 
 **Sub-steps**
 
@@ -302,6 +303,7 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
 - [x] TD.8 CI (dropped, see the decisions)
 - [x] TD.9 Docs and smoke test
 - [x] TD.10 Keep trained progress
+- [x] TD.10b Forgot button
 - [ ] TD.11 US keymap fixture
 - [ ] TD.12 English shortcut texts
 - [ ] TD.13 Notes for the future

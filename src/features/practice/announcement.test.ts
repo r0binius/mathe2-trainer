@@ -38,9 +38,20 @@ describe('announcementOf', () => {
   });
 
   it('says a wrong answer while testing, and the right keys', () => {
-    const session = { ...presenting, mode: 'testing', misses: 1, mistake: ['Meta', 'j'] } as const;
+    const session = {
+      ...presenting,
+      mode: 'testing',
+      misses: 1,
+      failure: { kind: 'wrong', keys: ['Meta', 'j'] },
+    } as const;
 
     expect(announcementOf(session)).toStrictEqual({ kind: 'wrong', item });
+  });
+
+  it('says the right keys once a test is forgotten', () => {
+    const session = { ...presenting, mode: 'testing', failure: { kind: 'forgot' } } as const;
+
+    expect(announcementOf(session)).toStrictEqual({ kind: 'forgot', item });
   });
 
   it('says a correct answer', () => {

@@ -37,12 +37,16 @@ const due = reviewItems(
   appPracticeItems(props.app, props.context),
 );
 
-const [{ session, held, saveFailed }, skip] = usePracticeSession(reviewStrategy, reviewPool(due), {
-  keymap: () => keymap,
-  save: progressSaver(progressStore, { appId: props.app.id, layout }, Date.now),
-  now: Date.now,
-  random: Math.random,
-});
+const [{ session, held, saveFailed }, { skip, forget }] = usePracticeSession(
+  reviewStrategy,
+  reviewPool(due),
+  {
+    keymap: () => keymap,
+    save: progressSaver(progressStore, { appId: props.app.id, layout }, Date.now),
+    now: Date.now,
+    random: Math.random,
+  },
+);
 
 const done = computed(() => session.value.pool.done);
 
@@ -69,6 +73,7 @@ useSessionExit(
       :held="held"
       :save-failed="saveFailed"
       @skip="skip"
+      @forget="forget"
     >
       <template #progress>
         <TextProgress :value="done" :max="due.length" />

@@ -1,6 +1,7 @@
 <script setup lang="ts" generic="Pool">
 import { computed, ref, watch } from 'vue';
 
+import BaseButton from '@/components/BaseButton.vue';
 import KeyCap from '@/components/KeyCap.vue';
 import SkipButton from '@/components/SkipButton.vue';
 import { useKeyLabels } from '@/composables/useKeyLabels';
@@ -25,6 +26,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   /** Skip was clicked. */
   skip: [];
+  /** Forgot was clicked: the shortcut being tested wasn't recalled. */
+  forget: [];
 }>();
 
 defineSlots<{
@@ -36,6 +39,14 @@ const text = useText();
 const labelOf = useKeyLabels();
 const keyCaps = computed(() =>
   props.session.phase === 'finished' ? [] : keyCapsOf(props.session, props.held),
+);
+
+/** Whether a test is waiting for its keys, which can be forgotten. */
+const canForget = computed(
+  () =>
+    props.session.phase === 'presenting' &&
+    props.session.mode === 'testing' &&
+    props.session.failure === undefined,
 );
 
 /** What VoiceOver announces for the current state, such as the shortcut and its keys. */
@@ -109,7 +120,12 @@ watch(
         <slot name="progress" />
         <span v-if="saveFailed" class="save-failed">{{ text.ui('practice.saveFailed') }}</span>
       </div>
-      <SkipButton @click="emit('skip')">{{ text.ui('practice.skip') }}</SkipButton>
+      <div class="actions">
+        <BaseButton v-if="canForget" @click="emit('forget')">
+          {{ text.ui('practice.forgot') }}
+        </BaseButton>
+        <SkipButton @click="emit('skip')">{{ text.ui('practice.skip') }}</SkipButton>
+      </div>
     </footer>
   </div>
 </template>
@@ -175,6 +191,12 @@ watch(
   color: var(--color-text-muted);
   font-size: 12px;
   font-weight: 700;
+}
+
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .save-failed {

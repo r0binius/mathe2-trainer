@@ -35,11 +35,12 @@ function practice(save: Save = () => Promise.resolve(ok(undefined))) {
     return expect.unreachable();
   }
 
-  const [view, skip] = running;
+  const [view, { skip, forget }] = running;
 
   return {
     view,
     skip,
+    forget,
     stop: () => {
       scope.stop();
     },
@@ -95,6 +96,14 @@ describe('usePracticeSession', () => {
     skip();
 
     expect(view.session.value).toMatchObject({ phase: 'presenting', item: b });
+  });
+
+  it('reveals the keys of a forgotten test', () => {
+    const { view, forget } = practice();
+
+    forget();
+
+    expect(view.session.value).toMatchObject({ phase: 'presenting', failure: { kind: 'forgot' } });
   });
 
   it('shows the keys held', () => {

@@ -90,6 +90,13 @@ export type PracticeStrategy<Pool> = {
 };
 
 /**
+ * Why a test failed: the first wrong keys pressed, shown next to the right ones, or that the
+ * shortcut was forgotten, which reveals the right keys without pressing any.
+ */
+export type Failure =
+  { readonly kind: 'wrong'; readonly keys: KeyCombination } | { readonly kind: 'forgot' };
+
+/**
  * A practice session, the Elm model of learning and reviewing, in one of its phases. Each phase
  * holds only what makes sense in it, so the old app's contradictory flags (`success` while
  * `testFailed`, …) can't be represented.
@@ -106,8 +113,8 @@ export type Session<Pool> =
       readonly shownAt: number;
       /** How many wrong answers were given, so the UI can react to each one. */
       readonly misses: number;
-      /** The first wrong keys of a test, shown next to the right ones. */
-      readonly mistake?: KeyCombination;
+      /** Why the test failed, if it did; a test ends only once its keys are pressed. */
+      readonly failure?: Failure;
     }
   | {
       /** The item was answered correctly, and the result is shown until `advance`. */
@@ -140,7 +147,9 @@ export type SessionMsg =
       /** The presentation whose success ends, as its `advanceAfter` named it. */
       readonly presentation: number;
     })
-  | (Roll & { readonly type: 'skip' });
+  | (Roll & { readonly type: 'skip' })
+  /** The shortcut being tested was forgotten: reveal its keys and count the test as failed. */
+  | { readonly type: 'forget' };
 
 /** The session after a message, and the effects the shell has to carry out because of it. */
 export type SessionUpdate<Pool> = {
@@ -185,6 +194,8 @@ export function updateSession<Pool>(
         : unchanged(session);
     case 'skip':
       return session.phase === 'presenting' ? skip(strategy, session, msg) : unchanged(session);
+    case 'forget':
+      return { model: forget(session), effects: [] };
   }
 }
 
@@ -214,7 +225,7 @@ function answer<Pool>(
   session: Presenting<Pool>,
   { keys, at }: AnswerMsg,
 ): SessionUpdate<Pool> {
-  const { item, mode, presentation, shownAt, mistake } = session;
+  const { item, mode, presentation, shownAt, failure } = session;
 
   if (!isSameCombination(keys, item.keys)) {
     return { model: miss(session, keys), effects: [] };
@@ -223,7 +234,7 @@ function answer<Pool>(
   const { pool, effects } = strategy.complete(session.pool, {
     item,
     mode,
-    failed: mistake !== undefined,
+    failed: failure !== undefined,
     durationMs: at - shownAt,
   });
 
@@ -237,7 +248,18 @@ function miss<Pool>(session: Presenting<Pool>, keys: KeyCombination): Presenting
   const missed = { ...session, misses: session.misses + 1 };
 
   // Only a test remembers what was pressed: while training the right keys are on screen anyway.
-  return session.mode === 'testing' ? { ...missed, mistake: session.mistake ?? keys } : missed;
+  return session.mode === 'testing'
+    ? { ...missed, failure: session.failure ?? { kind: 'wrong', keys } }
+    : missed;
+}
+
+/** Reveals the keys of a test not failed yet; anything else stays as it is. */
+function forget<Pool>(session: Session<Pool>): Session<Pool> {
+  return session.phase === 'presenting' &&
+    session.mode === 'testing' &&
+    session.failure === undefined
+    ? { ...session, failure: { kind: 'forgot' } }
+    : session;
 }
 
 function skip<Pool>(

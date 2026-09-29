@@ -44,8 +44,10 @@
       "test": "{title}. Press the shortcut.",
       "miss": "Not quite. Press {keys}.",
       "wrong": "Not quite. It's {keys}.",
-      "correct": "Correct."
-    }
+      "correct": "Correct.",
+      "forgot": "It's {keys}."
+    },
+    "forgot": "Forgot"
   },
   "review": {
     "title": "Review",

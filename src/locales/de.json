@@ -44,8 +44,10 @@
       "test": "{title}. Drücke den Kurzbefehl.",
       "miss": "Nicht ganz. Drücke {keys}.",
       "wrong": "Nicht ganz. Richtig ist {keys}.",
-      "correct": "Richtig."
-    }
+      "correct": "Richtig.",
+      "forgot": "Richtig ist {keys}."
+    },
+    "forgot": "Vergessen"
   },
   "review": {
     "title": "Wiederholen",

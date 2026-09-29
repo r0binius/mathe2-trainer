@@ -124,7 +124,7 @@ describe('answering', () => {
     expect(model).toMatchObject({ phase: 'presenting', misses: 1 });
   });
 
-  it('keeps the first wrong keys of a test as its mistake', () => {
+  it('keeps the first wrong keys of a test as its failure', () => {
     const first = updateSession(inOrder, presenting(testing), {
       type: 'answer',
       keys: ['Meta', 'g'],
@@ -137,12 +137,12 @@ describe('answering', () => {
     });
 
     expect(second).toStrictEqual({
-      model: { ...presenting(testing), misses: 2, mistake: ['Meta', 'g'] },
+      model: { ...presenting(testing), misses: 2, failure: { kind: 'wrong', keys: ['Meta', 'g'] } },
       effects: [],
     });
   });
 
-  it('completes a test as failed when it had a mistake', () => {
+  it('completes a test as failed when it had a wrong answer', () => {
     const missed = updateSession(inOrder, presenting(testing), {
       type: 'answer',
       keys: ['Meta', 'g'],
@@ -161,6 +161,40 @@ describe('answering', () => {
     expect(
       updateSession(inOrder, session, { type: 'answer', keys: ['Meta', 'g'], at: 2000 }).model,
     ).toBe(session);
+  });
+});
+
+describe('forgetting', () => {
+  it('reveals the keys of a test as forgotten, without counting a miss', () => {
+    expect(updateSession(inOrder, presenting(testing), { type: 'forget' })).toStrictEqual({
+      model: { ...presenting(testing), failure: { kind: 'forgot' } },
+      effects: [],
+    });
+  });
+
+  it('completes a forgotten test as failed once its keys are pressed', () => {
+    const forgot = updateSession(inOrder, presenting(testing), { type: 'forget' });
+
+    expect(
+      updateSession(inOrder, forgot.model, { type: 'answer', keys: ['Meta', 'f'], at: 4000 })
+        .effects,
+    ).toContainEqual({ type: 'tested', id: find.id, failed: true, durationMs: 3000 });
+  });
+
+  it('ignores forgetting while training, since the keys are shown', () => {
+    const session = presenting(training);
+
+    expect(updateSession(inOrder, session, { type: 'forget' }).model).toBe(session);
+  });
+
+  it('keeps a wrong answer as the failure when forgetting afterwards', () => {
+    const missed = updateSession(inOrder, presenting(testing), {
+      type: 'answer',
+      keys: ['Meta', 'g'],
+      at: 2000,
+    });
+
+    expect(updateSession(inOrder, missed.model, { type: 'forget' }).model).toBe(missed.model);
   });
 });
 

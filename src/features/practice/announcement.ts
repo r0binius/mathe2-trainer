@@ -1,12 +1,12 @@
-import type { Mode, PracticeItem, Session } from '@/domain/practice/session';
+import type { PracticeItem, Session } from '@/domain/practice/session';
 
 /**
  * What a practice screen tells VoiceOver, for what's shown right now: a shortcut to train (with
- * its keys) or to recall (without), a wrong answer while training or testing (with the right
- * keys), or a correct one.
+ * its keys) or to recall (without), a wrong answer while training or testing or a forgotten test
+ * (with the right keys), or a correct answer.
  */
 export type Announcement = {
-  readonly kind: 'train' | 'test' | 'miss' | 'wrong' | 'correct';
+  readonly kind: 'train' | 'test' | 'miss' | 'wrong' | 'forgot' | 'correct';
   readonly item: PracticeItem;
 };
 
@@ -18,14 +18,20 @@ export function announcementOf<Pool>(session: Session<Pool>): Announcement | und
     case 'succeeded':
       return { kind: 'correct', item: session.item };
     case 'presenting':
-      return { kind: kindWhilePresenting(session.mode, session.misses), item: session.item };
+      return { kind: kindWhilePresenting(session), item: session.item };
   }
 }
 
-function kindWhilePresenting(mode: Mode, misses: number): Announcement['kind'] {
-  if (misses === 0) {
-    return mode === 'training' ? 'train' : 'test';
+type Presenting<Pool> = Extract<Session<Pool>, { readonly phase: 'presenting' }>;
+
+function kindWhilePresenting<Pool>({
+  mode,
+  misses,
+  failure,
+}: Presenting<Pool>): Announcement['kind'] {
+  if (mode === 'training') {
+    return misses === 0 ? 'train' : 'miss';
   }
 
-  return mode === 'training' ? 'miss' : 'wrong';
+  return failure === undefined ? 'test' : failure.kind;
 }

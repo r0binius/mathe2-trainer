@@ -37,17 +37,22 @@ export type PracticeView<Pool> = {
   readonly saveFailed: Readonly<Ref<boolean>>;
 };
 
+/** What the user can do besides pressing keys: skip the shortcut, or say it's forgotten. */
+export type PracticeActions = {
+  readonly skip: () => void;
+  readonly forget: () => void;
+};
+
 /**
  * Runs a practice session with the given strategy while the calling screen lives: key presses
- * answer, pauses become timers, and results are saved. Returns what to show, and how to skip the
- * current item.
+ * answer, pauses become timers, and results are saved. Returns what to show, and the actions.
  * @see §1.1 of `docs/architecture.md`
  */
 export function usePracticeSession<Pool>(
   strategy: PracticeStrategy<Pool>,
   pool: Pool,
   shell: PracticeShell,
-): readonly [view: PracticeView<Pool>, skip: () => void] {
+): readonly [view: PracticeView<Pool>, actions: PracticeActions] {
   const { keymap, save, now, random } = shell;
   const saveFailed = ref(false);
   const logger = inject(loggerKey, consoleLogger);
@@ -94,5 +99,12 @@ export function usePracticeSession<Pool>(
     dispatch({ type: 'skip', ...roll() });
   }
 
-  return [{ session, held, saveFailed: readonly(saveFailed) }, skip];
+  function forget(): void {
+    dispatch({ type: 'forget' });
+  }
+
+  return [
+    { session, held, saveFailed: readonly(saveFailed) },
+    { skip, forget },
+  ];
 }

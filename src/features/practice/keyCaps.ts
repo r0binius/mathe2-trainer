@@ -30,12 +30,24 @@ export function keyCapsOf<Pool>(
     return [keys.map((key) => ({ key, hidden: false, pressed: held.includes(key) }))];
   }
 
-  if (session.mistake === undefined) {
-    return [keys.map((key) => ({ key, hidden: true, pressed: false }))];
+  switch (session.failure?.kind) {
+    case undefined:
+      return [keys.map((key) => ({ key, hidden: true, pressed: false }))];
+    case 'forgot':
+      return [keys.map((key) => ({ key, hidden: false, pressed: held.includes(key) }))];
+    case 'wrong':
+      return wrongAnswer(session.failure.keys, keys, held);
   }
+}
 
+/** What was pressed, each key marked right or wrong, above the right keys. */
+function wrongAnswer(
+  pressed: KeyCombination,
+  keys: KeyCombination,
+  held: KeyCombination,
+): readonly (readonly KeyCapState[])[] {
   return [
-    session.mistake.map((key) => ({
+    pressed.map((key) => ({
       key,
       hidden: false,
       pressed: true,

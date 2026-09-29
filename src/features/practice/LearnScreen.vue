@@ -34,7 +34,7 @@ const text = useText();
 const target = { appId: props.app.id, setId: props.set.id, layout: props.context.layout };
 
 // The session starts from the progress as it is now, and owns it from then on.
-const [{ session, held, saveFailed }, skip] = usePracticeSession(
+const [{ session, held, saveFailed }, { skip, forget }] = usePracticeSession(
   learnStrategy,
   learnPool(
     practiceItems(props.app.id, props.set, props.context),
@@ -82,6 +82,7 @@ useSessionExit(
       :held="held"
       :save-failed="saveFailed"
       @skip="skip"
+      @forget="forget"
     >
       <template #progress>
         <CircleProgress v-if="learned > 0" :value="learned" :max="session.pool.entries.length" />
