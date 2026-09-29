@@ -42,9 +42,3 @@ VS Code recommends the needed extensions (`.vscode/extensions.json`). Files are 
 ## Git
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) and branches follow [Conventional Branch](https://conventionalbranch.org). Git hooks installed by `pnpm install` check both. See [conventions](docs/conventions.md#git).
-
-## License
-
-The code of this rewrite is licensed under the [GNU General Public License v3.0 or later](LICENSE).
-
-Some parts still come from the original [ueberdosis/mouseless](https://github.com/ueberdosis/mouseless), which has no license: the selection and German texts of the shortcut data, parts of the visual design, and the app icons it shipped. They're not covered by this license and are being replaced with our own (see the [roadmap](docs/roadmap.md)). App names and logos belong to their owners.

@@ -281,12 +281,12 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 
 ## Technical debt after step 5 🚧 ([#12](https://codeberg.org/gobin/mouseless/issues/12))
 
-Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 found debt in the practice session's edges, a module cycle, test and accessibility gaps, missing CI and logging, and drifted docs. It's paid off before step 6, one reviewable diff each, together with three product gaps: trained shortcuts are kept, the shortcut texts exist in English, and a US layout fixture tests ANSI keyboards.
+Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 found debt in the practice session's edges, a module cycle, test and accessibility gaps, missing logging, and drifted docs. It's paid off before step 6, one reviewable diff each (CI is postponed), together with three product gaps: trained shortcuts are kept, the shortcut texts exist in English, and a US layout fixture tests ANSI keyboards.
 
 **Decisions**
 
 - Resetting progress (and, from step 6, changing the layout) ends a running practice session, which returns to its set or app. A session never writes from a stale snapshot.
-- CI runs on Forgejo Actions (`.forgejo/workflows/`): the TypeScript checks and the Rust checks on Linux.
+- No hosted CI for now: Codeberg's runners require a free license, and the app is for personal use. `pnpm check` stays the local gate; CI comes back once the repository moves to its own Forgejo instance with its own runner.
 - Logging goes through `tauri-plugin-log`, for Rust and the webview, into the macOS log folder.
 
 **Sub-steps**
@@ -298,7 +298,7 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
 - [x] TD.5 Logging
 - [x] TD.6 Database off the async threads
 - [x] TD.7 Small fixes
-- [x] TD.8 CI
+- [x] TD.8 CI (dropped, see the decisions)
 - [ ] TD.9 Docs and smoke test
 - [ ] TD.10 Keep trained progress
 - [ ] TD.11 US keymap fixture
