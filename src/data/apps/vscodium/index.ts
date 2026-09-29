@@ -1,6 +1,7 @@
 import type { AppDefinition } from '@/domain/shortcuts/types';
 
 import de from './de.json';
+import en from './en.json';
 
 /**
  * VS Code's default shortcuts, which VSCodium shares.
@@ -14,7 +15,7 @@ export const vscodium = {
   id: 'vscodium',
   title: 'VSCodium',
   category: 'development',
-  catalogs: { de },
+  catalogs: { de, en },
   sets: [
     {
       id: 'essentials',

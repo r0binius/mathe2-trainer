@@ -308,7 +308,7 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
 - TD.12 English shortcut texts
   - [x] TD.12a English catalogs and translatable app titles
   - [x] TD.12b English for Bitwarden, Helium, Notes, Rectangle, Spotify, Terminal and WhatsApp
-  - [ ] TD.12c English for Bitwig and VSCodium
+  - [x] TD.12c English for Bitwig and VSCodium
   - [ ] TD.12d English for macOS, then English required
 - [ ] TD.13 Notes for the future
 
