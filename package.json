@@ -55,6 +55,7 @@
     "vue-tsc": "^3.3.11"
   },
   "description": "Keyboard shortcut training and look-up.",
+  "license": "GPL-3.0-or-later",
   "packageManager": "pnpm@12.6.0",
   "engines": {
     "node": ">=24"
