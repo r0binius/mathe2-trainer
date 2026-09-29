@@ -19,7 +19,7 @@ const text = useText();
   <RouterLink class="card" :to="toApp(summary.app.id)">
     <img class="logo" :src="logoOf(summary.app.id)" alt="" />
     <span v-if="summary.due > 0" class="due">{{ text.ui('library.due', { n: summary.due }) }}</span>
-    <span class="title truncate">{{ summary.app.title }}</span>
+    <span class="title truncate">{{ text.appTitle(summary.app) }}</span>
     <span class="meta">
       <template v-if="summary.learned > 0">
         <span>

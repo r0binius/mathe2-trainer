@@ -93,6 +93,10 @@ function pressFor(layout: Keymap, keys: KeyCombination): KeyPress {
   };
 }
 
+function isSameList(first: readonly string[], second: readonly string[]): boolean {
+  return first.toSorted().join('\n') === second.toSorted().join('\n');
+}
+
 function describeRejection(rejection: Rejection): string {
   switch (rejection.reason) {
     case 'duplicate-key':
@@ -123,8 +127,9 @@ function messageKeysOf(app: AppDefinition): readonly string[] {
   ]);
 }
 
+// The entries of the German catalog, apart from the app's translated name, which isn't a key.
 function catalogKeysOf(app: AppDefinition): readonly string[] {
-  return flattenCatalog(app.catalogs.de);
+  return flattenCatalog(app.catalogs.de).filter((key) => key !== 'appTitle');
 }
 
 describe('app data', () => {
@@ -242,6 +247,14 @@ describe('app data', () => {
     });
 
     expect(missing).toStrictEqual([]);
+  });
+
+  it('has the same entries in English as in German, where it is translated', () => {
+    const differing = apps.flatMap(({ id, catalogs: { de, en } }) =>
+      en === undefined || isSameList(flattenCatalog(en), flattenCatalog(de)) ? [] : [id],
+    );
+
+    expect(differing).toStrictEqual([]);
   });
 
   it('uses every entry of the German catalog', () => {

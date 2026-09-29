@@ -305,7 +305,11 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
 - [x] TD.10 Keep trained progress
 - [x] TD.10b Forgot button
 - [x] TD.11 US keymap fixture
-- [ ] TD.12 English shortcut texts
+- TD.12 English shortcut texts
+  - [x] TD.12a English catalogs and translatable app titles
+  - [ ] TD.12b English for Bitwarden, Helium, Notes, Rectangle, Spotify, Terminal and WhatsApp
+  - [ ] TD.12c English for Bitwig and VSCodium
+  - [ ] TD.12d English for macOS, then English required
 - [ ] TD.13 Notes for the future
 
 ## 6. Native keyboard layout ⏳ ([#6](https://codeberg.org/gobin/mouseless/issues/6))

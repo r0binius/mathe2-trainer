@@ -60,7 +60,7 @@ useSessionExit(
 </script>
 
 <template>
-  <PageLayout :title="app.title" :subtitle="text.ui('review.title')">
+  <PageLayout :title="text.appTitle(app)" :subtitle="text.ui('review.title')">
     <template #start>
       <BaseButton icon="arrowLeft" @click="router.push(toApp(app.id))">
         {{ text.ui('review.back') }}

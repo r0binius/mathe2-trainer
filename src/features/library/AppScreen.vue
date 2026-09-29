@@ -63,7 +63,7 @@ const nextReview = computed(() => {
     </template>
 
     <nav ref="nav">
-      <ScreenHeading :title="app.title">
+      <ScreenHeading :title="text.appTitle(app)">
         <template #leading><img class="logo" :src="logoOf(app.id)" alt="" /></template>
         <template v-if="nextReview !== undefined" #meta>{{ nextReview }}</template>
         <template v-if="summary.due > 0" #action>

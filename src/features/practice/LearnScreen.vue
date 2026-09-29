@@ -69,7 +69,7 @@ useSessionExit(
 </script>
 
 <template>
-  <PageLayout :title="app.title" :subtitle="text.app(app.id, set.title)">
+  <PageLayout :title="text.appTitle(app)" :subtitle="text.app(app.id, set.title)">
     <template #start>
       <BaseButton icon="arrowLeft" @click="router.push(toSet(app.id, set.id))">
         {{ text.ui('learn.back') }}

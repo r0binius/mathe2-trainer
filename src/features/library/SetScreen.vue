@@ -49,7 +49,7 @@ const continues = computed(() => {
 </script>
 
 <template>
-  <PageLayout :title="app.title" :subtitle="title">
+  <PageLayout :title="text.appTitle(app)" :subtitle="title">
     <template #start>
       <BaseButton icon="arrowLeft" @click="router.push(toApp(app.id))">
         {{ text.ui('set.back') }}

@@ -80,13 +80,16 @@ export type Catalog = { readonly [key: string]: string | Catalog };
 export type AppDefinition = {
   /** Unique, and the first part of every `ShortcutId` of the app. */
   readonly id: string;
-  /** The app's product name, which isn't translated. */
+  /**
+   * The app's name as its vendor ships it in English. Where the vendor translates it, as Apple
+   * does Notes, a catalog's `appTitle` names it in that language.
+   */
   readonly title: string;
   readonly category: AppCategory;
   /**
    * The texts its message keys point to, by language. The data is written in German, which is
    * also what other languages fall back to.
    */
-  readonly catalogs: { readonly de: Catalog };
+  readonly catalogs: { readonly de: Catalog; readonly en?: Catalog };
   readonly sets: readonly ShortcutSet[];
 };

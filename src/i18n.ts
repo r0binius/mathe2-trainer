@@ -28,6 +28,8 @@ export type Text = {
   readonly count: (key: UiKey, count: number) => string;
   /** A text of an app's shortcut data, such as a set's title. */
   readonly app: (appId: string, key: MessageKey) => string;
+  /** An app's name in the current language: its `appTitle` where the vendor translates it. */
+  readonly appTitle: (app: AppDefinition) => string;
   /** When something is, in days from today: "today", "tomorrow", "in 3 days". */
   readonly inDays: (days: number) => string;
 };
@@ -45,7 +47,7 @@ export function createAppI18n(language: UiLanguage): Plugin {
     fallbackWarn: false,
     // `satisfies` keeps the German UI text complete: a key missing from it is a type error.
     messages: {
-      en,
+      en: { ...en, apps: Object.fromEntries(apps.flatMap(englishCatalogOf)) },
       de: { ...(de satisfies UiMessages), apps: Object.fromEntries(apps.map(germanCatalogOf)) },
     },
   });
@@ -55,9 +57,14 @@ function germanCatalogOf(app: AppDefinition): readonly [string, Catalog] {
   return [app.id, app.catalogs.de];
 }
 
+function englishCatalogOf(app: AppDefinition): readonly (readonly [string, Catalog])[] {
+  return app.catalogs.en === undefined ? [] : [[app.id, app.catalogs.en]];
+}
+
 /** The translations of a component's texts. Components use it instead of vue-i18n's `t`. */
 export function useText(): Text {
-  const { t, locale } = useI18n();
+  const composer = useI18n();
+  const { t, locale } = composer;
 
   function ui(key: UiKey, values: Readonly<Record<string, string | number>> = {}): string {
     return t(key, values);
@@ -76,11 +83,17 @@ export function useText(): Text {
     () => new Intl.RelativeTimeFormat(locale.value, { numeric: 'auto' }),
   );
 
+  function appTitle({ id, title }: AppDefinition): string {
+    const key = `apps.${id}.appTitle`;
+
+    return composer.te(key) ? t(key) : title;
+  }
+
   function inDays(days: number): string {
     return relativeTime.value.format(days, 'day');
   }
 
-  return { ui, count, app, inDays };
+  return { ui, count, app, appTitle, inDays };
 }
 
 /**
