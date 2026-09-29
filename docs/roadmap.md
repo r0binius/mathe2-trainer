@@ -311,7 +311,7 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
   - [x] TD.12b English for Bitwarden, Helium, Notes, Rectangle, Spotify, Terminal and WhatsApp
   - [x] TD.12c English for Bitwig and VSCodium
   - [x] TD.12d English for macOS, then English required
-- [ ] TD.13 Notes for the future
+- [x] TD.13 Notes for the future
 
 ## 6. Native keyboard layout ⏳ ([#6](https://codeberg.org/gobin/mouseless/issues/6))
 
@@ -325,6 +325,13 @@ Branch `feature/native-keymap`. Read the current keyboard layout in Rust, replac
 - [ ] 6.2 macOS FFI: `TISCopyCurrentKeyboardLayoutInputSource` + `UCKeyTranslate`
 - [ ] 6.3 Safe translation into our keymap type and fixture comparison tests
 - [ ] 6.4 Layout-change events
+
+**Carried over** (from step 5 and the technical debt round)
+
+- Replace the German stand-in (`platform/keymap.ts` and its one lint exception) by the Rust reader, and rename `StorageError` to `PlatformError`, since the keymap port uses it too.
+- Replace the hand-written US fixture (`usKeymap.fixture.json`, from the US layout tables) by the reader's real output on an ANSI keyboard, and compare the German fixture with it on ISO.
+- A layout change ends a running practice session: `useSessionExit` already watches the layout, so check it once the layout can switch at runtime (smoke test, _Later steps_).
+- Six shortcuts can't be practiced on US: written from a German keyboard, their character needs a modifier the shortcut already has (Shift + `+` becomes Shift twice). Give them an alternative combination for such layouts: Bitwig's octave up and vertical zoom in, macOS's previous window, Rectangle's smaller and larger, Terminal's show all tabs.
 
 **Concepts:** FFI and `unsafe`, `objc2`, Core Foundation memory rules, traits as ports (Bridge pattern).
 
@@ -341,6 +348,12 @@ Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcu
 - [ ] 7.3 Trigger: hold ⌘ event tap and global shortcut
 - [ ] 7.4 Dock icon, autostart, single instance
 - [ ] 7.5 Strict CSP, verified in the running app
+
+**Carried over**
+
+- The options get the trigger (with recording a shortcut, checked by the shortcut policy), the menu bar and Dock icons and launch at login, once Rust applies them; ⌘, opens the options from the app menu.
+- Refresh the end of today (`useSummaryContext`) when the window is shown, since the app keeps running past midnight.
+- Log Rust's own errors with `log::error!` (the plugin is set up; so far only the frontend logs).
 
 **Concepts:** the Mediator pattern, macOS activation policy and focus handling, event taps, the Content Security Policy.
 
@@ -368,6 +381,27 @@ Branch `chore/packaging`. Build and sign the app. There's no importer: progress 
 
 - [ ] 9.1 Bundle config and signing
 
+**Carried over**
+
+- Set `minimumSystemVersion` (macOS 14): the app relies on ES2023 (`toSorted`), `color-mix()` and native CSS nesting in the system's WebKit.
+- The two logos from macosicons.com are community icons: fine for personal use, to be checked before the app is published.
+
 ## 10. Linux ⏳ ([#10](https://codeberg.org/gobin/mouseless/issues/10))
 
 Platform implementations for X11/Wayland, a UI driven by capabilities, and Linux key labels. Planned in detail once macOS is complete.
+
+**Carried over**
+
+- Linux key labels: `main.ts` provides the platform's labels (`keyLabelsKey`), so only that line changes.
+- CI can run the Rust checks on Linux, but only macOS builds the macOS-specific code.
+
+## Unscheduled
+
+Found along the way, not tied to a step yet.
+
+- **CI:** once the repository moves to its own Forgejo instance with a runner. The workflow is in the history (`7f6594b`); Codeberg's hosted runners required a free license.
+- **Data:** the German Notes catalog calls _Monostyled_ "Proportional", which means the opposite; check Apple's German menu name.
+- **Set screen:** show trained shortcuts (kept since the debt round) apart from new ones, not only the learned ones.
+- **VoiceOver:** two identical announcements in a row are read once; a counter in the text would repeat a second identical mistake.
+- **Keyboard navigation:** going back focuses the screen's first element rather than the item you came from.
+- **TypeScript 7** once typescript-eslint and vue-tsc support it, and dropping the `is-immutable-type` patch once its upstream fix lands (both in `CLAUDE.md`).
