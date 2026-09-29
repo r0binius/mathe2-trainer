@@ -279,7 +279,7 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 - **Split big steps when they turn out big.** 5.3 became five sub-steps and 5.5 five, each one diff with a look at the running app. Transitions moved forward once navigation existed, so later screens were reviewed with their final motion.
 - **Modern CSS is enough.** Custom properties, native nesting, `color-mix()` and scoped styles replaced Sass, and naming colours by role (`--color-surface`, `--color-text-muted`) came once the same shades had repeated 21 times.
 
-## Technical debt after step 5 🚧 ([#12](https://codeberg.org/gobin/mouseless/issues/12))
+## Technical debt after step 5 ✅ ([#12](https://codeberg.org/gobin/mouseless/issues/12))
 
 Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 found debt in the practice session's edges, a module cycle, test and accessibility gaps, missing logging, and drifted docs. It's paid off before step 6, one reviewable diff each (CI is postponed), together with three product gaps: trained shortcuts are kept, the shortcut texts exist in English, and a US layout fixture tests ANSI keyboards.
 
@@ -312,6 +312,17 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
   - [x] TD.12c English for Bitwig and VSCodium
   - [x] TD.12d English for macOS, then English required
 - [x] TD.13 Notes for the future
+
+**What we learned**
+
+- **Assess before paying off.** Collecting evidence first (sizes, test gaps, escapes, cycles, drift) turned a vague "some debt" into a ranked list, and most of it was small once named.
+- **A snapshot needs an owner.** The practice session copies the progress it starts from; resetting underneath it was harmless until the session saved again. Ending the session when its origin changes is simpler than keeping both in sync.
+- **Break code on purpose to trust a test.** Disabling the router guard and the trigger reservation made exactly the new tests fail, proving they guard what they claim.
+- **Read the library before believing its docs.** `#[tauri::command(async)]` runs a synchronous body on the async runtime, not on a blocking thread; the macro's source showed it, and `spawn_blocking` fixed it. `expect` lints then reported the obsolete `needless_pass_by_value` by themselves.
+- **Vue's `inject` ignores its fallback outside an app.** A composable that injects needs an app context in tests too (`app.runWithContext`), which matches how it runs for real.
+- **Required fields find every case.** Making `trained` and English catalogs required turned the change into a list of compiler errors to fix, where optional fields would have hidden the gaps; a mechanical fix still needs review (it once hit a destructuring pattern, caught by lint).
+- **A second fixture finds real data bugs.** Running the capture contract on a US layout showed six shortcuts written from a German keyboard that can't be practiced on US.
+- **Check external services' terms before building on them.** Codeberg's hosted runners require a free license and stop jobs after 5 or 10 minutes; learning that first would have saved the CI detour, now reverted and kept in the history for an own Forgejo.
 
 ## 6. Native keyboard layout ⏳ ([#6](https://codeberg.org/gobin/mouseless/issues/6))
 
