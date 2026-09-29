@@ -1,29 +1,19 @@
-# Runs `pnpm check` on Codeberg's Forgejo Actions for every push and pull request: formatting,
-# lint, typecheck and tests, for TypeScript and Rust. Rust builds on Linux, which covers
-# everything but the macOS-only code (none yet; from step 6 on, that part is checked locally).
+# The checks of `pnpm check` on Codeberg's Forgejo Actions, for every push and pull request. Two
+# jobs, so each reports on its own: TypeScript is quick, while Rust needs the bigger runner for
+# its first, uncached build (Codeberg's runners stop a job after 5 or 10 minutes). Rust builds on
+# Linux, which covers everything but macOS-only code (none yet; from step 6 on, that part is
+# checked locally).
 on:
   push:
   pull_request:
 
 jobs:
-  check:
+  typescript:
     runs-on: codeberg-small
     container:
       image: node:24-bookworm
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
-
-      - name: Install the libraries Tauri builds against on Linux
-        run: |
-          apt-get update
-          apt-get install -y --no-install-recommends \
-            libwebkit2gtk-4.1-dev libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
-
-      - name: Install Rust
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
-            | sh -s -- -y --profile minimal --component rustfmt,clippy
-          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
 
       - name: Install pnpm and the dependencies
         env:
@@ -33,11 +23,33 @@ jobs:
           corepack enable
           pnpm install --frozen-lockfile
 
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+
+  rust:
+    runs-on: codeberg-medium
+    container:
+      image: rust:1-bookworm
+    steps:
+      - uses: https://code.forgejo.org/actions/checkout@v4
+
+      - name: Install the libraries Tauri builds against on Linux
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            libwebkit2gtk-4.1-dev libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+          rustup component add rustfmt clippy
+
       - uses: https://code.forgejo.org/actions/cache@v4
         with:
           path: |
-            ~/.cargo/registry
+            /usr/local/cargo/registry
             src-tauri/target
           key: cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
 
-      - run: pnpm check
+      # The same commands as the `rust:*` scripts in package.json, without needing Node.
+      - run: cargo fmt --manifest-path src-tauri/Cargo.toml --check
+      - run: cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets --locked -- -D warnings
+      - run: cargo test --manifest-path src-tauri/Cargo.toml --locked
