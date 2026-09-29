@@ -304,7 +304,7 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
 - [x] TD.9 Docs and smoke test
 - [x] TD.10 Keep trained progress
 - [x] TD.10b Forgot button
-- [ ] TD.11 US keymap fixture
+- [x] TD.11 US keymap fixture
 - [ ] TD.12 English shortcut texts
 - [ ] TD.13 Notes for the future
 

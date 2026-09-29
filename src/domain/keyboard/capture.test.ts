@@ -4,6 +4,7 @@ import type { KeyPress } from './capture';
 import { combinationOf, heldKeysOf, heldModifiersOf } from './capture';
 import germanKeymap from './germanKeymap.fixture.json';
 import { resolveKeys } from './resolve';
+import usKeymap from './usKeymap.fixture.json';
 
 function press(code: string, held: Partial<Omit<KeyPress, 'code'>> = {}): KeyPress {
   return { code, control: false, alt: false, shift: false, meta: false, ...held };
@@ -32,6 +33,12 @@ describe('combinationOf', () => {
       'Numpad1',
     ]);
     expect(combinationOf(germanKeymap, press('F6'))).toStrictEqual(['F6']);
+  });
+
+  it('captures the same shortcut as the US layout resolves it', () => {
+    const captured = combinationOf(usKeymap, press('Slash', { shift: true, meta: true }));
+
+    expect(captured).toStrictEqual(resolveKeys(usKeymap, ['Meta', '?']));
   });
 
   it('waits for the key when only a modifier is pressed', () => {

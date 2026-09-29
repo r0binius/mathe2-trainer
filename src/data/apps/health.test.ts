@@ -11,6 +11,7 @@ import { macosKeyLabels } from '@/domain/keyboard/labels';
 import type { Rejection } from '@/domain/keyboard/policy';
 import { checkShortcut, practicePolicy } from '@/domain/keyboard/policy';
 import { keyOf, resolveKeys } from '@/domain/keyboard/resolve';
+import usKeymap from '@/domain/keyboard/usKeymap.fixture.json';
 import { shortcutId } from '@/domain/shortcuts/shortcutId';
 import type {
   AppDefinition,
@@ -69,12 +70,22 @@ function describeKeys(keys: KeyCombination): string {
   return keys.join('+');
 }
 
-// The press that types resolved keys: the physical key named like the key, with its modifiers.
-function pressFor(keys: KeyCombination): KeyPress {
-  const key = keys.find((candidate) => !isModifier(candidate)) ?? '';
+// The key of a combination besides its modifiers.
+function mainKeyOf(keys: KeyCombination): string {
+  return keys.find((candidate) => !isModifier(candidate)) ?? '';
+}
 
+// The physical key a layout types a key with, or the key's name for keys named by their code.
+function codeFor(layout: Keymap, key: string): string | undefined {
+  return (
+    keyCodes.find((code) => keyOf(layout, code) === key) ?? (namedKeys.has(key) ? key : undefined)
+  );
+}
+
+// The press that types resolved keys on a layout: the key's physical key, with its modifiers.
+function pressFor(layout: Keymap, keys: KeyCombination): KeyPress {
   return {
-    code: keyCodes.find((code) => keyOf(keymap, code) === key) ?? key,
+    code: codeFor(layout, mainKeyOf(keys)) ?? '',
     control: keys.includes('Control'),
     alt: keys.includes('Alt'),
     shift: keys.includes('Shift'),
@@ -198,13 +209,20 @@ describe('app data', () => {
     expect(rejected).toStrictEqual([]);
   });
 
-  it('captures the press of every combination as its keys on German', () => {
-    // Key capture and key resolution have to name keys alike, or a correct answer fails.
+  it.each([
+    ['German', keymap],
+    ['US', usKeymap],
+  ])('captures the press of every combination as its keys on %s', (_, layout) => {
+    // Key capture and key resolution have to name keys alike, or a correct answer fails. Only what
+    // practice offers counts: a key the layout can't type (an umlaut on US) can't be pressed.
     const mismatched = shortcuts.flatMap((entry) =>
       entry.shortcut.keys
-        .map((keys) => resolveKeys(keymap, keys))
+        .map((keys) => resolveKeys(layout, keys))
+        .filter((keys) => codeFor(layout, mainKeyOf(keys)) !== undefined)
+        // What the policy rejects, practice never offers, such as Shift twice on US for Shift + `+`.
+        .filter((keys) => checkShortcut(practicePolicy([]), keys).kind === 'ok')
         .filter((keys) => {
-          const captured = combinationOf(keymap, pressFor(keys));
+          const captured = combinationOf(layout, pressFor(layout, keys));
 
           return captured === undefined || !isSameCombination(captured, keys);
         })

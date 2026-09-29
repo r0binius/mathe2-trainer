@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import germanKeymap from './germanKeymap.fixture.json';
 import { keyOf, resolveKeys } from './resolve';
+import usKeymap from './usKeymap.fixture.json';
 
 describe('resolveKeys', () => {
   describe('on a German keymap', () => {
@@ -49,6 +50,30 @@ describe('resolveKeys', () => {
 
     it('keeps a duplicated modifier for the shortcut policy to reject', () => {
       expect(resolveKeys(germanKeymap, ['Shift', '?'])).toStrictEqual(['Shift', 'Shift', 'ß']);
+    });
+  });
+
+  describe('on a US keymap, of an ANSI keyboard', () => {
+    it('resolves the same definition to the keys this layout types it with', () => {
+      expect(resolveKeys(usKeymap, ['Meta', '?'])).toStrictEqual(['Shift', 'Meta', '/']);
+      expect(resolveKeys(usKeymap, ['Meta', '@'])).toStrictEqual(['Shift', 'Meta', '2']);
+      expect(resolveKeys(usKeymap, ['Meta', '\\'])).toStrictEqual(['Meta', '\\']);
+    });
+
+    it('keeps Y and Z where the US layout has them', () => {
+      expect(resolveKeys(usKeymap, ['Meta', 'z'])).toStrictEqual(['Meta', 'z']);
+    });
+
+    it('types `<` with Shift, since an ANSI keyboard has no key left of Z', () => {
+      expect(resolveKeys(usKeymap, ['Meta', '<'])).toStrictEqual(['Shift', 'Meta', ',']);
+    });
+
+    it('adds Alt for a character typed with Option', () => {
+      expect(resolveKeys(usKeymap, ['Meta', 'ß'])).toStrictEqual(['Alt', 'Meta', 's']);
+    });
+
+    it('keeps a character the layout does not type, such as a German umlaut', () => {
+      expect(resolveKeys(usKeymap, ['Meta', 'ö'])).toStrictEqual(['Meta', 'ö']);
     });
   });
 
