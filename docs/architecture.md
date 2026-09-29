@@ -75,7 +75,7 @@ State + Command (§5) are this loop in pattern terms: the model is the State, an
 | Official plugins for solved problems | `single-instance` (registered first), `autostart`, `global-shortcut`, `opener`, `positioner`, `log`. Settings and progress share one SQLite database instead of the `store` plugin (step 4). |
 | Platform code isolated               | `#[cfg(target_os = "macos")]` only inside `platform/`. Everything else sees traits.                                                                                                          |
 | Structure                            | `main.rs` only calls `lib::run()`. `lib.rs` builds the app from modules.                                                                                                                     |
-| Quality gates                        | `cargo fmt`, `cargo clippy -- -D warnings`, `cargo test`.                                                                                                                                    |
+| Quality gates                        | `cargo fmt`, `cargo clippy -- -D warnings`, `cargo test`, all in `pnpm check`, which CI runs on every push (Forgejo Actions).                                                                |
 
 ## 4. Vue 3 best practices we follow
 

@@ -1,0 +1,43 @@
+# Runs `pnpm check` on Codeberg's Forgejo Actions for every push and pull request: formatting,
+# lint, typecheck and tests, for TypeScript and Rust. Rust builds on Linux, which covers
+# everything but the macOS-only code (none yet; from step 6 on, that part is checked locally).
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: codeberg-small
+    container:
+      image: node:24-bookworm
+    steps:
+      - uses: https://code.forgejo.org/actions/checkout@v4
+
+      - name: Install the libraries Tauri builds against on Linux
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            libwebkit2gtk-4.1-dev libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+
+      - name: Install Rust
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+            | sh -s -- -y --profile minimal --component rustfmt,clippy
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+
+      - name: Install pnpm and the dependencies
+        env:
+          # Nobody can answer Corepack's question whether to download pnpm.
+          COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+
+      - uses: https://code.forgejo.org/actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            src-tauri/target
+          key: cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
+
+      - run: pnpm check
