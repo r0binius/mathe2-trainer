@@ -1,0 +1,59 @@
+{
+  "essentials": {
+    "title": "Essentials",
+    "newTab": "New Tab",
+    "newWindow": "New Window",
+    "newIncognitoWindow": "New Incognito Window",
+    "reopenClosedTab": "Reopen Closed Tab",
+    "openLocation": "Open Location",
+    "closeTab": "Close Tab",
+    "closeWindow": "Close Window",
+    "openFile": "Open File",
+    "print": "Print"
+  },
+  "tabs": {
+    "title": "Tabs",
+    "next": "Select Next Tab",
+    "previous": "Select Previous Tab",
+    "first": "First Tab",
+    "last": "Last Tab",
+    "search": "Search Tabs",
+    "addToSplitView": "Add Tab to New Split View"
+  },
+  "navigation": {
+    "title": "Navigation",
+    "back": "Back",
+    "forward": "Forward",
+    "reload": "Reload This Page",
+    "forceReload": "Force Reload This Page",
+    "stop": "Stop Loading",
+    "home": "Home",
+    "history": "Show Full History",
+    "clearBrowsingData": "Clear Browsing Data"
+  },
+  "bookmarks": {
+    "title": "Bookmarks",
+    "bookmarkTab": "Bookmark This Tab",
+    "bookmarkAllTabs": "Bookmark All Tabs",
+    "manager": "Open Bookmark Manager",
+    "toggleBar": "Show or Hide Bookmarks Bar"
+  },
+  "search": {
+    "title": "Find",
+    "find": "Find on Page",
+    "findNext": "Find Next",
+    "findPrevious": "Find Previous",
+    "useSelection": "Use Selection for Find",
+    "searchWeb": "Search the Web"
+  },
+  "developer": {
+    "title": "View and Developer",
+    "actualSize": "Actual Size",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "tools": "Developer Tools",
+    "inspectElements": "Inspect Elements",
+    "console": "JavaScript Console",
+    "viewSource": "View Source"
+  }
+}

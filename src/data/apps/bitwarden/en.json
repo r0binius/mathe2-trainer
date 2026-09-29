@@ -1,0 +1,27 @@
+{
+  "essentials": {
+    "title": "Essentials",
+    "searchVault": "Search vault",
+    "newLogin": "New login",
+    "copyUsername": "Copy username",
+    "copyPassword": "Copy password",
+    "copyTotp": "Copy verification code (TOTP)",
+    "generator": "Generator",
+    "lockAllVaults": "Lock all vaults",
+    "settings": "Settings"
+  },
+  "newItem": {
+    "title": "New item",
+    "login": "New login",
+    "card": "New card",
+    "identity": "New identity",
+    "note": "New note",
+    "sshKey": "New SSH key"
+  },
+  "window": {
+    "title": "Window",
+    "hideToMenuBar": "Hide to menu bar",
+    "alwaysOnTop": "Always on top",
+    "reload": "Reload"
+  }
+}

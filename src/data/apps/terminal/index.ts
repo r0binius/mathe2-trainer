@@ -1,6 +1,7 @@
 import type { AppDefinition } from '@/domain/shortcuts/types';
 
 import de from './de.json';
+import en from './en.json';
 
 /**
  * The shortcuts in Terminal's menu bar, as of 2026-09-25, plus the line-editing shortcuts of zsh in
@@ -10,7 +11,7 @@ export const terminal = {
   id: 'terminal',
   title: 'Terminal',
   category: 'development',
-  catalogs: { de },
+  catalogs: { de, en },
   sets: [
     {
       id: 'windows',

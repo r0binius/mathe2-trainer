@@ -1,0 +1,63 @@
+{
+  "appTitle": "Notes",
+  "essentials": {
+    "title": "Essentials",
+    "newNote": "New Note",
+    "newFolder": "New Folder",
+    "duplicateNote": "Duplicate Note",
+    "searchNotes": "Search Notes List",
+    "findInNote": "Find in Note",
+    "findAndReplace": "Find and Replace",
+    "addLink": "Add Link",
+    "attachFile": "Attach File",
+    "insertLine": "Insert Line"
+  },
+  "formats": {
+    "title": "Formats",
+    "heading1": "Title",
+    "heading2": "Heading",
+    "heading3": "Subheading",
+    "body": "Body",
+    "monostyled": "Monostyled",
+    "bulletedList": "Bulleted List",
+    "dashedList": "Dashed List",
+    "numberedList": "Numbered List",
+    "blockQuote": "Block Quote",
+    "checklist": "Checklist",
+    "markAsChecked": "Mark as Checked",
+    "table": "Table"
+  },
+  "text": {
+    "title": "Text",
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "highlight": "Highlight",
+    "copyStyle": "Copy Style",
+    "pasteStyle": "Paste Style",
+    "increaseIndent": "Increase Indent",
+    "decreaseIndent": "Decrease Indent",
+    "alignLeft": "Align Left",
+    "alignRight": "Align Right",
+    "moveItemUp": "Move Item Up",
+    "moveItemDown": "Move Item Down"
+  },
+  "view": {
+    "title": "View",
+    "asList": "as List",
+    "asGallery": "as Gallery",
+    "attachments": "Show Attachments Browser",
+    "toggleSidebar": "Show or Hide Sidebar",
+    "tags": "Show Tags",
+    "activity": "Show Notes Activity",
+    "previousNote": "Previous Note",
+    "nextNote": "Next Note",
+    "expandSection": "Expand Section",
+    "expandAllSections": "Expand All Sections",
+    "collapseSection": "Collapse Section",
+    "collapseAllSections": "Collapse All Sections",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "actualSize": "Actual Size"
+  }
+}

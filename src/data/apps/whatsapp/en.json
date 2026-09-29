@@ -1,0 +1,21 @@
+{
+  "essentials": {
+    "title": "Essentials",
+    "chats": "Chats",
+    "updates": "Updates",
+    "communities": "Communities",
+    "calls": "Calls",
+    "media": "Media",
+    "back": "Back",
+    "previousChat": "Previous Chat",
+    "nextChat": "Next Chat",
+    "search": "Search",
+    "settings": "Settings"
+  },
+  "view": {
+    "title": "View",
+    "zoomIn": "Make Text Bigger",
+    "zoomOut": "Make Text Smaller",
+    "actualSize": "Make Text Actual Size"
+  }
+}

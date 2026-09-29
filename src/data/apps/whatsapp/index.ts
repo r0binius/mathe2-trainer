@@ -1,13 +1,14 @@
 import type { AppDefinition } from '@/domain/shortcuts/types';
 
 import de from './de.json';
+import en from './en.json';
 
 /** The shortcuts in WhatsApp's menu bar, as of 2026-09-25. */
 export const whatsapp = {
   id: 'whatsapp',
   title: 'WhatsApp',
   category: 'communication',
-  catalogs: { de },
+  catalogs: { de, en },
   sets: [
     {
       id: 'essentials',

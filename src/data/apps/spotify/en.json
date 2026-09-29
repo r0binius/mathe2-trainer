@@ -1,0 +1,33 @@
+{
+  "playback": {
+    "title": "Playback",
+    "playPause": "Play/Pause",
+    "next": "Next Track",
+    "previous": "Previous Track",
+    "seekForward": "Seek Forward",
+    "seekBackward": "Seek Backward",
+    "shuffle": "Shuffle",
+    "repeat": "Repeat",
+    "volumeUp": "Volume Up",
+    "volumeDown": "Volume Down"
+  },
+  "navigation": {
+    "title": "Navigation",
+    "search": "Search",
+    "filter": "Filter",
+    "back": "Back",
+    "forward": "Forward",
+    "newPlaylist": "New Playlist",
+    "newPlaylistFolder": "New Playlist Folder"
+  },
+  "miscellaneous": {
+    "title": "Miscellaneous",
+    "actualSize": "Actual Size",
+    "zoomIn": "Zoom In",
+    "zoomOut": "Zoom Out",
+    "settings": "Settings",
+    "help": "Spotify Help",
+    "logOut": "Log Out",
+    "showWindow": "Show Spotify Window"
+  }
+}

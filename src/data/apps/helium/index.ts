@@ -1,13 +1,14 @@
 import type { AppDefinition } from '@/domain/shortcuts/types';
 
 import de from './de.json';
+import en from './en.json';
 
 /** The shortcuts in Helium's menu bar, as of 2026-09-25. */
 export const helium = {
   id: 'helium',
   title: 'Helium',
   category: 'internet',
-  catalogs: { de },
+  catalogs: { de, en },
   sets: [
     {
       id: 'essentials',
