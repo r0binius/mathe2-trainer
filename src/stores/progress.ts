@@ -29,6 +29,8 @@ const notLoaded: StorageError = { kind: 'notLoaded', message: 'progress is not l
 export const useProgressStore = defineStore('progress', () => {
   const repository = inject(progressRepositoryKey, missingProgressRepository);
   const progress = shallowRef<Loadable<StoredProgress>>({ status: 'loading' });
+  /** How often progress was reset, so a running practice session can tell it's gone. */
+  const resets = shallowRef(0);
 
   /**
    * Waits for a save and, once it's stored, applies the change to the progress shown. It applies
@@ -113,10 +115,11 @@ export const useProgressStore = defineStore('progress', () => {
 
     if (deleted.kind === 'ok') {
       progress.value = { status: 'loaded', value: { sets: [], cards: [] } };
+      resets.value += 1;
     }
 
     return deleted;
   }
 
-  return { progress, load, saveLearning, recordReview, reset };
+  return { progress, resets, load, saveLearning, recordReview, reset };
 });

@@ -17,6 +17,7 @@ import { useProgressStore } from '@/stores/progress';
 
 import PracticeStage from './PracticeStage.vue';
 import { progressSaver } from './progressSaver';
+import { useSessionExit } from './useSessionExit';
 
 const props = defineProps<{
   /** The app the set belongs to. */
@@ -28,6 +29,7 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
+const progressStore = useProgressStore();
 const text = useText();
 const target = { appId: props.app.id, setId: props.set.id, layout: props.context.layout };
 
@@ -40,7 +42,7 @@ const [{ session, held, saveFailed }, skip] = usePracticeSession(
   ),
   {
     keymap: () => props.context.keymap,
-    save: progressSaver(useProgressStore(), target, Date.now),
+    save: progressSaver(progressStore, target, Date.now),
     now: Date.now,
     random: Math.random,
   },
@@ -57,14 +59,12 @@ watch(learned, (count) => {
   announced.value = count;
 });
 
-watch(
-  () => session.value.phase,
-  (phase) => {
-    if (phase === 'finished') {
-      void router.push(toSet(props.app.id, props.set.id));
-    }
+useSessionExit(
+  () => session.value,
+  () => `${String(progressStore.resets)}/${props.context.layout}`,
+  () => {
+    void router.push(toSet(props.app.id, props.set.id));
   },
-  { immediate: true },
 );
 </script>
 

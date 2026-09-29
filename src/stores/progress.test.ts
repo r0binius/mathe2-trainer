@@ -219,4 +219,21 @@ describe('reset', () => {
     await expect(store.reset()).resolves.toStrictEqual(ok(undefined));
     expect(store.progress).toStrictEqual({ status: 'loaded', value: { sets: [], cards: [] } });
   });
+
+  it('counts each reset, so a running practice session can tell its progress is gone', async () => {
+    const store = storeWith(repositoryWith({}));
+
+    await store.load(apps);
+    expect(store.resets).toBe(0);
+    await store.reset();
+    expect(store.resets).toBe(1);
+  });
+
+  it('does not count a reset that failed', async () => {
+    const store = storeWith(repositoryWith({ reset: () => Promise.resolve(err(locked)) }));
+
+    await store.load(apps);
+    await store.reset();
+    expect(store.resets).toBe(0);
+  });
 });

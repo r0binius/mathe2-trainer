@@ -279,6 +279,32 @@ Branch `feature/main-window`. The library, sets, set detail, learn, review and o
 - **Split big steps when they turn out big.** 5.3 became five sub-steps and 5.5 five, each one diff with a look at the running app. Transitions moved forward once navigation existed, so later screens were reviewed with their final motion.
 - **Modern CSS is enough.** Custom properties, native nesting, `color-mix()` and scoped styles replaced Sass, and naming colours by role (`--color-surface`, `--color-text-muted`) came once the same shades had repeated 21 times.
 
+## Technical debt after step 5 🚧 ([#12](https://codeberg.org/gobin/mouseless/issues/12))
+
+Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 found debt in the practice session's edges, a module cycle, test and accessibility gaps, missing CI and logging, and drifted docs. It's paid off before step 6, one reviewable diff each, together with three product gaps: trained shortcuts are kept, the shortcut texts exist in English, and a US layout fixture tests ANSI keyboards.
+
+**Decisions**
+
+- Resetting progress (and, from step 6, changing the layout) ends a running practice session, which returns to its set or app. A session never writes from a stale snapshot.
+- CI runs on Forgejo Actions (`.forgejo/workflows/`): the TypeScript checks and the Rust checks on Linux.
+- Logging goes through `tauri-plugin-log`, for Rust and the webview, into the macOS log folder.
+
+**Sub-steps**
+
+- [x] TD.1 End sessions on reset
+- [ ] TD.2 Break the router cycle
+- [ ] TD.3 Shell tests
+- [ ] TD.4 Accessible practice
+- [ ] TD.5 Logging
+- [ ] TD.6 Database off the async threads
+- [ ] TD.7 Small fixes
+- [ ] TD.8 CI
+- [ ] TD.9 Docs and smoke test
+- [ ] TD.10 Keep trained progress
+- [ ] TD.11 US keymap fixture
+- [ ] TD.12 English shortcut texts
+- [ ] TD.13 Notes for the future
+
 ## 6. Native keyboard layout ⏳ ([#6](https://codeberg.org/gobin/mouseless/issues/6))
 
 Branch `feature/native-keymap`. Read the current keyboard layout in Rust, replacing `native-keymap`.

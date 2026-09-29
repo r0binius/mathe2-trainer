@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 import BaseButton from '@/components/BaseButton.vue';
@@ -17,6 +17,7 @@ import { useProgressStore } from '@/stores/progress';
 
 import PracticeStage from './PracticeStage.vue';
 import { progressSaver } from './progressSaver';
+import { useSessionExit } from './useSessionExit';
 
 const props = defineProps<{
   /** The app whose due shortcuts are reviewed. */
@@ -26,6 +27,7 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
+const progressStore = useProgressStore();
 const text = useText();
 const { keymap, layout, progress, endOfToday } = props.context;
 
@@ -37,21 +39,19 @@ const due = reviewItems(
 
 const [{ session, held, saveFailed }, skip] = usePracticeSession(reviewStrategy, reviewPool(due), {
   keymap: () => keymap,
-  save: progressSaver(useProgressStore(), { appId: props.app.id, layout }, Date.now),
+  save: progressSaver(progressStore, { appId: props.app.id, layout }, Date.now),
   now: Date.now,
   random: Math.random,
 });
 
 const done = computed(() => session.value.pool.done);
 
-watch(
-  () => session.value.phase,
-  (phase) => {
-    if (phase === 'finished') {
-      void router.push(toApp(props.app.id));
-    }
+useSessionExit(
+  () => session.value,
+  () => `${String(progressStore.resets)}/${props.context.layout}`,
+  () => {
+    void router.push(toApp(props.app.id));
   },
-  { immediate: true },
 );
 </script>
 
