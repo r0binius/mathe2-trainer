@@ -15,7 +15,12 @@ import type { Result } from '@/domain/shared/result';
 import { err } from '@/domain/shared/result';
 import type { StorageError } from '@/domain/shared/storage';
 import type { AppDefinition } from '@/domain/shortcuts/types';
-import { missingProgressRepository, progressRepositoryKey } from '@/ports';
+import {
+  consoleLogger,
+  loggerKey,
+  missingProgressRepository,
+  progressRepositoryKey,
+} from '@/ports';
 
 /** A test that counts for reviews, as the session reports it, plus when and on which layout. */
 export type TestResult = Omit<LoggedReview, 'grade'>;
@@ -28,6 +33,7 @@ const notLoaded: StorageError = { kind: 'notLoaded', message: 'progress is not l
  */
 export const useProgressStore = defineStore('progress', () => {
   const repository = inject(progressRepositoryKey, missingProgressRepository);
+  const logger = inject(loggerKey, consoleLogger);
   const progress = shallowRef<Loadable<StoredProgress>>({ status: 'loading' });
   /** How often progress was reset, so a running practice session can tell it's gone. */
   const resets = shallowRef(0);
@@ -62,7 +68,7 @@ export const useProgressStore = defineStore('progress', () => {
     }
 
     loaded.value.skipped.forEach(({ path, expected }) => {
-      console.warn(`Skipped stored progress at ${path}: expected ${expected}`);
+      logger.warn(`Skipped stored progress at ${path}: expected ${expected}`);
     });
 
     const stored = loaded.value.progress;
@@ -76,7 +82,7 @@ export const useProgressStore = defineStore('progress', () => {
       const written = await repository.replace(reconciled);
 
       if (written.kind === 'err') {
-        console.warn(`Could not write back reconciled progress: ${written.error.message}`);
+        logger.warn(`Could not write back reconciled progress: ${written.error.message}`);
       }
     }
   }

@@ -9,7 +9,7 @@ import OptionsPanel from './features/options/OptionsPanel.vue';
 import { useText } from './i18n';
 import { depthOf } from './routes';
 
-const context = useStartup(apps);
+const [context, retry] = useStartup(apps);
 const route = useRoute();
 const text = useText();
 
@@ -55,7 +55,10 @@ watch(
         <OptionsPanel v-if="optionsOpen" class="options" @close="optionsOpen = false" />
       </Transition>
     </div>
-    <p v-else-if="context.status === 'failed'" class="failed">{{ text.ui('startup.failed') }}</p>
+    <div v-else-if="context.status === 'failed'" class="failed">
+      <p>{{ text.ui('startup.failed') }}</p>
+      <BaseButton @click="retry">{{ text.ui('startup.retry') }}</BaseButton>
+    </div>
   </Transition>
 </template>
 
@@ -161,7 +164,9 @@ watch(
 
 .failed {
   display: grid;
-  place-items: center;
+  place-content: center;
+  justify-items: center;
+  gap: 16px;
   height: 100vh;
   padding: 32px;
   color: var(--color-text-muted);

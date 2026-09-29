@@ -204,7 +204,7 @@ src/
 │  ├─ settings/     settings.ts (types, decoder), language.ts, repository.ts (port)
 │  └─ shared/       result.ts (errors as values), decode.ts (JSON decoders), storage.ts (StorageError), loadable.ts
 ├─ data/            apps.ts (the list), apps/<id>/ index.ts, de.json, logo.svg
-├─ platform/        ipc.ts (commandCaller), settings.ts, progress.ts, keymap.ts, lookup.ts, window.ts
+├─ platform/        ipc.ts (commandCaller), settings.ts, progress.ts, keymap.ts, log.ts, lookup.ts, window.ts
 ├─ stores/          settings.ts, progress.ts, keymap.ts
 ├─ composables/     useProgram.ts (Elm runtime), usePracticeSession.ts, useKeyCapture.ts, useSpatialNav.ts
 │                   (+ spatial.ts), useStartup.ts, useSummaryContext.ts, useKeyLabels.ts
@@ -215,7 +215,7 @@ src/
 ├─ styles/          main.css, tokens.css (custom properties), base.css
 ├─ locales/         en.json, de.json (UI text)
 ├─ i18n.ts          vue-i18n setup, useText, useUiLanguage
-├─ ports.ts         injection keys for what main.ts provides (repositories, keymap source, key labels)
+├─ ports.ts         injection keys for what main.ts provides (repositories, keymap source, key labels, logger)
 ├─ routes.ts        route names, paths, depths and helpers (toApp, …), imported by the screens
 ├─ router.ts, App.vue, main.ts
 src-tauri/

@@ -1,5 +1,5 @@
 import type { Ref } from 'vue';
-import { readonly, ref } from 'vue';
+import { inject, readonly, ref } from 'vue';
 
 import type { KeyCombination } from '@/domain/keyboard/combination';
 import type { Keymap } from '@/domain/keyboard/keymap';
@@ -13,6 +13,7 @@ import type {
 import { startSession, updateSession } from '@/domain/practice/session';
 import type { Result } from '@/domain/shared/result';
 import type { StorageError } from '@/domain/shared/storage';
+import { consoleLogger, loggerKey } from '@/ports';
 
 import { useKeyCapture } from './useKeyCapture';
 import { useProgram } from './useProgram';
@@ -49,6 +50,7 @@ export function usePracticeSession<Pool>(
 ): readonly [view: PracticeView<Pool>, skip: () => void] {
   const { keymap, save, now, random } = shell;
   const saveFailed = ref(false);
+  const logger = inject(loggerKey, consoleLogger);
 
   function run(effect: SessionEffect, dispatch: (msg: SessionMsg) => void, signal: AbortSignal) {
     switch (effect.type) {
@@ -71,7 +73,7 @@ export function usePracticeSession<Pool>(
   function reportFailure(saved: Result<void, StorageError>): void {
     if (saved.kind === 'err') {
       saveFailed.value = true;
-      console.error(`Could not save practice progress: ${saved.error.message}`);
+      logger.error(`Could not save practice progress: ${saved.error.message}`);
     }
   }
 

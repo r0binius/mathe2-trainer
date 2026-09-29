@@ -12,6 +12,7 @@
     "allow-replace-progress",
     "allow-reset-progress",
     "allow-get-settings",
-    "allow-set-settings"
+    "allow-set-settings",
+    "log:default"
   ]
 }

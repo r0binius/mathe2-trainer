@@ -9,10 +9,12 @@ import { macosKeyLabels } from './domain/keyboard/labels';
 import { uiLanguageOf } from './domain/settings/language';
 import { createAppI18n } from './i18n';
 import { germanKeymapSource } from './platform/keymap';
+import { tauriLogger } from './platform/log';
 import { tauriRepositories } from './platform/tauri';
 import {
   keyLabelsKey,
   keymapSourceKey,
+  loggerKey,
   progressRepositoryKey,
   settingsRepositoryKey,
 } from './ports';
@@ -28,4 +30,5 @@ createApp(App)
   .provide(progressRepositoryKey, repositories.progress)
   .provide(keymapSourceKey, germanKeymapSource)
   .provide(keyLabelsKey, macosKeyLabels)
+  .provide(loggerKey, tauriLogger)
   .mount('#app');

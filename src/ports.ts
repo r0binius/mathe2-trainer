@@ -28,6 +28,28 @@ export const keyLabelsKey: InjectionKey<KeyLabels> = Symbol('key labels');
 /** What a screen injects when the app provided no key labels: keys show by their names. */
 export const missingKeyLabels: KeyLabels = {};
 
+/**
+ * Where the app reports what went wrong, so it can be found later in an installed app. A shell
+ * concern: the domain only returns errors.
+ */
+export type Logger = {
+  readonly warn: (message: string) => void;
+  readonly error: (message: string) => void;
+};
+
+/** Where the app provides its logger. */
+export const loggerKey: InjectionKey<Logger> = Symbol('logger');
+
+/** What's injected when the app provided no logger, as in tests: the console. */
+export const consoleLogger: Logger = {
+  warn: (message) => {
+    console.warn(message);
+  },
+  error: (message) => {
+    console.error(message);
+  },
+};
+
 const notProvided: StorageError = {
   kind: 'storage',
   message: 'no repository was provided to the app',

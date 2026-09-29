@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { effectScope } from 'vue';
+import { createApp, effectScope } from 'vue';
 
 import type { Keymap } from '@/domain/keyboard/keymap';
 import { reviewPool, reviewStrategy } from '@/domain/practice/review';
@@ -26,7 +26,10 @@ type Save = (effect: ProgressEffect) => Promise<Result<void, StorageError>>;
 function practice(save: Save = () => Promise.resolve(ok(undefined))) {
   const shell: PracticeShell = { keymap: () => keymap, save, now: () => 1000, random: () => 0 };
   const scope = effectScope();
-  const running = scope.run(() => usePracticeSession(reviewStrategy, reviewPool([a, b]), shell));
+  // In an app, as in a screen: the session injects the app's logger.
+  const running = createApp({}).runWithContext(() =>
+    scope.run(() => usePracticeSession(reviewStrategy, reviewPool([a, b]), shell)),
+  );
 
   if (running === undefined) {
     return expect.unreachable();

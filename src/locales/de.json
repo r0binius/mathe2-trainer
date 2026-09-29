@@ -1,6 +1,7 @@
 {
   "startup": {
-    "failed": "Einstellungen und Fortschritt konnten nicht geladen werden. Starte Mouseless neu, um es erneut zu versuchen."
+    "failed": "Einstellungen und Fortschritt konnten nicht geladen werden.",
+    "retry": "Erneut versuchen"
   },
   "page": {
     "options": "Einstellungen"

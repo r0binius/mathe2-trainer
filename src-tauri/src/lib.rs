@@ -18,6 +18,11 @@ use crate::services::database::Database;
 /// Returns an error if Tauri fails to start or stops with an error.
 pub fn run() -> tauri::Result<()> {
     tauri::Builder::default()
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .level(tauri_plugin_log::log::LevelFilter::Info)
+                .build(),
+        )
         .setup(|app| {
             let directory = app.path().app_data_dir().map_err(AppError::DataDirectory)?;
             app.manage(Database::open_in(&directory)?);

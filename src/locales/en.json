@@ -1,6 +1,7 @@
 {
   "startup": {
-    "failed": "Your settings and progress couldn't be loaded. Restart Mouseless to try again."
+    "failed": "Your settings and progress couldn't be loaded.",
+    "retry": "Try again"
   },
   "page": {
     "options": "Options"

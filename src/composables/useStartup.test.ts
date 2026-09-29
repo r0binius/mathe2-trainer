@@ -44,9 +44,9 @@ async function startWith(settings: Result<Settings, StorageError>) {
     load: () => Promise.resolve(ok({ id: 'com.apple.keylayout.German', keymap: {} })),
   };
   const Window = defineComponent(() => {
-    const context = useStartup([]);
+    const [context, retry] = useStartup([]);
 
-    return () => h('p', context.value.status);
+    return () => h('button', { onClick: retry }, context.value.status);
   });
   const host = document.createElement('div');
 
@@ -80,6 +80,19 @@ describe('useStartup', () => {
     await startWith(ok(german));
 
     expect(document.documentElement.getAttribute('lang')).toBe('de');
+  });
+
+  it('loads again when asked to try again', async () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const { host, progressRepository } = await startWith(
+      err({ kind: 'database', message: 'database is locked' }),
+    );
+
+    host.querySelector('button')?.click();
+    await vi.waitFor(() => {
+      expect(progressRepository.load).toHaveBeenCalledTimes(2);
+    });
+    expect(logged).toHaveBeenCalled();
   });
 
   it('logs why loading failed', async () => {
