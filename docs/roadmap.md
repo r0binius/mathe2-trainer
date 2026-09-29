@@ -293,7 +293,7 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
 
 - [x] TD.1 End sessions on reset
 - [x] TD.2 Break the router cycle
-- [ ] TD.3 Shell tests
+- [x] TD.3 Shell tests
 - [ ] TD.4 Accessible practice
 - [ ] TD.5 Logging
 - [ ] TD.6 Database off the async threads
