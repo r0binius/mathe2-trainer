@@ -34,20 +34,16 @@ export type Text = {
   readonly inDays: (days: number) => string;
 };
 
-/**
- * Sets up the translations of the UI and of the shortcut data, in the given language. Data that
- * isn't translated into it yet shows in German.
- */
+/** Sets up the translations of the UI and of the shortcut data, in the given language. */
 export function createAppI18n(language: UiLanguage): Plugin {
   return createI18n({
     legacy: false,
     locale: language,
-    fallbackLocale: 'de',
-    // Falling back to the German data is expected until the data is translated.
-    fallbackWarn: false,
+    // Every text exists in both languages, so a fallback only shows a mistake, with a warning.
+    fallbackLocale: 'en',
     // `satisfies` keeps the German UI text complete: a key missing from it is a type error.
     messages: {
-      en: { ...en, apps: Object.fromEntries(apps.flatMap(englishCatalogOf)) },
+      en: { ...en, apps: Object.fromEntries(apps.map(englishCatalogOf)) },
       de: { ...(de satisfies UiMessages), apps: Object.fromEntries(apps.map(germanCatalogOf)) },
     },
   });
@@ -57,8 +53,8 @@ function germanCatalogOf(app: AppDefinition): readonly [string, Catalog] {
   return [app.id, app.catalogs.de];
 }
 
-function englishCatalogOf(app: AppDefinition): readonly (readonly [string, Catalog])[] {
-  return app.catalogs.en === undefined ? [] : [[app.id, app.catalogs.en]];
+function englishCatalogOf(app: AppDefinition): readonly [string, Catalog] {
+  return [app.id, app.catalogs.en];
 }
 
 /** The translations of a component's texts. Components use it instead of vue-i18n's `t`. */

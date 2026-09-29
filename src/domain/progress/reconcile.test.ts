@@ -11,7 +11,7 @@ const apps: readonly AppDefinition[] = [
     id: 'app',
     title: 'App',
     category: 'productivity',
-    catalogs: { de: {} },
+    catalogs: { de: {}, en: {} },
     sets: [
       {
         id: 'basics',

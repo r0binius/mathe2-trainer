@@ -13,7 +13,7 @@ describe('AppDefinition', () => {
       id: 'app',
       title: 'App',
       category: 'system',
-      catalogs: { de: {} },
+      catalogs: { de: {}, en: {} },
       sets: [
         {
           id: 'set',
@@ -30,7 +30,7 @@ describe('AppDefinition', () => {
       id: 'app',
       title: 'App',
       category: 'system',
-      catalogs: { de: {} },
+      catalogs: { de: {}, en: {} },
       // @ts-expect-error -- keys needs at least one combination.
       sets: [{ id: 'set', title: 'set.title', shortcuts: [{ title: 'set.find', keys: [] }] }],
     });
@@ -42,7 +42,7 @@ describe('AppDefinition', () => {
       title: 'App',
       // @ts-expect-error -- a typo would otherwise create a new category.
       category: 'sytem',
-      catalogs: { de: {} },
+      catalogs: { de: {}, en: {} },
       sets: [],
     });
   });

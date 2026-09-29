@@ -61,12 +61,13 @@ export type Catalog = { readonly [key: string]: string | Catalog };
  * @example
  * ```ts
  * import de from './de.json';
+ * import en from './en.json';
  *
  * export const rectangle = {
  *   id: 'rectangle',
  *   title: 'Rectangle',
  *   category: 'system',
- *   catalogs: { de },
+ *   catalogs: { de, en },
  *   sets: [
  *     {
  *       id: 'halves',
@@ -87,9 +88,9 @@ export type AppDefinition = {
   readonly title: string;
   readonly category: AppCategory;
   /**
-   * The texts its message keys point to, by language. The data is written in German, which is
-   * also what other languages fall back to.
+   * The texts its message keys point to, in every language the UI speaks. The health test keeps
+   * their entries the same.
    */
-  readonly catalogs: { readonly de: Catalog; readonly en?: Catalog };
+  readonly catalogs: { readonly de: Catalog; readonly en: Catalog };
   readonly sets: readonly ShortcutSet[];
 };

@@ -12,7 +12,7 @@ const notes: AppDefinition = {
   id: 'notes',
   title: 'Notes',
   category: 'productivity',
-  catalogs: { de: {} },
+  catalogs: { de: {}, en: {} },
   sets: [basics],
 };
 

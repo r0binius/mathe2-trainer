@@ -249,9 +249,9 @@ describe('app data', () => {
     expect(missing).toStrictEqual([]);
   });
 
-  it('has the same entries in English as in German, where it is translated', () => {
+  it('has the same entries in English as in German', () => {
     const differing = apps.flatMap(({ id, catalogs: { de, en } }) =>
-      en === undefined || isSameList(flattenCatalog(en), flattenCatalog(de)) ? [] : [id],
+      isSameList(flattenCatalog(en), flattenCatalog(de)) ? [] : [id],
     );
 
     expect(differing).toStrictEqual([]);

@@ -289,6 +289,7 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
 - No hosted CI for now: Codeberg's runners require a free license, and the app is for personal use. `pnpm check` stays the local gate; CI comes back once the repository moves to its own Forgejo instance with its own runner.
 - Logging goes through `tauri-plugin-log`, for Rust and the webview, into the macOS log folder.
 - Trained shortcuts are kept between learning sessions (`SetProgress.trained`, migration `0003_trained.sql`), unlike in the old app, so leaving a session loses only what wasn't pressed yet; they come back as tests. The effect that saves learning progress fires whenever a shortcut changes its stage and is called `learningChanged`.
+- The shortcut data exists in English too, worded like each app's English menus. Every app needs both catalogs with the same entries (a type and a health rule), so vue-i18n falls back only on a mistake. An app's `title` is its English name; a catalog's `appTitle` translates it where the vendor does (Notes is Notizen in German).
 - A test can be given up with **Forgot**: the right keys show, and it counts as a wrong answer (failed, graded _again_, back to trained, requeued in review) until the keys are pressed. The session records why a test failed as `failure: { kind: 'wrong', keys } | { kind: 'forgot' }`. It's a button only: every key is an answer during practice, and the data has shortcuts without modifiers.
 
 **Sub-steps**
@@ -305,11 +306,11 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
 - [x] TD.10 Keep trained progress
 - [x] TD.10b Forgot button
 - [x] TD.11 US keymap fixture
-- TD.12 English shortcut texts
+- [x] TD.12 English shortcut texts
   - [x] TD.12a English catalogs and translatable app titles
   - [x] TD.12b English for Bitwarden, Helium, Notes, Rectangle, Spotify, Terminal and WhatsApp
   - [x] TD.12c English for Bitwig and VSCodium
-  - [ ] TD.12d English for macOS, then English required
+  - [x] TD.12d English for macOS, then English required
 - [ ] TD.13 Notes for the future
 
 ## 6. Native keyboard layout ⏳ ([#6](https://codeberg.org/gobin/mouseless/issues/6))

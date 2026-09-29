@@ -203,7 +203,7 @@ src/
 │  ├─ progress/     setProgress.ts, storedProgress.ts, repository.ts (port), reconcile.ts, summary.ts
 │  ├─ settings/     settings.ts (types, decoder), language.ts, repository.ts (port)
 │  └─ shared/       result.ts (errors as values), decode.ts (JSON decoders), storage.ts (StorageError), loadable.ts
-├─ data/            apps.ts (the list), apps/<id>/ index.ts, de.json, logo.svg
+├─ data/            apps.ts (the list), apps/<id>/ index.ts, de.json, en.json, logo.svg
 ├─ platform/        ipc.ts (commandCaller), settings.ts, progress.ts, keymap.ts, log.ts, lookup.ts, window.ts
 ├─ stores/          settings.ts, progress.ts, keymap.ts
 ├─ composables/     useProgram.ts (Elm runtime), usePracticeSession.ts, useKeyCapture.ts, useSpatialNav.ts
