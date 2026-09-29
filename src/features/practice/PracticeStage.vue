@@ -5,9 +5,10 @@ import KeyCap from '@/components/KeyCap.vue';
 import SkipButton from '@/components/SkipButton.vue';
 import { useKeyLabels } from '@/composables/useKeyLabels';
 import type { KeyCombination } from '@/domain/keyboard/combination';
-import type { Session } from '@/domain/practice/session';
+import type { PracticeItem, Session } from '@/domain/practice/session';
 import { useText } from '@/i18n';
 
+import { announcementOf } from './announcement';
 import { keyCapsOf } from './keyCaps';
 
 const props = defineProps<{
@@ -37,6 +38,29 @@ const keyCaps = computed(() =>
   props.session.phase === 'finished' ? [] : keyCapsOf(props.session, props.held),
 );
 
+/** What VoiceOver announces for the current state, such as the shortcut and its keys. */
+const announcement = computed(() => {
+  const announced = announcementOf(props.session);
+
+  return announced === undefined
+    ? ''
+    : text.ui(`practice.announce.${announced.kind}`, {
+        title: text.app(props.appId, announced.item.title),
+        keys: spokenKeys(announced.item),
+      });
+});
+
+/** The keys as VoiceOver reads them: by their keycap names where they have one ("Cmd + K"). */
+function spokenKeys({ keys }: PracticeItem): string {
+  return keys
+    .map((key) => {
+      const label = labelOf(key);
+
+      return label.name ?? label.symbol;
+    })
+    .join(' + ');
+}
+
 /** Plays the shake after a wrong answer; the animation's end clears it. */
 const shaking = ref(false);
 
@@ -50,6 +74,8 @@ watch(
 
 <template>
   <div class="practice">
+    <p class="visually-hidden" aria-live="polite">{{ announcement }}</p>
+
     <Transition name="shortcut" mode="out-in">
       <div
         v-if="session.phase !== 'finished'"
@@ -62,7 +88,8 @@ watch(
         <p v-if="session.item.description !== undefined" class="description">
           {{ text.app(appId, session.item.description) }}
         </p>
-        <div class="keys">
+        <!-- Announced instead: the key caps alone would read as symbols. -->
+        <div class="keys" aria-hidden="true">
           <div v-for="(row, index) in keyCaps" :key="index" class="row">
             <KeyCap
               v-for="cap in row"

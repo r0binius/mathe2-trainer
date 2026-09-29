@@ -73,6 +73,16 @@ textarea {
   background-color: transparent;
 }
 
+/* Read by VoiceOver but not shown, such as what practice announces. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Cuts a single line of text off with an ellipsis, as titles in lists do. */
 .truncate {
   overflow: hidden;

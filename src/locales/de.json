@@ -37,7 +37,14 @@
   },
   "practice": {
     "skip": "Überspringen",
-    "saveFailed": "Fortschritt konnte nicht gespeichert werden"
+    "saveFailed": "Fortschritt konnte nicht gespeichert werden",
+    "announce": {
+      "train": "{title}. Drücke {keys}.",
+      "test": "{title}. Drücke den Kurzbefehl.",
+      "miss": "Nicht ganz. Drücke {keys}.",
+      "wrong": "Nicht ganz. Richtig ist {keys}.",
+      "correct": "Richtig."
+    }
   },
   "review": {
     "title": "Wiederholen",

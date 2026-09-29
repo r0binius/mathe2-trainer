@@ -37,7 +37,14 @@
   },
   "practice": {
     "skip": "Skip",
-    "saveFailed": "Progress couldn't be saved"
+    "saveFailed": "Progress couldn't be saved",
+    "announce": {
+      "train": "{title}. Press {keys}.",
+      "test": "{title}. Press the shortcut.",
+      "miss": "Not quite. Press {keys}.",
+      "wrong": "Not quite. It's {keys}.",
+      "correct": "Correct."
+    }
   },
   "review": {
     "title": "Review",
