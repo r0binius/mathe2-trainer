@@ -437,9 +437,18 @@ Branch `fix/memory-leaks`. An audit of both sides for listeners, timers, subscri
 - **Check a fix against every rule, not only the bug.** The first version of the guard was a `static`; asking whether it fits the functional style and The Elm Architecture found it, and moved `undefined` to a `Result` in the same review.
 - **Unhandled rejections are silent failures.** Nothing leaked, but a failed `listen` would never have reached the log; a test with a failing `listen` made Vitest report the rejection itself.
 
-## 7. Menu bar popover and trigger ⏳ ([#7](https://codeberg.org/gobin/mouseless/issues/7))
+## 7. Menu bar popover and trigger ✅ ([#7](https://codeberg.org/gobin/mouseless/issues/7))
 
-Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcut, window coordination, typed events between the windows (`settings-changed`, moved here from step 4), dock icon, autostart, single instance, and a strict CSP.
+Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcut, window coordination, dock icon, autostart, single instance, and a strict CSP. The typed `settings-changed` events between the windows (moved here from step 4) moved on to step 8, which fills the popover.
+
+**Decisions**
+
+- The popover is its own page (`popover.html`, `popover.ts`) without the router, placed by our own code from the tray icon's position (no positioner plugin), which also serves the trigger. It's transparent with the native popover material and a dark theme, which needs `macOSPrivateApi`.
+- A pure coordinator decides what every window event does (`coordinate(Showing, Event) → Vec<Action>`), and one executor carries it out. Closing the popover gives focus back by hiding the app, unless the main window shows; closing the main window hides it, and the Dock, a second launch, ⌘, and the icon's Options bring it back.
+- Holding ⌘ is watched with a listen-only event tap, which needs Input Monitoring; it's asked for only once hold ⌘ is the trigger. Detecting the hold is a small pure update with a press counter, so an old wait can't fire.
+- The trigger shortcut stays stored as characters; Rust registers the key typing them on the current layout, and again after a layout change. The recorder needs ⌘, ⌃ or ⌥ and rejects ⌘ with one key, which apps use for their standard commands.
+- The Dock and menu bar icons apply live, and one of them always stays. Launch at login uses a LaunchAgent, in release builds only. Both menus are built by us in English and German, since Tauri's default menu isn't translated.
+- A strict CSP for built apps (`'self'` plus IPC) and a `devCsp` with only what Vite needs, a frozen prototype, and capabilities that grant each window only what it uses.
 
 **Sub-steps**
 
@@ -449,14 +458,20 @@ Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcu
 - [x] 7.4 Dock icon, autostart, single instance
 - [x] 7.5 Strict CSP, verified in the running app
 
-**Carried over**
-
-- Opening the popover activates Mouseless, so a main window behind other apps comes forward with it. If that bothers in use, make the popover a non-activating panel.
-- The recorder can't offer `IntlBackslash` (the ISO key left of 1): global-hotkey has no macOS key code for it. A shortcut that can't be registered (such as one another app holds) is only logged (`ErrorKind::Trigger`); `set_settings` could return it so the recorder shows it.
-
 **Concepts:** the Mediator pattern, macOS activation policy and focus handling, event taps, the Content Security Policy.
 
 **Resources:** [Tauri system tray](https://tauri.app/learn/system-tray/) · [Tauri CSP](https://tauri.app/security/csp/) · [NSWorkspace.frontmostApplication](https://developer.apple.com/documentation/appkit/nsworkspace/frontmostapplication)
+
+**What we learned**
+
+- **A pure coordinator pays off with every new input.** Once window behaviour was `coordinate(Showing, Event)`, the trigger, the Dock, a second launch and Escape were each one event and one test, and questions like "does Escape hide the main window too?" were answered in a unit test, not in the running app.
+- **The Elm Architecture fits Rust too.** Holding ⌘ became an update function with a `Wait` effect; a press counter replaced cancelling timers, so a stale wait simply doesn't match.
+- **Where to start watching is a permission decision.** The event tap needs Input Monitoring, so it starts only when hold ⌘ is chosen; people who use a shortcut are never asked.
+- **Keep the stored format, translate at the edge.** The trigger stays in characters like every other combination; only registering it needs a key, which Rust looks up on the current layout and again after a change.
+- **Prove a security policy by breaking it.** An empty violation log meant nothing until a build with `font-src 'none'` showed 14 blocked fonts in it: both the policy and the logging were live.
+- **A plugin's cooldown is its whole dependency tree.** Two plugins brought 40 crates; every new lockfile entry was checked, not only the ones we named.
+- **Strict templates turn fallthrough attributes into documented props.** `aria-pressed` and `title` couldn't pass through, so `BaseButton.pressed` and `OptionRow.hint` say what they're for.
+- **Defaults hide features.** Replacing Tauri's untranslated menu meant building the Edit menu ourselves, which is also what gives text fields ⌘C and ⌘V.
 
 ## 8. Menu shortcut lookup ⏳ ([#8](https://codeberg.org/gobin/mouseless/issues/8))
 
@@ -510,4 +525,6 @@ Found along the way, not tied to a step yet.
 - **VoiceOver:** two identical announcements in a row are read once; a counter in the text would repeat a second identical mistake.
 - **Keyboard navigation:** going back focuses the screen's first element rather than the item you came from.
 - **`yoke-derive`** is held at 0.8.2: 0.8.3 was yanked, and 0.8.4 was under a day old on 2026-09-30. `cargo update -p yoke-derive` once it's past the cooldown, then `pnpm rust:audit`.
+- **Popover focus:** opening the popover activates Mouseless, so a main window behind other apps comes forward with it. If that bothers in use, make the popover a non-activating panel.
+- **Trigger recorder:** it can't offer `IntlBackslash` (the ISO key left of 1), since global-hotkey has no macOS key code for it. A shortcut that can't be registered (such as one another app holds) is only logged (`ErrorKind::Trigger`); `set_settings` could return it so the recorder shows it.
 - **TypeScript 7** once typescript-eslint and vue-tsc support it, and dropping the `is-immutable-type` patch once its upstream fix lands (both in `CLAUDE.md`).

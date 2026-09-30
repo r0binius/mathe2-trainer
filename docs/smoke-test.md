@@ -40,14 +40,37 @@ What `pnpm check` can't prove: the app running on a real Mac. Walk through it wi
 - [ ] Learning and reviewing are stored: after a restart the progress is still there, and the log shows no rejected command arguments (Rust checks what the webview sends).
 - [ ] VoiceOver (⌘F5) announces the shortcut, "Correct" and "Not quite" with the right keys.
 
+## Menu bar and popover
+
+- [ ] The menu bar icon shows, tinted for light and dark menu bars; a click opens the popover centred below it, rounded and translucent.
+- [ ] A click elsewhere closes the popover; a second click on the icon and Escape close it and give focus back to the app in front.
+- [ ] With the main window open, closing the popover leaves the main window in front.
+- [ ] A right click on the icon shows About, Options and Quit, in the UI language.
+- [ ] Closing the main window (red button, ⌘W) hides it; the Dock icon and launching the app again bring it back as it was.
+- [ ] ⌘, and **Options…** in the icon's menu open the main window with the options, also from the popover.
+
+## Trigger
+
+- [ ] Holding ⌘ alone for a second opens the popover over other apps, and again closes it; holding longer fires once.
+- [ ] ⌘C, ⌘Tab, ⌘-click, ⌘⇧ and letting go early don't open it.
+- [ ] A fresh start (or `tccutil reset ListenEvent`) asks for Input Monitoring once; without it the log says why hold ⌘ doesn't work.
+- [ ] A recorded shortcut (⇧⌘M) opens the popover from any app; after switching the layout (German ↔ US) it still works by its character.
+- [ ] The recorder rejects ⌘C, K alone and ⌘Space with the reason; Escape cancels recording without closing the options.
+
+## Security
+
+- [ ] After using every screen, the popover and the options, the log shows no "content security policy blocked" line.
+
 ## Options
 
 - [ ] The gear opens the panel over the stepped-back screen, also during practice; Escape closes it.
 - [ ] The language switches the whole UI at once and is kept after a restart.
 - [ ] **Reset progress** asks for a second click, clears everything, and ends a running practice session.
+- [ ] The menu bar and Dock icons switch at once, and the last one left can't be turned off.
+- [ ] The language also switches the app menu and the icon's menu (English "Options…", German "Einstellungen …").
+- [ ] After midnight, focusing the window moves due counts to the new day.
 
 ## Later steps
 
-- [ ] Step 7: holding ⌘ and a custom shortcut open the popover over other apps; ⌘, opens the options; the menu bar icon, Dock icon and launch at login apply at once; after midnight, due counts move to the new day.
 - [ ] Step 8: the popover shows the frontmost app's menu shortcuts, with search and Escape, and focus returns to the app.
-- [ ] Step 9: the packaged app installs, starts at login and keeps its data across updates.
+- [ ] Step 9: the packaged app installs, starts at login (and stops when the option is off) and keeps its data across updates.
