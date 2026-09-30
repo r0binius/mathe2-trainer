@@ -6,7 +6,7 @@
 
 mod key_code;
 #[cfg(target_os = "macos")]
-mod macos;
+pub mod macos;
 
 use std::collections::BTreeMap;
 

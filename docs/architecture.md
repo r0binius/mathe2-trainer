@@ -220,6 +220,7 @@ src/
 ├─ router.ts, App.vue, main.ts
 src-tauri/
 ├─ migrations/      0001_settings.sql, … (one SQL file per schema change)
+├─ examples/        dump_keymap.rs (prints the current layout as a keymap fixture)
 src-tauri/src/
 ├─ main.rs, lib.rs, error.rs
 ├─ commands/        settings.rs, progress.rs, keymap.rs, lookup.rs, window.rs

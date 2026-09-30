@@ -195,7 +195,7 @@
     "value": "k",
     "withShift": "K",
     "withAlt": "˚",
-    "withShiftAlt": ""
+    "withShiftAlt": "\uf8ff"
   },
   "KeyL": {
     "value": "l",
@@ -284,8 +284,8 @@
   "Space": {
     "value": " ",
     "withShift": " ",
-    "withAlt": " ",
-    "withShiftAlt": " "
+    "withAlt": "\u00a0",
+    "withShiftAlt": "\u00a0"
   },
   "NumpadEqual": {
     "value": "=",
@@ -378,8 +378,8 @@
     "withShiftAlt": "0"
   },
   "NumpadDecimal": {
-    "value": ",",
-    "withShift": ",",
+    "value": ".",
+    "withShift": ".",
     "withAlt": ".",
     "withShiftAlt": "."
   }

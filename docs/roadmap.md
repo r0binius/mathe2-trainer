@@ -338,14 +338,14 @@ Branch `feature/native-keymap`. Read the current keyboard layout in Rust, replac
 - Keys are named as WebKit's `event.code` names them, since key capture looks them up by it. Checked on an ISO keyboard: WebKit doesn't undo macOS's ISO codes as Chromium does, so the key left of 1 is `IntlBackslash` and the key next to left Shift `Backquote`, crossed from the W3C names. The German fixture swaps its two entries back to match (step 2 had applied Chromium's swap).
 - The `TIS` functions run on the main thread, so the command hands its work to it.
 - `keymap-changed` is only a signal: the keymap store loads again through the same command and decoder, and keeps its value when the layout ID didn't change (input methods post the same notification).
-- Fixtures come from an ignored dump test run by hand per layout. There's only an ISO keyboard to read, so the US fixture is made with an ANSI keyboard type passed to `UCKeyTranslate`.
+- Fixtures come from a Cargo example run by hand per layout (`cargo run --example dump_keymap`, `-- --ansi` for the US fixture): tests can't read the layout, since libtest runs them off the main thread. There's only an ISO keyboard to read, so the US fixture is translated for the first ANSI keyboard type macOS knows. The German fixture matched the reader exactly; the hand-written US one had two mistakes (Shift+Option+K types the Apple logo, the numpad's decimal key a period).
 
 **Sub-steps**
 
 - [x] 6.1 Rename `StorageError` to `PlatformError`
 - [x] 6.2 `KeymapSource` trait, `platform::current()` and the pure mapping with the ISO fix
 - [x] 6.3 macOS FFI and the `get_keymap` command; the frontend reads the real layout
-- [ ] 6.4 Fixtures from the reader: compare German, replace US with ANSI output
+- [x] 6.4 Fixtures from the reader: compare German, replace US with ANSI output
 - [ ] 6.5 Layout-change events
 - [ ] 6.6 Alternatives for the six shortcuts that can't be practiced on US
 
@@ -425,6 +425,7 @@ Found along the way, not tied to a step yet.
 - **CI:** once the repository moves to its own Forgejo instance with a runner. The workflow is in the history (`7f6594b`); Codeberg's hosted runners required a free license.
 - **Data:** the German Notes catalog calls _Monostyled_ "Proportional", which means the opposite; check Apple's German menu name.
 - **Set screen:** show trained shortcuts (kept since the debt round) apart from new ones, not only the learned ones.
+- **Dead-key layouts:** on U.S. International, Shift+6 and Shift+`are dead keys that type`ˆ`and`˜`(spacing accents), so shortcuts written with`^`or`~` don't resolve there. Resolve a character to the dead key that types its accent, if such layouts matter.
 - **VoiceOver:** two identical announcements in a row are read once; a counter in the text would repeat a second identical mistake.
 - **Keyboard navigation:** going back focuses the screen's first element rather than the item you came from.
 - **TypeScript 7** once typescript-eslint and vue-tsc support it, and dropping the `is-immutable-type` patch once its upstream fix lands (both in `CLAUDE.md`).

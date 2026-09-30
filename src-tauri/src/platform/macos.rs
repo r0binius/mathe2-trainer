@@ -1,6 +1,6 @@
 //! The macOS implementations of the platform traits.
 
-mod input_source;
+pub mod input_source;
 pub mod keymap;
 
 use crate::error::AppError;
@@ -13,6 +13,6 @@ pub struct SystemKeymap;
 
 impl KeymapSource for SystemKeymap {
     fn current_layout(&self) -> Result<Layout, AppError> {
-        input_source::current_layout()
+        input_source::current_layout(None)
     }
 }

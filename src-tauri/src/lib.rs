@@ -14,6 +14,23 @@ use tauri::Manager;
 use crate::error::AppError;
 use crate::services::database::Database;
 
+/// The ID of the keyboard layout in use and its keymap as fixture JSON, for the `dump_keymap`
+/// example. With `ansi`, keys are translated as on an ANSI keyboard, whatever keyboard is
+/// connected.
+///
+/// # Errors
+///
+/// Returns an error if the layout can't be read, such as off the main thread.
+#[doc(hidden)]
+#[cfg(target_os = "macos")]
+pub fn dump_keymap(ansi: bool) -> Result<(String, String), Box<dyn std::error::Error>> {
+    use crate::platform::macos::{input_source, keymap::Keyboard};
+
+    let layout = input_source::current_layout(ansi.then_some(Keyboard::Ansi))?;
+
+    Ok((layout.id, serde_json::to_string_pretty(&layout.keymap)?))
+}
+
 /// Builds and runs the app until it quits.
 ///
 /// # Errors

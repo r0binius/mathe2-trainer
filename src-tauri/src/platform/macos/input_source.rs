@@ -49,6 +49,9 @@ unsafe extern "C" {
     ) -> i32;
 }
 
+/// `kKeyboardANSI`, the four-character code `KBGetLayoutType` returns for ANSI keyboards.
+const ANSI_KEYBOARD: u32 = u32::from_be_bytes(*b"ANSI");
+
 /// `kKeyboardISO`, the four-character code `KBGetLayoutType` returns for ISO keyboards.
 const ISO_KEYBOARD: u32 = u32::from_be_bytes(*b"ISO ");
 
@@ -68,13 +71,15 @@ const OPTION: u32 = 0x08;
 /// The most UTF-16 units one key press types; `UCKeyTranslate` shortens longer output.
 const MAX_LENGTH: usize = 4;
 
-/// Reads the keyboard layout the user selected, and what each key types on this keyboard.
+/// Reads the keyboard layout the user selected, and what each key types on the connected keyboard,
+/// or on a keyboard of the given kind (to dump an ANSI fixture on an ISO Mac).
 ///
 /// # Errors
 ///
 /// Returns [`AppError::Keymap`] when called off the main thread (the Text Input Sources API isn't
-/// thread safe), when no layout or key tables are reported, or when a key can't be translated.
-pub fn current_layout() -> Result<Layout, AppError> {
+/// thread safe), when no layout, key tables or keyboard of the kind are found, or when a key can't
+/// be translated.
+pub fn current_layout(keyboard: Option<Keyboard>) -> Result<Layout, AppError> {
     if CFRunLoop::current() != CFRunLoop::main() {
         return Err(keymap_error(
             "the layout can only be read on the main thread",
@@ -96,8 +101,12 @@ pub fn current_layout() -> Result<Layout, AppError> {
         .and_then(|key| property::<CFData>(&source, key))
         .ok_or_else(|| keymap_error("the layout has no key tables"))?;
 
-    // SAFETY: reads a system value, on the main thread (it isn't thread safe).
-    let keyboard_type = unsafe { LMGetKbdType() };
+    let keyboard_type = match keyboard {
+        // SAFETY: reads a system value, on the main thread (it isn't thread safe).
+        None => unsafe { LMGetKbdType() },
+        Some(kind) => keyboard_type_of(kind)
+            .ok_or_else(|| keymap_error("macOS knows no keyboard type of that kind"))?,
+    };
     let keymap = key_positions(keyboard_of(keyboard_type))
         .map(|(key, code)| Ok((code, characters(tables, key, keyboard_type)?)))
         .collect::<Result<Keymap, AppError>>()?;
@@ -127,12 +136,28 @@ fn property<'source, T: ConcreteType>(
 
 /// Whether a keyboard type (from `LMGetKbdType`) is an ISO keyboard.
 fn keyboard_of(keyboard_type: u8) -> Keyboard {
-    // SAFETY: a lookup by value, with no pointers involved.
-    if unsafe { KBGetLayoutType(i16::from(keyboard_type)) } == ISO_KEYBOARD {
+    if layout_type(keyboard_type) == ISO_KEYBOARD {
         Keyboard::Iso
     } else {
         Keyboard::Ansi
     }
+}
+
+/// The first keyboard type macOS knows of the given kind, to translate keys as on a keyboard
+/// that isn't connected.
+fn keyboard_type_of(keyboard: Keyboard) -> Option<u8> {
+    let wanted = match keyboard {
+        Keyboard::Ansi => ANSI_KEYBOARD,
+        Keyboard::Iso => ISO_KEYBOARD,
+    };
+
+    (0..=u8::MAX).find(|&keyboard_type| layout_type(keyboard_type) == wanted)
+}
+
+/// The physical layout of a keyboard type, as a four-character code (`kKeyboardISO`, …).
+fn layout_type(keyboard_type: u8) -> u32 {
+    // SAFETY: a lookup by value, with no pointers involved.
+    unsafe { KBGetLayoutType(i16::from(keyboard_type)) }
 }
 
 /// What a key types without a modifier and with Shift, Option or both.
