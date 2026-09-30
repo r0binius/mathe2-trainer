@@ -20,6 +20,13 @@ export default defineConfig({
     },
   },
 
+  // One page per window: the main window and the popover.
+  build: {
+    rolldownOptions: {
+      input: ['index.html', 'popover.html'],
+    },
+  },
+
   // Keep Rust compiler errors visible in the terminal.
   clearScreen: false,
 

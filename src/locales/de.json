@@ -62,5 +62,8 @@
     "reset": "Fortschritt zurücksetzen",
     "confirmReset": "Zum Zurücksetzen erneut klicken",
     "saveFailed": "Änderung konnte nicht gespeichert werden"
+  },
+  "popover": {
+    "placeholder": "Hier erscheinen die Kurzbefehle der App im Vordergrund."
   }
 }

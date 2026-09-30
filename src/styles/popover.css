@@ -1,0 +1,4 @@
+/* The popover's page, over the shared styles: transparent, so macOS's popover material shows. */
+body {
+  background-color: transparent;
+}

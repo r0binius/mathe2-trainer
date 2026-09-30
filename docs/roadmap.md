@@ -443,7 +443,7 @@ Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcu
 
 **Sub-steps**
 
-- [ ] 7.1 Tray icon and popover window
+- [x] 7.1 Tray icon and popover window
 - [ ] 7.2 `WindowCoordinator` (Mediator)
 - [ ] 7.3 Trigger: hold ⌘ event tap and global shortcut
 - [ ] 7.4 Dock icon, autostart, single instance
@@ -454,6 +454,10 @@ Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcu
 - The options get the trigger (with recording a shortcut, checked by the shortcut policy), the menu bar and Dock icons and launch at login, once Rust applies them; ⌘, opens the options from the app menu.
 - Refresh the end of today (`useSummaryContext`) when the window is shown, since the app keeps running past midnight.
 - Log Rust's own errors with `log::error!` (the plugin is set up; so far only the frontend logs).
+- The tray menu gets an Options item once the coordinator can bring back a closed main window (7.2).
+- Closing the popover gives focus back to the app that had it, without bringing the main window forward (7.2).
+- The popover's capability file and an `AppError` variant for windows come with its first command (Escape closes it, 7.2).
+- The tray menu is English only: translate it once the language setting reaches Rust (7.4).
 
 **Concepts:** the Mediator pattern, macOS activation policy and focus handling, event taps, the Content Security Policy.
 

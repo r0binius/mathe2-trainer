@@ -62,5 +62,8 @@
     "reset": "Reset progress",
     "confirmReset": "Click again to reset",
     "saveFailed": "Couldn't save the change"
+  },
+  "popover": {
+    "placeholder": "The shortcuts of the app in front will show up here."
   }
 }

@@ -10,6 +10,7 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [
       {
         "label": "main",
@@ -20,6 +21,24 @@
         "titleBarStyle": "Overlay",
         "hiddenTitle": true,
         "backgroundColor": "#000000"
+      },
+      {
+        "label": "popover",
+        "url": "popover.html",
+        "width": 300,
+        "height": 480,
+        "visible": false,
+        "decorations": false,
+        "transparent": true,
+        "theme": "Dark",
+        "resizable": false,
+        "alwaysOnTop": true,
+        "visibleOnAllWorkspaces": true,
+        "windowEffects": {
+          "effects": ["popover"],
+          "state": "active",
+          "radius": 10
+        }
       }
     ],
     "security": {
