@@ -44,8 +44,21 @@ export const rectangle = {
       shortcuts: [
         { title: 'size.maximize', keys: [['Control', 'Alt', 'Enter']] },
         { title: 'size.maximizeHeight', keys: [['Control', 'Alt', 'Shift', 'ArrowUp']] },
-        { title: 'size.smaller', keys: [['Control', 'Alt', 'ß']] },
-        { title: 'size.larger', keys: [['Control', 'Alt', '´']] },
+        // Rectangle's defaults are the keys right of 0: `ß` and `´` on German, `-` and `=` on US.
+        {
+          title: 'size.smaller',
+          keys: [
+            ['Control', 'Alt', 'ß'],
+            ['Control', 'Alt', '-'],
+          ],
+        },
+        {
+          title: 'size.larger',
+          keys: [
+            ['Control', 'Alt', '´'],
+            ['Control', 'Alt', '='],
+          ],
+        },
         { title: 'size.center', keys: [['Control', 'Alt', 'c']] },
         { title: 'size.restore', keys: [['Control', 'Alt', 'Backspace']] },
         { title: 'size.nextDisplay', keys: [['Control', 'Alt', 'Meta', 'ArrowRight']] },

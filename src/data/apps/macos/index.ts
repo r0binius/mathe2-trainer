@@ -51,8 +51,21 @@ export const macos = {
         { title: 'windows.close', keys: [['Meta', 'w']] },
         { title: 'windows.closeAll', keys: [['Alt', 'Meta', 'w']] },
         { title: 'windows.fullScreen', keys: [['Control', 'Meta', 'f']] },
-        { title: 'windows.nextWindow', keys: [['Meta', '<']] },
-        { title: 'windows.previousWindow', keys: [['Shift', 'Meta', '<']] },
+        // The key next to left Shift on ISO keyboards, which US keyboards have left of 1 as `.
+        {
+          title: 'windows.nextWindow',
+          keys: [
+            ['Meta', '<'],
+            ['Meta', '`'],
+          ],
+        },
+        {
+          title: 'windows.previousWindow',
+          keys: [
+            ['Shift', 'Meta', '<'],
+            ['Shift', 'Meta', '`'],
+          ],
+        },
         { title: 'windows.switchApp', keys: [['Meta', 'Tab']] },
         { title: 'windows.quitApp', keys: [['Meta', 'q']] },
         { title: 'windows.forceQuit', keys: [['Alt', 'Meta', 'Escape']] },

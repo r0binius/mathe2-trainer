@@ -158,7 +158,14 @@ export const bitwig = {
         { title: 'events.shortenFine', keys: [['Shift', 'ArrowDown']] },
         { title: 'events.semitoneUp', keys: [['Alt', '+']] },
         { title: 'events.semitoneDown', keys: [['Alt', '-']] },
-        { title: 'events.octaveUp', keys: [['Alt', 'Shift', '+']] },
+        // The second combination is for layouts where `+` needs Shift, such as US.
+        {
+          title: 'events.octaveUp',
+          keys: [
+            ['Alt', 'Shift', '+'],
+            ['Alt', 'Shift', '='],
+          ],
+        },
         { title: 'events.octaveDown', keys: [['Alt', 'Shift', '-']] },
       ],
     },
@@ -214,7 +221,14 @@ export const bitwig = {
       shortcuts: [
         { title: 'zoom.horizontalIn', keys: [['Meta', '+']] },
         { title: 'zoom.horizontalOut', keys: [['Meta', '-']] },
-        { title: 'zoom.verticalIn', keys: [['Shift', 'Meta', '+']] },
+        // The second combination is for layouts where `+` needs Shift, such as US.
+        {
+          title: 'zoom.verticalIn',
+          keys: [
+            ['Shift', 'Meta', '+'],
+            ['Shift', 'Meta', '='],
+          ],
+        },
         { title: 'zoom.verticalOut', keys: [['Shift', 'Meta', '-']] },
         { title: 'zoom.fitAll', keys: [['Meta', '0']] },
         { title: 'zoom.fitSelectionOrAll', keys: [['z']] },

@@ -9,7 +9,7 @@ import type { Keymap } from '@/domain/keyboard/keymap';
 import { keyCodes } from '@/domain/keyboard/keymap';
 import { macosKeyLabels } from '@/domain/keyboard/labels';
 import type { Rejection } from '@/domain/keyboard/policy';
-import { checkShortcut, practicePolicy } from '@/domain/keyboard/policy';
+import { checkShortcut, practicableKeys, practicePolicy } from '@/domain/keyboard/policy';
 import { keyOf, resolveKeys } from '@/domain/keyboard/resolve';
 import usKeymap from '@/domain/keyboard/usKeymap.fixture.json';
 import { shortcutId } from '@/domain/shortcuts/shortcutId';
@@ -198,20 +198,30 @@ describe('app data', () => {
     expect(invalid).toStrictEqual([]);
   });
 
-  it('passes the practice policy in every combination on German, reserved keys aside', () => {
+  it.each([
+    ['German', keymap],
+    ['US', usKeymap],
+  ])('can practice every shortcut on %s, reserved keys aside', (_, layout) => {
+    // An alternative may be written for another layout, where it's rejected: a character that
+    // needs Shift on US, say. Every shortcut needs one combination the practice policy allows.
     // Reserved combinations are left out: the data may list them, practice only hides them.
     const policy = practicePolicy([]);
-    const rejected = shortcuts.flatMap((entry) =>
-      entry.shortcut.keys.flatMap((keys) => {
-        const result = checkShortcut(policy, resolveKeys(keymap, keys));
+    const impossible = shortcuts
+      .filter((entry) => practicableKeys(layout, entry.shortcut.keys, policy) === undefined)
+      .map((entry) => {
+        const rejections = entry.shortcut.keys.map((keys) => {
+          const resolved = resolveKeys(layout, keys);
+          const result = checkShortcut(policy, resolved);
 
-        return result.kind === 'err'
-          ? [`${nameOf(entry)}: ${describeKeys(keys)} is ${describeRejection(result.error)}`]
-          : [];
-      }),
-    );
+          return result.kind === 'err'
+            ? `${describeKeys(resolved)} is ${describeRejection(result.error)}`
+            : describeKeys(resolved);
+        });
 
-    expect(rejected).toStrictEqual([]);
+        return `${nameOf(entry)}: ${rejections.join(', ')}`;
+      });
+
+    expect(impossible).toStrictEqual([]);
   });
 
   it.each([

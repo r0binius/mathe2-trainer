@@ -25,8 +25,22 @@ export const terminal = {
         { title: 'windows.closeOtherTabs', keys: [['Alt', 'Meta', 'w']] },
         { title: 'windows.nextTab', keys: [['Control', 'Tab']] },
         { title: 'windows.previousTab', keys: [['Control', 'Shift', 'Tab']] },
-        { title: 'windows.nextWindow', keys: [['Meta', '<']] },
-        { title: 'windows.showAllTabs', keys: [['Shift', 'Meta', '#']] },
+        // The key next to left Shift on ISO keyboards, which US keyboards have left of 1 as `.
+        {
+          title: 'windows.nextWindow',
+          keys: [
+            ['Meta', '<'],
+            ['Meta', '`'],
+          ],
+        },
+        // German `#` sits where US keyboards have `\`.
+        {
+          title: 'windows.showAllTabs',
+          keys: [
+            ['Shift', 'Meta', '#'],
+            ['Shift', 'Meta', '\\'],
+          ],
+        },
         { title: 'windows.toggleTabBar', keys: [['Shift', 'Meta', 't']] },
         { title: 'windows.split', keys: [['Meta', 'd']] },
         { title: 'windows.closeSplit', keys: [['Shift', 'Meta', 'd']] },
