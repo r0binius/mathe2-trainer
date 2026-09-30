@@ -15,6 +15,6 @@ pub struct Platform {
 #[must_use]
 pub fn current() -> Platform {
     Platform {
-        keymap: Box::new(macos::SystemKeymap),
+        keymap: Box::new(macos::SystemKeymap::default()),
     }
 }

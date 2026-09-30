@@ -64,10 +64,6 @@ const NO_DEAD_KEYS: u32 = 1;
 /// The most UTF-16 units one key press types; `UCKeyTranslate` shortens longer output.
 const MAX_LENGTH: usize = 4;
 
-/// Whether the layout is observed already. The observer is leaked, so a second registration
-/// would leak another one and report every change twice.
-static OBSERVING: AtomicBool = AtomicBool::new(false);
-
 /// The Text Input Sources API, which only works on the main thread: it isn't thread safe, and its
 /// notifications arrive on the run loop of the thread that registered for them.
 ///
@@ -132,20 +128,25 @@ impl TextInputSources {
 
     /// Calls `on_change` whenever the user selects another keyboard layout, for as long as the
     /// app runs. Input methods (Japanese, the emoji picker) post the same notification, so the
-    /// layout may be the same one.
+    /// layout may be the same one. `observing` is claimed for it: the observer is leaked, so a
+    /// second registration would leak another one and report every change twice.
     ///
     /// # Errors
     ///
     /// Returns [`AppError::Keymap`] if macOS offers no distributed notification center or no name
-    /// for the notification, or if the layout is observed already.
-    pub fn observe_selection<F: Fn() + 'static>(self, on_change: F) -> Result<(), AppError> {
+    /// for the notification, or if `observing` was claimed before.
+    pub fn observe_selection<F: Fn() + 'static>(
+        self,
+        observing: &AtomicBool,
+        on_change: F,
+    ) -> Result<(), AppError> {
         let center = CFNotificationCenter::distributed_center()
             .ok_or_else(|| AppError::keymap("there's no distributed notification center"))?;
         // SAFETY: a constant the framework defines for the whole run.
         let name = unsafe { kTISNotifySelectedKeyboardInputSourceChanged };
         let name = name.ok_or_else(|| AppError::keymap("there's no layout change notification"))?;
         // Claimed only now, so a registration that failed above can be tried again.
-        claim_once(&OBSERVING)?;
+        claim_once(observing)?;
         // Observed for the whole run and never removed, so the callback is leaked on purpose.
         let observer: &'static F = Box::leak(Box::new(on_change));
 
