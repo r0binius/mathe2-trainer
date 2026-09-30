@@ -1,5 +1,5 @@
 {
-  "Backquote": { "value": "^", "withShift": "°", "withAlt": "„", "withShiftAlt": "“" },
+  "Backquote": { "value": "<", "withShift": ">", "withAlt": "≤", "withShiftAlt": "≥" },
   "Digit1": { "value": "1", "withShift": "!", "withAlt": "¡", "withShiftAlt": "¬" },
   "Digit2": { "value": "2", "withShift": "\"", "withAlt": "“", "withShiftAlt": "”" },
   "Digit3": { "value": "3", "withShift": "§", "withAlt": "¶", "withShiftAlt": "#" },
@@ -36,7 +36,7 @@
   "Semicolon": { "value": "ö", "withShift": "Ö", "withAlt": "œ", "withShiftAlt": "Œ" },
   "Quote": { "value": "ä", "withShift": "Ä", "withAlt": "æ", "withShiftAlt": "Æ" },
   "Backslash": { "value": "#", "withShift": "'", "withAlt": "‘", "withShiftAlt": "’" },
-  "IntlBackslash": { "value": "<", "withShift": ">", "withAlt": "≤", "withShiftAlt": "≥" },
+  "IntlBackslash": { "value": "^", "withShift": "°", "withAlt": "„", "withShiftAlt": "“" },
   "KeyZ": { "value": "y", "withShift": "Y", "withAlt": "¥", "withShiftAlt": "‡" },
   "KeyX": { "value": "x", "withShift": "X", "withAlt": "≈", "withShiftAlt": "Ù" },
   "KeyC": { "value": "c", "withShift": "C", "withAlt": "ç", "withShiftAlt": "Ç" },

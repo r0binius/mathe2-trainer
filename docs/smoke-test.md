@@ -21,6 +21,7 @@ What `pnpm check` can't prove: the app running on a real Mac. Walk through it wi
 - [ ] The arrows move focus between cards and rows, → at the edge opens, ← at the edge and Escape go back.
 - [ ] Each screen focuses its main action; Enter on **Start** starts learning.
 - [ ] During practice, ⌘W, ⌘Q, ⌘H, ⌘M, ⌘C/⌘V and ⌘R are answers, not menu actions.
+- [ ] On an ISO keyboard, the keys left of 1 (`^`) and next to left Shift (`<`) are recognized: macOS's _Next window_ shows as ⌘< and accepts it.
 
 ## Learning and review
 

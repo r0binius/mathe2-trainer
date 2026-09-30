@@ -379,7 +379,7 @@ In the renderer:
 
 1. The `shortcutId` semantics (§7.2): derived from the definition keys, so it's the same on every layout, kept on renaming and new when the keys change. Not the hash itself: the rewrite doesn't carry over the old progress.
 2. Progress is stored separately per keyboard layout.
-3. Resolution semantics: lookup order value → Shift → AltGr → Shift + AltGr, ⌃⌥⇧⌘ sorting, the shortest alternative wins, and the ISO swap.
+3. Resolution semantics: lookup order value → Shift → AltGr → Shift + AltGr, ⌃⌥⇧⌘ sorting, the shortest alternative wins, and keymap key names that match the webview's `event.code` (the old app swapped the two ISO keys for Chromium; the rewrite keeps WebKit's names, see step 6).
 4. Learning rules: training vs test, only the first test per session counts for reviews, bucket weights 90/50/10, and a run finishes only without skips. The rewrite keeps the intent (a skipped shortcut that isn't learned keeps the set incomplete), but a skipped learned one no longer blocks completion (fixed after step 3).
 5. Review rules: a card is created on the first success, due until the end of the day, `again` → tomorrow and requeued in the session, and the 6 s `hard` threshold. Grades come only from what was measured, never from the user's estimate; the rewrite adds `easy` for a fast first try (decided in step 3).
 6. Lookup: built-in sets take priority, Mouseless itself is never the looked-up app, and focus returns to the previous app on hide.

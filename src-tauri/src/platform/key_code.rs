@@ -7,7 +7,8 @@ use serde::Serialize;
 /// as the frontend's `KeyCode`.
 ///
 /// A name comes from the key's position on a US keyboard, not from what it types: `KeyY` types
-/// `z` on a German layout. The variants are in keyboard order, the frontend's `keyCodes`, which is
+/// `z` on a German layout. The names are WebKit's, which crosses two on ISO keyboards (see
+/// `key_positions` in the macOS keymap). The variants are in keyboard order, the frontend's `keyCodes`, which is
 /// also the order of a [`Keymap`](super::Keymap).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub enum KeyCode {

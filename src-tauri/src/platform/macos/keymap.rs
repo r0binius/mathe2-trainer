@@ -2,8 +2,8 @@
 //! call.
 //!
 //! macOS names a key by its virtual key code (`kVK_…` in `HIToolbox/Events.h`), and `UCKeyTranslate`
-//! tells what that key types. These codes follow the key's position on an ANSI keyboard, with one
-//! exception on ISO keyboards, handled in [`key_positions`].
+//! tells what that key types. Each code gets the name WebKit's `event.code` gives it, since key
+//! capture looks keys up by that name.
 
 use crate::platform::KeyCode;
 
@@ -17,16 +17,16 @@ pub enum Keyboard {
     Iso,
 }
 
-/// `kVK_ANSI_Grave`: the key left of 1 on ANSI, the key next to left Shift on ISO.
-const ANSI_GRAVE: u16 = 0x32;
-
-/// `kVK_ISO_Section`: the key left of 1 on ISO. ANSI keyboards don't have it.
+/// `kVK_ISO_Section`: the key left of 1 on ISO keyboards. ANSI keyboards don't have it.
 const ISO_SECTION: u16 = 0x0A;
 
 /// The virtual key codes of every key that types characters, on an ANSI keyboard, in keyboard
 /// order. Keys like Return, Tab and the arrows type no characters and aren't listed.
+///
+/// `kVK_ANSI_Grave` (0x32) is the key left of 1 on ANSI but the key next to left Shift on ISO.
+/// WebKit calls it `Backquote` on both, so it's `Backquote` here too.
 const ANSI_POSITIONS: [(u16, KeyCode); 64] = [
-    (ANSI_GRAVE, KeyCode::Backquote),
+    (0x32, KeyCode::Backquote),
     (0x12, KeyCode::Digit1),
     (0x13, KeyCode::Digit2),
     (0x14, KeyCode::Digit3),
@@ -94,22 +94,16 @@ const ANSI_POSITIONS: [(u16, KeyCode); 64] = [
 
 /// Every key on the keyboard, with the virtual key code macOS reports for it.
 ///
-/// On ISO keyboards macOS gives the key left of 1 the code [`ISO_SECTION`] and the extra key next
-/// to left Shift the code [`ANSI_GRAVE`], crossed from what their names suggest. So on ISO,
-/// [`ISO_SECTION`] is `Backquote` and [`ANSI_GRAVE`] is `IntlBackslash`.
+/// An ISO keyboard has one more key, [`ISO_SECTION`] left of 1, which WebKit calls
+/// `IntlBackslash`, a name the W3C gives the key next to left Shift. The two keys are named
+/// crossed on ISO, but the same way as `event.code`, which is what matters.
 pub fn key_positions(keyboard: Keyboard) -> impl Iterator<Item = (u16, KeyCode)> {
     let iso_key = match keyboard {
         Keyboard::Ansi => None,
-        Keyboard::Iso => Some((ANSI_GRAVE, KeyCode::IntlBackslash)),
+        Keyboard::Iso => Some((ISO_SECTION, KeyCode::IntlBackslash)),
     };
 
-    ANSI_POSITIONS
-        .into_iter()
-        .map(move |(key, code)| match (keyboard, code) {
-            (Keyboard::Iso, KeyCode::Backquote) => (ISO_SECTION, code),
-            _ => (key, code),
-        })
-        .chain(iso_key)
+    ANSI_POSITIONS.into_iter().chain(iso_key)
 }
 
 #[cfg(test)]
@@ -129,14 +123,14 @@ mod tests {
     }
 
     #[test]
-    fn on_iso_the_key_left_of_1_is_backquote_and_the_key_next_to_shift_is_intl_backslash() {
-        // macOS swaps the two codes on ISO keyboards: kVK_ISO_Section is the key left of 1, and
-        // kVK_ANSI_Grave the one next to left Shift. native-keymap missed this.
-        assert_eq!(key_code_of(0x0A, Keyboard::Iso), Some(KeyCode::Backquote));
+    fn names_the_two_iso_keys_as_webkit_does() {
+        // On ISO, 0x0A is the key left of 1 and 0x32 the one next to left Shift, but WebKit's
+        // `event.code` names them by their ANSI codes, and key capture looks keys up by it.
         assert_eq!(
-            key_code_of(0x32, Keyboard::Iso),
+            key_code_of(0x0A, Keyboard::Iso),
             Some(KeyCode::IntlBackslash)
         );
+        assert_eq!(key_code_of(0x32, Keyboard::Iso), Some(KeyCode::Backquote));
     }
 
     #[test]

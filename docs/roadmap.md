@@ -328,13 +328,14 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
 
 Branch `feature/native-keymap`. Read the current keyboard layout in Rust, replacing `native-keymap`.
 
-**Deliverables:** the `KeymapSource` trait, a macOS implementation (`TISCopyCurrentKeyboardLayoutInputSource` + `UCKeyTranslate`) that reports `Backquote` and `IntlBackslash` correctly on ISO keyboards (`native-keymap` swapped them), layout-change events, and output that matches the step 2 fixture.
+**Deliverables:** the `KeymapSource` trait, a macOS implementation (`TISCopyCurrentKeyboardLayoutInputSource` + `UCKeyTranslate`) that names the ISO keys as WebKit's `event.code` does, layout-change events, and output that matches the step 2 fixture.
 
 **Decisions**
 
 - Rust, not Swift: Swift would add a second FFI boundary, a toolchain and a third language under our rules, and these Carbon APIs aren't Swift-friendly either.
 - `objc2-core-foundation` for the Core Foundation types, whose `CFRetained` releases what a _Copy_ function returned. No objc2 crate binds the Carbon functions (`objc2-carbon` is empty, `objc2-core-services` lacks CarbonCore and HIToolbox), so they're declared by hand in one `extern "C"` block.
-- A thin FFI and a pure mapping: the `unsafe` module only reads raw data (per macOS key code its four characters, the layout ID, whether the keyboard is ISO); a pure function turns it into our keymap, including the ISO fix, and is tested without a keyboard. The ISO fix follows what WebKit's `event.code` reports, checked in the running app.
+- A thin FFI and a pure mapping: the `unsafe` module only reads raw data (per macOS key code its four characters, the layout ID, whether the keyboard is ISO); a pure function turns it into our keymap and is tested without a keyboard.
+- Keys are named as WebKit's `event.code` names them, since key capture looks them up by it. Checked on an ISO keyboard: WebKit doesn't undo macOS's ISO codes as Chromium does, so the key left of 1 is `IntlBackslash` and the key next to left Shift `Backquote`, crossed from the W3C names. The German fixture swaps its two entries back to match (step 2 had applied Chromium's swap).
 - The `TIS` functions run on the main thread, so the command hands its work to it.
 - `keymap-changed` is only a signal: the keymap store loads again through the same command and decoder, and keeps its value when the layout ID didn't change (input methods post the same notification).
 - Fixtures come from an ignored dump test run by hand per layout. There's only an ISO keyboard to read, so the US fixture is made with an ANSI keyboard type passed to `UCKeyTranslate`.

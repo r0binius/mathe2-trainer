@@ -28,7 +28,7 @@ describe('resolveKeys', () => {
     });
 
     it('prefers a key typing the character without a modifier over one needing modifiers', () => {
-      // `^` is the value of Backquote and the Shift+Alt character of Digit6.
+      // `^` is the value of IntlBackslash and the Shift+Alt character of Digit6.
       expect(resolveKeys(germanKeymap, ['^'])).toStrictEqual(['^']);
     });
 
