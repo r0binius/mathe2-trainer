@@ -445,7 +445,7 @@ Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcu
 
 - [x] 7.1 Tray icon and popover window
 - [x] 7.2 `WindowCoordinator` (Mediator)
-- [ ] 7.3 Trigger: hold ⌘ event tap and global shortcut
+- [x] 7.3 Trigger: hold ⌘ event tap and global shortcut
 - [ ] 7.4 Dock icon, autostart, single instance
 - [ ] 7.5 Strict CSP, verified in the running app
 
@@ -456,6 +456,7 @@ Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcu
 - Refresh the end of today (`useSummaryContext`) when the window is shown, since the app keeps running past midnight.
 - Log Rust's own errors with `log::error!` (the plugin is set up; so far only the frontend logs).
 - The tray menu is English only: translate it once the language setting reaches Rust (7.4).
+- The recorder can't offer `IntlBackslash` (the ISO key left of 1): global-hotkey has no macOS key code for it. Trigger errors (`ErrorKind::Trigger`) are only logged so far; the recorder shows them.
 
 **Concepts:** the Mediator pattern, macOS activation policy and focus handling, event taps, the Content Security Policy.
 

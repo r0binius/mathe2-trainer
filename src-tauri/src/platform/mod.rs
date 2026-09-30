@@ -7,10 +7,12 @@
 mod current;
 mod key_code;
 mod layout;
+mod modifier_hold;
 
 pub use self::current::Platform;
 pub use self::key_code::KeyCode;
 pub use self::layout::{KeyCharacters, Keymap, KeymapSource, Layout};
+pub use self::modifier_hold::{KeyInput, ModifierHold};
 
 #[cfg(target_os = "macos")]
 pub mod macos;

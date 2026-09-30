@@ -19,6 +19,8 @@ pub struct Showing {
 pub enum Event {
     /// The menu bar icon was clicked.
     IconClicked,
+    /// The trigger was pressed: ⌘ held on its own, or the global shortcut.
+    TriggerPressed,
     /// The popover lost focus, such as to a click elsewhere.
     PopoverBlurred,
     /// The popover was closed from inside, with Escape.
@@ -52,8 +54,10 @@ pub enum Action {
 #[must_use]
 pub fn coordinate(showing: Showing, event: Event) -> Vec<Action> {
     match event {
-        Event::IconClicked | Event::PopoverDismissed if showing.popover => dismiss(showing),
-        Event::IconClicked => vec![Action::OpenPopover],
+        Event::IconClicked | Event::TriggerPressed | Event::PopoverDismissed if showing.popover => {
+            dismiss(showing)
+        }
+        Event::IconClicked | Event::TriggerPressed => vec![Action::OpenPopover],
         // Focus already went elsewhere, so there's none to give back.
         Event::PopoverBlurred if showing.popover => vec![Action::ClosePopover],
         Event::PopoverDismissed | Event::PopoverBlurred => vec![],
@@ -110,6 +114,18 @@ mod tests {
     fn a_second_click_closes_it_and_gives_focus_back() {
         assert_eq!(
             coordinate(POPOVER, Event::IconClicked),
+            [Action::ClosePopover, Action::ReturnFocus]
+        );
+    }
+
+    #[test]
+    fn the_trigger_opens_and_closes_it_like_a_click() {
+        assert_eq!(
+            coordinate(NOTHING, Event::TriggerPressed),
+            [Action::OpenPopover]
+        );
+        assert_eq!(
+            coordinate(POPOVER, Event::TriggerPressed),
             [Action::ClosePopover, Action::ReturnFocus]
         );
     }

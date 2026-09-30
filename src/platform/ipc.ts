@@ -28,7 +28,13 @@ export type CommandCall = <T>(
 
 /** How the Rust side sends an `AppError`. */
 const decodeAppError = object({
-  kind: oneOf([literal('storage'), literal('database'), literal('keymap'), literal('window')]),
+  kind: oneOf([
+    literal('storage'),
+    literal('database'),
+    literal('keymap'),
+    literal('trigger'),
+    literal('window'),
+  ]),
   message: string,
 });
 

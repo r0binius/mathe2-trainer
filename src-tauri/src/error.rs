@@ -53,6 +53,18 @@ pub enum AppError {
         /// What went wrong, for the logs.
         reason: String,
     },
+    /// The trigger couldn't be set up: holding ⌘ can't be watched, or the shortcut has no key.
+    #[error("cannot set up the trigger: {reason}")]
+    Trigger {
+        /// What went wrong, for the logs.
+        reason: String,
+    },
+    /// The global shortcut couldn't be registered, such as when another app has it.
+    #[error("cannot register the shortcut: {source}")]
+    Shortcut {
+        /// The plugin's error.
+        source: tauri_plugin_global_shortcut::Error,
+    },
     /// A window couldn't be found, shown, hidden or told something.
     #[error("cannot change a window: {source}")]
     Window {
@@ -69,6 +81,13 @@ impl AppError {
         }
     }
 
+    /// A trigger error, with the `reason` for the logs.
+    pub fn trigger(reason: impl Into<String>) -> Self {
+        Self::Trigger {
+            reason: reason.into(),
+        }
+    }
+
     /// The kind of this error, as the frontend sees it.
     #[must_use]
     pub fn kind(&self) -> ErrorKind {
@@ -78,6 +97,7 @@ impl AppError {
                 ErrorKind::Database
             }
             Self::Keymap { .. } => ErrorKind::Keymap,
+            Self::Trigger { .. } | Self::Shortcut { .. } => ErrorKind::Trigger,
             Self::Window { .. } => ErrorKind::Window,
         }
     }
@@ -107,6 +127,8 @@ pub enum ErrorKind {
     Database,
     /// Reading the keyboard layout failed.
     Keymap,
+    /// Setting up the trigger failed.
+    Trigger,
     /// Showing or hiding a window failed.
     Window,
 }
