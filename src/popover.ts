@@ -8,7 +8,10 @@ import PopoverWindow from './features/popover/PopoverWindow.vue';
 import { createAppI18n } from './i18n';
 import { tauriLogger } from './platform/log';
 import { tauriPorts } from './platform/tauri';
+import { logPolicyViolations } from './policyViolations';
 import { loggerKey, windowsKey } from './ports';
+
+logPolicyViolations(tauriLogger);
 
 createApp(PopoverWindow)
   .use(createAppI18n(uiLanguageOf(navigator.languages)))

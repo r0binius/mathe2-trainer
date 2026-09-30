@@ -3,5 +3,5 @@
   "identifier": "popover",
   "description": "Capability for the popover",
   "windows": ["popover"],
-  "permissions": ["core:default", "allow-dismiss-popover", "log:default"]
+  "permissions": ["allow-dismiss-popover", "log:allow-log"]
 }

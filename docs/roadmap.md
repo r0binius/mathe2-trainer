@@ -447,7 +447,7 @@ Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcu
 - [x] 7.2 `WindowCoordinator` (Mediator)
 - [x] 7.3 Trigger: hold ⌘ event tap and global shortcut
 - [x] 7.4 Dock icon, autostart, single instance
-- [ ] 7.5 Strict CSP, verified in the running app
+- [x] 7.5 Strict CSP, verified in the running app
 
 **Carried over**
 

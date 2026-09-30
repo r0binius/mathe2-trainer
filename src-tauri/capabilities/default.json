@@ -4,7 +4,8 @@
   "description": "Capability for the main window",
   "windows": ["main"],
   "permissions": [
-    "core:default",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
     "core:window:allow-start-dragging",
     "allow-get-keymap",
     "allow-load-progress",
@@ -14,6 +15,6 @@
     "allow-reset-progress",
     "allow-get-settings",
     "allow-set-settings",
-    "log:default"
+    "log:allow-log"
   ]
 }

@@ -10,6 +10,7 @@ import { uiLanguageOf } from './domain/settings/language';
 import { createAppI18n } from './i18n';
 import { tauriLogger } from './platform/log';
 import { tauriPorts } from './platform/tauri';
+import { logPolicyViolations } from './policyViolations';
 import {
   keyLabelsKey,
   keymapSourceKey,
@@ -21,6 +22,8 @@ import {
 import { createAppRouter } from './router';
 
 const ports = tauriPorts();
+
+logPolicyViolations(tauriLogger);
 
 createApp(App)
   .use(createPinia())
