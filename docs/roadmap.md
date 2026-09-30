@@ -372,6 +372,33 @@ Branch `feature/native-keymap`. Read the current keyboard layout in Rust, replac
 - **Subscriptions are effects.** `onChange` couldn't live in the functional core, so ports with effects moved to the shell next to `Logger`, while ports that only return data stay in the domain.
 - **Tests find what the data can't be pressed as, not what's wrong.** The six impossible US shortcuts were flagged, but Next window resolving to ⇧⌘, on US wasn't; knowing the apps' real shortcuts still takes a person.
 
+## Rust review 🚧 ([#16](https://codeberg.org/gobin/mouseless/issues/16))
+
+Branch `chore/rust-review`. The Rust code is refactored along three references, with [High Assurance Rust](https://highassurance.rs/) weighing most: [Canonical's Rust best practices](https://canonical.github.io/rust-best-practices/) and [Rust Design Patterns](https://rust-unofficial.github.io/patterns/). The code already meets most of them (no `unwrap`, `unsafe` in one module, `thiserror`, `-D warnings` from the command line); this round turns review rules into compiler checks and closes the gaps.
+
+**Decisions**
+
+- Canonical's module layout: a module with files of its own has a `mod.rs`, which only declares modules and re-exports, instead of `platform.rs` next to `platform/`.
+- The main thread is proven by a token: the Carbon calls take objc2's `MainThreadMarker`, checked once where a command comes in, instead of a runtime check inside every call (High Assurance: functions on a resource called in the right sequence).
+- Rust validates what the webview sends (High Assurance: external inputs must be validated; Tauri treats the webview as untrusted): newtypes for shortcut IDs, layout IDs and times, and range checks on a card's memory, decoded with serde's `try_from`. The frontend's decoders stay.
+- `cargo-deny` checks the Rust dependencies (advisories, sources, licenses) in its own script, `pnpm audit:rust`, so `pnpm check` stays offline.
+
+**Sub-steps**
+
+- [ ] RR.1 Module layout with `mod.rs`
+- [ ] RR.2 Lints that lock in what the code already follows
+- [ ] RR.3 Smallest `unsafe` module and the main-thread token
+- [ ] RR.4 Errors: `source` and `reason` fields, "cannot …" messages
+- [ ] RR.5 Newtypes and checks for what the webview sends
+- [ ] RR.6 Row writers that name every field and SQL parameter
+- [ ] RR.7 Canonical style: derives, imports, ordering, returns
+- [ ] RR.8 `cargo-deny`
+- [ ] RR.9 Conventions, UML and what we learned
+
+**Concepts:** static, dynamic and operational assurance; parse, don't validate; typestate and capability tokens; containing `unsafe`; supply-chain checks.
+
+**Resources:** [High Assurance Rust](https://highassurance.rs/) · [Canonical Rust best practices](https://canonical.github.io/rust-best-practices/) · [Rust Design Patterns](https://rust-unofficial.github.io/patterns/) · [Clippy lints](https://rust-lang.github.io/rust-clippy/master/) · [cargo-deny](https://embarkstudios.github.io/cargo-deny/)
+
 ## 7. Menu bar popover and trigger ⏳ ([#7](https://codeberg.org/gobin/mouseless/issues/7))
 
 Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcut, window coordination, typed events between the windows (`settings-changed`, moved here from step 4), dock icon, autostart, single instance, and a strict CSP.
