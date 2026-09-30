@@ -1,12 +1,12 @@
-// eslint-disable-next-line no-restricted-syntax -- a stand-in until step 6 reads the layout in Rust
-import germanKeymap from '@/domain/keyboard/germanKeymap.fixture.json';
-import type { CurrentLayout, KeymapSource } from '@/domain/keyboard/keymap';
-import { ok } from '@/domain/shared/result';
+import type { KeymapSource } from '@/domain/keyboard/keymap';
+import { decodeCurrentLayout } from '@/domain/keyboard/keymap';
 
-const german: CurrentLayout = { id: 'com.apple.keylayout.German', keymap: germanKeymap };
+import type { Invoke } from './ipc';
+import { commandCaller } from './ipc';
 
-/**
- * Always reports the German layout, from the test fixture. A stand-in, so the screens can be built
- * before step 6 reads the real layout in Rust.
- */
-export const germanKeymapSource: KeymapSource = { load: () => Promise.resolve(ok(german)) };
+/** The keyboard layout selected in the system, read by the Rust side. */
+export function keymapSource(invoke: Invoke): KeymapSource {
+  const call = commandCaller(invoke);
+
+  return { load: () => call('get_keymap', decodeCurrentLayout) };
+}

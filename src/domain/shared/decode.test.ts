@@ -12,6 +12,7 @@ import {
   object,
   oneOf,
   optional,
+  partialRecord,
   sift,
   string,
 } from './decode';
@@ -77,6 +78,18 @@ describe('object', () => {
   it('rejects what is no object', () => {
     expect(point([1])).toStrictEqual(err({ path: '', expected: 'an object' }));
     expect(point(null)).toStrictEqual(err({ path: '', expected: 'an object' }));
+  });
+});
+
+describe('partialRecord', () => {
+  const counts = partialRecord(['a', 'b'], integer);
+
+  it('decodes the given keys that are there, and leaves out any other', () => {
+    expect(counts({ a: 1, c: 3 })).toStrictEqual(ok({ a: 1 }));
+  });
+
+  it('names the key that fails', () => {
+    expect(counts({ b: 'two' })).toStrictEqual(err({ path: 'b', expected: 'an integer' }));
   });
 });
 

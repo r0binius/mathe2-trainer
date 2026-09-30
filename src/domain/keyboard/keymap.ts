@@ -1,3 +1,5 @@
+import type { Decoder } from '../shared/decode';
+import { object, partialRecord, string } from '../shared/decode';
 import type { PlatformError } from '../shared/platformError';
 import type { Result } from '../shared/result';
 
@@ -7,6 +9,8 @@ import type { Result } from '../shared/result';
  *
  * A name comes from the key's position on a US keyboard, not from what it types: `KeyY` types
  * `z` on a German layout. Keys that type nothing (arrows, F-keys, modifiers) aren't included.
+ * The names are the webview's: on ISO keyboards WebKit calls the key left of 1 `IntlBackslash`
+ * and the key next to left Shift `Backquote`, so the keymap does too.
  *
  * The order is fixed so that key resolution doesn't depend on the order in which the keymap's
  * entries arrive: when two keys type the same character, the earlier one wins.
@@ -109,6 +113,22 @@ export type CurrentLayout = {
   readonly id: LayoutId;
   readonly keymap: Keymap;
 };
+
+const decodeKeyCharacters: Decoder<KeyCharacters> = object({
+  value: string,
+  withShift: string,
+  withAlt: string,
+  withShiftAlt: string,
+});
+
+/**
+ * Decodes the layout the Rust side reads. Keys it reports that aren't {@link keyCodes}, such as
+ * those of a Japanese keyboard, are left out.
+ */
+export const decodeCurrentLayout: Decoder<CurrentLayout> = object({
+  id: string,
+  keymap: partialRecord(keyCodes, decodeKeyCharacters),
+});
 
 /** Reads the keyboard layout in use from the system. */
 export type KeymapSource = {

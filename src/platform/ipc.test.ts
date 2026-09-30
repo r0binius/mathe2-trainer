@@ -24,12 +24,13 @@ describe('commandCaller', () => {
   });
 
   // Tauri rejects with what the command returned, or with a message, never with an `Error`.
-  it('passes on the error a command returned', async () => {
-    const invoke = vi.fn().mockRejectedValue({ kind: 'database', message: 'database is locked' });
+  it.each([
+    { kind: 'database', message: 'database is locked' },
+    { kind: 'keymap', message: 'no keyboard layout is selected' },
+  ])('passes on the $kind error a command returned', async (error) => {
+    const invoke = vi.fn().mockRejectedValue(error);
 
-    await expect(commandCaller(invoke)('answer', integer)).resolves.toStrictEqual(
-      err({ kind: 'database', message: 'database is locked' }),
-    );
+    await expect(commandCaller(invoke)('answer', integer)).resolves.toStrictEqual(err(error));
   });
 
   it('reports a failed call, such as arguments the command rejects', async () => {

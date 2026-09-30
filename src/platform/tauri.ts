@@ -1,15 +1,18 @@
 import { invoke } from '@tauri-apps/api/core';
 
+import type { KeymapSource } from '@/domain/keyboard/keymap';
 import type { ProgressRepository } from '@/domain/progress/repository';
 import type { SettingsRepository } from '@/domain/settings/repository';
 
+import { keymapSource } from './keymap';
 import { progressRepository } from './progress';
 import { settingsRepository } from './settings';
 
-/** Every repository the stores need. */
+/** Every repository the stores need, and the source of the keyboard layout. */
 export type Repositories = {
   readonly settings: SettingsRepository;
   readonly progress: ProgressRepository;
+  readonly keymap: KeymapSource;
 };
 
 /**
@@ -17,5 +20,9 @@ export type Repositories = {
  * them, called once at startup.
  */
 export function tauriRepositories(): Repositories {
-  return { settings: settingsRepository(invoke), progress: progressRepository(invoke) };
+  return {
+    settings: settingsRepository(invoke),
+    progress: progressRepository(invoke),
+    keymap: keymapSource(invoke),
+  };
 }

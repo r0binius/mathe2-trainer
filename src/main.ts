@@ -8,7 +8,6 @@ import { apps } from './data/apps';
 import { macosKeyLabels } from './domain/keyboard/labels';
 import { uiLanguageOf } from './domain/settings/language';
 import { createAppI18n } from './i18n';
-import { germanKeymapSource } from './platform/keymap';
 import { tauriLogger } from './platform/log';
 import { tauriRepositories } from './platform/tauri';
 import {
@@ -28,7 +27,7 @@ createApp(App)
   .use(createAppRouter(apps))
   .provide(settingsRepositoryKey, repositories.settings)
   .provide(progressRepositoryKey, repositories.progress)
-  .provide(keymapSourceKey, germanKeymapSource)
+  .provide(keymapSourceKey, repositories.keymap)
   .provide(keyLabelsKey, macosKeyLabels)
   .provide(loggerKey, tauriLogger)
   .mount('#app');

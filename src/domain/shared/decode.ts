@@ -122,6 +122,20 @@ export function object<S extends Shape>(shape: S): Decoder<Decoded<S>> {
 }
 
 /**
+ * Decodes an object whose properties are some of `keys`, each decoded by `item`, such as a keymap
+ * by key code. Missing keys are left out, and so are properties that aren't in `keys`.
+ */
+export function partialRecord<K extends string, T>(
+  keys: readonly K[],
+  item: Decoder<T>,
+): Decoder<Readonly<Partial<Record<K, T>>>> {
+  const shape = Object.fromEntries(keys.map((key) => [key, optional(item)]));
+
+  // `fromEntries` types its keys as `string`, but they're exactly `keys`, each optional `item`.
+  return object(shape) as Decoder<Readonly<Partial<Record<K, T>>>>;
+}
+
+/**
  * Decodes with the first decoder that succeeds, such as for a union's members. If none does, the
  * failure that got furthest into the input is the most telling, so that one is reported.
  */
