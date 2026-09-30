@@ -473,6 +473,41 @@ Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcu
 - **Strict templates turn fallthrough attributes into documented props.** `aria-pressed` and `title` couldn't pass through, so `BaseButton.pressed` and `OptionRow.hint` say what they're for.
 - **Defaults hide features.** Replacing Tauri's untranslated menu meant building the Edit menu ourselves, which is also what gives text fields ⌘C and ⌘V.
 
+## Native design ✅ ([#17](https://codeberg.org/gobin/mouseless/issues/17))
+
+Branch `feature/native-design`. The app looks and behaves like a native Mac app, following [Apple's design resources for macOS](https://developer.apple.com/design/resources/#macos-apps) and the Human Interface Guidelines, before step 8 builds the lookup UI. Built in one go and reviewed as a whole.
+
+**Decisions**
+
+- A sidebar lists the apps by category (and Recent) on macOS's sidebar material; the detail shows an app, a set, learning or review, with a toolbar whose back button is a glass capsule, instead of sliding screens. The window is resizable with a minimum size.
+- The appearance follows the system, light and dark. The system font (SF Pro) replaces Source Sans 3; colors are semantic tokens measured from System Settings on macOS 27, the accent follows the user's accent color, controls are native or capsules, and grouped boxes have no border and inset separators.
+- Liquid Glass (`NSGlassEffectView`, which Tauri 2.12 exposes as a window effect) is used where macOS 27 uses it: the popover. Window sidebars keep the sidebar material, as Settings and Finder do; a clear glass sidebar let the desktop show through in streaks.
+- The options became a Settings window of their own (⌘,), with toolbar panes, and "Options" is called "Settings" in English. Windows learn about changes made in another one through `settings-changed` and `progress-reset` events (brought forward from step 8). Only the Settings window may save settings or reset progress.
+- This replaces the invariant that the rewrite keeps most of the old app's look; it keeps its functionality and data.
+
+**Sub-steps**
+
+- [x] ND.1 Foundations: system font, system colors for light and dark, native controls
+- [x] ND.2 Window: resizable, sidebar material, traffic lights over the sidebar
+- [x] ND.3 Sidebar and detail navigation
+- [x] ND.4 Keyboard navigation for the sidebar and the detail
+- [x] ND.5 Settings window, and events between the windows
+- [x] ND.6 Practice screens and popover in the native look
+- [x] ND.7 Docs, UML and smoke test
+
+**Concepts:** the macOS Human Interface Guidelines (sidebars, toolbars, settings windows), semantic system colors, window materials.
+
+**Resources:** [Apple Design Resources: macOS](https://developer.apple.com/design/resources/#macos-apps) · [HIG: Sidebars](https://developer.apple.com/design/human-interface-guidelines/sidebars) · [HIG: Color](https://developer.apple.com/design/human-interface-guidelines/color) · [HIG: Settings](https://developer.apple.com/design/human-interface-guidelines/settings)
+
+**What we learned**
+
+- **Measure against the system, not memory.** The first version followed the HIG and a recollection of Tahoe, and looked almost right. Screenshots of System Settings and Finder, sampled pixel by pixel, gave the real content, box and separator colors, row heights and capsule sizes, and showed that sidebars are flush, not floating.
+- **The newest effect isn't always the native one.** Liquid Glass was available and impressive, but macOS 27 uses it for floating things (popovers, toolbar capsules), while window sidebars keep the sidebar material. Copying what the system does beat using what the toolkit offers.
+- **Design kits can't be read, the running system can.** Figma and Sketch links were closed to tools and the kit's download held only pointers; the Mac running the target OS was the better reference.
+- **A second window turns local state into shared state.** Moving the options into their own window meant the main window had to hear about saved settings and resets: two events from Rust, followed by the stores, not a message between windows.
+- **A grid needs a row height to scroll.** The sidebar didn't scroll because the window grid's only row grew with its content; `grid-template-rows: minmax(0, 1fr)` let it shrink to the window.
+- **A big step in one go needs screenshots, not only tests.** 406 tests passed while the sidebar couldn't scroll and the glass looked wrong; only looking at the running app found both.
+
 ## 8. Menu shortcut lookup ⏳ ([#8](https://codeberg.org/gobin/mouseless/issues/8))
 
 Branch `feature/menu-lookup`. Read any app's menu shortcuts through the Accessibility API, and show them with search in the popover.
@@ -485,7 +520,7 @@ Branch `feature/menu-lookup`. Read any app's menu shortcuts through the Accessib
 
 **Carried over**
 
-- The popover follows the settings, at least the language, through a typed `settings-changed` event between the windows. Planned for step 7, but not needed while the popover showed only a placeholder; it reads `navigator.languages` for now.
+- The popover follows the settings, at least the language, through the `settings-changed` event that the native design adds. It reads `navigator.languages` for now.
 
 **Concepts:** the Accessibility API and permissions, recursion over trees, matching apps by bundle ID.
 

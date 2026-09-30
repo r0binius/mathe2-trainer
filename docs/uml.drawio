@@ -13,7 +13,7 @@
         <mxCell id="Disk__app_data_directory_" value="Disk (app data directory)" parent="1" vertex="1" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;width=200;height=26;container=1;collapsible=0;recursiveResize=0;fillColor=none;">
           <mxGeometry x="1210" y="940" width="260" height="400" as="geometry" />
         </mxCell>
-        <mxCell id="main_ts___App_vue" value="&lt;b&gt;main.ts / App.vue · popover.ts&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;composition roots of the two windows: provide the ports, install i18n (and the router), log CSP violations&lt;/font&gt;" parent="Webview__TypeScript__Vue__src__" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;shape=module;jettyWidth=10;jettyHeight=6;align=center;spacingLeft=14;">
+        <mxCell id="main_ts___App_vue" value="&lt;b&gt;main.ts · popover.ts · settings.ts&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;composition roots of the three windows: provide the ports, install i18n (and the router), log CSP violations&lt;/font&gt;" parent="Webview__TypeScript__Vue__src__" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;shape=module;jettyWidth=10;jettyHeight=6;align=center;spacingLeft=14;">
           <mxGeometry x="420" y="40" width="230" height="60" as="geometry" />
         </mxCell>
         <mxCell id="data_apps_" value="&lt;b&gt;data/apps/&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;10 apps with their texts and logos, listed in apps.ts&lt;/font&gt;" parent="Webview__TypeScript__Vue__src__" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;shape=module;jettyWidth=10;jettyHeight=6;align=center;spacingLeft=14;">
@@ -22,7 +22,7 @@
         <mxCell id="stores_" value="&lt;b&gt;stores/&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;settings, progress, keymap (Pinia)&lt;/font&gt;" parent="Webview__TypeScript__Vue__src__" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;shape=module;jettyWidth=10;jettyHeight=6;align=center;spacingLeft=14;">
           <mxGeometry x="300" y="270" width="230" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="platform_" value="&lt;b&gt;platform/&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;ipc, settings, progress, keymap, windows, tauri, log&lt;/font&gt;" parent="Webview__TypeScript__Vue__src__" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;shape=module;jettyWidth=10;jettyHeight=6;align=center;spacingLeft=14;">
+        <mxCell id="platform_" value="&lt;b&gt;platform/&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;ipc, settings, progress, keymap, windows, changes, tauri, log&lt;/font&gt;" parent="Webview__TypeScript__Vue__src__" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;shape=module;jettyWidth=10;jettyHeight=6;align=center;spacingLeft=14;">
           <mxGeometry x="570" y="270" width="230" height="60" as="geometry" />
         </mxCell>
         <mxCell id="_tauri_apps_api" value="&lt;b&gt;@tauri-apps/api&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;invoke, listen&lt;/font&gt;" parent="Webview__TypeScript__Vue__src__" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;shape=module;jettyWidth=10;jettyHeight=6;align=center;spacingLeft=14;">
@@ -145,7 +145,7 @@
         <mxCell id="note" value="Legend: blue = domain types, yellow = module functions, green = ports, orange = shell, red = Rust, gray = tables, purple = data, white = libraries.&lt;br&gt;Dashed open arrow = depends on; dashed hollow triangle = implements; solid open arrow = holds or extends; filled diamond = contains; thick red = IPC." parent="1" vertex="1" style="shape=note;whiteSpace=wrap;html=1;size=14;align=left;spacingLeft=6;verticalAlign=top;fillColor=#fffbe6;strokeColor=#b3a25d;fontSize=11;">
           <mxGeometry x="40" y="1370" width="1000" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="features_" value="&lt;b&gt;features/&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;library, practice, options, popover: the screens&lt;/font&gt;" parent="Webview__TypeScript__Vue__src__" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;shape=module;jettyWidth=10;jettyHeight=6;align=center;spacingLeft=14;">
+        <mxCell id="features_" value="&lt;b&gt;features/&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;library (sidebar and pages), practice, settings, popover&lt;/font&gt;" parent="Webview__TypeScript__Vue__src__" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;shape=module;jettyWidth=10;jettyHeight=6;align=center;spacingLeft=14;">
           <mxGeometry x="300" y="150" width="230" height="60" as="geometry" />
         </mxCell>
         <mxCell id="composables_" value="&lt;b&gt;composables/&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;useProgram, usePracticeSession, useKeyCapture, useSpatialNav, useStartup, …&lt;/font&gt;" parent="Webview__TypeScript__Vue__src__" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;shape=module;jettyWidth=10;jettyHeight=6;align=center;spacingLeft=14;">
@@ -210,7 +210,7 @@
         <mxCell id="e_platform_rust_carbon" value="FFI, main thread" parent="1" edge="1" source="platform_rust" target="carbon" style="html=1;fontSize=10;labelBackgroundColor=#ffffff;endArrow=open;endSize=10;dashed=1;">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e_commands__tauri_apps_api" value="events: keymap-changed, options-requested" parent="1" edge="1" source="lib_rs" target="_tauri_apps_api" style="html=1;fontSize=10;labelBackgroundColor=#ffffff;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#b85450;exitX=0.8;exitY=0;exitDx=0;exitDy=0;entryX=0.95;entryY=1;entryDx=0;entryDy=0;">
+        <mxCell id="e_commands__tauri_apps_api" value="events: keymap-changed, settings-changed, progress-reset" parent="1" edge="1" source="lib_rs" target="_tauri_apps_api" style="html=1;fontSize=10;labelBackgroundColor=#ffffff;endArrow=block;endFill=1;strokeWidth=2;strokeColor=#b85450;exitX=0.8;exitY=0;exitDx=0;exitDy=0;entryX=0.95;entryY=1;entryDx=0;entryDy=0;">
           <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="750" y="910" /><mxPoint x="1119" y="910" /></Array></mxGeometry>
         </mxCell>
 </root>
@@ -1678,28 +1678,28 @@
         <mxCell id="features_practice_r2" value="LearnScreen, ReviewScreen → PracticeStage" parent="features_practice" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="80" width="520" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="features_library" value="&amp;laquo;feature&amp;raquo;&lt;br&gt;&lt;b&gt;features/library, options&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;swimlaneFillColor=#ffffff;">
+        <mxCell id="features_library" value="«feature»&lt;br&gt;&lt;b&gt;features/library, settings&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;swimlaneFillColor=#ffffff;">
           <mxGeometry x="600" y="1148" width="520" height="106" as="geometry" />
         </mxCell>
-        <mxCell id="features_library_r0" value="LibraryScreen, AppScreen, SetScreen (summaries)" parent="features_library" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="features_library_r0" value="LibrarySidebar, StartScreen, AppScreen, SetScreen" parent="features_library" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="520" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="features_library_r1" value="AppCard, SetRow, logoOf(appId)" parent="features_library" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="features_library_r1" value="SetRow, logoOf(appId), focusSidebarKey" parent="features_library" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="60" width="520" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="features_library_r2" value="OptionsPanel (language, reset)" parent="features_library" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="features_library_r2" value="SettingsWindow: General, Trigger, Progress panes" parent="features_library" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="80" width="520" height="20" as="geometry" />
         </mxCell>
         <mxCell id="router" value="&amp;laquo;routes&amp;raquo;&lt;br&gt;&lt;b&gt;routes.ts / router.ts&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;swimlaneFillColor=#ffffff;">
           <mxGeometry x="1160" y="1148" width="470" height="106" as="geometry" />
         </mxCell>
-        <mxCell id="router_r0" value="routes.ts: RouteName, routePaths, depthOf, toApp(), toSet(), …" parent="router" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="router_r0" value="routes.ts: RouteName, routePaths, toApp(), toSet(), …" parent="router" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="470" height="20" as="geometry" />
         </mxCell>
         <mxCell id="router_r1" value="router.ts: createAppRouter(apps)  (screen(), lookedUp)" parent="router" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="60" width="470" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="router_r2" value="screens import only routes.ts, so there is no cycle" parent="router" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="router_r2" value="pages import only routes.ts, so there is no cycle" parent="router" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="80" width="470" height="20" as="geometry" />
         </mxCell>
         <mxCell id="e_features_practice_usePracticeSession" value="" parent="1" edge="1" source="features_practice" target="usePracticeSession" style="html=1;fontSize=10;labelBackgroundColor=#ffffff;endArrow=open;endSize=10;dashed=1;">
@@ -1711,7 +1711,7 @@
         <mxCell id="stores_repositories_r_logger" value="Logger { warn, error }, loggerKey, consoleLogger" parent="stores_repositories" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="160" width="360" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="stores_repositories_s6_0" value="KeymapSource, Logger  (ports with effects)" parent="stores_repositories" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="stores_repositories_s6_0" value="KeymapSource, Windows, Changes, Logger  (with effects)" parent="stores_repositories" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="180" width="360" height="20" as="geometry" />
         </mxCell>
         <mxCell id="features_practice_r_exit" value="useSessionExit(session, origin, leave)" parent="features_practice" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
@@ -1755,7 +1755,7 @@
         <mxCell id="commands_r" value="get_settings() -&gt; Settings" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="330" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="commands_r_" value="set_settings(settings)  (then applies them)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="commands_r_" value="set_settings(settings)  (applies, emits settings-changed)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="60" width="330" height="20" as="geometry" />
         </mxCell>
         <mxCell id="commands_r__" value="load_progress() -&gt; StoredProgress" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
@@ -1770,7 +1770,7 @@
         <mxCell id="commands_r_____" value="replace_progress(progress)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="140" width="330" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="commands_r______" value="reset_progress()" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="commands_r______" value="reset_progress()  (emits progress-reset)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="160" width="330" height="20" as="geometry" />
         </mxCell>
         <mxCell id="commands_s6_0" value="get_keymap() -&gt; Layout  (sync: main thread)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
@@ -2353,7 +2353,7 @@
         <mxCell id="coordinator" value="&amp;laquo;module · pure, Elm update&amp;raquo;&lt;br&gt;&lt;b&gt;app::coordinator&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
           <mxGeometry x="420" y="40" width="380" height="244" as="geometry" />
         </mxCell>
-        <mxCell id="coordinator_0" value="Showing { popover: bool, main: bool }" parent="coordinator" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="coordinator_0" value="Showing { popover, main, settings: bool }" parent="coordinator" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="380" height="20" as="geometry" />
         </mxCell>
         <mxCell id="coordinator_1" value="" parent="coordinator" vertex="1" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;">
@@ -2365,10 +2365,10 @@
         <mxCell id="coordinator_3" value="  PopoverBlurred, PopoverDismissed," parent="coordinator" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="88" width="380" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="coordinator_4" value="  OptionsChosen, DockClicked," parent="coordinator" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="coordinator_4" value="  SettingsChosen, DockClicked, LaunchedAgain," parent="coordinator" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="108" width="380" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="coordinator_5" value="  LaunchedAgain, MainClosing" parent="coordinator" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="coordinator_5" value="  MainClosing, SettingsClosing" parent="coordinator" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="128" width="380" height="20" as="geometry" />
         </mxCell>
         <mxCell id="coordinator_6" value="" parent="coordinator" vertex="1" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;">
@@ -2380,7 +2380,7 @@
         <mxCell id="coordinator_8" value="  ReturnFocus, ShowMain, HideMain," parent="coordinator" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="176" width="380" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="coordinator_9" value="  OpenOptions" parent="coordinator" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="coordinator_9" value="  ShowSettings, HideSettings" parent="coordinator" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="196" width="380" height="20" as="geometry" />
         </mxCell>
         <mxCell id="coordinator_10" value="" parent="coordinator" vertex="1" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;">
@@ -2425,7 +2425,7 @@
         <mxCell id="windows_2" value="report_window_events(app):" parent="windows" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="80" width="380" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="windows_3" value="  popover blur, main close → hide" parent="windows" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="windows_3" value="  popover blur; main, Settings close → hide" parent="windows" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="100" width="380" height="20" as="geometry" />
         </mxCell>
         <mxCell id="windows_4" value="" parent="windows" vertex="1" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;">
@@ -2434,10 +2434,10 @@
         <mxCell id="windows_5" value="apply(Action): popover::open_below with" parent="windows" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="128" width="380" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="windows_6" value="  tray::area, app.hide(), emit_to(main," parent="windows" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="windows_6" value="  tray::area, app.hide(), show or hide the" parent="windows" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="148" width="380" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="windows_7" value="  &quot;options-requested&quot;)" parent="windows" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="windows_7" value="  main and Settings windows" parent="windows" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="168" width="380" height="20" as="geometry" />
         </mxCell>
         <mxCell id="popover" value="&amp;laquo;module&amp;raquo;&lt;br&gt;&lt;b&gt;app::popover&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
@@ -2461,7 +2461,7 @@
         <mxCell id="menu_0" value="app_menu(app, UiLanguage): Mouseless" parent="menu" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="340" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="menu_1" value="  (About, Options… ⌘,, Services, Hide," parent="menu" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="menu_1" value="  (About, Settings… ⌘,, Services, Hide," parent="menu" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="60" width="340" height="20" as="geometry" />
         </mxCell>
         <mxCell id="menu_2" value="  Quit), Edit, Window" parent="menu" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
@@ -2473,7 +2473,7 @@
         <mxCell id="menu_4" value="report_choice(app, MenuEvent)" parent="menu" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="120" width="340" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="menu_5" value="  → OptionsChosen" parent="menu" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="menu_5" value="  → SettingsChosen" parent="menu" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="140" width="340" height="20" as="geometry" />
         </mxCell>
         <mxCell id="menu_6" value="ENGLISH, GERMAN: MenuTexts" parent="menu" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
@@ -2638,7 +2638,7 @@
         <mxCell id="e_commands_windows_windows" value="handle" parent="1" edge="1" source="commands_windows" target="windows" style="html=1;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endSize=10;exitX=0.1;exitY=1;exitDx=0;exitDy=0;entryX=0.9;entryY=0;entryDx=0;entryDy=0;">
           <mxGeometry relative="1" as="geometry"></mxGeometry>
         </mxCell>
-        <mxCell id="e_menu_windows" value="OptionsChosen" parent="1" edge="1" source="menu" target="windows" style="html=1;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endSize=10;exitX=1;exitY=0.1;exitDx=0;exitDy=0;entryX=0;entryY=0.95;entryDx=0;entryDy=0;">
+        <mxCell id="e_menu_windows" value="SettingsChosen" parent="1" edge="1" source="menu" target="windows" style="html=1;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endSize=10;exitX=1;exitY=0.1;exitDx=0;exitDy=0;entryX=0;entryY=0.95;entryDx=0;entryDy=0;">
           <mxGeometry relative="1" as="geometry"></mxGeometry>
         </mxCell>
         <mxCell id="e_trigger_windows" value="TriggerPressed" parent="1" edge="1" source="trigger" target="windows" style="html=1;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endSize=10;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;">
