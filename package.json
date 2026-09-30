@@ -19,6 +19,7 @@
     "rust:format:check": "cargo fmt --manifest-path src-tauri/Cargo.toml --check",
     "rust:lint": "cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets --locked -- -D warnings",
     "rust:test": "cargo test --manifest-path src-tauri/Cargo.toml --locked",
+    "rust:audit": "cargo deny --manifest-path src-tauri/Cargo.toml --locked check",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm rust:format:check && pnpm rust:lint && pnpm rust:test"
   },
   "dependencies": {

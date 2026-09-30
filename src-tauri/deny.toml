@@ -1,0 +1,23 @@
+# What cargo-deny checks in the Rust dependencies (`pnpm audit:rust`). Only settings that differ
+# from its defaults; known vulnerabilities and unsound crates always fail.
+
+[graph]
+# The platforms the app is built for. Linux's targets join in step 10.
+targets = ["aarch64-apple-darwin", "x86_64-apple-darwin"]
+
+[advisories]
+# A yanked release was withdrawn by its authors, often for a bug; don't build on one.
+yanked = "deny"
+
+[licenses]
+# Permissive licenses, and MPL-2.0, whose copyleft covers only changes to its own files.
+allow = ["Apache-2.0", "BSD-3-Clause", "MIT", "MPL-2.0", "Unicode-3.0", "Zlib"]
+
+[licenses.private]
+# The app itself is never published (`publish = false`).
+ignore = true
+
+[sources]
+# Only crates.io, whose releases the one-day cooldown applies to (CLAUDE.md).
+unknown-git = "deny"
+unknown-registry = "deny"
