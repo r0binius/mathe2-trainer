@@ -74,7 +74,7 @@ State + Command (§5) are this loop in pattern terms: the model is the State, an
 | Threads                              | AppKit and AX calls that need the main thread go through `run_on_main_thread`. Slow work (AX menu walk, SQLite) runs in async commands or `spawn_blocking`, never on the UI thread.          |
 | Official plugins for solved problems | `single-instance` (registered first), `autostart`, `global-shortcut`, `opener`, `positioner`, `log`. Settings and progress share one SQLite database instead of the `store` plugin (step 4). |
 | Platform code isolated               | `#[cfg(target_os = "macos")]` only inside `platform/`. Everything else sees traits.                                                                                                          |
-| Structure                            | `main.rs` only calls `lib::run()`. `lib.rs` builds the app from modules.                                                                                                                     |
+| Structure                            | `main.rs` only calls `run()`, which `app.rs` builds the app in. `lib.rs` and every `mod.rs` only declare modules and re-export (Canonical's layout).                                         |
 | Quality gates                        | `cargo fmt`, `cargo clippy -- -D warnings`, `cargo test`.                                                                                                                                    |
 
 ## 4. Vue 3 best practices we follow
@@ -222,12 +222,12 @@ src-tauri/
 ├─ migrations/      0001_settings.sql, … (one SQL file per schema change)
 ├─ examples/        dump_keymap.rs (prints the current layout as a keymap fixture)
 src-tauri/src/
-├─ main.rs, lib.rs, error.rs
+├─ main.rs, lib.rs (modules only), error.rs
+├─ app.rs           run(): plugins, managed state, commands; later app/ with coordinator.rs, tray.rs, trigger.rs, windows.rs
 ├─ commands/        settings.rs, progress.rs, keymap.rs, lookup.rs, window.rs
-├─ app/             coordinator.rs, tray.rs, trigger.rs, windows.rs
 ├─ services/        database.rs (connection, migrations), settings.rs, progress.rs, lookup.rs
-├─ platform.rs      traits (KeymapSource, …), their data types, Capabilities, current()
-└─ platform/        key_code.rs, macos/ (keymap.rs, …), linux/
+└─ platform/        layout.rs (KeymapSource and its data types), current.rs (Platform, current()), key_code.rs,
+                    Capabilities, macos/ (system_keymap.rs, input_source.rs, keymap.rs, fixture.rs), linux/
 ```
 
 ## 7. Testing strategy

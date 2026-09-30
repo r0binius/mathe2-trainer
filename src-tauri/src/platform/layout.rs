@@ -1,20 +1,11 @@
-//! What the app needs from the operating system, as traits (the ports), and their implementation
-//! for the platform the app is built for.
-//!
-//! The rest of the app works against the traits, so a platform is added without changing it (the
-//! Bridge pattern in `architecture.md`).
-
-mod key_code;
-#[cfg(target_os = "macos")]
-pub mod macos;
+//! The keyboard layout in use and what its keys type, and the trait that reads it.
 
 use std::collections::BTreeMap;
 
 use serde::Serialize;
 
-pub use key_code::KeyCode;
-
 use crate::error::AppError;
+use crate::platform::KeyCode;
 
 /// The characters one key types without a modifier and with Shift, Option (Alt) or both.
 ///
@@ -45,21 +36,6 @@ pub struct Layout {
     pub id: String,
     /// What each key types.
     pub keymap: Keymap,
-}
-
-/// The platform's implementations of the traits, for the system the app is built for.
-pub struct Platform {
-    /// Reads the keyboard layout.
-    pub keymap: Box<dyn KeymapSource + Send + Sync>,
-}
-
-/// The implementations for macOS.
-#[cfg(target_os = "macos")]
-#[must_use]
-pub fn current() -> Platform {
-    Platform {
-        keymap: Box::new(macos::SystemKeymap),
-    }
 }
 
 /// Reads the keyboard layout in use.

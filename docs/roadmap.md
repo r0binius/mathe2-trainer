@@ -385,7 +385,7 @@ Branch `chore/rust-review`. The Rust code is refactored along three references, 
 
 **Sub-steps**
 
-- [ ] RR.1 Module layout with `mod.rs`
+- [x] RR.1 Module layout with `mod.rs`
 - [ ] RR.2 Lints that lock in what the code already follows
 - [ ] RR.3 Smallest `unsafe` module and the main-thread token
 - [ ] RR.4 Errors: `source` and `reason` fields, "cannot …" messages

@@ -1,9 +1,7 @@
-//! The macOS implementations of the platform traits.
-
-pub mod input_source;
-pub mod keymap;
+//! The keyboard layout selected in macOS, as a [`KeymapSource`].
 
 use crate::error::AppError;
+use crate::platform::macos::input_source;
 use crate::platform::{KeymapSource, Layout};
 
 /// The keyboard layout selected in macOS.
