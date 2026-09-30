@@ -389,7 +389,7 @@ Branch `chore/rust-review`. The Rust code is refactored along three references, 
 - [x] RR.2 Lints that lock in what the code already follows
 - [x] RR.3 Smallest `unsafe` module and the main-thread token
 - [x] RR.4 Errors: `source` and `reason` fields, "cannot …" messages
-- [ ] RR.5 Newtypes and checks for what the webview sends
+- [x] RR.5 Newtypes and checks for what the webview sends
 - [ ] RR.6 Row writers that name every field and SQL parameter
 - [ ] RR.7 Canonical style: derives, imports, ordering, returns
 - [ ] RR.8 `cargo-deny`

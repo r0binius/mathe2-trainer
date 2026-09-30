@@ -1,13 +1,21 @@
 //! Learning progress, review cards and the review log, and how they're stored.
 //!
-//! The types mirror the frontend's domain types. Rust stores them as they come; checks such as
-//! the valid ranges of a card's memory belong to the frontend's decoders.
+//! The types mirror the frontend's domain types. What the webview sends is checked as it's
+//! deserialized, with the frontend decoders' rules: IDs and times by their types
+//! ([`values`](crate::services::values)), a card's memory by [`Card`]'s own rules.
 
 use rusqlite::{Connection, Row, ToSql};
 use serde::{Deserialize, Serialize};
 
 use crate::error::AppError;
 use crate::services::database::{Json, query_all};
+use crate::services::values::{EpochMillis, InvalidValue, LayoutId, ShortcutId};
+
+/// The stability range FSRS works in, in days, as the frontend's scheduler checks it.
+const STABILITY: std::ops::RangeInclusive<f64> = 0.001..=36_500.0;
+
+/// The difficulty range FSRS works in, as the frontend's scheduler checks it.
+const DIFFICULTY: std::ops::RangeInclusive<f64> = 1.0..=10.0;
 
 /// Which shortcuts of a set are learned on one keyboard layout.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -18,7 +26,7 @@ pub struct SetRecord {
     /// The set, unique within its app.
     pub set_id: String,
     /// The keyboard layout's input source ID.
-    pub layout: String,
+    pub layout: LayoutId,
     /// The progress itself.
     pub progress: SetProgress,
 }
@@ -28,37 +36,85 @@ pub struct SetRecord {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SetProgress {
     /// The learned shortcut IDs.
-    pub learned: Vec<String>,
+    pub learned: Vec<ShortcutId>,
     /// The trained shortcut IDs: pressed right with their keys shown, not yet recalled.
-    pub trained: Vec<String>,
+    pub trained: Vec<ShortcutId>,
     /// When the set was last completed. Left out, not `null`, when it never was, as the
     /// frontend's optional property.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub completed_at: Option<i64>,
+    pub completed_at: Option<EpochMillis>,
     /// When the progress last changed.
-    pub updated_at: i64,
+    pub updated_at: EpochMillis,
 }
 
 /// A recalled shortcut's review card on one keyboard layout, as the frontend's `Card`.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+///
+/// Deserializing one checks its memory as the frontend's `parseCardMemory` does (see
+/// [`Card::try_from`]).
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", try_from = "CardFields")]
 pub struct Card {
     /// The shortcut's ID.
-    pub id: String,
+    pub id: ShortcutId,
     /// The keyboard layout's input source ID.
-    pub layout: String,
-    /// Days until the chance of recalling it drops to 90 %.
+    pub layout: LayoutId,
+    /// Days until the chance of recalling it drops to 90 %, within [`STABILITY`].
     pub stability: f64,
-    /// 1–10, how hard it is to raise the stability.
+    /// How hard it is to raise the stability, within [`DIFFICULTY`].
     pub difficulty: f64,
     /// When it was last reviewed.
-    pub last_review_at: i64,
-    /// When it's due next.
-    pub due_at: i64,
-    /// How often it was reviewed.
+    pub last_review_at: EpochMillis,
+    /// When it's due next, not before it was last reviewed.
+    pub due_at: EpochMillis,
+    /// How often it was reviewed, at least once.
     pub reps: u32,
-    /// How often it was forgotten after it was first recalled.
+    /// How often it was forgotten after it was first recalled, fewer than `reps`: the first
+    /// review can't be a lapse.
     pub lapses: u32,
+}
+
+impl TryFrom<CardFields> for Card {
+    type Error = InvalidValue;
+
+    /// Checks a card's memory with the frontend's rules: stability and difficulty within FSRS's
+    /// ranges, fewer lapses than reviews, and not due before its last review.
+    fn try_from(fields: CardFields) -> Result<Self, Self::Error> {
+        let CardFields {
+            id,
+            layout,
+            stability,
+            difficulty,
+            last_review_at,
+            due_at,
+            reps,
+            lapses,
+        } = fields;
+        let reason = if !STABILITY.contains(&stability) {
+            Some("stability out of range")
+        } else if !DIFFICULTY.contains(&difficulty) {
+            Some("difficulty out of range")
+        } else if lapses >= reps {
+            Some("not fewer lapses than reviews")
+        } else if due_at < last_review_at {
+            Some("due before its last review")
+        } else {
+            None
+        };
+
+        match reason {
+            Some(reason) => Err(InvalidValue::new("card", reason)),
+            None => Ok(Self {
+                id,
+                layout,
+                stability,
+                difficulty,
+                last_review_at,
+                due_at,
+                reps,
+                lapses,
+            }),
+        }
+    }
 }
 
 /// How well a shortcut was recalled, on FSRS's scale.
@@ -81,13 +137,13 @@ pub enum Grade {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Review {
     /// The shortcut's ID.
-    pub id: String,
+    pub id: ShortcutId,
     /// The keyboard layout's input source ID.
-    pub layout: String,
+    pub layout: LayoutId,
     /// The grade the measurements gave.
     pub grade: Grade,
     /// When the test was answered.
-    pub at: i64,
+    pub at: EpochMillis,
     /// The local UTC offset at that moment, in minutes east of UTC.
     pub utc_offset_minutes: i32,
     /// Whether wrong keys were pressed first.
@@ -259,11 +315,12 @@ fn insert_card(connection: &Connection, card: &Card) -> rusqlite::Result<()> {
 }
 
 fn read_set_record(row: &Row<'_>) -> rusqlite::Result<SetRecord> {
-    let Json(learned) = row.get("learned")?;
-    let Json(trained) = row.get("trained")?;
+    let Json(learned): Json<Vec<String>> = row.get("learned")?;
+    let Json(trained): Json<Vec<String>> = row.get("trained")?;
+    // As stored, without checking again (see `values`).
     let progress = SetProgress {
-        learned,
-        trained,
+        learned: learned.into_iter().map(ShortcutId::stored).collect(),
+        trained: trained.into_iter().map(ShortcutId::stored).collect(),
         completed_at: row.get("completed_at")?,
         updated_at: row.get("updated_at")?,
     };
@@ -289,6 +346,22 @@ fn read_card(row: &Row<'_>) -> rusqlite::Result<Card> {
     })
 }
 
+// serde types.
+
+/// A card as the webview sends it, before [`Card::try_from`] checks it.
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct CardFields {
+    id: ShortcutId,
+    layout: LayoutId,
+    stability: f64,
+    difficulty: f64,
+    last_review_at: EpochMillis,
+    due_at: EpochMillis,
+    reps: u32,
+    lapses: u32,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -298,28 +371,36 @@ mod tests {
     const GERMAN: &str = "com.apple.keylayout.German";
     const US: &str = "com.apple.keylayout.US";
 
-    fn record(layout: &str, learned: &[&str], completed_at: Option<i64>) -> SetRecord {
+    fn shortcut(id: &str) -> ShortcutId {
+        ShortcutId::stored(id.to_owned())
+    }
+
+    fn layout(id: &str) -> LayoutId {
+        LayoutId::stored(id.to_owned())
+    }
+
+    fn record(layout_id: &str, learned: &[&str], completed_at: Option<i64>) -> SetRecord {
         SetRecord {
             app_id: "macos".to_owned(),
             set_id: "windows".to_owned(),
-            layout: layout.to_owned(),
+            layout: layout(layout_id),
             progress: SetProgress {
-                learned: learned.iter().map(|&id| id.to_owned()).collect(),
+                learned: learned.iter().copied().map(shortcut).collect(),
                 trained: Vec::new(),
-                completed_at,
-                updated_at: 1_000,
+                completed_at: completed_at.map(EpochMillis::stored),
+                updated_at: EpochMillis::stored(1_000),
             },
         }
     }
 
-    fn card(layout: &str, reps: u32) -> Card {
+    fn card(layout_id: &str, reps: u32) -> Card {
         Card {
-            id: "macos:cmd+m".to_owned(),
-            layout: layout.to_owned(),
+            id: shortcut("macos/Meta+m"),
+            layout: layout(layout_id),
             stability: 3.17,
             difficulty: 5.3,
-            last_review_at: 1_000,
-            due_at: 2_000,
+            last_review_at: EpochMillis::stored(1_000),
+            due_at: EpochMillis::stored(2_000),
             reps,
             lapses: 0,
         }
@@ -327,10 +408,10 @@ mod tests {
 
     fn review(grade: Grade) -> Review {
         Review {
-            id: "macos:cmd+m".to_owned(),
-            layout: GERMAN.to_owned(),
+            id: shortcut("macos/Meta+m"),
+            layout: layout(GERMAN),
             grade,
-            at: 1_000,
+            at: EpochMillis::stored(1_000),
             utc_offset_minutes: 120,
             failed: grade == Grade::Again,
             duration_ms: 1_500,
@@ -346,7 +427,7 @@ mod tests {
 
     /// The row [`review`] logs with the given grade.
     fn logged_as(grade: &str) -> LoggedReview {
-        let (id, layout) = ("macos:cmd+m".to_owned(), GERMAN.to_owned());
+        let (id, layout) = ("macos/Meta+m".to_owned(), GERMAN.to_owned());
 
         (id, layout, 1_000, 120, grade.to_owned(), false, 1_500)
     }
@@ -387,10 +468,10 @@ mod tests {
             "appId": "macos",
             "setId": "windows",
             "layout": GERMAN,
-            "progress": { "learned": ["macos:cmd+m"], "trained": [], "updatedAt": 1_000 },
+            "progress": { "learned": ["macos/Meta+m"], "trained": [], "updatedAt": 1_000 },
         });
         let card_json = json!({
-            "id": "macos:cmd+m",
+            "id": "macos/Meta+m",
             "layout": GERMAN,
             "stability": 3.17,
             "difficulty": 5.3,
@@ -400,7 +481,7 @@ mod tests {
             "lapses": 0,
         });
         let review_json = json!({
-            "id": "macos:cmd+m",
+            "id": "macos/Meta+m",
             "layout": GERMAN,
             "grade": "hard",
             "at": 1_000,
@@ -409,7 +490,7 @@ mod tests {
             "durationMs": 1_500,
         });
 
-        let set = serde_json::to_value(record(GERMAN, &["macos:cmd+m"], None)).ok();
+        let set = serde_json::to_value(record(GERMAN, &["macos/Meta+m"], None)).ok();
         let card = serde_json::to_value(card(GERMAN, 2)).ok();
         let review_sent = serde_json::from_value::<Review>(review_json).ok();
 
@@ -427,12 +508,48 @@ mod tests {
             "progress": { "learned": [], "trained": [], "updatedAt": 1_000, "runs": [] },
         });
         let with_fractional_time = json!({ "sets": [], "cards": [{
-            "id": "macos:cmd+m", "layout": GERMAN, "stability": 3.17, "difficulty": 5.3,
+            "id": "macos/Meta+m", "layout": GERMAN, "stability": 3.17, "difficulty": 5.3,
             "lastReviewAt": 1_000.5, "dueAt": 2_000, "reps": 2, "lapses": 0,
         }]});
 
         assert!(serde_json::from_value::<SetRecord>(with_unknown_field).is_err());
         assert!(serde_json::from_value::<StoredProgress>(with_fractional_time).is_err());
+    }
+
+    /// A valid card as the webview sends it, with one field changed, deserialized.
+    fn sent_card(field: &str, value: serde_json::Value) -> Result<Card, String> {
+        let mut card = json!({
+            "id": "macos/Meta+m", "layout": GERMAN, "stability": 3.17, "difficulty": 5.3,
+            "lastReviewAt": 1_000, "dueAt": 2_000, "reps": 2, "lapses": 1,
+        });
+        card[field] = value;
+
+        serde_json::from_value(card).map_err(|error| error.to_string())
+    }
+
+    #[test]
+    fn checks_a_cards_memory_as_the_frontend_does() {
+        let rejected = |field, value, reason: &str| {
+            sent_card(field, value).is_err_and(|error| error.contains(reason))
+        };
+
+        assert!(sent_card("reps", json!(2)).is_ok());
+        assert!(rejected("stability", json!(0.0), "stability"));
+        assert!(rejected("difficulty", json!(10.5), "difficulty"));
+        assert!(rejected("lapses", json!(2), "lapses"));
+        assert!(rejected("dueAt", json!(999), "due before"));
+        assert!(rejected("id", json!("Meta+m"), "shortcut ID"));
+        assert!(rejected("runs", json!([]), "unknown field"));
+    }
+
+    #[test]
+    fn checks_the_ids_and_times_of_a_review() {
+        let review = json!({
+            "id": "macos/Meta+m", "layout": "", "grade": "good", "at": -1,
+            "utcOffsetMinutes": 120, "failed": false, "durationMs": 1_500,
+        });
+
+        assert!(serde_json::from_value::<Review>(review).is_err());
     }
 
     #[test]
@@ -444,10 +561,10 @@ mod tests {
     #[test]
     fn keeps_one_record_per_set_and_layout() -> Result<(), AppError> {
         let database = Database::in_memory()?;
-        let german = record(GERMAN, &["macos:cmd+m", "macos:cmd+w"], Some(900));
+        let german = record(GERMAN, &["macos/Meta+m", "macos/Meta+w"], Some(900));
         let us = record(US, &[], None);
 
-        saved(&database, &record(GERMAN, &["macos:cmd+m"], None))?;
+        saved(&database, &record(GERMAN, &["macos/Meta+m"], None))?;
         saved(&database, &german)?;
         saved(&database, &us)?;
 
@@ -522,8 +639,8 @@ mod tests {
     #[test]
     fn keeps_trained_shortcuts() -> Result<(), AppError> {
         let database = Database::in_memory()?;
-        let mut trained = record(GERMAN, &["macos:cmd+m"], None);
-        trained.progress.trained = vec!["macos:cmd+w".to_owned()];
+        let mut trained = record(GERMAN, &["macos/Meta+m"], None);
+        trained.progress.trained = vec![shortcut("macos/Meta+w")];
 
         saved(&database, &trained)?;
 
