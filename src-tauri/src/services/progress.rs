@@ -4,7 +4,7 @@
 //! deserialized, with the frontend decoders' rules: IDs and times by their types
 //! ([`values`](crate::services::values)), a card's memory by [`Card`]'s own rules.
 
-use rusqlite::{Connection, Row, ToSql};
+use rusqlite::{Connection, Row, ToSql, named_params};
 use serde::{Deserialize, Serialize};
 
 use crate::error::AppError;
@@ -207,19 +207,33 @@ pub fn load(connection: &Connection) -> Result<StoredProgress, AppError> {
 ///
 /// Returns a database error if it can't be written.
 pub fn save_set(connection: &Connection, record: &SetRecord) -> Result<(), AppError> {
+    // Every field is named, so a new one fails to compile until it's stored too.
+    let SetRecord {
+        app_id,
+        set_id,
+        layout,
+        progress,
+    } = record;
+    let SetProgress {
+        learned,
+        trained,
+        completed_at,
+        updated_at,
+    } = progress;
+
     connection.execute(
         "INSERT OR REPLACE INTO set_progress
             (app_id, set_id, layout, learned, trained, completed_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-        (
-            &record.app_id,
-            &record.set_id,
-            &record.layout,
-            Json(&record.progress.learned),
-            Json(&record.progress.trained),
-            record.progress.completed_at,
-            record.progress.updated_at,
-        ),
+         VALUES (:app_id, :set_id, :layout, :learned, :trained, :completed_at, :updated_at)",
+        named_params! {
+            ":app_id": app_id,
+            ":set_id": set_id,
+            ":layout": layout,
+            ":learned": Json(learned),
+            ":trained": Json(trained),
+            ":completed_at": completed_at,
+            ":updated_at": updated_at,
+        },
     )?;
     Ok(())
 }
@@ -237,20 +251,7 @@ pub fn record_review(
 ) -> Result<(), AppError> {
     let transaction = connection.transaction()?;
 
-    transaction.execute(
-        "INSERT INTO reviews
-            (shortcut_id, layout, reviewed_at, utc_offset_minutes, grade, failed, duration_ms)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-        (
-            &review.id,
-            &review.layout,
-            review.at,
-            review.utc_offset_minutes,
-            review.grade,
-            review.failed,
-            review.duration_ms,
-        ),
-    )?;
+    insert_review(&transaction, review)?;
     if let Some(card) = card {
         insert_card(&transaction, card)?;
     }
@@ -295,21 +296,62 @@ fn delete_sets_and_cards(connection: &Connection) -> rusqlite::Result<()> {
     Ok(())
 }
 
+fn insert_review(connection: &Connection, review: &Review) -> rusqlite::Result<()> {
+    // Every field is named, so a new one fails to compile until it's logged too.
+    let Review {
+        id,
+        layout,
+        grade,
+        at,
+        utc_offset_minutes,
+        failed,
+        duration_ms,
+    } = review;
+
+    connection.execute(
+        "INSERT INTO reviews
+            (shortcut_id, layout, reviewed_at, utc_offset_minutes, grade, failed, duration_ms)
+         VALUES (:id, :layout, :at, :utc_offset_minutes, :grade, :failed, :duration_ms)",
+        named_params! {
+            ":id": id,
+            ":layout": layout,
+            ":at": at,
+            ":utc_offset_minutes": utc_offset_minutes,
+            ":grade": grade,
+            ":failed": failed,
+            ":duration_ms": duration_ms,
+        },
+    )?;
+    Ok(())
+}
+
 fn insert_card(connection: &Connection, card: &Card) -> rusqlite::Result<()> {
+    // Every field is named, so a new one fails to compile until it's stored too.
+    let Card {
+        id,
+        layout,
+        stability,
+        difficulty,
+        last_review_at,
+        due_at,
+        reps,
+        lapses,
+    } = card;
+
     connection.execute(
         "INSERT OR REPLACE INTO cards
             (shortcut_id, layout, stability, difficulty, last_review_at, due_at, reps, lapses)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
-        (
-            &card.id,
-            &card.layout,
-            card.stability,
-            card.difficulty,
-            card.last_review_at,
-            card.due_at,
-            card.reps,
-            card.lapses,
-        ),
+         VALUES (:id, :layout, :stability, :difficulty, :last_review_at, :due_at, :reps, :lapses)",
+        named_params! {
+            ":id": id,
+            ":layout": layout,
+            ":stability": stability,
+            ":difficulty": difficulty,
+            ":last_review_at": last_review_at,
+            ":due_at": due_at,
+            ":reps": reps,
+            ":lapses": lapses,
+        },
     )?;
     Ok(())
 }
