@@ -372,7 +372,7 @@ Branch `feature/native-keymap`. Read the current keyboard layout in Rust, replac
 - **Subscriptions are effects.** `onChange` couldn't live in the functional core, so ports with effects moved to the shell next to `Logger`, while ports that only return data stay in the domain.
 - **Tests find what the data can't be pressed as, not what's wrong.** The six impossible US shortcuts were flagged, but Next window resolving to ⇧⌘, on US wasn't; knowing the apps' real shortcuts still takes a person.
 
-## Rust review 🚧 ([#16](https://codeberg.org/gobin/mouseless/issues/16))
+## Rust review ✅ ([#16](https://codeberg.org/gobin/mouseless/issues/16))
 
 Branch `chore/rust-review`. The Rust code is refactored along three references, with [High Assurance Rust](https://highassurance.rs/) weighing most: [Canonical's Rust best practices](https://canonical.github.io/rust-best-practices/) and [Rust Design Patterns](https://rust-unofficial.github.io/patterns/). The code already meets most of them (no `unwrap`, `unsafe` in one module, `thiserror`, `-D warnings` from the command line); this round turns review rules into compiler checks and closes the gaps.
 
@@ -396,11 +396,21 @@ Branch `chore/rust-review`. The Rust code is refactored along three references, 
   - [x] RR.7a Derives, imports, ordering, returns and struct literals
   - [x] RR.7b Tests that `expect` instead of returning `Result`
 - [x] RR.8 `cargo-deny`
-- [ ] RR.9 Conventions, UML and what we learned
+- [x] RR.9 Conventions, UML and what we learned
 
 **Concepts:** static, dynamic and operational assurance; parse, don't validate; typestate and capability tokens; containing `unsafe`; supply-chain checks.
 
 **Resources:** [High Assurance Rust](https://highassurance.rs/) · [Canonical Rust best practices](https://canonical.github.io/rust-best-practices/) · [Rust Design Patterns](https://rust-unofficial.github.io/patterns/) · [Clippy lints](https://rust-lang.github.io/rust-clippy/master/) · [cargo-deny](https://embarkstudios.github.io/cargo-deny/)
+
+**What we learned**
+
+- **Turn review rules into compiler checks.** "Every `unsafe` block has a SAFETY comment", "no overflow" and "no indexing" held already, but only because someone looked. As lints they hold without anyone looking; deleting one SAFETY comment on purpose failed the build.
+- **A capability beats a runtime check.** A zero-sized `TextInputSources` that holds a `MainThreadMarker` turns "call this on the main thread" into a type rule: the check runs once where a command comes in, and nothing that holds one can run elsewhere.
+- **Make the compiler list what a new field touches.** Destructuring every field in the row writers made one extra field on `Card` fail the build in exactly the three places that have to handle it: checking, writing and reading. Named SQL parameters make the column next to each value visible, where positions let two IDs swap silently.
+- **Check at the boundary, not on the way back.** Values from the webview are parsed into newtypes; rows read from the database aren't checked again, so a rule that tightens later can't lock anyone out of their progress. Where to check was a decision, not a detail.
+- **A supply-chain tool pays off on its first run.** `cargo-deny` found a yanked crate deep under Tauri; the fix was hours old, so the cooldown rule held it at the release before. Rules about time need someone who checks the date.
+- **References disagree, so write down which one decides.** Canonical wants `mod.rs` and `unwrap` in tests; the Rust book prefers `foo.rs`, and High Assurance calls the layout a preference. Choosing once per question and recording it in `conventions.md` beats rediscovering the conflict in every review.
+- **Render the diagram to check it.** Moving boxes by coordinates in XML looked right until draw.io's CLI rendered the page: two arrows cut through boxes, and an old bend point made a box seem to point where it didn't.
 
 ## 7. Menu bar popover and trigger ⏳ ([#7](https://codeberg.org/gobin/mouseless/issues/7))
 

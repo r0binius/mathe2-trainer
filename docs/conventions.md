@@ -68,12 +68,22 @@ In practice:
 
 ## Rust
 
-- `cargo fmt` formats, and `cargo clippy` runs with `pedantic` and `-D warnings`.
+The Rust code follows three references, [High Assurance Rust](https://highassurance.rs/) weighing most, then [Canonical's Rust best practices](https://canonical.github.io/rust-best-practices/) and [Rust Design Patterns](https://rust-unofficial.github.io/patterns/). Where they leave a choice or disagree, the rule below decides.
+
+- `cargo fmt` formats, and `cargo clippy` runs with `pedantic` and `-D warnings` (on the command line, not `#![deny(warnings)]`).
+- **Few runtime failures:** no overflowing arithmetic, `as` casts or panicking indexing (Clippy's `arithmetic_side_effects`, `as_conversions`, `indexing_slicing`). Use `checked_*`, `From`/`TryFrom` and `.get()`. Tests may slice.
 - Nesting depth of at most 3, as in TypeScript: Clippy's `excessive_nesting` with the threshold in `src-tauri/clippy.toml`. It counts nested blocks (closures, `if`, `match`, loops), not struct literals or tuples, so data can still be written out in its own shape.
-- No `unwrap()` (denied). `expect()` only where failure is a bug, with a message saying why it can't happen.
-- `unsafe` is denied crate-wide. FFI modules opt in with `#[allow(unsafe_code)]`, and every `unsafe` block gets a `// SAFETY:` comment.
-- Errors: `Result<T, AppError>` with `thiserror`. Commands return errors to the frontend and never panic.
+- **No `unwrap()`** (denied everywhere). Outside tests, `expect()` only where failure is a bug, with a message saying why it can't happen. Tests `expect` with a message saying what must hold instead of returning `Result`, so a failure points at its line.
+- **`unsafe` lives in one small module per foreign API** (`platform/macos/carbon.rs`), which opts in with `#![expect(unsafe_code, reason = …)]` and offers only safe functions. Each `unsafe` block does one unsafe operation and has a `// SAFETY:` comment (both enforced by Clippy).
+- **Invariants in types:** an API that only works on the main thread is a method of a capability that holds objc2's `MainThreadMarker` (`TextInputSources`), made once where a command comes in.
+- **The webview is untrusted:** what it sends is decoded into newtypes (`ShortcutId`, `LayoutId`, `EpochMillis`) and checked types (`Card`) through serde's `try_from`, with the frontend decoders' rules. Rows read back from the database are wrapped as stored (`stored`), so the frontend can skip a row that no longer fits.
+- **Errors:** `Result<T, AppError>` with `thiserror`. A variant that wraps an error keeps it in a `source` field; one that doesn't says why in a `reason` field. Messages are lowercase and start with "cannot". Errors from other crates are converted where they occur. Commands return errors to the frontend and never panic.
+- **Row writers name every field:** they destructure the record exhaustively and bind named SQL parameters (`:app_id`), so a new field fails to compile until it's stored.
+- **Modules:** a module with files of its own has a `mod.rs`. `lib.rs` and every `mod.rs` only declare modules and re-export (`pub use self::…`), with `#[cfg]`-gated items last.
+- **Canonical's style:** derives list `Copy` first, then std traits, then other crates' traits, each alphabetically; imports come in three groups (std, other crates, `self`/`super`/`crate`); an `impl` block follows its type; a function returning `Result<()>` ends in `x?; Ok(())`; no method calls on a closing `}`; no `|&x|` patterns; struct literals take plain bindings. Hex is lowercase, except where it copies Apple's headers (`kVK_…`).
+- Lint exceptions use `#[expect(…, reason = "…")]`, never a bare `#[allow]`.
 - Prefer immutable bindings, iterators over index loops, and small pure functions. Keep OS calls in `platform/`.
+- **Dependencies:** `pnpm rust:audit` (`cargo-deny`, `src-tauri/deny.toml`) checks the macOS dependency tree for advisories, yanked releases, licenses and sources. Run it after `cargo update` and before a merge.
 
 ## Documentation
 
@@ -81,7 +91,7 @@ Each language documents code its own standard way, so editors and doc tools pick
 
 - **TypeScript: [TSDoc](https://tsdoc.org/).** Every exported function, type and constant gets a `/** … */` comment (enforced by `eslint-plugin-jsdoc` with its TSDoc preset). It starts with a one-sentence summary, followed by details if needed. Types live in the signature, never in the comment: no JSDoc `{type}` annotations. Use `@param` and `@returns` only when they add something the names and types don't say. Use `@example` for non-obvious usage and `@see` for references, such as the legacy behaviour a function reproduces.
 - **Vue:** document props, emits and models with TSDoc on the members of the type passed to `defineProps`/`defineEmits`/`defineModel`, so Vue's language tools show them where the component is used.
-- **Rust: [rustdoc](https://doc.rust-lang.org/rustdoc/how-to-write-documentation.html).** `///` on public items and `//!` for crate and module docs (enforced by the `missing_docs` lint), with a summary line first. Standard sections where they apply: `# Errors` (enforced by Clippy), `# Panics`, `# Safety` on `unsafe fn`, and `# Examples`. Link to other items with intra-doc links (``[`AppError`]``). An `unsafe` block gets a `// SAFETY:` comment.
+- **Rust: [rustdoc](https://doc.rust-lang.org/rustdoc/how-to-write-documentation.html).** `///` on public items and `//!` for crate and module docs (enforced by the `missing_docs` lint), with a summary line first. Standard sections where they apply: `# Errors` (enforced by Clippy), `# Panics`, `# Safety` on `unsafe fn`, and `# Examples`. Link to other items with intra-doc links (``[`AppError`]``). An `unsafe` block gets a `// SAFETY:` comment (enforced by Clippy).
 - **Inline comments** (`//`) explain why: constraints, legacy quirks, workarounds. They never narrate the code.
 - **Tests document through their names:** `describe`/`it` read as a spec, and there are no doc comments on test cases.
 - **Markdown** docs live in `docs/`, and the README only introduces the project and links to them.

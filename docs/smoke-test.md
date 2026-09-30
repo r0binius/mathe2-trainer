@@ -36,6 +36,7 @@ What `pnpm check` can't prove: the app running on a real Mac. Walk through it wi
 - [ ] "N mastered" shows when a shortcut is learned; leaving with **Overview** keeps the learned ones.
 - [ ] A finished set shows as completed; its shortcuts become due for review.
 - [ ] Review tests the due shortcuts, requeues a wrong one, and returns to the app when done.
+- [ ] Learning and reviewing are stored: after a restart the progress is still there, and the log shows no rejected command arguments (Rust checks what the webview sends).
 - [ ] VoiceOver (⌘F5) announces the shortcut, "Correct" and "Not quite" with the right keys.
 
 ## Options

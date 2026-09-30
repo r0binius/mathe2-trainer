@@ -75,7 +75,7 @@ State + Command (§5) are this loop in pattern terms: the model is the State, an
 | Official plugins for solved problems | `single-instance` (registered first), `autostart`, `global-shortcut`, `opener`, `positioner`, `log`. Settings and progress share one SQLite database instead of the `store` plugin (step 4). |
 | Platform code isolated               | `#[cfg(target_os = "macos")]` only inside `platform/`. Everything else sees traits.                                                                                                          |
 | Structure                            | `main.rs` only calls `run()`, which `app.rs` builds the app in. `lib.rs` and every `mod.rs` only declare modules and re-export (Canonical's layout).                                         |
-| Quality gates                        | `cargo fmt`, `cargo clippy -- -D warnings`, `cargo test`.                                                                                                                                    |
+| Quality gates                        | `cargo fmt`, `cargo clippy -- -D warnings` (pedantic plus lints for runtime failures and `unsafe` blocks), `cargo test`, and `cargo-deny` for the dependencies (`pnpm rust:audit`).          |
 
 ## 4. Vue 3 best practices we follow
 
@@ -109,7 +109,7 @@ The catalog describes patterns with classes. The intent of a pattern carries ove
 | Observer                | Vue reactivity (`computed`, `watch`) and Tauri event listeners                                          |
 | Memento                 | Immutable snapshots; restoring is a pure function of the snapshot                                       |
 
-Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs for state, and a functional leaning (immutability by default, iterators, `Result`, pure functions where possible).
+Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs for state, and a functional leaning (immutability by default, iterators, `Result`, pure functions where possible). It follows High Assurance Rust, Canonical's best practices and Rust Design Patterns (`conventions.md` → Rust): invariants in types where the compiler can check them, such as newtypes for what the webview sends and a main-thread capability for Carbon.
 
 ### 5.1 Used
 
@@ -141,7 +141,7 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 
 **Adapter: foreign APIs to our interfaces**
 
-- Rust `platform/macos/*` adapts NSWorkspace, AXUIElement and UCKeyTranslate to our traits and data types (`Keymap`, `MenuShortcut { title, keys, group }`).
+- Rust `platform/macos/*` adapts NSWorkspace, AXUIElement and UCKeyTranslate to our traits and data types (`Keymap`, `MenuShortcut { title, keys, group }`). The `unsafe` calls of each foreign API stay in one small module behind safe functions (`carbon.rs`), so the adapters around it are safe code.
 - Frontend `platform/*` adapts Tauri's `invoke`, through hand-written wrappers that decode every answer, to the domain ports (`ProgressRepository`, `SettingsRepository`).
 
 **Bridge: features independent of the OS** (`src-tauri/src/platform/`)
