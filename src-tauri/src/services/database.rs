@@ -48,9 +48,15 @@ impl Database {
     }
 
     /// Opens an empty database in memory, for tests.
+    ///
+    /// # Panics
+    ///
+    /// If SQLite can't open it or a migration fails, which only a broken migration causes.
     #[cfg(test)]
-    pub fn in_memory() -> Result<Self, AppError> {
-        Self::migrate(Connection::open_in_memory()?)
+    #[must_use]
+    pub fn in_memory() -> Self {
+        let connection = Connection::open_in_memory().expect("SQLite opens a database in memory");
+        Self::migrate(connection).expect("the migrations apply to an empty database")
     }
 
     /// Runs `work` with the connection, holding the lock only while it runs.
@@ -137,63 +143,68 @@ mod tests {
     }
 
     #[test]
-    fn json_columns_read_back_what_was_written() -> Result<(), AppError> {
-        let connection = Connection::open_in_memory()?;
-        let ids = vec!["macos:cmd+m".to_owned()];
+    fn json_columns_read_back_what_was_written() {
+        let connection = Connection::open_in_memory().expect("SQLite opens a database in memory");
+        let ids = vec!["macos/Meta+m".to_owned()];
 
-        let Json(read): Json<Vec<String>> =
-            connection.query_row("SELECT ?1", (Json(&ids),), |row| row.get(0))?;
+        let Json(read): Json<Vec<String>> = connection
+            .query_row("SELECT ?1", (Json(&ids),), |row| row.get(0))
+            .expect("a list of strings reads back");
         let wrong_shape: rusqlite::Result<Json<Vec<String>>> =
             connection.query_row("SELECT '[1]'", (), |row| row.get(0));
 
         assert_eq!(read, ids);
         assert!(wrong_shape.is_err());
-        Ok(())
     }
 
     #[test]
-    fn runs_work_and_returns_its_result() -> Result<(), AppError> {
-        let database = Arc::new(Database::in_memory()?);
+    fn runs_work_and_returns_its_result() {
+        let database = Arc::new(Database::in_memory());
         let answer: i64 = tauri::async_runtime::block_on(
             database.run(|connection| Ok(connection.query_row("SELECT 42", (), |row| row.get(0))?)),
-        )?;
+        )
+        .expect("the work runs");
 
         assert_eq!(answer, 42);
-        Ok(())
     }
 
     #[test]
     #[expect(clippy::panic, reason = "the panic is what's being tested")]
-    fn reports_work_that_panicked_as_interrupted() -> Result<(), AppError> {
-        let database = Arc::new(Database::in_memory()?);
+    fn reports_work_that_panicked_as_interrupted() {
+        let database = Arc::new(Database::in_memory());
         let result: Result<(), AppError> =
             tauri::async_runtime::block_on(database.run(|_| panic!("work failed")));
 
         assert!(matches!(result, Err(AppError::Interrupted { .. })));
-        Ok(())
     }
 
     #[test]
-    fn adding_trained_shortcuts_keeps_the_records_stored_before() -> Result<(), AppError> {
-        let mut connection = Connection::open_in_memory()?;
+    fn adding_trained_shortcuts_keeps_the_records_stored_before() {
+        let mut connection =
+            Connection::open_in_memory().expect("SQLite opens a database in memory");
         let before = &MIGRATIONS[..2];
         let insert = "
             INSERT INTO set_progress (app_id, set_id, layout, learned, updated_at)
-            VALUES ('macos', 'windows', 'German', '[\"macos:cmd+m\"]', 1000)";
+            VALUES ('macos', 'windows', 'German', '[\"macos/Meta+m\"]', 1000)";
+        let select = "SELECT learned, trained FROM set_progress";
 
-        Migrations::from_slice(before).to_latest(&mut connection)?;
-        connection.execute(insert, ())?;
-        Migrations::from_slice(MIGRATIONS).to_latest(&mut connection)?;
-        let (learned, trained): (String, String) =
-            connection.query_row("SELECT learned, trained FROM set_progress", (), |row| {
-                Ok((row.get(0)?, row.get(1)?))
-            })?;
+        Migrations::from_slice(before)
+            .to_latest(&mut connection)
+            .expect("the migrations before trained shortcuts apply");
+        connection
+            .execute(insert, ())
+            .expect("a record without trained shortcuts is stored");
+        Migrations::from_slice(MIGRATIONS)
+            .to_latest(&mut connection)
+            .expect("the migration adding trained shortcuts applies");
+        let (learned, trained): (String, String) = connection
+            .query_row(select, (), |row| Ok((row.get(0)?, row.get(1)?)))
+            .expect("the record is still there");
 
         assert_eq!(
             (learned.as_str(), trained.as_str()),
-            (r#"["macos:cmd+m"]"#, "[]")
+            (r#"["macos/Meta+m"]"#, "[]")
         );
-        Ok(())
     }
 
     #[test]
@@ -210,17 +221,21 @@ mod tests {
     }
 
     #[test]
-    fn reopening_keeps_the_data() -> Result<(), Box<dyn std::error::Error>> {
+    fn reopening_keeps_the_data() {
         let directory = std::env::temp_dir().join(format!("mouseless-test-{}", std::process::id()));
         let insert = "INSERT INTO settings (key, value) VALUES ('showDockIcon', 'false')";
         let count = "SELECT count(*) FROM settings";
 
-        Database::open_in(&directory)?.with(|connection| Ok(connection.execute(insert, ())?))?;
-        let rows: i64 = Database::open_in(&directory)?
-            .with(|connection| Ok(connection.query_row(count, (), |row| row.get(0))?))?;
-        std::fs::remove_dir_all(&directory)?;
+        Database::open_in(&directory)
+            .expect("the database opens in a new directory")
+            .with(|connection| Ok(connection.execute(insert, ())?))
+            .expect("a setting is stored");
+        let rows: i64 = Database::open_in(&directory)
+            .expect("the database opens again")
+            .with(|connection| Ok(connection.query_row(count, (), |row| row.get(0))?))
+            .expect("the settings are counted");
+        std::fs::remove_dir_all(&directory).expect("the test directory is removed");
 
         assert_eq!(rows, 1);
-        Ok(())
     }
 }

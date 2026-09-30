@@ -115,11 +115,11 @@ mod tests {
         };
 
         assert_eq!(
-            serde_json::to_value(&error).ok(),
-            Some(json!({
+            serde_json::to_value(&error).expect("an error serializes"),
+            json!({
                 "kind": "storage",
                 "message": "cannot find the data directory: unknown path",
-            })),
+            }),
         );
     }
 

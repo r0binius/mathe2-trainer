@@ -486,33 +486,39 @@ mod tests {
     }
 
     fn logged_review(row: &Row<'_>) -> rusqlite::Result<LoggedReview> {
-        let (id, layout, at, offset) = (row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?);
+        let id = row.get("shortcut_id")?;
+        let layout = row.get("layout")?;
+        let at = row.get("reviewed_at")?;
+        let offset = row.get("utc_offset_minutes")?;
+        let grade = row.get("grade")?;
+        let failed = row.get("failed")?;
+        let duration = row.get("duration_ms")?;
 
-        Ok((
-            id,
-            layout,
-            at,
-            offset,
-            row.get(4)?,
-            row.get(5)?,
-            row.get(6)?,
-        ))
+        Ok((id, layout, at, offset, grade, failed, duration))
     }
 
-    fn logged(database: &Database) -> Result<Vec<LoggedReview>, AppError> {
-        database.with(|connection| Ok(query_all(connection, SELECT_LOG, logged_review)?))
+    fn logged(database: &Database) -> Vec<LoggedReview> {
+        database
+            .with(|connection| Ok(query_all(connection, SELECT_LOG, logged_review)?))
+            .expect("the review log is read")
     }
 
-    fn loaded(database: &Database) -> Result<StoredProgress, AppError> {
-        database.with(|connection| load(connection))
+    fn loaded(database: &Database) -> StoredProgress {
+        database
+            .with(|connection| load(connection))
+            .expect("the progress loads")
     }
 
-    fn saved(database: &Database, record: &SetRecord) -> Result<(), AppError> {
-        database.with(|connection| save_set(connection, record))
+    fn saved(database: &Database, record: &SetRecord) {
+        database
+            .with(|connection| save_set(connection, record))
+            .expect("the set record is saved");
     }
 
-    fn reviewed(database: &Database, review: &Review, card: Option<&Card>) -> Result<(), AppError> {
-        database.with(|connection| record_review(connection, review, card))
+    fn reviewed(database: &Database, review: &Review, card: Option<&Card>) {
+        database
+            .with(|connection| record_review(connection, review, card))
+            .expect("the review is recorded");
     }
 
     #[test]
@@ -543,13 +549,16 @@ mod tests {
             "durationMs": 1_500,
         });
 
-        let set = serde_json::to_value(record(GERMAN, &["macos/Meta+m"], None)).ok();
-        let card = serde_json::to_value(card(GERMAN, 2)).ok();
-        let review_sent = serde_json::from_value::<Review>(review_json).ok();
+        let set = serde_json::to_value(record(GERMAN, &["macos/Meta+m"], None));
+        let card = serde_json::to_value(card(GERMAN, 2));
+        let review_sent = serde_json::from_value::<Review>(review_json);
 
-        assert_eq!(set, Some(set_json));
-        assert_eq!(card, Some(card_json));
-        assert_eq!(review_sent, Some(review(Grade::Hard)));
+        assert_eq!(set.expect("a set record serializes"), set_json);
+        assert_eq!(card.expect("a card serializes"), card_json);
+        assert_eq!(
+            review_sent.expect("the review deserializes"),
+            review(Grade::Hard)
+        );
     }
 
     #[test]
@@ -606,124 +615,120 @@ mod tests {
     }
 
     #[test]
-    fn starts_empty() -> Result<(), AppError> {
-        assert_eq!(loaded(&Database::in_memory()?)?, StoredProgress::default());
-        Ok(())
+    fn starts_empty() {
+        assert_eq!(loaded(&Database::in_memory()), StoredProgress::default());
     }
 
     #[test]
-    fn keeps_one_record_per_set_and_layout() -> Result<(), AppError> {
-        let database = Database::in_memory()?;
+    fn keeps_one_record_per_set_and_layout() {
+        let database = Database::in_memory();
         let german = record(GERMAN, &["macos/Meta+m", "macos/Meta+w"], Some(900));
         let us = record(US, &[], None);
 
-        saved(&database, &record(GERMAN, &["macos/Meta+m"], None))?;
-        saved(&database, &german)?;
-        saved(&database, &us)?;
+        saved(&database, &record(GERMAN, &["macos/Meta+m"], None));
+        saved(&database, &german);
+        saved(&database, &us);
 
-        assert_eq!(loaded(&database)?.sets, [german, us]);
-        Ok(())
+        assert_eq!(loaded(&database).sets, [german, us]);
     }
 
     #[test]
-    fn logs_a_review_with_the_card_it_produced() -> Result<(), AppError> {
-        let database = Database::in_memory()?;
+    fn logs_a_review_with_the_card_it_produced() {
+        let database = Database::in_memory();
 
-        reviewed(&database, &review(Grade::Good), Some(&card(GERMAN, 1)))?;
-        reviewed(&database, &review(Grade::Easy), Some(&card(GERMAN, 2)))?;
+        reviewed(&database, &review(Grade::Good), Some(&card(GERMAN, 1)));
+        reviewed(&database, &review(Grade::Easy), Some(&card(GERMAN, 2)));
 
-        assert_eq!(loaded(&database)?.cards, [card(GERMAN, 2)]);
-        assert_eq!(logged(&database)?, [logged_as("good"), logged_as("easy")]);
-        Ok(())
+        assert_eq!(loaded(&database).cards, [card(GERMAN, 2)]);
+        assert_eq!(logged(&database), [logged_as("good"), logged_as("easy")]);
     }
 
     #[test]
-    fn logs_a_failed_first_test_without_a_card() -> Result<(), AppError> {
-        let database = Database::in_memory()?;
+    fn logs_a_failed_first_test_without_a_card() {
+        let database = Database::in_memory();
 
-        reviewed(&database, &review(Grade::Again), None)?;
+        reviewed(&database, &review(Grade::Again), None);
 
-        assert_eq!(loaded(&database)?.cards, []);
-        assert_eq!(logged(&database)?.len(), 1);
-        Ok(())
+        assert_eq!(loaded(&database).cards, []);
+        assert_eq!(logged(&database).len(), 1);
     }
 
     #[test]
-    fn keeps_cards_per_layout() -> Result<(), AppError> {
-        let database = Database::in_memory()?;
+    fn keeps_cards_per_layout() {
+        let database = Database::in_memory();
 
-        reviewed(&database, &review(Grade::Good), Some(&card(GERMAN, 1)))?;
-        reviewed(&database, &review(Grade::Good), Some(&card(US, 1)))?;
+        reviewed(&database, &review(Grade::Good), Some(&card(GERMAN, 1)));
+        reviewed(&database, &review(Grade::Good), Some(&card(US, 1)));
 
-        assert_eq!(loaded(&database)?.cards, [card(GERMAN, 1), card(US, 1)]);
-        Ok(())
+        assert_eq!(loaded(&database).cards, [card(GERMAN, 1), card(US, 1)]);
     }
 
     #[test]
-    fn replacing_keeps_the_review_log() -> Result<(), AppError> {
-        let database = Database::in_memory()?;
+    fn replacing_keeps_the_review_log() {
+        let database = Database::in_memory();
         let reconciled = StoredProgress {
             sets: vec![record(US, &[], None)],
             cards: vec![card(US, 1)],
         };
 
-        saved(&database, &record(GERMAN, &[], None))?;
-        reviewed(&database, &review(Grade::Good), Some(&card(GERMAN, 1)))?;
-        database.with(|connection| replace(connection, &reconciled))?;
+        saved(&database, &record(GERMAN, &[], None));
+        reviewed(&database, &review(Grade::Good), Some(&card(GERMAN, 1)));
+        database
+            .with(|connection| replace(connection, &reconciled))
+            .expect("the progress is replaced");
 
-        assert_eq!(loaded(&database)?, reconciled);
-        assert_eq!(logged(&database)?.len(), 1);
-        Ok(())
+        assert_eq!(loaded(&database), reconciled);
+        assert_eq!(logged(&database).len(), 1);
     }
 
     #[test]
-    fn reset_deletes_everything() -> Result<(), AppError> {
-        let database = Database::in_memory()?;
+    fn reset_deletes_everything() {
+        let database = Database::in_memory();
 
-        saved(&database, &record(GERMAN, &[], None))?;
-        reviewed(&database, &review(Grade::Good), Some(&card(GERMAN, 1)))?;
-        database.with(reset)?;
+        saved(&database, &record(GERMAN, &[], None));
+        reviewed(&database, &review(Grade::Good), Some(&card(GERMAN, 1)));
+        database.with(reset).expect("the progress is reset");
 
-        assert_eq!(loaded(&database)?, StoredProgress::default());
-        assert_eq!(logged(&database)?, []);
-        Ok(())
+        assert_eq!(loaded(&database), StoredProgress::default());
+        assert_eq!(logged(&database), []);
     }
 
     #[test]
-    fn keeps_trained_shortcuts() -> Result<(), AppError> {
-        let database = Database::in_memory()?;
+    fn keeps_trained_shortcuts() {
+        let database = Database::in_memory();
         let mut trained = record(GERMAN, &["macos/Meta+m"], None);
         trained.progress.trained = vec![shortcut("macos/Meta+w")];
 
-        saved(&database, &trained)?;
+        saved(&database, &trained);
 
-        assert_eq!(loaded(&database)?.sets, [trained]);
-        Ok(())
+        assert_eq!(loaded(&database).sets, [trained]);
     }
 
     #[test]
-    fn the_schema_rejects_trained_ids_that_are_no_list() -> Result<(), AppError> {
-        let database = Database::in_memory()?;
+    fn the_schema_rejects_trained_ids_that_are_no_list() {
+        let database = Database::in_memory();
         let not_a_list = "
             INSERT INTO set_progress (app_id, set_id, layout, learned, trained, updated_at)
             VALUES ('macos', 'windows', 'German', '[]', 'x', 1000)";
 
-        let inserted = database.with(|connection| Ok(connection.execute(not_a_list, ())))?;
+        let inserted = database
+            .with(|connection| Ok(connection.execute(not_a_list, ())))
+            .expect("the insert runs, whatever it returns");
 
         assert!(inserted.is_err());
-        Ok(())
     }
 
     #[test]
-    fn the_schema_rejects_learned_ids_that_are_no_list() -> Result<(), AppError> {
-        let database = Database::in_memory()?;
+    fn the_schema_rejects_learned_ids_that_are_no_list() {
+        let database = Database::in_memory();
         let not_a_list = "
             INSERT INTO set_progress (app_id, set_id, layout, learned, updated_at)
             VALUES ('macos', 'windows', 'German', '{}', 1000)";
 
-        let inserted = database.with(|connection| Ok(connection.execute(not_a_list, ())))?;
+        let inserted = database
+            .with(|connection| Ok(connection.execute(not_a_list, ())))
+            .expect("the insert runs, whatever it returns");
 
         assert!(inserted.is_err());
-        Ok(())
     }
 }

@@ -145,37 +145,49 @@ mod tests {
         }
     }
 
-    fn stored(database: &Database) -> Result<Vec<Entry>, AppError> {
-        let sql = "SELECT key, value FROM settings ORDER BY key";
-
-        database.with(|connection| Ok(query_all(connection, sql, read_entry)?))
+    fn loaded(database: &Database) -> Settings {
+        database
+            .with(|connection| load(connection))
+            .expect("the settings load")
     }
 
-    fn insert(database: &Database, key: &str, value: &str) -> Result<(), AppError> {
-        database.with(|connection| {
-            connection.execute(
-                "INSERT INTO settings (key, value) VALUES (?1, ?2)",
-                (key, value),
-            )?;
-            Ok(())
-        })
+    fn saved(database: &Database, settings: &Settings) {
+        database
+            .with(|connection| save(connection, settings))
+            .expect("the settings are saved");
+    }
+
+    fn stored(database: &Database) -> Vec<Entry> {
+        let sql = "SELECT key, value FROM settings ORDER BY key";
+
+        database
+            .with(|connection| Ok(query_all(connection, sql, read_entry)?))
+            .expect("the stored settings are read")
+    }
+
+    fn insert(database: &Database, key: &str, value: &str) {
+        let sql = "INSERT INTO settings (key, value) VALUES (?1, ?2)";
+
+        database
+            .with(|connection| Ok(connection.execute(sql, (key, value))?))
+            .expect("a setting is stored");
     }
 
     #[test]
     fn reaches_the_frontend_in_camel_case() {
         assert_eq!(
-            serde_json::to_value(changed()).ok(),
-            Some(json!({
+            serde_json::to_value(changed()).expect("the settings serialize"),
+            json!({
                 "trigger": { "kind": "shortcut", "keys": ["Meta", "Shift", "m"] },
                 "showMenuBarIcon": true,
                 "showDockIcon": false,
                 "launchAtLogin": true,
                 "language": "de",
-            })),
+            }),
         );
         assert_eq!(
-            serde_json::to_value(Trigger::HoldCommand).ok(),
-            Some(json!({ "kind": "holdCommand" })),
+            serde_json::to_value(Trigger::HoldCommand).expect("a trigger serializes"),
+            json!({ "kind": "holdCommand" }),
         );
     }
 
@@ -194,34 +206,29 @@ mod tests {
     }
 
     #[test]
-    fn starts_with_the_defaults() -> Result<(), AppError> {
-        let database = Database::in_memory()?;
+    fn starts_with_the_defaults() {
+        let database = Database::in_memory();
 
-        assert_eq!(
-            database.with(|connection| load(connection))?,
-            Settings::default()
-        );
-        Ok(())
+        assert_eq!(loaded(&database), Settings::default());
     }
 
     #[test]
-    fn loads_what_was_saved() -> Result<(), AppError> {
-        let database = Database::in_memory()?;
+    fn loads_what_was_saved() {
+        let database = Database::in_memory();
 
-        database.with(|connection| save(connection, &changed()))?;
+        saved(&database, &changed());
 
-        assert_eq!(database.with(|connection| load(connection))?, changed());
-        Ok(())
+        assert_eq!(loaded(&database), changed());
     }
 
     #[test]
-    fn stores_only_what_differs_from_the_defaults() -> Result<(), AppError> {
-        let database = Database::in_memory()?;
+    fn stores_only_what_differs_from_the_defaults() {
+        let database = Database::in_memory();
 
-        database.with(|connection| save(connection, &changed()))?;
+        saved(&database, &changed());
 
         assert_eq!(
-            stored(&database)?,
+            stored(&database),
             [
                 ("language".to_owned(), r#""de""#.to_owned()),
                 ("showDockIcon".to_owned(), "false".to_owned()),
@@ -231,37 +238,34 @@ mod tests {
                 ),
             ],
         );
-        Ok(())
     }
 
     #[test]
-    fn forgets_a_setting_changed_back_to_its_default() -> Result<(), AppError> {
-        let database = Database::in_memory()?;
+    fn forgets_a_setting_changed_back_to_its_default() {
+        let database = Database::in_memory();
 
-        database.with(|connection| save(connection, &changed()))?;
-        database.with(|connection| save(connection, &Settings::default()))?;
+        saved(&database, &changed());
+        saved(&database, &Settings::default());
 
-        assert_eq!(stored(&database)?, []);
-        Ok(())
+        assert_eq!(stored(&database), []);
     }
 
     #[test]
-    fn keeps_the_default_where_a_stored_value_no_longer_fits() -> Result<(), AppError> {
-        let database = Database::in_memory()?;
+    fn keeps_the_default_where_a_stored_value_no_longer_fits() {
+        let database = Database::in_memory();
 
-        insert(&database, "showDockIcon", r#""no""#)?;
-        insert(&database, "trigger", r#"{"kind":"doubleTap"}"#)?;
-        insert(&database, "showDockIcons", "false")?;
-        insert(&database, "launchAtLogin", "false")?;
-        insert(&database, "language", r#""fr""#)?;
+        insert(&database, "showDockIcon", r#""no""#);
+        insert(&database, "trigger", r#"{"kind":"doubleTap"}"#);
+        insert(&database, "showDockIcons", "false");
+        insert(&database, "launchAtLogin", "false");
+        insert(&database, "language", r#""fr""#);
 
         assert_eq!(
-            database.with(|connection| load(connection))?,
+            loaded(&database),
             Settings {
                 launch_at_login: false,
                 ..Settings::default()
             },
         );
-        Ok(())
     }
 }

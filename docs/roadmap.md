@@ -392,9 +392,9 @@ Branch `chore/rust-review`. The Rust code is refactored along three references, 
 - [x] RR.4 Errors: `source` and `reason` fields, "cannot …" messages
 - [x] RR.5 Newtypes and checks for what the webview sends
 - [x] RR.6 Row writers that name every field and SQL parameter
-- [ ] RR.7 Canonical style
+- [x] RR.7 Canonical style
   - [x] RR.7a Derives, imports, ordering, returns and struct literals
-  - [ ] RR.7b Tests that `expect` instead of returning `Result`
+  - [x] RR.7b Tests that `expect` instead of returning `Result`
 - [ ] RR.8 `cargo-deny`
 - [ ] RR.9 Conventions, UML and what we learned
 

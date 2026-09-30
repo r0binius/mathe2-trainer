@@ -2,5 +2,7 @@
 excessive-nesting-threshold = 3
 # A test that slices out of bounds fails, which is what a test should do.
 allow-indexing-slicing-in-tests = true
+# Tests fail with a message at the failing line (Canonical), rather than returning the error.
+allow-expect-in-tests = true
 # Product names that `doc_markdown` would otherwise want in backticks; `..` keeps its defaults.
 doc-valid-idents = ["WebKit", ".."]

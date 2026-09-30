@@ -174,20 +174,22 @@ mod tests {
     fn reaches_the_frontend_as_the_bare_value() {
         let id = ShortcutId::stored("macos/Meta+m".to_owned());
 
-        assert_eq!(serde_json::to_value(id).ok(), Some(json!("macos/Meta+m")));
-        assert_eq!(
-            serde_json::to_value(EpochMillis::stored(1_000)).ok(),
-            Some(json!(1_000))
-        );
+        let id = serde_json::to_value(id).expect("a shortcut ID serializes");
+        let time = serde_json::to_value(EpochMillis::stored(1_000)).expect("a time serializes");
+
+        assert_eq!(id, json!("macos/Meta+m"));
+        assert_eq!(time, json!(1_000));
     }
 
     #[test]
-    fn reads_back_what_the_database_stores_without_checking_again() -> rusqlite::Result<()> {
-        let connection = rusqlite::Connection::open_in_memory()?;
+    fn reads_back_what_the_database_stores_without_checking_again() {
+        let connection =
+            rusqlite::Connection::open_in_memory().expect("SQLite opens a database in memory");
 
-        let id: ShortcutId = connection.query_row("SELECT 'no-slash'", (), |row| row.get(0))?;
+        let id: ShortcutId = connection
+            .query_row("SELECT 'no-slash'", (), |row| row.get(0))
+            .expect("a text column reads as a shortcut ID");
 
         assert_eq!(id, ShortcutId::stored("no-slash".to_owned()));
-        Ok(())
     }
 }

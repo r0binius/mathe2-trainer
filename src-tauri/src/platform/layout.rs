@@ -76,13 +76,13 @@ mod tests {
         };
 
         assert_eq!(
-            serde_json::to_value(&layout).ok(),
-            Some(json!({
+            serde_json::to_value(&layout).expect("a layout serializes"),
+            json!({
                 "id": "com.apple.keylayout.German",
                 "keymap": {
                     "Backquote": { "value": "^", "withShift": "°", "withAlt": "„", "withShiftAlt": "“" },
                 },
-            })),
+            }),
         );
     }
 }
