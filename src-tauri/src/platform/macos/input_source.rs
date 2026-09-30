@@ -46,10 +46,8 @@ pub fn current_layout(
         .map(|(key, code)| Ok((code, characters(tables, key, keyboard_type)?)))
         .collect::<Result<Keymap, AppError>>()?;
 
-    Ok(Layout {
-        id: id.to_string(),
-        keymap,
-    })
+    let id = id.to_string();
+    Ok(Layout { id, keymap })
 }
 
 /// The keyboard type to translate keys for: the connected keyboard's, or the first one macOS
@@ -79,7 +77,7 @@ fn keyboard_type_of(keyboard: Keyboard) -> Option<u8> {
         Keyboard::Iso => ISO_KEYBOARD,
     };
 
-    (0..=u8::MAX).find(|&keyboard_type| carbon::layout_type(keyboard_type) == wanted)
+    (0..=u8::MAX).find(|keyboard_type| carbon::layout_type(*keyboard_type) == wanted)
 }
 
 /// What a key types without a modifier and with Shift, Option or both.

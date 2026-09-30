@@ -32,7 +32,8 @@ pub async fn save_set_progress(
 ) -> Result<(), AppError> {
     database
         .run(move |connection| progress::save_set(connection, &record))
-        .await
+        .await?;
+    Ok(())
 }
 
 /// Logs a review and stores the card it produced, if any.
@@ -48,7 +49,8 @@ pub async fn record_review(
 ) -> Result<(), AppError> {
     database
         .run(move |connection| progress::record_review(connection, &review, card.as_ref()))
-        .await
+        .await?;
+    Ok(())
 }
 
 /// Replaces all set records and cards with reconciled ones.
@@ -63,7 +65,8 @@ pub async fn replace_progress(
 ) -> Result<(), AppError> {
     database
         .run(move |connection| progress::replace(connection, &progress))
-        .await
+        .await?;
+    Ok(())
 }
 
 /// Deletes all progress and the review log.
@@ -73,5 +76,6 @@ pub async fn replace_progress(
 /// Returns a database error if it can't be deleted.
 #[tauri::command]
 pub async fn reset_progress(database: State<'_, Arc<Database>>) -> Result<(), AppError> {
-    database.run(progress::reset).await
+    database.run(progress::reset).await?;
+    Ok(())
 }

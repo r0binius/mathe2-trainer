@@ -32,5 +32,6 @@ pub async fn set_settings(
 ) -> Result<(), AppError> {
     database
         .run(move |connection| settings::save(connection, &settings))
-        .await
+        .await?;
+    Ok(())
 }

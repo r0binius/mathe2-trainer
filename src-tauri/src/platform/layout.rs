@@ -10,7 +10,7 @@ use crate::platform::KeyCode;
 /// The characters one key types without a modifier and with Shift, Option (Alt) or both.
 ///
 /// A combination that types nothing is an empty string.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct KeyCharacters {
     /// Without a modifier.
@@ -29,7 +29,7 @@ pub struct KeyCharacters {
 pub type Keymap = BTreeMap<KeyCode, KeyCharacters>;
 
 /// A keyboard layout and what its keys type, in the shape of the frontend's `CurrentLayout`.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 pub struct Layout {
     /// The system's ID of the layout, such as `com.apple.keylayout.German`. Progress is kept per
     /// layout, so the ID must not change with the system language.
@@ -58,8 +58,9 @@ pub trait KeymapSource {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use serde_json::json;
+
+    use super::*;
 
     #[test]
     fn reaches_the_frontend_in_the_shape_of_its_current_layout() {

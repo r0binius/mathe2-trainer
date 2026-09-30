@@ -16,7 +16,6 @@ const COMMANDS: &[&str] = &[
 ];
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    Ok(tauri_build::try_build(
-        Attributes::new().app_manifest(AppManifest::new().commands(COMMANDS)),
-    )?)
+    tauri_build::try_build(Attributes::new().app_manifest(AppManifest::new().commands(COMMANDS)))?;
+    Ok(())
 }

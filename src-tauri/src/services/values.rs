@@ -23,10 +23,8 @@ impl InvalidValue {
     /// Rejects a `value` of the given kind for the given `reason`.
     #[must_use]
     pub fn new(value: &'static str, reason: &str) -> Self {
-        Self {
-            value,
-            reason: reason.to_owned(),
-        }
+        let reason = reason.to_owned();
+        Self { value, reason }
     }
 }
 

@@ -10,11 +10,8 @@ use serde_json::{Map, Value};
 use crate::error::AppError;
 use crate::services::database::query_all;
 
-/// A stored setting: its name and its value as JSON text.
-type Entry = (String, String);
-
 /// How the popover is opened.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(tag = "kind", rename_all = "camelCase", deny_unknown_fields)]
 pub enum Trigger {
     /// Holding ⌘ on its own for a moment.
@@ -27,7 +24,7 @@ pub enum Trigger {
 }
 
 /// The language of the interface.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Language {
     /// The system's preferred language, if the interface is written in it, else English.
@@ -39,7 +36,7 @@ pub enum Language {
 }
 
 /// Everything the user can set, in the shape the frontend sends and receives.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Settings {
     /// How the popover is opened.
@@ -101,8 +98,12 @@ pub fn save(connection: &mut Connection, settings: &Settings) -> Result<(), AppE
             )?;
         }
     }
-    Ok(transaction.commit()?)
+    transaction.commit()?;
+    Ok(())
 }
+
+/// A stored setting: its name and its value as JSON text.
+type Entry = (String, String);
 
 // The value is read as text, not as JSON, so a value that no longer parses only loses its own
 // setting instead of failing the whole query.
@@ -128,9 +129,10 @@ fn fields(settings: &Settings) -> rusqlite::Result<Map<String, Value>> {
 
 #[cfg(test)]
 mod tests {
+    use serde_json::json;
+
     use super::*;
     use crate::services::database::Database;
-    use serde_json::json;
 
     fn changed() -> Settings {
         Settings {

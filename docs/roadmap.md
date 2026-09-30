@@ -381,6 +381,7 @@ Branch `chore/rust-review`. The Rust code is refactored along three references, 
 - Canonical's module layout: a module with files of its own has a `mod.rs`, which only declares modules and re-exports, instead of `platform.rs` next to `platform/`.
 - The main thread is proven by a token: the Carbon calls take objc2's `MainThreadMarker`, checked once where a command comes in, instead of a runtime check inside every call (High Assurance: functions on a resource called in the right sequence).
 - Rust validates what the webview sends (High Assurance: external inputs must be validated; Tauri treats the webview as untrusted): newtypes for shortcut IDs, layout IDs and times, and range checks on a card's memory, decoded with serde's `try_from`. The frontend's decoders stay.
+- Rust tests `expect` with a message instead of returning `Result` (Clippy's `allow-expect-in-tests`), so a failure points at its line, as Canonical asks; `unwrap` stays denied everywhere.
 - `cargo-deny` checks the Rust dependencies (advisories, sources, licenses) in its own script, `pnpm audit:rust`, so `pnpm check` stays offline.
 
 **Sub-steps**
@@ -391,7 +392,9 @@ Branch `chore/rust-review`. The Rust code is refactored along three references, 
 - [x] RR.4 Errors: `source` and `reason` fields, "cannot …" messages
 - [x] RR.5 Newtypes and checks for what the webview sends
 - [x] RR.6 Row writers that name every field and SQL parameter
-- [ ] RR.7 Canonical style: derives, imports, ordering, returns
+- [ ] RR.7 Canonical style
+  - [x] RR.7a Derives, imports, ordering, returns and struct literals
+  - [ ] RR.7b Tests that `expect` instead of returning `Result`
 - [ ] RR.8 `cargo-deny`
 - [ ] RR.9 Conventions, UML and what we learned
 

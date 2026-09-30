@@ -91,7 +91,7 @@ impl Serialize for AppError {
 ///
 /// Serialized in camelCase, like the frontend's string union. Several variants of [`AppError`] can
 /// share a kind, since the frontend only needs to tell apart what it handles differently.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ErrorKind {
     /// Where the app keeps its data isn't available.
@@ -104,8 +104,9 @@ pub enum ErrorKind {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use serde_json::json;
+
+    use super::*;
 
     #[test]
     fn reaches_the_frontend_as_kind_and_message() {

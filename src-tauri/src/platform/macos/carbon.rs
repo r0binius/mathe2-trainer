@@ -69,7 +69,7 @@ const MAX_LENGTH: usize = 4;
 /// Holding one proves the code runs on the main thread. It's only made there and, like the
 /// [`MainThreadMarker`] it holds, can't be sent to another thread, so the compiler checks what a
 /// runtime check would otherwise do on every call.
-#[derive(Clone, Copy, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct TextInputSources {
     _main_thread: MainThreadMarker,
 }
@@ -137,8 +137,8 @@ impl TextInputSources {
         let center = CFNotificationCenter::distributed_center()
             .ok_or_else(|| AppError::keymap("there's no distributed notification center"))?;
         // SAFETY: a constant the framework defines for the whole run.
-        let name = unsafe { kTISNotifySelectedKeyboardInputSourceChanged }
-            .ok_or_else(|| AppError::keymap("there's no layout change notification"))?;
+        let name = unsafe { kTISNotifySelectedKeyboardInputSourceChanged };
+        let name = name.ok_or_else(|| AppError::keymap("there's no layout change notification"))?;
         // Observed for the whole run and never removed, so the callback is leaked on purpose.
         let observer: &'static F = Box::leak(Box::new(on_change));
 
@@ -168,7 +168,8 @@ impl TextInputSources {
     ) -> Option<&'source T> {
         // SAFETY: called on the main thread, which `self` proves, with references valid for the
         // call.
-        let pointer = unsafe { TISGetInputSourceProperty(source, key) }.cast::<CFType>();
+        let pointer = unsafe { TISGetInputSourceProperty(source, key) };
+        let pointer = pointer.cast::<CFType>();
         // SAFETY: a Get function returns null or a CF object owned by `source`, alive as long as
         // `source` is. `downcast_ref` checks its type before it's used as a `T`.
         let value = unsafe { pointer.as_ref() }?;

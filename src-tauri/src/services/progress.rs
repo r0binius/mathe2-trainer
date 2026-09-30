@@ -18,7 +18,7 @@ const STABILITY: std::ops::RangeInclusive<f64> = 0.001..=36_500.0;
 const DIFFICULTY: std::ops::RangeInclusive<f64> = 1.0..=10.0;
 
 /// Which shortcuts of a set are learned on one keyboard layout.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SetRecord {
     /// The app the set belongs to.
@@ -32,7 +32,7 @@ pub struct SetRecord {
 }
 
 /// A set's learning progress, as the frontend's `SetProgress`.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SetProgress {
     /// The learned shortcut IDs.
@@ -118,7 +118,7 @@ impl TryFrom<CardFields> for Card {
 }
 
 /// How well a shortcut was recalled, on FSRS's scale.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Grade {
     /// Forgotten.
@@ -131,9 +131,27 @@ pub enum Grade {
     Easy,
 }
 
+impl Grade {
+    /// The grade as it's stored, the same word the frontend uses.
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Again => "again",
+            Self::Hard => "hard",
+            Self::Good => "good",
+            Self::Easy => "easy",
+        }
+    }
+}
+
+impl ToSql for Grade {
+    fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
+        self.as_str().to_sql()
+    }
+}
+
 /// A graded test of a shortcut and what was measured, one entry of the review log. It only comes
 /// from the frontend, so it's never serialized.
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Review {
     /// The shortcut's ID.
@@ -154,31 +172,13 @@ pub struct Review {
 
 /// All stored progress that depends on which shortcuts exist, as the frontend's
 /// `StoredProgress`.
-#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct StoredProgress {
     /// Every set's progress, on every layout.
     pub sets: Vec<SetRecord>,
     /// Every card, on every layout.
     pub cards: Vec<Card>,
-}
-
-impl Grade {
-    /// The grade as it's stored, the same word the frontend uses.
-    fn as_str(self) -> &'static str {
-        match self {
-            Self::Again => "again",
-            Self::Hard => "hard",
-            Self::Good => "good",
-            Self::Easy => "easy",
-        }
-    }
-}
-
-impl ToSql for Grade {
-    fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
-        self.as_str().to_sql()
-    }
 }
 
 const SELECT_SETS: &str = "
@@ -255,7 +255,8 @@ pub fn record_review(
     if let Some(card) = card {
         insert_card(&transaction, card)?;
     }
-    Ok(transaction.commit()?)
+    transaction.commit()?;
+    Ok(())
 }
 
 /// Replaces all set records and cards, such as with what reconciling left. The review log is
@@ -274,7 +275,8 @@ pub fn replace(connection: &mut Connection, progress: &StoredProgress) -> Result
     for card in &progress.cards {
         insert_card(&transaction, card)?;
     }
-    Ok(transaction.commit()?)
+    transaction.commit()?;
+    Ok(())
 }
 
 /// Deletes all progress: set records, cards and the review log, on every layout.
@@ -287,7 +289,8 @@ pub fn reset(connection: &mut Connection) -> Result<(), AppError> {
 
     delete_sets_and_cards(&transaction)?;
     transaction.execute("DELETE FROM reviews", ())?;
-    Ok(transaction.commit()?)
+    transaction.commit()?;
+    Ok(())
 }
 
 fn delete_sets_and_cards(connection: &Connection) -> rusqlite::Result<()> {
@@ -357,20 +360,27 @@ fn insert_card(connection: &Connection, card: &Card) -> rusqlite::Result<()> {
 }
 
 fn read_set_record(row: &Row<'_>) -> rusqlite::Result<SetRecord> {
+    let app_id = row.get("app_id")?;
+    let set_id = row.get("set_id")?;
+    let layout = row.get("layout")?;
     let Json(learned): Json<Vec<String>> = row.get("learned")?;
     let Json(trained): Json<Vec<String>> = row.get("trained")?;
+    let completed_at = row.get("completed_at")?;
+    let updated_at = row.get("updated_at")?;
     // As stored, without checking again (see `values`).
-    let progress = SetProgress {
-        learned: learned.into_iter().map(ShortcutId::stored).collect(),
-        trained: trained.into_iter().map(ShortcutId::stored).collect(),
-        completed_at: row.get("completed_at")?,
-        updated_at: row.get("updated_at")?,
-    };
+    let learned = learned.into_iter().map(ShortcutId::stored).collect();
+    let trained = trained.into_iter().map(ShortcutId::stored).collect();
 
+    let progress = SetProgress {
+        learned,
+        trained,
+        completed_at,
+        updated_at,
+    };
     Ok(SetRecord {
-        app_id: row.get("app_id")?,
-        set_id: row.get("set_id")?,
-        layout: row.get("layout")?,
+        app_id,
+        set_id,
+        layout,
         progress,
     })
 }
@@ -406,9 +416,10 @@ struct CardFields {
 
 #[cfg(test)]
 mod tests {
+    use serde_json::json;
+
     use super::*;
     use crate::services::database::Database;
-    use serde_json::json;
 
     const GERMAN: &str = "com.apple.keylayout.German";
     const US: &str = "com.apple.keylayout.US";

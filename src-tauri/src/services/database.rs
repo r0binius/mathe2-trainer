@@ -40,9 +40,9 @@ impl Database {
     /// Returns [`AppError::CreateDataDirectory`] if the directory can't be created, and a database
     /// error if the file can't be opened or migrated.
     pub fn open_in(directory: &Path) -> Result<Self, AppError> {
-        std::fs::create_dir_all(directory).map_err(|source| AppError::CreateDataDirectory {
-            path: directory.to_owned(),
-            source,
+        std::fs::create_dir_all(directory).map_err(|source| {
+            let path = directory.to_owned();
+            AppError::CreateDataDirectory { path, source }
         })?;
         Self::migrate(Connection::open(directory.join(FILE_NAME))?)
     }

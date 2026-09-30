@@ -8,7 +8,7 @@
 use crate::platform::KeyCode;
 
 /// The physical kind of keyboard, as `KBGetLayoutType` reports it.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Keyboard {
     /// The US shape: a wide Enter and a long left Shift. JIS keyboards count as ANSI here, since
     /// they lack the ISO key too.
@@ -150,8 +150,8 @@ mod tests {
     #[test]
     fn an_iso_keyboard_has_every_key_once() {
         let positions: Vec<_> = key_positions(Keyboard::Iso).collect();
-        let codes: BTreeSet<_> = positions.iter().map(|&(_, code)| code).collect();
-        let keys: BTreeSet<_> = positions.iter().map(|&(key, _)| key).collect();
+        let codes: BTreeSet<_> = positions.iter().map(|(_, code)| *code).collect();
+        let keys: BTreeSet<_> = positions.iter().map(|(key, _)| *key).collect();
 
         assert_eq!(positions.len(), 65);
         assert_eq!(codes.len(), 65);

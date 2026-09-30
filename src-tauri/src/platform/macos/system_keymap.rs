@@ -16,6 +16,7 @@ impl KeymapSource for SystemKeymap {
     }
 
     fn watch_changes(&self, on_change: Box<dyn Fn()>) -> Result<(), AppError> {
-        TextInputSources::new()?.observe_selection(on_change)
+        TextInputSources::new()?.observe_selection(on_change)?;
+        Ok(())
     }
 }

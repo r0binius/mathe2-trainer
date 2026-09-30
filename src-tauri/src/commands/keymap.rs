@@ -18,9 +18,10 @@ pub fn emit_changes(app: &AppHandle, platform: &Platform) -> Result<(), AppError
 
     platform.keymap.watch_changes(Box::new(move || {
         if let Err(error) = app.emit(KEYMAP_CHANGED, ()) {
-            tauri_plugin_log::log::error!("the layout change didn't reach the frontend: {error}");
+            tauri_plugin_log::log::error!("cannot tell the frontend the layout changed: {error}");
         }
-    }))
+    }))?;
+    Ok(())
 }
 
 /// Returns the keyboard layout in use and what each key types.

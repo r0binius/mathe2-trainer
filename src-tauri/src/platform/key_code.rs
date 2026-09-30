@@ -10,7 +10,7 @@ use serde::Serialize;
 /// `z` on a German layout. The names are WebKit's, which crosses two on ISO keyboards (see
 /// `key_positions` in the macOS keymap). The variants are in keyboard order, the frontend's `keyCodes`, which is
 /// also the order of a [`Keymap`](super::Keymap).
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize)]
+#[derive(Copy, Clone, Debug, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum KeyCode {
     Backquote,
     Digit1,
