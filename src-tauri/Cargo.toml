@@ -18,19 +18,19 @@ tauri-plugin-log = "2"
 thiserror = "2.0.21"
 
 [target.'cfg(target_os = "macos")'.dependencies]
+objc2 = { version = "0.6.4", default-features = false, features = ["std"] }
 objc2-core-foundation = { version = "0.3.2", default-features = false, features = [
   "std",
   "CFBase",
   "CFData",
   "CFDictionary",
   "CFNotificationCenter",
-  "CFRunLoop",
   "CFString",
 ] }
 
 [lints.rust]
 missing_docs = "warn"
-# FFI code (macOS APIs) opts in per module with `#[allow(unsafe_code)]` and a SAFETY comment.
+# FFI code (macOS APIs) opts in per module with `#![expect(unsafe_code)]`, and every block with a SAFETY comment.
 unsafe_code = "deny"
 unused_qualifications = "warn"
 

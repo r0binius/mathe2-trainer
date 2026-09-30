@@ -227,7 +227,7 @@ src-tauri/src/
 ├─ commands/        settings.rs, progress.rs, keymap.rs, lookup.rs, window.rs
 ├─ services/        database.rs (connection, migrations), settings.rs, progress.rs, lookup.rs
 └─ platform/        layout.rs (KeymapSource and its data types), current.rs (Platform, current()), key_code.rs,
-                    Capabilities, macos/ (system_keymap.rs, input_source.rs, keymap.rs, fixture.rs), linux/
+                    Capabilities, macos/ (carbon.rs, the only unsafe code; system_keymap.rs, input_source.rs, keymap.rs, fixture.rs), linux/
 ```
 
 ## 7. Testing strategy

@@ -2,6 +2,7 @@
 
 pub mod fixture;
 
+mod carbon;
 mod input_source;
 mod keymap;
 mod system_keymap;

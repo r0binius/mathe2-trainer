@@ -42,6 +42,11 @@ pub enum ErrorKind {
 }
 
 impl AppError {
+    /// A keymap error, with the reason for the logs.
+    pub fn keymap(reason: impl Into<String>) -> Self {
+        Self::Keymap(reason.into())
+    }
+
     /// The kind of this error, as the frontend sees it.
     #[must_use]
     pub fn kind(&self) -> ErrorKind {
