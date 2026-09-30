@@ -1,4 +1,6 @@
 # The same nesting limit as ESLint's `max-depth` for TypeScript (conventions.md).
 excessive-nesting-threshold = 3
+# A test that slices out of bounds fails, which is what a test should do.
+allow-indexing-slicing-in-tests = true
 # Product names that `doc_markdown` would otherwise want in backticks; `..` keeps its defaults.
 doc-valid-idents = ["WebKit", ".."]

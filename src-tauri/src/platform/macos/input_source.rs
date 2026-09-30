@@ -196,13 +196,11 @@ fn property<'source, T: ConcreteType>(
     source: &'source CFType,
     key: &CFString,
 ) -> Option<&'source T> {
-    // SAFETY: a Get function: the value is null or a CF object owned by `source`, alive as long as
+    // SAFETY: both references are valid for the call, which only reads the property.
+    let pointer = unsafe { TISGetInputSourceProperty(source, key) }.cast::<CFType>();
+    // SAFETY: a Get function returns null or a CF object owned by `source`, alive as long as
     // `source` is. `downcast_ref` checks its type before it's used as a `T`.
-    let value = unsafe {
-        TISGetInputSourceProperty(source, key)
-            .cast::<CFType>()
-            .as_ref()
-    }?;
+    let value = unsafe { pointer.as_ref() }?;
 
     value.downcast_ref()
 }
