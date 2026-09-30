@@ -8,6 +8,8 @@ import { useText } from '@/i18n';
 import { useProgressStore } from '@/stores/progress';
 import { useSettingsStore } from '@/stores/settings';
 
+import AppearanceOptions from './AppearanceOptions.vue';
+import OptionRow from './OptionRow.vue';
 import TriggerOption from './TriggerOption.vue';
 
 const emit = defineEmits<{
@@ -54,11 +56,6 @@ async function chooseLanguage(event: Event): Promise<void> {
   }
 }
 
-/** The checked state of a checkbox that changed. */
-function checkedOf(event: Event): boolean {
-  return event.target instanceof HTMLInputElement && event.target.checked;
-}
-
 async function reset(): Promise<void> {
   clearTimeout(confirmTimer.value);
 
@@ -100,51 +97,18 @@ onScopeDispose(() => {
     </header>
 
     <template v-if="settings.settings.status === 'loaded'">
-      <div class="row">
-        <span class="label">{{ text.ui('options.trigger') }}</span>
+      <OptionRow :label="text.ui('options.trigger')">
         <TriggerOption
           :trigger="settings.settings.value.trigger"
           @choose="(trigger) => change({ trigger })"
           @recording="(active) => (recording = active)"
         />
-      </div>
+      </OptionRow>
 
-      <!-- One icon always stays: the one left can't be turned off. -->
-      <div class="row" :title="text.ui('options.keepOneIcon')">
-        <span class="label">{{ text.ui('options.icons') }}</span>
-        <label class="check">
-          <input
-            type="checkbox"
-            :checked="settings.settings.value.showMenuBarIcon"
-            :disabled="!settings.settings.value.showDockIcon"
-            @change="change({ showMenuBarIcon: checkedOf($event) })"
-          />
-          {{ text.ui('options.menuBarIcon') }}
-        </label>
-        <label class="check">
-          <input
-            type="checkbox"
-            :checked="settings.settings.value.showDockIcon"
-            :disabled="!settings.settings.value.showMenuBarIcon"
-            @change="change({ showDockIcon: checkedOf($event) })"
-          />
-          {{ text.ui('options.dockIcon') }}
-        </label>
-      </div>
-
-      <div class="row">
-        <label class="label" for="launch-at-login">{{ text.ui('options.launchAtLogin') }}</label>
-        <input
-          id="launch-at-login"
-          type="checkbox"
-          :checked="settings.settings.value.launchAtLogin"
-          @change="change({ launchAtLogin: checkedOf($event) })"
-        />
-      </div>
+      <AppearanceOptions :settings="settings.settings.value" @change="change" />
     </template>
 
-    <div class="row">
-      <label class="label" for="language">{{ text.ui('options.language') }}</label>
+    <OptionRow :label="text.ui('options.language')" label-for="language">
       <select
         v-if="settings.settings.status === 'loaded'"
         id="language"
@@ -155,14 +119,13 @@ onScopeDispose(() => {
         <option value="system">{{ text.ui('options.system') }}</option>
         <option v-for="[value, name] in languages" :key="value" :value="value">{{ name }}</option>
       </select>
-    </div>
+    </OptionRow>
 
-    <div class="row">
-      <span class="label">{{ text.ui('options.progress') }}</span>
+    <OptionRow :label="text.ui('options.progress')">
       <BaseButton variant="danger" @click="reset">
         {{ text.ui(confirming ? 'options.confirmReset' : 'options.reset') }}
       </BaseButton>
-    </div>
+    </OptionRow>
 
     <p v-if="failed" class="failed">{{ text.ui('options.saveFailed') }}</p>
   </section>
@@ -182,26 +145,6 @@ onScopeDispose(() => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
-}
-
-.row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.label {
-  flex: none;
-  width: 120px;
-  color: var(--color-text-muted);
-  font-weight: 600;
-}
-
-.check {
-  display: inline-flex;
-  gap: 6px;
-  align-items: center;
-  margin-right: 16px;
 }
 
 .select {
