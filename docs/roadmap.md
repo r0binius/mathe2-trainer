@@ -342,7 +342,7 @@ Branch `feature/native-keymap`. Read the current keyboard layout in Rust, replac
 **Sub-steps**
 
 - [x] 6.1 Rename `StorageError` to `PlatformError`
-- [ ] 6.2 `KeymapSource` trait, `platform::current()` and the pure mapping with the ISO fix
+- [x] 6.2 `KeymapSource` trait, `platform::current()` and the pure mapping with the ISO fix
 - [ ] 6.3 macOS FFI and the `get_keymap` command; the frontend reads the real layout
 - [ ] 6.4 Fixtures from the reader: compare German, replace US with ANSI output
 - [ ] 6.5 Layout-change events

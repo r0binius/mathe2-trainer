@@ -4,6 +4,7 @@
 
 mod commands;
 mod error;
+mod platform;
 mod services;
 
 use std::sync::Arc;

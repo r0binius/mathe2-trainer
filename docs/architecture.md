@@ -225,7 +225,8 @@ src-tauri/src/
 ├─ commands/        settings.rs, progress.rs, keymap.rs, lookup.rs, window.rs
 ├─ app/             coordinator.rs, tray.rs, trigger.rs, windows.rs
 ├─ services/        database.rs (connection, migrations), settings.rs, progress.rs, lookup.rs
-└─ platform/        mod.rs (traits, Capabilities, current()), macos/, linux/
+├─ platform.rs      traits (KeymapSource, …), their data types, Capabilities, current()
+└─ platform/        key_code.rs, macos/ (keymap.rs, …), linux/
 ```
 
 ## 7. Testing strategy
