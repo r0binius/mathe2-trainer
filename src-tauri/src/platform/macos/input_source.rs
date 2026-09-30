@@ -12,9 +12,12 @@
 )]
 
 use std::ffi::c_void;
-use std::ptr::NonNull;
+use std::ptr::{self, NonNull};
 
-use objc2_core_foundation::{CFData, CFRetained, CFRunLoop, CFString, CFType, ConcreteType};
+use objc2_core_foundation::{
+    CFData, CFDictionary, CFNotificationCenter, CFNotificationName,
+    CFNotificationSuspensionBehavior, CFRetained, CFRunLoop, CFString, CFType, ConcreteType,
+};
 
 use super::keymap::{Keyboard, key_positions};
 use crate::error::AppError;
@@ -30,6 +33,7 @@ struct UcKeyboardLayout {
 unsafe extern "C" {
     static kTISPropertyInputSourceID: Option<&'static CFString>;
     static kTISPropertyUnicodeKeyLayoutData: Option<&'static CFString>;
+    static kTISNotifySelectedKeyboardInputSourceChanged: Option<&'static CFString>;
 
     fn TISCopyCurrentKeyboardLayoutInputSource() -> Option<NonNull<CFType>>;
     fn TISGetInputSourceProperty(source: &CFType, key: &CFString) -> *const c_void;
@@ -115,6 +119,53 @@ pub fn current_layout(keyboard: Option<Keyboard>) -> Result<Layout, AppError> {
         id: id.to_string(),
         keymap,
     })
+}
+
+/// Calls `on_change` whenever the user selects another keyboard layout, for as long as the app
+/// runs. Input methods (Japanese, the emoji picker) post the same notification, so the layout may
+/// be the same one.
+///
+/// # Errors
+///
+/// Returns [`AppError::Keymap`] if macOS offers no distributed notification center or no name for
+/// the notification.
+pub fn observe_changes<F: Fn() + 'static>(on_change: F) -> Result<(), AppError> {
+    let center = CFNotificationCenter::distributed_center()
+        .ok_or_else(|| keymap_error("there's no distributed notification center"))?;
+    // SAFETY: a constant the framework defines for the whole run.
+    let name = unsafe { kTISNotifySelectedKeyboardInputSourceChanged }
+        .ok_or_else(|| keymap_error("there's no layout change notification"))?;
+    // Observed for the whole run and never removed, so the callback is leaked on purpose.
+    let observer: &'static F = Box::leak(Box::new(on_change));
+
+    // SAFETY: `observer` stays valid forever (leaked above), and `layout_changed::<F>` reads it
+    // back as the type it is. A null object observes the notification from any sender.
+    unsafe {
+        center.add_observer(
+            ptr::from_ref(observer).cast(),
+            Some(layout_changed::<F>),
+            Some(name),
+            ptr::null(),
+            CFNotificationSuspensionBehavior::DeliverImmediately,
+        );
+    }
+
+    Ok(())
+}
+
+/// What the notification center calls when the input source changes: the callback registered in
+/// [`observe_changes`], passed as the observer.
+unsafe extern "C-unwind" fn layout_changed<F: Fn()>(
+    _center: *mut CFNotificationCenter,
+    observer: *mut c_void,
+    _name: *const CFNotificationName,
+    _object: *const c_void,
+    _user_info: *const CFDictionary,
+) {
+    // SAFETY: the observer is the `F` that `observe_changes::<F>` leaked, so it's alive.
+    if let Some(on_change) = unsafe { observer.cast::<F>().as_ref() } {
+        on_change();
+    }
 }
 
 /// A property of an input source, if it has one of type `T`. The value is borrowed from the

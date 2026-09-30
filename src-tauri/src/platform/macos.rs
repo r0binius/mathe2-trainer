@@ -15,4 +15,8 @@ impl KeymapSource for SystemKeymap {
     fn current_layout(&self) -> Result<Layout, AppError> {
         input_source::current_layout(None)
     }
+
+    fn watch_changes(&self, on_change: Box<dyn Fn()>) -> Result<(), AppError> {
+        input_source::observe_changes(on_change)
+    }
 }

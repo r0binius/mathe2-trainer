@@ -46,7 +46,9 @@ pub fn run() -> tauri::Result<()> {
         .setup(|app| {
             let directory = app.path().app_data_dir().map_err(AppError::DataDirectory)?;
             app.manage(Arc::new(Database::open_in(&directory)?));
-            app.manage(platform::current());
+            let platform = platform::current();
+            commands::keymap::emit_changes(app.handle(), &platform)?;
+            app.manage(platform);
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
