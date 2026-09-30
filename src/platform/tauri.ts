@@ -6,6 +6,7 @@ import type { SettingsRepository } from '@/domain/settings/repository';
 import type { KeymapSource } from '@/ports';
 
 import { keymapSource } from './keymap';
+import { tauriLogger } from './log';
 import { progressRepository } from './progress';
 import { settingsRepository } from './settings';
 
@@ -24,6 +25,6 @@ export function tauriPorts(): Ports {
   return {
     settings: settingsRepository(invoke),
     progress: progressRepository(invoke),
-    keymap: keymapSource(invoke, listen),
+    keymap: keymapSource(invoke, listen, tauriLogger),
   };
 }
