@@ -37,11 +37,13 @@ impl Database {
     ///
     /// # Errors
     ///
-    /// Returns [`AppError::DataDirectory`] if the directory can't be created, and a database error
-    /// if the file can't be opened or migrated.
+    /// Returns [`AppError::CreateDataDirectory`] if the directory can't be created, and a database
+    /// error if the file can't be opened or migrated.
     pub fn open_in(directory: &Path) -> Result<Self, AppError> {
-        std::fs::create_dir_all(directory)
-            .map_err(|error| AppError::DataDirectory(error.into()))?;
+        std::fs::create_dir_all(directory).map_err(|source| AppError::CreateDataDirectory {
+            path: directory.to_owned(),
+            source,
+        })?;
         Self::migrate(Connection::open(directory.join(FILE_NAME))?)
     }
 
@@ -82,7 +84,7 @@ impl Database {
 
         tauri::async_runtime::spawn_blocking(move || database.with(work))
             .await
-            .map_err(AppError::Interrupted)?
+            .map_err(|source| AppError::Interrupted { source })?
     }
 
     /// Brings the connection's schema up to date and wraps it.
@@ -167,7 +169,7 @@ mod tests {
         let result: Result<(), AppError> =
             tauri::async_runtime::block_on(database.run(|_| panic!("work failed")));
 
-        assert!(matches!(result, Err(AppError::Interrupted(_))));
+        assert!(matches!(result, Err(AppError::Interrupted { .. })));
         Ok(())
     }
 
@@ -195,7 +197,20 @@ mod tests {
     }
 
     #[test]
-    fn reopening_keeps_the_data() -> Result<(), AppError> {
+    fn reports_a_directory_it_cannot_create_with_its_path() {
+        let inside_a_file = Path::new("/dev/null/mouseless");
+
+        let error = Database::open_in(inside_a_file)
+            .err()
+            .map(|error| error.to_string());
+
+        assert!(error.is_some_and(|message| {
+            message.starts_with("cannot create the data directory /dev/null/mouseless: ")
+        }));
+    }
+
+    #[test]
+    fn reopening_keeps_the_data() -> Result<(), Box<dyn std::error::Error>> {
         let directory = std::env::temp_dir().join(format!("mouseless-test-{}", std::process::id()));
         let insert = "INSERT INTO settings (key, value) VALUES ('showDockIcon', 'false')";
         let count = "SELECT count(*) FROM settings";
@@ -203,8 +218,7 @@ mod tests {
         Database::open_in(&directory)?.with(|connection| Ok(connection.execute(insert, ())?))?;
         let rows: i64 = Database::open_in(&directory)?
             .with(|connection| Ok(connection.query_row(count, (), |row| row.get(0))?))?;
-        std::fs::remove_dir_all(&directory)
-            .map_err(|error| AppError::DataDirectory(error.into()))?;
+        std::fs::remove_dir_all(&directory)?;
 
         assert_eq!(rows, 1);
         Ok(())

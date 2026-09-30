@@ -21,7 +21,10 @@ pub fn run() -> tauri::Result<()> {
                 .build(),
         )
         .setup(|app| {
-            let directory = app.path().app_data_dir().map_err(AppError::DataDirectory)?;
+            let directory = app
+                .path()
+                .app_data_dir()
+                .map_err(|source| AppError::FindDataDirectory { source })?;
             app.manage(Arc::new(Database::open_in(&directory)?));
             let platform = platform::current();
             commands::keymap::emit_changes(app.handle(), &platform)?;

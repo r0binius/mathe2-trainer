@@ -1,29 +1,90 @@
 //! The error every command returns, and how it reaches the frontend.
 
+use std::io;
+use std::path::PathBuf;
+
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 
 /// Something that went wrong in the Rust side of the app.
 ///
 /// Commands return `Result<T, AppError>`, and Tauri sends the error to the frontend as
-/// `{ kind, message }` (see [`ErrorKind`]). Each variant keeps its cause as the
-/// [`source`](std::error::Error::source), for logs.
+/// `{ kind, message }` (see [`ErrorKind`]). A variant that wraps another error keeps it in a
+/// `source` field, as the [`source`](std::error::Error::source) for logs; one that doesn't says
+/// why in a `reason` field.
 #[derive(Debug, thiserror::Error)]
 pub enum AppError {
-    /// The app's data directory couldn't be found or created.
-    #[error("the data directory is unavailable: {0}")]
-    DataDirectory(#[source] tauri::Error),
+    /// The system doesn't say where the app's data directory is.
+    #[error("cannot find the data directory: {source}")]
+    FindDataDirectory {
+        /// Why Tauri couldn't resolve it.
+        source: tauri::Error,
+    },
+    /// The app's data directory couldn't be created.
+    #[error("cannot create the data directory {}: {source}", path.display())]
+    CreateDataDirectory {
+        /// Where it should be.
+        path: PathBuf,
+        /// Why it couldn't be created.
+        source: io::Error,
+    },
     /// A database query failed.
-    #[error("the database failed: {0}")]
-    Database(#[from] rusqlite::Error),
+    #[error("cannot access the database: {source}")]
+    Database {
+        /// SQLite's error.
+        #[from]
+        source: rusqlite::Error,
+    },
     /// The database couldn't be brought up to this version's schema.
-    #[error("the database couldn't be migrated: {0}")]
-    Migration(#[from] rusqlite_migration::Error),
+    #[error("cannot migrate the database: {source}")]
+    Migration {
+        /// Which migration failed, and why.
+        #[from]
+        source: rusqlite_migration::Error,
+    },
     /// Work on the database stopped before it finished, such as by panicking.
-    #[error("the database work was interrupted: {0}")]
-    Interrupted(#[source] tauri::Error),
+    #[error("cannot finish the database work: {source}")]
+    Interrupted {
+        /// Why the blocking task ended.
+        source: tauri::Error,
+    },
     /// The keyboard layout couldn't be read from the system.
-    #[error("the keyboard layout couldn't be read: {0}")]
-    Keymap(String),
+    #[error("cannot read the keyboard layout: {reason}")]
+    Keymap {
+        /// What went wrong, for the logs.
+        reason: String,
+    },
+}
+
+impl AppError {
+    /// A keymap error, with the `reason` for the logs.
+    pub fn keymap(reason: impl Into<String>) -> Self {
+        Self::Keymap {
+            reason: reason.into(),
+        }
+    }
+
+    /// The kind of this error, as the frontend sees it.
+    #[must_use]
+    pub fn kind(&self) -> ErrorKind {
+        match self {
+            Self::FindDataDirectory { .. } | Self::CreateDataDirectory { .. } => ErrorKind::Storage,
+            Self::Database { .. } | Self::Migration { .. } | Self::Interrupted { .. } => {
+                ErrorKind::Database
+            }
+            Self::Keymap { .. } => ErrorKind::Keymap,
+        }
+    }
+}
+
+// Written by hand: a derived impl would send the variant and its cause, but the frontend gets
+// only the kind to act on and the message to log.
+impl Serialize for AppError {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        let mut error = serializer.serialize_struct("AppError", 2)?;
+        error.serialize_field("kind", &self.kind())?;
+        error.serialize_field("message", &self.to_string())?;
+        error.end()
+    }
 }
 
 /// What kind of error the frontend received, so it can decide what to show.
@@ -41,34 +102,6 @@ pub enum ErrorKind {
     Keymap,
 }
 
-impl AppError {
-    /// A keymap error, with the reason for the logs.
-    pub fn keymap(reason: impl Into<String>) -> Self {
-        Self::Keymap(reason.into())
-    }
-
-    /// The kind of this error, as the frontend sees it.
-    #[must_use]
-    pub fn kind(&self) -> ErrorKind {
-        match self {
-            Self::DataDirectory(_) => ErrorKind::Storage,
-            Self::Database(_) | Self::Migration(_) | Self::Interrupted(_) => ErrorKind::Database,
-            Self::Keymap(_) => ErrorKind::Keymap,
-        }
-    }
-}
-
-// Written by hand: a derived impl would send the variant and its cause, but the frontend gets
-// only the kind to act on and the message to log.
-impl Serialize for AppError {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        let mut error = serializer.serialize_struct("AppError", 2)?;
-        error.serialize_field("kind", &self.kind())?;
-        error.serialize_field("message", &self.to_string())?;
-        error.end()
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -76,27 +109,33 @@ mod tests {
 
     #[test]
     fn reaches_the_frontend_as_kind_and_message() {
-        let error = AppError::DataDirectory(tauri::Error::UnknownPath);
+        let error = AppError::FindDataDirectory {
+            source: tauri::Error::UnknownPath,
+        };
 
         assert_eq!(
             serde_json::to_value(&error).ok(),
             Some(json!({
                 "kind": "storage",
-                "message": "the data directory is unavailable: unknown path",
+                "message": "cannot find the data directory: unknown path",
             })),
         );
     }
 
     #[test]
     fn interrupted_work_counts_as_a_database_error() {
-        let error = AppError::Interrupted(tauri::Error::UnknownPath);
+        let error = AppError::Interrupted {
+            source: tauri::Error::UnknownPath,
+        };
 
         assert_eq!(error.kind(), ErrorKind::Database);
     }
 
     #[test]
     fn keeps_its_cause_as_the_source() {
-        let error = AppError::DataDirectory(tauri::Error::UnknownPath);
+        let error = AppError::FindDataDirectory {
+            source: tauri::Error::UnknownPath,
+        };
 
         assert_eq!(
             std::error::Error::source(&error).map(ToString::to_string),
