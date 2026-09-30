@@ -1,4 +1,6 @@
-//! Reads the keyboard layout in use through Carbon's Text Input Sources and `UCKeyTranslate`.
+//! Reads the keyboard layout in use and observes when it changes, through Carbon's Text Input
+//! Sources and `UCKeyTranslate`. Both only work on the main thread: the API isn't thread safe, and
+//! notifications arrive on the run loop of the thread that registered for them.
 //!
 //! The only module that calls these C functions. No objc2 crate binds them, so they're declared
 //! here from the SDK headers (`HIToolbox/TextInputSources.h`, `HIToolbox/Keyboards.h`,
@@ -84,17 +86,9 @@ const MAX_LENGTH: usize = 4;
 /// thread safe), when no layout, key tables or keyboard of the kind are found, or when a key can't
 /// be translated.
 pub fn current_layout(keyboard: Option<Keyboard>) -> Result<Layout, AppError> {
-    if CFRunLoop::current() != CFRunLoop::main() {
-        return Err(keymap_error(
-            "the layout can only be read on the main thread",
-        ));
-    }
+    ensure_main_thread()?;
 
-    // SAFETY: on the main thread, as the API requires. A Copy function returns a reference we
-    // own, which `CFRetained` takes over and releases.
-    let source = unsafe { TISCopyCurrentKeyboardLayoutInputSource() }
-        .map(|pointer| unsafe { CFRetained::from_raw(pointer) })
-        .ok_or_else(|| keymap_error("no keyboard layout is selected"))?;
+    let source = selected_source()?;
     // SAFETY: the keys are constants the framework defines for the whole run.
     let (id_key, data_key) =
         unsafe { (kTISPropertyInputSourceID, kTISPropertyUnicodeKeyLayoutData) };
@@ -105,12 +99,7 @@ pub fn current_layout(keyboard: Option<Keyboard>) -> Result<Layout, AppError> {
         .and_then(|key| property::<CFData>(&source, key))
         .ok_or_else(|| keymap_error("the layout has no key tables"))?;
 
-    let keyboard_type = match keyboard {
-        // SAFETY: reads a system value, on the main thread (it isn't thread safe).
-        None => unsafe { LMGetKbdType() },
-        Some(kind) => keyboard_type_of(kind)
-            .ok_or_else(|| keymap_error("macOS knows no keyboard type of that kind"))?,
-    };
+    let keyboard_type = keyboard_type(keyboard)?;
     let keymap = key_positions(keyboard_of(keyboard_type))
         .map(|(key, code)| Ok((code, characters(tables, key, keyboard_type)?)))
         .collect::<Result<Keymap, AppError>>()?;
@@ -127,9 +116,11 @@ pub fn current_layout(keyboard: Option<Keyboard>) -> Result<Layout, AppError> {
 ///
 /// # Errors
 ///
-/// Returns [`AppError::Keymap`] if macOS offers no distributed notification center or no name for
-/// the notification.
+/// Returns [`AppError::Keymap`] when called off the main thread, or if macOS offers no distributed
+/// notification center or no name for the notification.
 pub fn observe_changes<F: Fn() + 'static>(on_change: F) -> Result<(), AppError> {
+    ensure_main_thread()?;
+
     let center = CFNotificationCenter::distributed_center()
         .ok_or_else(|| keymap_error("there's no distributed notification center"))?;
     // SAFETY: a constant the framework defines for the whole run.
@@ -165,6 +156,37 @@ unsafe extern "C-unwind" fn layout_changed<F: Fn()>(
     // SAFETY: the observer is the `F` that `observe_changes::<F>` leaked, so it's alive.
     if let Some(on_change) = unsafe { observer.cast::<F>().as_ref() } {
         on_change();
+    }
+}
+
+/// Fails unless called on the main thread, the only one this module's API works on.
+fn ensure_main_thread() -> Result<(), AppError> {
+    if CFRunLoop::current() == CFRunLoop::main() {
+        Ok(())
+    } else {
+        Err(keymap_error(
+            "the layout can only be used on the main thread",
+        ))
+    }
+}
+
+/// The keyboard layout input source the user selected.
+fn selected_source() -> Result<CFRetained<CFType>, AppError> {
+    // SAFETY: called on the main thread (see `current_layout`). A Copy function returns a
+    // reference we own, which `CFRetained` takes over and releases.
+    unsafe { TISCopyCurrentKeyboardLayoutInputSource() }
+        .map(|pointer| unsafe { CFRetained::from_raw(pointer) })
+        .ok_or_else(|| keymap_error("no keyboard layout is selected"))
+}
+
+/// The keyboard type to translate keys for: the connected keyboard's, or the first one macOS
+/// knows of the given kind.
+fn keyboard_type(keyboard: Option<Keyboard>) -> Result<u8, AppError> {
+    match keyboard {
+        // SAFETY: reads a system value, on the main thread (it isn't thread safe).
+        None => Ok(unsafe { LMGetKbdType() }),
+        Some(kind) => keyboard_type_of(kind)
+            .ok_or_else(|| keymap_error("macOS knows no keyboard type of that kind")),
     }
 }
 
