@@ -64,18 +64,18 @@ State + Command (§5) are this loop in pattern terms: the model is the State, an
 
 ## 3. Tauri 2 best practices we follow
 
-| Practice                             | How                                                                                                                                                                                          |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Least privilege                      | One capability file per window (`main`, `popover`) that grants only the commands and plugin permissions that window uses. A strict CSP (the scaffold has `csp: null`, which we replace).     |
-| Typed IPC                            | Hand-written typed wrappers in `platform/`, one per command and event, that decode what they receive. `tauri-specta` is still a release candidate (step 4); revisit once it's stable.        |
-| Thin commands                        | Commands parse input, call a service and map errors. No logic in them.                                                                                                                       |
-| Errors as values                     | Commands return `Result<T, AppError>`. `AppError` uses `thiserror`, is serializable and has a `kind`, so the frontend can handle it. No `unwrap()` outside tests and setup.                  |
-| State                                | Services are registered with `app.manage()` and received as `State<'_, T>`. Mutable state goes behind `Mutex`/`RwLock`, with locks held as briefly as possible.                              |
-| Threads                              | AppKit and AX calls that need the main thread go through `run_on_main_thread`. Slow work (AX menu walk, SQLite) runs in async commands or `spawn_blocking`, never on the UI thread.          |
-| Official plugins for solved problems | `single-instance` (registered first), `autostart`, `global-shortcut`, `opener`, `positioner`, `log`. Settings and progress share one SQLite database instead of the `store` plugin (step 4). |
-| Platform code isolated               | `#[cfg(target_os = "macos")]` only inside `platform/`. Everything else sees traits.                                                                                                          |
-| Structure                            | `main.rs` only calls `run()`, which `app.rs` builds the app in. `lib.rs` and every `mod.rs` only declare modules and re-export (Canonical's layout).                                         |
-| Quality gates                        | `cargo fmt`, `cargo clippy -- -D warnings` (pedantic plus lints for runtime failures and `unsafe` blocks), `cargo test`, and `cargo-deny` for the dependencies (`pnpm rust:audit`).          |
+| Practice                             | How                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Least privilege                      | One capability file per window (`main`, `popover`) that grants only the commands and plugin permissions that window uses. A strict CSP for built apps (`'self'` plus IPC), a `devCsp` with only what Vite needs, a frozen prototype, and both pages log what the policy blocks (`policyViolations.ts`). |
+| Typed IPC                            | Hand-written typed wrappers in `platform/`, one per command and event, that decode what they receive. `tauri-specta` is still a release candidate (step 4); revisit once it's stable.                                                                                                                   |
+| Thin commands                        | Commands parse input, call a service and map errors. No logic in them.                                                                                                                                                                                                                                  |
+| Errors as values                     | Commands return `Result<T, AppError>`. `AppError` uses `thiserror`, is serializable and has a `kind`, so the frontend can handle it. No `unwrap()` outside tests and setup.                                                                                                                             |
+| State                                | Services are registered with `app.manage()` and received as `State<'_, T>`. Mutable state goes behind `Mutex`/`RwLock`, with locks held as briefly as possible.                                                                                                                                         |
+| Threads                              | AppKit and AX calls that need the main thread go through `run_on_main_thread`. Slow work (AX menu walk, SQLite) runs in async commands or `spawn_blocking`, never on the UI thread.                                                                                                                     |
+| Official plugins for solved problems | `single-instance` (registered first), `autostart`, `global-shortcut`, `log`; the popover is placed by our own code from the tray's position, which also serves the trigger. Settings and progress share one SQLite database instead of the `store` plugin (step 4).                                     |
+| Platform code isolated               | `#[cfg(target_os = "macos")]` only inside `platform/`. Everything else sees traits.                                                                                                                                                                                                                     |
+| Structure                            | `main.rs` only calls `run()`, which `app/run.rs` builds the app in. `lib.rs` and every `mod.rs` only declare modules and re-export (Canonical's layout).                                                                                                                                                |
+| Quality gates                        | `cargo fmt`, `cargo clippy -- -D warnings` (pedantic plus lints for runtime failures and `unsafe` blocks), `cargo test`, and `cargo-deny` for the dependencies (`pnpm rust:audit`).                                                                                                                     |
 
 ## 4. Vue 3 best practices we follow
 
@@ -122,7 +122,7 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 **Command: session inputs, IPC, menu actions**
 
 - Session inputs are messages (§1.1): `{ type: 'answer', keys, at }`, `{ type: 'skip', roll, at }`, `{ type: 'advance', roll, at }`. The component dispatches them, and the state machine interprets them, so tests can replay a whole session.
-- Tauri commands and tray/app menu items map to named actions (`showPreferences`, `togglePopover`, `quit`) that the Rust window coordinator handles in one place.
+- The tray, the menus, the trigger, the Dock, a second launch and the popover's Escape (`dismiss_popover`) all become coordinator `Event`s, which the Rust window coordinator turns into `Action`s in one place.
 
 **Strategy: what differs between learn and review**
 
@@ -141,8 +141,8 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 
 **Adapter: foreign APIs to our interfaces**
 
-- Rust `platform/macos/*` adapts NSWorkspace, AXUIElement and UCKeyTranslate to our traits and data types (`Keymap`, `MenuShortcut { title, keys, group }`). The `unsafe` calls of each foreign API stay in one small module behind safe functions (`carbon.rs`), so the adapters around it are safe code.
-- Frontend `platform/*` adapts Tauri's `invoke`, through hand-written wrappers that decode every answer, to the domain ports (`ProgressRepository`, `SettingsRepository`).
+- Rust `platform/macos/*` adapts NSWorkspace, AXUIElement and UCKeyTranslate to our traits and data types (`Keymap`, `MenuShortcut { title, keys, group }`). The `unsafe` calls of each foreign API stay in one small module behind safe functions (`carbon.rs` for Carbon, `event_tap.rs` for Core Graphics event taps), so the adapters around them are safe code.
+- Frontend `platform/*` adapts Tauri's `invoke` and `listen`, through hand-written wrappers that decode every answer, to the ports (`ProgressRepository`, `SettingsRepository`, `KeymapSource`, `Windows`).
 
 **Bridge: features independent of the OS** (`src-tauri/src/platform/`)
 
@@ -162,11 +162,12 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 **Mediator: window coordination** (`src-tauri/src/app/coordinator.rs`)
 
 - _Problem:_ the old `MenuBar` singleton knew the tray, the popover, the main window, the trigger, the store and focus handling all at once, and the windows sent each other messages.
-- A `WindowCoordinator` receives events (tray click, trigger fired, popover blurred, "maximize", "preferences") and decides what happens: show or hide the popover, restore focus, show the main window, open options. Tray, trigger and windows only talk to the coordinator.
+- Elm-style in Rust: `coordinate(Showing, Event) → Vec<Action>` is pure and unit-tested; `app/windows.rs` reads which windows show, asks it, and carries out the actions (open or close the popover, give focus back by hiding the app, show or hide the main window, tell it to open the options). Tray, menus, trigger and windows only report events.
+- Holding ⌘ is its own small Elm program (`app/hold.rs`: `update_hold(Hold, HoldMessage) → (Hold, Option<HoldEffect>)`), fed by the `ModifierHold` port and a wait per press.
 
 **Observer: change propagation**
 
-- Tauri events (`keymap-changed`, `lookup-result`, `settings-changed`) with typed listeners that are removed on scope dispose.
+- Tauri events (`keymap-changed`, `options-requested`, later `lookup-result` and `settings-changed`) with typed listeners that are removed on scope dispose.
 - Inside the frontend: Vue reactivity and Pinia. This replaces the custom `Emitter` and the global `Event` bus.
 - A keyboard layout change updates the `keymap` store, and everything computed from it re-resolves. Reloading the windows is no longer necessary.
 
@@ -204,30 +205,32 @@ src/
 │  ├─ settings/     settings.ts (types, decoder), language.ts, repository.ts (port)
 │  └─ shared/       result.ts (errors as values), decode.ts (JSON decoders), platformError.ts (failed platform calls), loadable.ts
 ├─ data/            apps.ts (the list), apps/<id>/ index.ts, de.json, en.json, logo.svg
-├─ platform/        ipc.ts (commandCaller), settings.ts, progress.ts, keymap.ts, log.ts, lookup.ts, window.ts
+├─ platform/        ipc.ts (commandCaller, subscriber), settings.ts, progress.ts, keymap.ts, windows.ts, log.ts, tauri.ts; lookup.ts in step 8
 ├─ stores/          settings.ts, progress.ts, keymap.ts
 ├─ composables/     useProgram.ts (Elm runtime), usePracticeSession.ts, useKeyCapture.ts, useSpatialNav.ts
 │                   (+ spatial.ts), useStartup.ts, useSummaryContext.ts, useKeyLabels.ts
 ├─ features/        library/ (screens, AppCard, SetRow), practice/ (Learn, Review, PracticeStage),
-│                   options/ (OptionsPanel); lookup/ in step 7
+│                   options/ (OptionsPanel, OptionRow, TriggerOption, AppearanceOptions), popover/ (PopoverWindow)
 ├─ components/      BaseButton, BaseIcon, KeyCap, KeyCapSmall, ResultBadge, CircleProgress, TextProgress,
 │                   PageLayout, ScreenHeading, ListSection, SkipButton
 ├─ styles/          main.css, tokens.css (custom properties), base.css
 ├─ locales/         en.json, de.json (UI text)
 ├─ i18n.ts          vue-i18n setup, useText, useUiLanguage
-├─ ports.ts         injection keys for what main.ts provides (repositories, keymap source, key labels, logger), and the ports with effects (KeymapSource, Logger)
+├─ ports.ts         injection keys for what main.ts and popover.ts provide (repositories, keymap source, windows, key labels, logger), and the ports with effects (KeymapSource, Windows, Logger)
 ├─ routes.ts        route names, paths, depths and helpers (toApp, …), imported by the screens
-├─ router.ts, App.vue, main.ts
+├─ router.ts, App.vue, main.ts (main window), popover.ts (popover), policyViolations.ts
 src-tauri/
 ├─ migrations/      0001_settings.sql, … (one SQL file per schema change)
 ├─ examples/        dump_keymap.rs (prints the current layout as a keymap fixture)
 src-tauri/src/
 ├─ main.rs, lib.rs (modules only), error.rs
-├─ app.rs           run(): plugins, managed state, commands; later app/ with coordinator.rs, tray.rs, trigger.rs, windows.rs
-├─ commands/        settings.rs, progress.rs, keymap.rs, lookup.rs, window.rs
+├─ app/             run.rs (plugins, managed state, commands), coordinator.rs (pure) + windows.rs, tray.rs, popover.rs,
+│                   menu.rs, trigger.rs, hold.rs (pure), shortcut.rs (pure), layout.rs, settings.rs (applies them)
+├─ commands/        settings.rs, progress.rs, keymap.rs, windows.rs; lookup.rs in step 8
 ├─ services/        database.rs (connection, migrations), settings.rs, progress.rs, lookup.rs
-└─ platform/        layout.rs (KeymapSource and its data types), current.rs (Platform, current()), key_code.rs,
-                    Capabilities, macos/ (carbon.rs, the only unsafe code; system_keymap.rs, input_source.rs, keymap.rs, fixture.rs), linux/
+└─ platform/        layout.rs (KeymapSource and its data types), modifier_hold.rs (ModifierHold), current.rs (Platform,
+                    current()), key_code.rs, macos/ (carbon.rs and event_tap.rs, the only unsafe code; system_keymap.rs,
+                    system_modifier_hold.rs, input_source.rs, keymap.rs, languages.rs, fixture.rs), linux/
 ```
 
 ## 7. Testing strategy

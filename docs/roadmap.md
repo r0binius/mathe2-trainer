@@ -468,6 +468,10 @@ Branch `feature/menu-lookup`. Read any app's menu shortcuts through the Accessib
 - [ ] 8.2 Recursive menu walk and mapping into shortcut data
 - [ ] 8.3 Lookup UI with search
 
+**Carried over**
+
+- The popover follows the settings, at least the language, through a typed `settings-changed` event between the windows. Planned for step 7, but not needed while the popover showed only a placeholder; it reads `navigator.languages` for now.
+
 **Concepts:** the Accessibility API and permissions, recursion over trees, matching apps by bundle ID.
 
 **Resources:** [AXUIElement](https://developer.apple.com/documentation/applicationservices/axuielement_h)
