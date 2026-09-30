@@ -338,6 +338,7 @@ Branch `feature/native-keymap`. Read the current keyboard layout in Rust, replac
 - Keys are named as WebKit's `event.code` names them, since key capture looks them up by it. Checked on an ISO keyboard: WebKit doesn't undo macOS's ISO codes as Chromium does, so the key left of 1 is `IntlBackslash` and the key next to left Shift `Backquote`, crossed from the W3C names. The German fixture swaps its two entries back to match (step 2 had applied Chromium's swap).
 - The `TIS` functions run on the main thread, so the command hands its work to it.
 - `keymap-changed` is only a signal: the keymap store loads again through the same command and decoder, and keeps its value when the layout ID didn't change (input methods post the same notification).
+- The frontend's `KeymapSource` port lives in `ports.ts` next to `Logger`, not in the domain: its `onChange` subscription is an effect, which the functional core has none of. Ports that only return data, like the repositories, stay in the domain. When the layout changes, the store reads it again, keeps its state when the ID is the same, and keeps the old layout (logging why) when reading fails.
 - Fixtures come from a Cargo example run by hand per layout (`cargo run --example dump_keymap`, `-- --ansi` for the US fixture): tests can't read the layout, since libtest runs them off the main thread. There's only an ISO keyboard to read, so the US fixture is translated for the first ANSI keyboard type macOS knows. The German fixture matched the reader exactly; the hand-written US one had two mistakes (Shift+Option+K types the Apple logo, the numpad's decimal key a period).
 
 **Sub-steps**
@@ -346,7 +347,7 @@ Branch `feature/native-keymap`. Read the current keyboard layout in Rust, replac
 - [x] 6.2 `KeymapSource` trait, `platform::current()` and the pure mapping with the ISO fix
 - [x] 6.3 macOS FFI and the `get_keymap` command; the frontend reads the real layout
 - [x] 6.4 Fixtures from the reader: compare German, replace US with ANSI output
-- [ ] 6.5 Layout-change events
+- [x] 6.5 Layout-change events
 - [ ] 6.6 Alternatives for the six shortcuts that can't be practiced on US
 
 **Carried over** (from step 5 and the technical debt round)

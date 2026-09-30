@@ -215,7 +215,7 @@ src/
 ├─ styles/          main.css, tokens.css (custom properties), base.css
 ├─ locales/         en.json, de.json (UI text)
 ├─ i18n.ts          vue-i18n setup, useText, useUiLanguage
-├─ ports.ts         injection keys for what main.ts provides (repositories, keymap source, key labels, logger)
+├─ ports.ts         injection keys for what main.ts provides (repositories, keymap source, key labels, logger), and the ports with effects (KeymapSource, Logger)
 ├─ routes.ts        route names, paths, depths and helpers (toApp, …), imported by the screens
 ├─ router.ts, App.vue, main.ts
 src-tauri/

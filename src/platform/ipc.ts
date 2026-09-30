@@ -13,6 +13,12 @@ export type CommandArgs = Readonly<Record<string, unknown>>;
  */
 export type Invoke = (command: string, args?: CommandArgs) => Promise<unknown>;
 
+/**
+ * Tauri's `listen` for an event without a payload, passed in like {@link Invoke}. It resolves to
+ * the function that stops listening.
+ */
+export type Listen = (event: string, handler: () => void) => Promise<() => void>;
+
 /** Invokes a command and decodes its answer. It never rejects: every failure is a result. */
 export type CommandCall = <T>(
   command: string,

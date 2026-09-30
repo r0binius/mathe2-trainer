@@ -1,8 +1,9 @@
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 
-import type { KeymapSource } from '@/domain/keyboard/keymap';
 import type { ProgressRepository } from '@/domain/progress/repository';
 import type { SettingsRepository } from '@/domain/settings/repository';
+import type { KeymapSource } from '@/ports';
 
 import { keymapSource } from './keymap';
 import { progressRepository } from './progress';
@@ -16,13 +17,13 @@ export type Repositories = {
 };
 
 /**
- * The repositories backed by the Rust side. The only place that hands Tauri's real `invoke` to
- * them, called once at startup.
+ * The repositories backed by the Rust side. The only place that hands Tauri's real `invoke` and
+ * `listen` to them, called once at startup.
  */
 export function tauriRepositories(): Repositories {
   return {
     settings: settingsRepository(invoke),
     progress: progressRepository(invoke),
-    keymap: keymapSource(invoke),
+    keymap: keymapSource(invoke, listen),
   };
 }

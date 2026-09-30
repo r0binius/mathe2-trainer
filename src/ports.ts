@@ -3,11 +3,12 @@
 
 import type { InjectionKey } from 'vue';
 
-import type { KeymapSource } from '@/domain/keyboard/keymap';
+import type { CurrentLayout } from '@/domain/keyboard/keymap';
 import type { KeyLabels } from '@/domain/keyboard/labels';
 import type { ProgressRepository } from '@/domain/progress/repository';
 import type { SettingsRepository } from '@/domain/settings/repository';
 import type { PlatformError } from '@/domain/shared/platformError';
+import type { Result } from '@/domain/shared/result';
 import type { Err } from '@/domain/shared/result';
 import { err } from '@/domain/shared/result';
 
@@ -18,6 +19,19 @@ export const settingsRepositoryKey: InjectionKey<SettingsRepository> =
 /** Where the app provides the progress repository to the stores. */
 export const progressRepositoryKey: InjectionKey<ProgressRepository> =
   Symbol('progress repository');
+
+/**
+ * Reads the keyboard layout in use from the system, and says when it may have changed. A shell
+ * port like {@link Logger}: subscribing is an effect, which the domain has none of.
+ */
+export type KeymapSource = {
+  readonly load: () => Promise<Result<CurrentLayout, PlatformError>>;
+  /**
+   * Calls `listener` whenever the user may have selected another layout, until the returned
+   * function stops it. The layout may also be the same one.
+   */
+  readonly onChange: (listener: () => void) => () => void;
+};
 
 /** Where the app provides the source of the current keyboard layout to the stores. */
 export const keymapSourceKey: InjectionKey<KeymapSource> = Symbol('keymap source');
@@ -77,5 +91,9 @@ export const missingProgressRepository: ProgressRepository = {
   reset: unavailable,
 };
 
-/** What a store injects when the app provided no keymap source: loading fails. */
-export const missingKeymapSource: KeymapSource = { load: unavailable };
+/** What a store injects when the app provided no keymap source: loading fails, nothing changes. */
+export const missingKeymapSource: KeymapSource = { load: unavailable, onChange: () => ignore };
+
+function ignore(): void {
+  // Nothing to stop: a missing source never reports a change.
+}

@@ -23,6 +23,11 @@ What `pnpm check` can't prove: the app running on a real Mac. Walk through it wi
 - [ ] During practice, ⌘W, ⌘Q, ⌘H, ⌘M, ⌘C/⌘V and ⌘R are answers, not menu actions.
 - [ ] On an ISO keyboard, the keys left of 1 (`^`) and next to left Shift (`<`) are recognized: macOS's _Next window_ shows as ⌘< and accepts it.
 
+## Keyboard layout
+
+- [ ] The layout selected in the menu bar is read (German and US), also after switching with another app in front.
+- [ ] Switching the layout re-resolves the shortcuts on the open screen, shows that layout's progress, and ends a running session.
+
 ## Learning and review
 
 - [ ] Training shows the keys, pressed keys pop up, a correct answer shows ✓ and moves on after a second.
@@ -41,7 +46,6 @@ What `pnpm check` can't prove: the app running on a real Mac. Walk through it wi
 
 ## Later steps
 
-- [ ] Step 6: the real layout is read (German and US); switching the layout re-resolves the shortcuts, keeps progress per layout and ends a running session.
 - [ ] Step 7: holding ⌘ and a custom shortcut open the popover over other apps; ⌘, opens the options; the menu bar icon, Dock icon and launch at login apply at once; after midnight, due counts move to the new day.
 - [ ] Step 8: the popover shows the frontmost app's menu shortcuts, with search and Escape, and focus returns to the app.
 - [ ] Step 9: the packaged app installs, starts at login and keeps its data across updates.

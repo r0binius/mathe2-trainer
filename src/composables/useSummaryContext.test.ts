@@ -2,13 +2,19 @@ import { createPinia } from 'pinia';
 import { describe, expect, it } from 'vitest';
 import { createApp } from 'vue';
 
-import type { CurrentLayout, KeymapSource } from '@/domain/keyboard/keymap';
+import type { CurrentLayout } from '@/domain/keyboard/keymap';
 import { checkShortcut } from '@/domain/keyboard/policy';
 import type { ProgressRepository } from '@/domain/progress/repository';
 import type { SettingsRepository } from '@/domain/settings/repository';
 import type { Settings } from '@/domain/settings/settings';
 import { err, ok } from '@/domain/shared/result';
-import { keymapSourceKey, progressRepositoryKey, settingsRepositoryKey } from '@/ports';
+import type { KeymapSource } from '@/ports';
+import {
+  keymapSourceKey,
+  missingKeymapSource,
+  progressRepositoryKey,
+  settingsRepositoryKey,
+} from '@/ports';
 import { useKeymapStore } from '@/stores/keymap';
 import { useProgressStore } from '@/stores/progress';
 import { useSettingsStore } from '@/stores/settings';
@@ -41,7 +47,10 @@ function appWith(loadSettings: SettingsRepository['load']) {
     replace: unused,
     reset: unused,
   };
-  const keymapSource: KeymapSource = { load: () => Promise.resolve(ok(us)) };
+  const keymapSource: KeymapSource = {
+    load: () => Promise.resolve(ok(us)),
+    onChange: missingKeymapSource.onChange,
+  };
   const app = createApp({})
     .use(pinia)
     .provide(settingsRepositoryKey, settingsRepository)

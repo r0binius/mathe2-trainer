@@ -1,5 +1,7 @@
 import type { Decoder } from '../shared/decode';
 import { object, partialRecord, string } from '../shared/decode';
+import type { Loadable } from '../shared/loadable';
+import { loadableOf } from '../shared/loadable';
 import type { PlatformError } from '../shared/platformError';
 import type { Result } from '../shared/result';
 
@@ -130,7 +132,20 @@ export const decodeCurrentLayout: Decoder<CurrentLayout> = object({
   keymap: partialRecord(keyCodes, decodeKeyCharacters),
 });
 
-/** Reads the keyboard layout in use from the system. */
-export type KeymapSource = {
-  readonly load: () => Promise<Result<CurrentLayout, PlatformError>>;
-};
+/**
+ * The layout after the system reported a change and it was read again. The change may keep the
+ * same layout (input methods report changes too), and then the state stays the very same, so
+ * nothing computed from it runs again. A layout that fails to read keeps the one that's loaded.
+ */
+export function afterLayoutChange(
+  current: Loadable<CurrentLayout>,
+  read: Result<CurrentLayout, PlatformError>,
+): Loadable<CurrentLayout> {
+  if (current.status !== 'loaded') {
+    return loadableOf(read);
+  }
+
+  return read.kind === 'err' || read.value.id === current.value.id
+    ? current
+    : { status: 'loaded', value: read.value };
+}

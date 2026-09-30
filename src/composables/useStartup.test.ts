@@ -3,7 +3,6 @@ import { createPinia } from 'pinia';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createApp, defineComponent, h } from 'vue';
 
-import type { KeymapSource } from '@/domain/keyboard/keymap';
 import type { ProgressRepository } from '@/domain/progress/repository';
 import type { SettingsRepository } from '@/domain/settings/repository';
 import type { Settings } from '@/domain/settings/settings';
@@ -11,7 +10,13 @@ import type { PlatformError } from '@/domain/shared/platformError';
 import type { Result } from '@/domain/shared/result';
 import { err, ok } from '@/domain/shared/result';
 import { createAppI18n } from '@/i18n';
-import { keymapSourceKey, progressRepositoryKey, settingsRepositoryKey } from '@/ports';
+import type { KeymapSource } from '@/ports';
+import {
+  keymapSourceKey,
+  missingKeymapSource,
+  progressRepositoryKey,
+  settingsRepositoryKey,
+} from '@/ports';
 
 import { useStartup } from './useStartup';
 
@@ -42,6 +47,7 @@ async function startWith(settings: Result<Settings, PlatformError>) {
   };
   const keymapSource: KeymapSource = {
     load: () => Promise.resolve(ok({ id: 'com.apple.keylayout.German', keymap: {} })),
+    onChange: missingKeymapSource.onChange,
   };
   const Window = defineComponent(() => {
     const [context, retry] = useStartup([]);
