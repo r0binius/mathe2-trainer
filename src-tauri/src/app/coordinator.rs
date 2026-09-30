@@ -1,5 +1,5 @@
 //! Decides what the windows do when something happens to them, to the menu bar icon or in a menu
-//! (the Mediator in `architecture.md`). The tray, the popover and the main window only report
+//! (the Mediator in `architecture.md`). The tray, the menus and the windows only report
 //! events here, and never act on each other.
 //!
 //! Pure, like an Elm `update`: [`windows`](super::windows) reads which windows are showing, asks
@@ -12,6 +12,8 @@ pub struct Showing {
     pub popover: bool,
     /// Whether the main window is on screen, though maybe behind other apps' windows.
     pub main: bool,
+    /// Whether the Settings window is on screen.
+    pub settings: bool,
 }
 
 /// Something that happened to a window, to the menu bar icon or in a menu.
@@ -25,14 +27,16 @@ pub enum Event {
     PopoverBlurred,
     /// The popover was closed from inside, with Escape.
     PopoverDismissed,
-    /// Options was chosen from the menu bar icon's menu or the app menu (⌘,).
-    OptionsChosen,
+    /// Settings was chosen from the menu bar icon's menu or the app menu (⌘,).
+    SettingsChosen,
     /// The Dock icon was clicked.
     DockClicked,
     /// The app was launched while it was running, which starts no second one.
     LaunchedAgain,
     /// The main window's close button or ⌘W was pressed.
     MainClosing,
+    /// The Settings window's close button or ⌘W was pressed.
+    SettingsClosing,
 }
 
 /// What to do with the windows.
@@ -46,10 +50,12 @@ pub enum Action {
     ReturnFocus,
     /// Bring the main window to the front.
     ShowMain,
-    /// Hide the main window, keeping its screens as they are.
+    /// Hide the main window, keeping its pages as they are.
     HideMain,
-    /// Tell the main window to open its options panel.
-    OpenOptions,
+    /// Bring the Settings window to the front.
+    ShowSettings,
+    /// Hide the Settings window.
+    HideSettings,
 }
 
 /// What the windows do when `event` happens while `showing`.
@@ -63,19 +69,20 @@ pub fn coordinate(showing: Showing, event: Event) -> Vec<Action> {
         // Focus already went elsewhere, so there's none to give back.
         Event::PopoverBlurred if showing.popover => vec![Action::ClosePopover],
         Event::PopoverDismissed | Event::PopoverBlurred => vec![],
-        Event::OptionsChosen if showing.popover => {
-            vec![Action::ClosePopover, Action::ShowMain, Action::OpenOptions]
+        Event::SettingsChosen if showing.popover => {
+            vec![Action::ClosePopover, Action::ShowSettings]
         }
-        Event::OptionsChosen => vec![Action::ShowMain, Action::OpenOptions],
+        Event::SettingsChosen => vec![Action::ShowSettings],
         Event::DockClicked | Event::LaunchedAgain => vec![Action::ShowMain],
         Event::MainClosing => vec![Action::HideMain],
+        Event::SettingsClosing => vec![Action::HideSettings],
     }
 }
 
-/// Closes the popover and gives focus back to the app it was opened over. With the main window
-/// showing, Mouseless keeps focus: hiding the app would hide the main window too.
+/// Closes the popover and gives focus back to the app it was opened over. With a window of its
+/// own showing, Mouseless keeps focus: hiding the app would hide that window too.
 fn dismiss(showing: Showing) -> Vec<Action> {
-    if showing.main {
+    if showing.main || showing.settings {
         vec![Action::ClosePopover]
     } else {
         vec![Action::ClosePopover, Action::ReturnFocus]
@@ -89,18 +96,25 @@ mod tests {
     const NOTHING: Showing = Showing {
         popover: false,
         main: false,
+        settings: false,
     };
     const POPOVER: Showing = Showing {
         popover: true,
-        main: false,
+        ..NOTHING
     };
     const MAIN: Showing = Showing {
-        popover: false,
         main: true,
+        ..NOTHING
     };
     const BOTH: Showing = Showing {
         popover: true,
         main: true,
+        ..NOTHING
+    };
+    const POPOVER_AND_SETTINGS: Showing = Showing {
+        popover: true,
+        settings: true,
+        ..NOTHING
     };
 
     #[test]
@@ -164,14 +178,30 @@ mod tests {
     }
 
     #[test]
-    fn options_open_in_the_main_window() {
+    fn settings_open_in_their_own_window() {
         assert_eq!(
-            coordinate(NOTHING, Event::OptionsChosen),
-            [Action::ShowMain, Action::OpenOptions]
+            coordinate(NOTHING, Event::SettingsChosen),
+            [Action::ShowSettings]
         );
         assert_eq!(
-            coordinate(POPOVER, Event::OptionsChosen),
-            [Action::ClosePopover, Action::ShowMain, Action::OpenOptions]
+            coordinate(POPOVER, Event::SettingsChosen),
+            [Action::ClosePopover, Action::ShowSettings]
+        );
+    }
+
+    #[test]
+    fn keeps_focus_while_the_settings_show() {
+        assert_eq!(
+            coordinate(POPOVER_AND_SETTINGS, Event::PopoverDismissed),
+            [Action::ClosePopover]
+        );
+    }
+
+    #[test]
+    fn closing_the_settings_hides_them() {
+        assert_eq!(
+            coordinate(NOTHING, Event::SettingsClosing),
+            [Action::HideSettings]
         );
     }
 

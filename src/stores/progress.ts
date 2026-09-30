@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { inject, shallowRef } from 'vue';
+import { inject, onScopeDispose, shallowRef } from 'vue';
 
 import { gradeRecall } from '@/domain/practice/grading';
 import type { LearnSnapshot } from '@/domain/practice/snapshot';
@@ -16,8 +16,10 @@ import type { Result } from '@/domain/shared/result';
 import { err } from '@/domain/shared/result';
 import type { AppDefinition } from '@/domain/shortcuts/types';
 import {
+  changesKey,
   consoleLogger,
   loggerKey,
+  missingChanges,
   missingProgressRepository,
   progressRepositoryKey,
 } from '@/ports';
@@ -115,17 +117,27 @@ export const useProgressStore = defineStore('progress', () => {
     );
   }
 
-  /** Deletes all progress, cards and the review log, on every layout. */
+  /** Shows the progress as gone, which ends a running practice session. */
+  function forgetAll(): void {
+    progress.value = { status: 'loaded', value: { sets: [], cards: [] } };
+    resets.value += 1;
+  }
+
+  /**
+   * Deletes all progress, cards and the review log, on every layout. The other windows forget
+   * theirs when the Rust side tells them.
+   */
   async function reset(): Promise<Result<void, PlatformError>> {
     const deleted = await repository.reset();
 
     if (deleted.kind === 'ok') {
-      progress.value = { status: 'loaded', value: { sets: [], cards: [] } };
-      resets.value += 1;
+      forgetAll();
     }
 
     return deleted;
   }
+
+  onScopeDispose(inject(changesKey, missingChanges).onProgressReset(forgetAll));
 
   return { progress, resets, load, saveLearning, recordReview, reset };
 });

@@ -71,9 +71,12 @@ useSessionExit(
 <template>
   <PageLayout :title="text.appTitle(app)" :subtitle="text.app(app.id, set.title)">
     <template #start>
-      <BaseButton icon="arrowLeft" @click="router.push(toSet(app.id, set.id))">
-        {{ text.ui('learn.back') }}
-      </BaseButton>
+      <BaseButton
+        variant="toolbar"
+        icon="chevronLeft"
+        :label="text.ui('learn.back')"
+        @click="router.push(toSet(app.id, set.id))"
+      />
     </template>
 
     <PracticeStage

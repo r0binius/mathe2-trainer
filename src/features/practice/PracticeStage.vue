@@ -151,16 +151,14 @@ watch(
 }
 
 .title {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
 }
 
 .description {
-  max-width: 350px;
+  max-width: 360px;
   margin: 6px auto 0;
-  font-size: 14px;
-  font-weight: 600;
-  opacity: 0.5;
+  color: var(--color-label-secondary);
 }
 
 .keys {
@@ -168,7 +166,7 @@ watch(
   flex-direction: column;
   align-items: center;
   gap: 40px;
-  margin-top: 20px;
+  margin-top: 28px;
 }
 
 .row {
@@ -181,16 +179,15 @@ watch(
   flex: none;
   align-items: center;
   justify-content: space-between;
-  min-height: 16px;
+  min-height: 28px;
 }
 
 .progress {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--color-text-muted);
-  font-size: 12px;
-  font-weight: 700;
+  color: var(--color-label-secondary);
+  font-variant-numeric: tabular-nums;
 }
 
 .actions {

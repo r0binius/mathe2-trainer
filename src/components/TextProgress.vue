@@ -21,6 +21,6 @@ defineProps<{
 }
 
 .separator {
-  opacity: 0.5;
+  color: var(--color-label-tertiary);
 }
 </style>

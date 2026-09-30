@@ -8,12 +8,12 @@ const { variant = 'neutral', size = 'regular' } = defineProps<{
   /** What an icon-only button does, for VoiceOver and as its tooltip. */
   label?: string;
   /**
-   * How much the button stands out: `neutral` for most, `accent` for the one main action on a
-   * screen, `danger` for destructive actions and `dangerText` for a destructive action next to
-   * text.
+   * What kind of macOS button it is: `neutral` a push button, `accent` the default button (the
+   * one main action on a screen), `danger` a push button for a destructive action, `dangerText`
+   * a destructive action next to text, and `toolbar` a borderless button in a toolbar.
    */
-  variant?: 'neutral' | 'accent' | 'danger' | 'dangerText';
-  /** `large` for a screen's main action next to its heading. */
+  variant?: 'neutral' | 'accent' | 'danger' | 'dangerText' | 'toolbar';
+  /** `large` for a screen's main action next to its heading, as macOS's large control size. */
   size?: 'regular' | 'large';
   /** Whether a button that stands for a choice is the one chosen, for VoiceOver. */
   pressed?: boolean;
@@ -41,63 +41,65 @@ const emit = defineEmits<{
 </template>
 
 <style scoped>
+/* A push button of macOS's regular control size. */
 .button {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 6px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
+  justify-content: center;
+  gap: 4px;
+  min-height: 22px;
+  padding: 0 10px;
+  border-radius: var(--radius-control);
+  font-size: 13px;
   line-height: 1;
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease;
+  white-space: nowrap;
 }
 
 .large {
-  padding: 10px 14px;
+  min-height: 28px;
+  padding: 0 14px;
+  font-weight: 500;
 }
 
-.neutral {
-  background-color: var(--color-surface);
-  color: var(--color-text-muted);
+.neutral,
+.danger {
+  background-color: var(--color-button);
+  box-shadow: var(--shadow-button);
 
-  &:hover,
-  &:focus-visible {
-    background-color: var(--color-surface-hover);
-    color: var(--color-white);
-  }
-}
-
-.accent {
-  background-color: var(--color-yellow);
-  color: var(--color-black);
-
-  &:hover,
-  &:focus-visible {
-    background-color: color-mix(in srgb, var(--color-yellow) 90%, transparent);
-  }
-
-  /* The main action is often focused from the start, so its focus also shows as a ring. */
-  &:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--color-yellow) 40%, transparent);
-    outline-offset: 2px;
+  &:active {
+    background-color: var(--color-button-pressed);
   }
 }
 
 .danger {
-  background-color: var(--color-red);
-  color: var(--color-black);
+  color: var(--color-red);
+}
 
-  &:hover,
-  &:focus-visible {
-    background-color: color-mix(in srgb, var(--color-red) 90%, transparent);
+.accent {
+  background-color: var(--color-accent);
+  box-shadow: var(--shadow-button);
+  color: var(--color-on-accent);
+
+  &:active {
+    filter: brightness(0.9);
   }
 }
 
 .dangerText {
   padding: 0;
   color: var(--color-red);
+}
+
+/* A toolbar item: a glass capsule, as on macOS 27. */
+.toolbar {
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0 10px;
+  background-color: var(--color-capsule);
+  box-shadow: inset 0 0 0 0.5px var(--color-capsule-edge);
+
+  &:active {
+    background-color: var(--color-fill-hover);
+  }
 }
 </style>

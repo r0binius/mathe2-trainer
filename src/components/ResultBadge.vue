@@ -20,10 +20,11 @@ defineProps<{
   flex: none;
 }
 
+/* SF Symbols' checkmark.circle.fill and xmark.circle.fill. */
 path {
   fill: none;
-  stroke: var(--color-black);
-  stroke-width: 2;
+  stroke: var(--color-on-accent);
+  stroke-width: 1.6;
   stroke-linecap: round;
   stroke-linejoin: round;
 }

@@ -3,6 +3,7 @@ import { computed, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
 
 import BaseButton from '@/components/BaseButton.vue';
+import GroupedList from '@/components/GroupedList.vue';
 import KeyCapSmall from '@/components/KeyCapSmall.vue';
 import PageLayout from '@/components/PageLayout.vue';
 import ResultBadge from '@/components/ResultBadge.vue';
@@ -51,9 +52,12 @@ const continues = computed(() => {
 <template>
   <PageLayout :title="text.appTitle(app)" :subtitle="title">
     <template #start>
-      <BaseButton icon="arrowLeft" @click="router.push(toApp(app.id))">
-        {{ text.ui('set.back') }}
-      </BaseButton>
+      <BaseButton
+        variant="toolbar"
+        icon="chevronLeft"
+        :label="text.ui('set.back')"
+        @click="router.push(toApp(app.id))"
+      />
     </template>
 
     <nav ref="nav">
@@ -72,7 +76,7 @@ const continues = computed(() => {
         </template>
       </ScreenHeading>
 
-      <ul class="rows">
+      <GroupedList tag="ul">
         <li
           v-for="item in summary.items"
           :key="item.id"
@@ -91,26 +95,18 @@ const continues = computed(() => {
             <KeyCapSmall v-for="key in item.keys" :key="key" :label="labelOf(key)" />
           </div>
         </li>
-      </ul>
+      </GroupedList>
     </nav>
   </PageLayout>
 </template>
 
 <style scoped>
-.rows {
-  display: grid;
-  gap: 2px;
-  border-radius: 9px;
-  overflow: hidden;
-  list-style: none;
-}
-
 .row {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 20px;
-  background-color: var(--color-surface);
+  min-height: 44px;
+  padding: 7px 12px;
 }
 
 .check {
@@ -126,20 +122,14 @@ const continues = computed(() => {
   min-width: 0;
 }
 
-.shortcut {
-  font-size: 14px;
-  font-weight: 600;
-}
-
 .description {
-  margin-top: 2px;
-  color: var(--color-text-muted);
-  font-size: 12px;
+  margin-top: 1px;
+  color: var(--color-label-secondary);
+  font-size: 11px;
 }
 
 .keys {
   display: flex;
   flex: none;
-  gap: 4px;
 }
 </style>

@@ -3,10 +3,9 @@ import './styles/main.css';
 import { createPinia } from 'pinia';
 import { createApp } from 'vue';
 
-import App from './App.vue';
-import { apps } from './data/apps';
 import { macosKeyLabels } from './domain/keyboard/labels';
 import { uiLanguageOf } from './domain/settings/language';
+import SettingsWindow from './features/settings/SettingsWindow.vue';
 import { createAppI18n } from './i18n';
 import { tauriLogger } from './platform/log';
 import { tauriPorts } from './platform/tauri';
@@ -19,20 +18,18 @@ import {
   progressRepositoryKey,
   settingsRepositoryKey,
 } from './ports';
-import { createAppRouter } from './router';
 
 const ports = tauriPorts();
 
 logPolicyViolations(tauriLogger);
 
-createApp(App)
+createApp(SettingsWindow)
   .use(createPinia())
   .use(createAppI18n(uiLanguageOf(navigator.languages)))
-  .use(createAppRouter(apps))
   .provide(settingsRepositoryKey, ports.settings)
   .provide(progressRepositoryKey, ports.progress)
   .provide(keymapSourceKey, ports.keymap)
+  .provide(changesKey, ports.changes)
   .provide(keyLabelsKey, macosKeyLabels)
   .provide(loggerKey, tauriLogger)
-  .provide(changesKey, ports.changes)
   .mount('#app');

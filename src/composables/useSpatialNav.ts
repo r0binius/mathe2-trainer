@@ -15,8 +15,8 @@ const directions: Readonly<Record<string, Direction>> = {
 /**
  * Keyboard navigation for a screen while it lives: the arrow keys move focus to the nearest
  * element that way, Escape goes `back`, and so does ← once nothing lies to the left, while →
- * then opens the focused link. A screen without `back`, such as the library, has nowhere to go. The screen's first focusable element, its main action, gets focus
- * when it opens.
+ * then opens the focused link. A screen without `back` has nowhere to go. The screen's first
+ * focusable element, its main action, gets focus when it opens, unless focus is elsewhere.
  */
 export function useSpatialNav(root: () => HTMLElement | null, back?: () => void): void {
   function focusables(): readonly HTMLElement[] {
@@ -24,8 +24,14 @@ export function useSpatialNav(root: () => HTMLElement | null, back?: () => void)
   }
 
   function focusFirst(): void {
-    // Without scrolling, which would fight the slide of a screen that's still moving in.
-    focusables()[0]?.focus({ preventScroll: true });
+    focusFirstIn(root());
+  }
+
+  /** Focuses the page's main action when it opens, unless focus is elsewhere, such as the sidebar. */
+  function focusFirstOnOpen(): void {
+    if (ownsFocus(root())) {
+      focusFirst();
+    }
   }
 
   function move(direction: Direction): void {
@@ -65,11 +71,16 @@ export function useSpatialNav(root: () => HTMLElement | null, back?: () => void)
     }
   }
 
-  onMounted(focusFirst);
+  onMounted(focusFirstOnOpen);
   window.addEventListener('keydown', onKeyDown);
   onScopeDispose(() => {
     window.removeEventListener('keydown', onKeyDown);
   });
+}
+
+/** Focuses the first link, button or menu inside `root`, if it has one. */
+export function focusFirstIn(root: HTMLElement | null): void {
+  root?.querySelector<HTMLElement>(focusableSelector)?.focus();
 }
 
 /** A key pressed on its own, which nothing else has handled already. */
@@ -78,8 +89,8 @@ function isPlainKey(event: KeyboardEvent): boolean {
 }
 
 /**
- * Whether keys are this screen's to handle: focus is inside it, or nowhere. While screens slide,
- * the leaving one still listens, and this keeps it from acting.
+ * Whether keys are this screen's to handle: focus is inside it, or nowhere. Keys in the sidebar
+ * are the sidebar's.
  */
 function ownsFocus(container: HTMLElement | null): boolean {
   const active = document.activeElement;

@@ -3,9 +3,6 @@
     "failed": "Your settings and progress couldn't be loaded.",
     "retry": "Try again"
   },
-  "page": {
-    "options": "Options"
-  },
   "categories": {
     "communication": "Communication",
     "development": "Development",
@@ -17,11 +14,12 @@
   "library": {
     "recent": "Recent",
     "shortcuts": "{n} shortcut | {n} shortcuts",
-    "mastered": "mastered",
-    "due": "{n} due"
+    "due": "{n} due",
+    "choose": "Choose an app in the sidebar to learn its shortcuts.",
+    "dueToday": "Due for review",
+    "apps": "Apps"
   },
   "app": {
-    "back": "Apps",
     "sets": "Sets",
     "review": "Review {n}",
     "nextReview": "Next review {when}"
@@ -53,13 +51,17 @@
     "title": "Review",
     "back": "Sets"
   },
-  "options": {
-    "title": "Options",
-    "close": "Close",
+  "settings": {
+    "title": "Settings",
+    "panes": {
+      "general": "General",
+      "trigger": "Popover",
+      "progress": "Progress"
+    },
     "trigger": "Open the popover",
     "holdCommand": "Hold ⌘",
     "recordShortcut": "Record a shortcut",
-    "pressShortcut": "Press the shortcut …",
+    "pressShortcut": "Press the shortcut…",
     "rejected": {
       "duplicateKey": "A key is in it twice.",
       "modifierOnly": "Add a key to the modifiers.",
@@ -67,17 +69,18 @@
       "needsModifier": "Use ⌘, ⌃ or ⌥ with it.",
       "appStandard": "Apps use ⌘ with one key themselves. Add another modifier."
     },
-    "icons": "Icons",
-    "menuBarIcon": "Menu bar",
-    "dockIcon": "Dock",
-    "keepOneIcon": "One icon always stays, so Mouseless can be reached.",
+    "menuBarIcon": "Show in menu bar",
+    "dockIcon": "Show in Dock",
+    "keepOneIcon": "One of the two always stays, so Mouseless can be reached.",
     "launchAtLogin": "Launch at login",
     "language": "Language",
     "system": "Same as system",
     "progress": "Progress",
     "reset": "Reset progress",
     "confirmReset": "Click again to reset",
-    "saveFailed": "Couldn't save the change"
+    "saveFailed": "Couldn't save the change",
+    "triggerHint": "How the popover with the shortcuts of the app in front opens.",
+    "progressHint": "Deletes what you learned and all reviews, on every keyboard layout."
   },
   "popover": {
     "placeholder": "The shortcuts of the app in front will show up here."

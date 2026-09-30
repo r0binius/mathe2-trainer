@@ -30,30 +30,27 @@ const text = useText();
         <CircleProgress :value="summary.learned.length" :max="summary.items.length" />
       </template>
       <template v-else>{{ summary.items.length }}</template>
-      <BaseIcon class="arrow" name="arrowRight" />
+      <BaseIcon class="arrow" name="chevronRight" :size="12" />
     </span>
   </RouterLink>
 </template>
 
 <style scoped>
+/* A row that opens its set, as a navigation row in System Settings. */
 .row {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 16px 20px;
-  background-color: var(--color-surface);
-  transition: background-color 0.2s ease;
+  min-height: 44px;
+  padding: 6px 12px;
 
-  &:hover,
-  &:focus-visible {
-    background-color: var(--color-surface-hover);
+  &:active {
+    background-color: var(--color-fill);
   }
 }
 
 .title {
   flex: 1 1 auto;
-  font-size: 18px;
-  font-weight: 700;
 }
 
 .meta {
@@ -61,25 +58,17 @@ const text = useText();
   flex: none;
   align-items: center;
   gap: 8px;
-  color: var(--color-text-muted);
-  font-size: 12px;
-  font-weight: 700;
+  color: var(--color-label-secondary);
+  font-variant-numeric: tabular-nums;
 }
 
 .completed {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  color: var(--color-green);
+  gap: 6px;
 }
 
 .arrow {
-  margin-left: 4px;
-  opacity: 0.5;
-  transition: opacity 0.2s ease;
-
-  .row:hover & {
-    opacity: 1;
-  }
+  color: var(--color-label-tertiary);
 }
 </style>

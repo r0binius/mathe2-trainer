@@ -42,66 +42,53 @@ defineProps<{
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 50px;
-  height: 50px;
-  padding: 0 10px;
-  border-radius: 9px;
-  font-size: 22px;
-  font-weight: 700;
+  min-width: 56px;
+  height: 56px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 24px;
 }
 
+/* Where the key goes: a shallow well, dashed while the key is being asked for. */
 .outline {
-  border: 3px solid color-mix(in srgb, var(--color-white) 20%, transparent);
-  color: var(--color-text-muted);
+  border: 1.5px solid var(--color-separator);
+  background-color: var(--color-fill);
+  color: var(--color-label-secondary);
 
   .hidden & {
     border-style: dashed;
+    border-color: var(--color-label-tertiary);
+    background-color: transparent;
     color: transparent;
   }
 
   .pressed & {
     border-color: transparent;
+    background-color: transparent;
   }
 }
 
-/* A white keycap on a darker 3px edge, so it looks raised. */
+/* The key itself, raised above its well like a key on a Mac keyboard. */
 .cap {
   position: absolute;
   inset: 0;
-  z-index: 0;
-  color: var(--color-black);
+  background-color: var(--color-key);
+  box-shadow:
+    0 0 0 0.5px var(--color-key-edge),
+    0 2px 0 var(--color-key-edge),
+    0 3px 6px rgb(0 0 0 / 12%);
+  color: var(--color-label);
   will-change: transform;
-
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-  }
-
-  &::before {
-    bottom: 3px;
-    z-index: -1;
-    background-color: var(--color-white);
-  }
-
-  &::after {
-    z-index: -2;
-    background-color: color-mix(in srgb, var(--color-white) 70%, transparent);
-  }
 }
 
 .name {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 10px);
   left: -2px;
   width: calc(100% + 4px);
-  font-size: 12px;
-  font-weight: 700;
+  color: var(--color-label-secondary);
+  font-size: 11px;
   text-align: center;
-  text-transform: uppercase;
-  opacity: 0.5;
 
   .hidden:not(.pressed) & {
     opacity: 0;
@@ -110,8 +97,8 @@ defineProps<{
 
 .badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: -5px;
+  right: -5px;
   will-change: transform;
 }
 
@@ -130,7 +117,7 @@ defineProps<{
   }
 
   40% {
-    transform: scale(1.15);
+    transform: scale(1.08);
     opacity: 1;
   }
 
@@ -146,7 +133,7 @@ defineProps<{
   }
 
   100% {
-    transform: scale(0.8);
+    transform: scale(0.9);
     opacity: 0;
   }
 }

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, useTemplateRef } from 'vue';
+import { computed, inject, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
 
 import BaseButton from '@/components/BaseButton.vue';
+import GroupedList from '@/components/GroupedList.vue';
 import ListSection from '@/components/ListSection.vue';
 import PageLayout from '@/components/PageLayout.vue';
 import ScreenHeading from '@/components/ScreenHeading.vue';
@@ -12,10 +13,11 @@ import { recentFirst, summarizeApp, summarizeSet } from '@/domain/progress/summa
 import { daysUntil } from '@/domain/scheduling/days';
 import type { AppDefinition } from '@/domain/shortcuts/types';
 import { useText } from '@/i18n';
-import { toLibrary, toReview } from '@/routes';
+import { toReview } from '@/routes';
 
 import { logoOf } from './logos';
 import SetRow from './SetRow.vue';
+import { focusSidebarKey } from './sidebarFocus';
 
 const props = defineProps<{
   /** The app whose sets are shown. */
@@ -28,11 +30,10 @@ const router = useRouter();
 const text = useText();
 const nav = useTemplateRef<HTMLElement>('nav');
 
+// ← and Escape lead back to the app in the sidebar.
 useSpatialNav(
   () => nav.value,
-  () => {
-    void router.push(toLibrary());
-  },
+  inject(focusSidebarKey, () => undefined),
 );
 
 const summary = computed(() => summarizeApp(props.app, props.context));
@@ -55,13 +56,7 @@ const nextReview = computed(() => {
 </script>
 
 <template>
-  <PageLayout>
-    <template #start>
-      <BaseButton icon="arrowLeft" @click="router.push(toLibrary())">
-        {{ text.ui('app.back') }}
-      </BaseButton>
-    </template>
-
+  <PageLayout :title="text.appTitle(app)">
     <nav ref="nav">
       <ScreenHeading :title="text.appTitle(app)">
         <template #leading><img class="logo" :src="logoOf(app.id)" alt="" /></template>
@@ -75,15 +70,15 @@ const nextReview = computed(() => {
 
       <div class="sections">
         <ListSection v-if="recent.length > 0" :title="text.ui('library.recent')">
-          <div class="rows">
+          <GroupedList>
             <SetRow v-for="set in recent" :key="set.set.id" :app-id="app.id" :summary="set" />
-          </div>
+          </GroupedList>
         </ListSection>
 
         <ListSection v-if="others.length > 0" :title="text.ui('app.sets')">
-          <div class="rows">
+          <GroupedList>
             <SetRow v-for="set in others" :key="set.set.id" :app-id="app.id" :summary="set" />
-          </div>
+          </GroupedList>
         </ListSection>
       </div>
     </nav>
@@ -92,18 +87,13 @@ const nextReview = computed(() => {
 
 <style scoped>
 .logo {
-  height: 40px;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
 }
 
 .sections {
   display: grid;
   gap: 24px;
-}
-
-.rows {
-  display: grid;
-  gap: 2px;
-  border-radius: 9px;
-  overflow: hidden;
 }
 </style>

@@ -20,28 +20,22 @@ defineSlots<{
 </template>
 
 <style scoped>
+/* A borderless toolbar-style button whose word appears when you reach for it. */
 .skip {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 6px;
-  border-radius: 6px;
-  color: var(--color-text-muted);
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1;
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease;
+  min-height: 28px;
+  padding: 0 8px;
+  border-radius: var(--radius-control);
+  color: var(--color-label-secondary);
 
-  &:hover,
-  &:focus-visible {
-    background-color: var(--color-surface);
-    color: var(--color-white);
+  &:hover {
+    background-color: var(--color-fill);
+    color: var(--color-label);
   }
 }
 
-/* The icon says what it does; the word appears when you reach for it. */
 .label {
   opacity: 0;
   transition: opacity 0.2s ease;

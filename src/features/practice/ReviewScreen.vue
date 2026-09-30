@@ -62,9 +62,12 @@ useSessionExit(
 <template>
   <PageLayout :title="text.appTitle(app)" :subtitle="text.ui('review.title')">
     <template #start>
-      <BaseButton icon="arrowLeft" @click="router.push(toApp(app.id))">
-        {{ text.ui('review.back') }}
-      </BaseButton>
+      <BaseButton
+        variant="toolbar"
+        icon="chevronLeft"
+        :label="text.ui('review.back')"
+        @click="router.push(toApp(app.id))"
+      />
     </template>
 
     <PracticeStage

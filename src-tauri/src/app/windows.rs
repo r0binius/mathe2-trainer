@@ -1,6 +1,6 @@
 //! Carries out what the [coordinator](super::coordinator) decides, on the real windows.
 
-use tauri::{AppHandle, Emitter, Manager, WebviewWindow, WindowEvent};
+use tauri::{AppHandle, Manager, WebviewWindow, WindowEvent};
 use tauri_plugin_log::log;
 
 use super::coordinator::{Action, Event, Showing, coordinate};
@@ -10,11 +10,11 @@ use crate::error::AppError;
 /// The main window's label, as in `tauri.conf.json`.
 const MAIN: &str = "main";
 
-/// The event that tells the main window to open its options panel. It carries nothing.
-const OPTIONS_REQUESTED: &str = "options-requested";
+/// The Settings window's label, as in `tauri.conf.json`.
+const SETTINGS: &str = "settings";
 
-/// Reports the windows' own events to the coordinator: the popover losing focus, and the main
-/// window closing, which hides it instead.
+/// Reports the windows' own events to the coordinator: the popover losing focus, and the main and
+/// Settings windows closing, which hides them instead.
 ///
 /// # Errors
 ///
@@ -27,14 +27,8 @@ pub fn report_window_events(app: &AppHandle) -> tauri::Result<()> {
         }
     });
 
-    let handle = app.clone();
-    main(app)?.on_window_event(move |event| {
-        if let WindowEvent::CloseRequested { api, .. } = event {
-            api.prevent_close();
-            report(&handle, Event::MainClosing);
-        }
-    });
-    Ok(())
+    hide_on_close(app, MAIN, Event::MainClosing)?;
+    hide_on_close(app, SETTINGS, Event::SettingsClosing)
 }
 
 /// Lets the coordinator decide what `event` does, and does it.
@@ -64,6 +58,7 @@ fn showing(app: &AppHandle) -> tauri::Result<Showing> {
     Ok(Showing {
         popover: popover::window(app)?.is_visible()?,
         main: main(app)?.is_visible()?,
+        settings: window(app, SETTINGS)?.is_visible()?,
     })
 }
 
@@ -72,17 +67,36 @@ fn apply(app: &AppHandle, action: Action) -> tauri::Result<()> {
         Action::OpenPopover => popover::open_below(&popover::window(app)?, tray::area(app)?),
         Action::ClosePopover => popover::window(app)?.hide(),
         Action::ReturnFocus => app.hide(),
-        Action::ShowMain => {
-            let main = main(app)?;
-            main.show()?;
-            main.set_focus()
-        }
+        Action::ShowMain => bring_forward(&main(app)?),
         Action::HideMain => main(app)?.hide(),
-        Action::OpenOptions => app.emit_to(MAIN, OPTIONS_REQUESTED, ()),
+        Action::ShowSettings => bring_forward(&window(app, SETTINGS)?),
+        Action::HideSettings => window(app, SETTINGS)?.hide(),
     }
 }
 
+/// Makes closing the window with `label` hide it, and tells the coordinator as `event`.
+fn hide_on_close(app: &AppHandle, label: &str, event: Event) -> tauri::Result<()> {
+    let handle = app.clone();
+
+    window(app, label)?.on_window_event(move |window_event| {
+        if let WindowEvent::CloseRequested { api, .. } = window_event {
+            api.prevent_close();
+            report(&handle, event);
+        }
+    });
+    Ok(())
+}
+
+fn bring_forward(window: &WebviewWindow) -> tauri::Result<()> {
+    window.show()?;
+    window.set_focus()
+}
+
 fn main(app: &AppHandle) -> tauri::Result<WebviewWindow> {
-    app.get_webview_window(MAIN)
+    window(app, MAIN)
+}
+
+fn window(app: &AppHandle, label: &str) -> tauri::Result<WebviewWindow> {
+    app.get_webview_window(label)
         .ok_or(tauri::Error::WebviewNotFound)
 }

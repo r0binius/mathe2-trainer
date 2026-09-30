@@ -43,7 +43,7 @@ onScopeDispose(() => {
   place-items: center;
   height: 100vh;
   padding: 24px;
-  color: var(--color-text-muted);
+  color: var(--color-label-secondary);
   text-align: center;
 }
 </style>

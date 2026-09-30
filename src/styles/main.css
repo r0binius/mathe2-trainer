@@ -1,4 +1,3 @@
-/* The global stylesheet of both windows, imported by `main.ts` and `popover.ts`. */
-@import '@fontsource-variable/source-sans-3';
+/* The global stylesheet of every window, imported by each window's entry. */
 @import './tokens.css';
 @import './base.css';

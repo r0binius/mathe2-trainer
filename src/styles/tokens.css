@@ -1,25 +1,95 @@
 /*
- * The design tokens, taken over from the old app. Only what components use is here: the old
- * app's other easing curves were never used, and its `ease` and `easeInOut` are CSS's own
- * `ease` and `ease-in-out`.
+ * The design tokens: macOS's semantic colors and measurements from Apple's Human Interface
+ * Guidelines, for light and dark appearance. Components use the roles, never raw colors, so both
+ * appearances follow from here.
  */
 :root {
-  --color-window: #000;
-  --color-white: #f2f2f2;
-  --color-black: #121212;
-  --color-dark-grey: #1f1f1f;
-  --color-green: #28c941;
-  --color-yellow: #fdd231;
-  --color-red: #ff6159;
+  /* Text, from most to least prominent. */
+  --color-label: rgb(0 0 0 / 85%);
+  --color-label-secondary: rgb(0 0 0 / 50%);
+  --color-label-tertiary: rgb(0 0 0 / 26%);
 
-  /* Roles, derived from the palette: what the screens use most. */
-  --color-surface: color-mix(in srgb, var(--color-white) 8%, transparent);
-  --color-surface-hover: color-mix(in srgb, var(--color-white) 12%, transparent);
-  --color-text-muted: color-mix(in srgb, var(--color-white) 50%, transparent);
+  /* Backgrounds: the window, the content next to the sidebar, and grouped boxes on it. */
+  --color-window: #ececec;
+  --color-content: #f5f5f7;
+  --color-box: #fff;
+  --color-separator: rgb(0 0 0 / 8%);
 
-  /* Robert Penner's curves, approximated as cubic Béziers. */
+  /* Fills for controls and rows, at rest and under the pointer. */
+  --color-fill: rgb(0 0 0 / 5%);
+  --color-fill-hover: rgb(0 0 0 / 9%);
+
+  /* A glass capsule in the toolbar, and its hairline edge. */
+  --color-capsule: rgb(0 0 0 / 5%);
+  --color-capsule-edge: rgb(0 0 0 / 8%);
+
+  /* A push button: its bezel, pressed, and the shadow that outlines it. */
+  --color-button: #fff;
+  --color-button-pressed: #f0f0f0;
+  --shadow-button: 0 0 0 0.5px rgb(0 0 0 / 15%), 0 0.5px 1px rgb(0 0 0 / 15%);
+
+  /* A sidebar row while the sidebar has focus: the accent, lightened as macOS 27 draws it. */
+  --color-selection: color-mix(in srgb, var(--color-accent) 60%, #fff);
+
+  /* A key cap: its face and the edge below it that makes it look raised. */
+  --color-key: #fff;
+  --color-key-edge: rgb(0 0 0 / 22%);
+
+  /* The system's colors. Selections and main actions use the user's accent color (below). */
+  --color-accent: #007aff;
+  --color-on-accent: #fff;
+  --color-red: #ff3b30;
+  --color-green: #28cd41;
+
+  /* Controls are capsules and boxes rounder, as on macOS 27. */
+  --radius-control: 999px;
+  --radius-box: 12px;
+  --radius-row: 8px;
+
+  /* The height of a window's unified title bar and toolbar. */
+  --toolbar-height: 52px;
+  --sidebar-width: 220px;
+
+  --font-sans: system-ui, -apple-system, sans-serif;
+
+  /* Robert Penner's curve, approximated as a cubic Bézier. */
   --ease-in-out-quad: cubic-bezier(0.455, 0.03, 0.515, 0.955);
-  --ease-in-out-quint: cubic-bezier(0.86, 0, 0.07, 1);
+}
 
-  --font-sans: 'Source Sans 3 Variable', system-ui, sans-serif;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-label: rgb(255 255 255 / 85%);
+    --color-label-secondary: rgb(255 255 255 / 55%);
+    --color-label-tertiary: rgb(255 255 255 / 25%);
+
+    /* Measured on macOS 27: System Settings' content, its boxes and their separators. */
+    --color-window: #2a2a2f;
+    --color-content: #2a2a2f;
+    --color-box: #303035;
+    --color-separator: #3a3a3f;
+
+    --color-fill: rgb(255 255 255 / 8%);
+    --color-fill-hover: rgb(255 255 255 / 13%);
+
+    --color-capsule: rgb(255 255 255 / 15%);
+    --color-capsule-edge: rgb(255 255 255 / 8%);
+
+    --color-button: rgb(255 255 255 / 20%);
+    --color-button-pressed: rgb(255 255 255 / 28%);
+    --shadow-button: 0 0 0 0.5px rgb(0 0 0 / 30%), 0 0.5px 0 rgb(255 255 255 / 10%) inset;
+
+    --color-key: #48484a;
+    --color-key-edge: rgb(0 0 0 / 60%);
+
+    --color-accent: #0a84ff;
+    --color-red: #ff453a;
+    --color-green: #32d74b;
+  }
+}
+
+/* WebKit on macOS knows the accent color the user chose in System Settings. */
+@supports (color: -apple-system-control-accent) {
+  :root {
+    --color-accent: -apple-system-control-accent;
+  }
 }

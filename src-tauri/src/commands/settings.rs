@@ -2,13 +2,17 @@
 
 use std::sync::Arc;
 
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, Emitter, State};
 use tauri_plugin_log::log;
 
 use crate::app;
 use crate::error::AppError;
 use crate::services::database::Database;
 use crate::services::settings::{self, Settings};
+
+/// The event every window reloads the settings on, after one of them changed them. It carries
+/// nothing.
+const SETTINGS_CHANGED: &str = "settings-changed";
 
 /// Returns the current settings.
 ///
@@ -22,8 +26,8 @@ pub async fn get_settings(database: State<'_, Arc<Database>>) -> Result<Settings
         .await
 }
 
-/// Replaces the settings, and applies them outside the webview. What can't be applied is logged:
-/// the settings are saved all the same.
+/// Replaces the settings, applies them outside the webview, and tells every window. What can't be
+/// applied is logged: the settings are saved all the same.
 ///
 /// # Errors
 ///
@@ -43,6 +47,9 @@ pub async fn set_settings(
     let handle = app.clone();
     if let Err(error) = app.run_on_main_thread(move || app::apply_settings(&handle, &settings)) {
         log::error!("cannot apply the settings: {error}");
+    }
+    if let Err(error) = app.emit(SETTINGS_CHANGED, ()) {
+        log::error!("cannot tell the windows the settings changed: {error}");
     }
     Ok(())
 }

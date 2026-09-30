@@ -1,18 +1,16 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
-  "identifier": "default",
-  "description": "Capability for the main window",
-  "windows": ["main"],
+  "identifier": "settings",
+  "description": "Capability for the Settings window",
+  "windows": ["settings"],
   "permissions": [
     "core:event:allow-listen",
     "core:event:allow-unlisten",
     "core:window:allow-start-dragging",
     "allow-get-keymap",
-    "allow-load-progress",
-    "allow-save-set-progress",
-    "allow-record-review",
-    "allow-replace-progress",
+    "allow-reset-progress",
     "allow-get-settings",
+    "allow-set-settings",
     "log:allow-log"
   ]
 }

@@ -1,14 +1,22 @@
 import { defineStore } from 'pinia';
-import { inject, shallowRef } from 'vue';
+import { inject, onScopeDispose, shallowRef } from 'vue';
 
 import type { Settings } from '@/domain/settings/settings';
 import type { Loadable } from '@/domain/shared/loadable';
 import { loadableOf } from '@/domain/shared/loadable';
 import type { PlatformError } from '@/domain/shared/platformError';
 import type { Result } from '@/domain/shared/result';
-import { missingSettingsRepository, settingsRepositoryKey } from '@/ports';
+import {
+  changesKey,
+  missingChanges,
+  missingSettingsRepository,
+  settingsRepositoryKey,
+} from '@/ports';
 
-/** The user's settings, loaded once at startup and changed only once they're saved. */
+/**
+ * The user's settings, loaded at startup, changed only once they're saved, and loaded again when
+ * another window saved them.
+ */
 export const useSettingsStore = defineStore('settings', () => {
   const repository = inject(settingsRepositoryKey, missingSettingsRepository);
   const settings = shallowRef<Loadable<Settings>>({ status: 'loading' });
@@ -28,6 +36,12 @@ export const useSettingsStore = defineStore('settings', () => {
 
     return saved;
   }
+
+  onScopeDispose(
+    inject(changesKey, missingChanges).onSettingsChanged(() => {
+      void load();
+    }),
+  );
 
   return { settings, load, save };
 });

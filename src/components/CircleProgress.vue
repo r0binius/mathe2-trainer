@@ -14,7 +14,7 @@ const {
   size?: number;
 }>();
 
-const strokeWidth = 3;
+const strokeWidth = 2.5;
 
 const center = computed(() => size / 2);
 const radius = computed(() => (size - strokeWidth) / 2);
@@ -45,11 +45,11 @@ const remaining = computed(() => (max > 0 ? (max - value) / max : 1));
 }
 
 .track {
-  stroke: color-mix(in srgb, var(--color-white) 20%, transparent);
+  stroke: var(--color-fill-hover);
 }
 
 .done {
-  stroke: var(--color-white);
+  stroke: var(--color-accent);
   transition: stroke-dashoffset 0.5s ease;
 }
 </style>

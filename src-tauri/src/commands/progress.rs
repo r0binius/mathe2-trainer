@@ -2,11 +2,15 @@
 
 use std::sync::Arc;
 
-use tauri::State;
+use tauri::{AppHandle, Emitter, State};
+use tauri_plugin_log::log;
 
 use crate::error::AppError;
 use crate::services::database::Database;
 use crate::services::progress::{self, Card, Review, SetRecord, StoredProgress};
+
+/// The event every window drops its progress on, after one of them reset it. It carries nothing.
+const PROGRESS_RESET: &str = "progress-reset";
 
 /// Returns all set records and cards, on every layout.
 ///
@@ -69,13 +73,19 @@ pub async fn replace_progress(
     Ok(())
 }
 
-/// Deletes all progress and the review log.
+/// Deletes all progress and the review log, and tells every window, so running practice ends.
 ///
 /// # Errors
 ///
 /// Returns a database error if it can't be deleted.
 #[tauri::command]
-pub async fn reset_progress(database: State<'_, Arc<Database>>) -> Result<(), AppError> {
+pub async fn reset_progress(
+    app: AppHandle,
+    database: State<'_, Arc<Database>>,
+) -> Result<(), AppError> {
     database.run(progress::reset).await?;
+    if let Err(error) = app.emit(PROGRESS_RESET, ()) {
+        log::error!("cannot tell the windows the progress was reset: {error}");
+    }
     Ok(())
 }

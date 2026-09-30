@@ -4,8 +4,8 @@
  */
 
 /*
- * A desktop app, not a page: nothing is selectable or draggable, and focus has no browser
- * outline. Every focusable component shows its own focus state instead.
+ * A desktop app, not a page: nothing is selectable or draggable, and the pointer stays an arrow
+ * over links and buttons, as it does in native apps.
  */
 *,
 *::before,
@@ -13,22 +13,24 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  outline: none;
+  cursor: default;
   user-select: none;
   -webkit-user-drag: none;
 }
 
 :root {
-  /* Dark native controls and scrollbars. */
-  color-scheme: dark;
+  /* Native controls and scrollbars in the system's appearance. */
+  color-scheme: light dark;
 }
 
+/* The system's body text: 13 points of SF Pro. */
 body {
   overflow: hidden;
   background-color: var(--color-window);
-  color: var(--color-white);
+  color: var(--color-label);
   font-family: var(--font-sans);
-  line-height: 1.4;
+  font-size: 13px;
+  line-height: 1.3;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -38,7 +40,6 @@ a {
 }
 
 button,
-input,
 textarea {
   border: none;
   background-color: transparent;
@@ -46,31 +47,10 @@ textarea {
   font: inherit;
 }
 
-/* Thin, rounded scrollbars that float inside a 4px transparent border. */
-::-webkit-scrollbar {
-  width: 14px;
-  height: 14px;
-}
-
-::-webkit-scrollbar-track {
-  border: 4px solid transparent;
-  border-radius: 8px;
-  background-clip: padding-box;
-}
-
-::-webkit-scrollbar-thumb {
-  border: 4px solid transparent;
-  border-radius: 8px;
-  background-clip: padding-box;
-  background-color: var(--color-surface);
-}
-
-::-webkit-scrollbar-button {
-  display: none;
-}
-
-::-webkit-scrollbar-corner {
-  background-color: transparent;
+/* The system's focus ring, in the accent color. */
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-accent) 50%, transparent);
+  outline-offset: 0;
 }
 
 /* Read by VoiceOver but not shown, such as what practice announces. */

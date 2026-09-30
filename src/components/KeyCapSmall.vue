@@ -12,20 +12,14 @@ defineProps<{
 </template>
 
 <style scoped>
+/* A key as macOS menus show shortcuts: its glyph in secondary text, one after the other. */
 .key {
   display: inline-flex;
-  align-items: center;
   justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 3px;
-  border-radius: 3px;
-  background-color: color-mix(in srgb, var(--color-white) 10%, transparent);
-  color: color-mix(in srgb, var(--color-white) 70%, transparent);
+  min-width: 13px;
+  color: var(--color-label-secondary);
   font-family: inherit;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 13px;
   line-height: 1;
-  transition: color 0.1s ease;
 }
 </style>

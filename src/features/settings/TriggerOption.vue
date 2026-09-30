@@ -21,8 +21,6 @@ defineProps<{
 const emit = defineEmits<{
   /** A trigger was chosen: holding ⌘, or a recorded shortcut that the trigger policy allows. */
   choose: [trigger: Trigger];
-  /** Recording started or stopped. Meanwhile Escape cancels it instead of closing the options. */
-  recording: [active: boolean];
 }>();
 
 const keymap = useKeymapStore();
@@ -32,11 +30,11 @@ const policy = triggerPolicy(macosReserved);
 
 /** Why each rejected combination can't open the popover. */
 const rejectionTexts: Readonly<Record<Rejection['reason'], UiKey>> = {
-  'duplicate-key': 'options.rejected.duplicateKey',
-  'modifier-only': 'options.rejected.modifierOnly',
-  reserved: 'options.rejected.reserved',
-  'needs-modifier': 'options.rejected.needsModifier',
-  'app-standard': 'options.rejected.appStandard',
+  'duplicate-key': 'settings.rejected.duplicateKey',
+  'modifier-only': 'settings.rejected.modifierOnly',
+  reserved: 'settings.rejected.reserved',
+  'needs-modifier': 'settings.rejected.needsModifier',
+  'app-standard': 'settings.rejected.appStandard',
 };
 
 const recording = ref(false);
@@ -45,15 +43,13 @@ const rejection = ref<Rejection>();
 function startRecording(): void {
   recording.value = true;
   rejection.value = undefined;
-  emit('recording', true);
-  // After the options panel's own listener, which keeps keys from the screens behind it.
+  // Capturing, so the key doesn't also reach a button: Escape or Space would press it.
   window.addEventListener('keydown', onKeyDown, { capture: true });
 }
 
 function stopRecording(): void {
   window.removeEventListener('keydown', onKeyDown, { capture: true });
   recording.value = false;
-  emit('recording', false);
 }
 
 function onKeyDown(event: KeyboardEvent): void {
@@ -99,18 +95,18 @@ onScopeDispose(() => {
         :pressed="trigger.kind === 'holdCommand'"
         @click="emit('choose', { kind: 'holdCommand' })"
       >
-        {{ text.ui('options.holdCommand') }}
+        {{ text.ui('settings.holdCommand') }}
       </BaseButton>
       <BaseButton
         :variant="trigger.kind === 'shortcut' && !recording ? 'accent' : 'neutral'"
         :pressed="trigger.kind === 'shortcut'"
         @click="startRecording"
       >
-        <template v-if="recording">{{ text.ui('options.pressShortcut') }}</template>
+        <template v-if="recording">{{ text.ui('settings.pressShortcut') }}</template>
         <span v-else-if="trigger.kind === 'shortcut'" class="keys">
           <KeyCapSmall v-for="key in trigger.keys" :key="key" :label="labelOf(key)" />
         </span>
-        <template v-else>{{ text.ui('options.recordShortcut') }}</template>
+        <template v-else>{{ text.ui('settings.recordShortcut') }}</template>
       </BaseButton>
     </div>
     <p v-if="recording && rejection" class="rejected" role="alert">
@@ -120,18 +116,30 @@ onScopeDispose(() => {
 </template>
 
 <style scoped>
+.trigger {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}
+
 .choices {
   display: flex;
   gap: 8px;
 }
 
+/* On a chosen button, the keys take its text color. */
 .keys {
   display: inline-flex;
-  gap: 4px;
+
+  & > * {
+    color: inherit;
+  }
 }
 
 .rejected {
-  margin-top: 8px;
+  max-width: 260px;
   color: var(--color-red);
+  font-size: 11px;
+  text-align: end;
 }
 </style>

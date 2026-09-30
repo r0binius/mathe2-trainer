@@ -1,5 +1,5 @@
-//! The app menu and the menu bar icon's menu, in the interface's language. Both have an Options
-//! item, which opens the options in the main window.
+//! The app menu and the menu bar icon's menu, in the interface's language. Both have a Settings
+//! item, which opens the Settings window.
 
 use tauri::menu::{Menu, MenuEvent, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::{AppHandle, Wry};
@@ -8,14 +8,14 @@ use super::coordinator::Event;
 use super::windows;
 use crate::services::settings::UiLanguage;
 
-/// The Options item's ID, in both menus.
-const OPTIONS: &str = "options";
+/// The Settings item's ID, in both menus.
+const SETTINGS: &str = "settings";
 
 /// Every text of the menus. macOS doesn't translate the items Tauri makes, so they're written
 /// here, in the words macOS itself uses.
 struct MenuTexts {
     about: &'static str,
-    options: &'static str,
+    settings: &'static str,
     services: &'static str,
     hide: &'static str,
     hide_others: &'static str,
@@ -36,7 +36,7 @@ struct MenuTexts {
 
 const ENGLISH: MenuTexts = MenuTexts {
     about: "About Mouseless",
-    options: "Options…",
+    settings: "Settings…",
     services: "Services",
     hide: "Hide Mouseless",
     hide_others: "Hide Others",
@@ -57,7 +57,7 @@ const ENGLISH: MenuTexts = MenuTexts {
 
 const GERMAN: MenuTexts = MenuTexts {
     about: "Über Mouseless",
-    options: "Einstellungen …",
+    settings: "Einstellungen …",
     services: "Dienste",
     hide: "Mouseless ausblenden",
     hide_others: "Andere ausblenden",
@@ -83,7 +83,7 @@ fn texts(language: UiLanguage) -> &'static MenuTexts {
     }
 }
 
-/// The app menu: the app's own items with Options (⌘,), and the Edit and Window menus, whose
+/// The app menu: the app's own items with Settings (⌘,), and the Edit and Window menus, whose
 /// items give the webview's text fields their shortcuts, such as ⌘V.
 ///
 /// # Errors
@@ -99,7 +99,7 @@ pub fn app_menu(app: &AppHandle, language: UiLanguage) -> tauri::Result<Menu<Wry
         &[
             &PredefinedMenuItem::about(app, Some(text.about), None)?,
             &separator()?,
-            &options_item(app, text, Some("CmdOrCtrl+,"))?,
+            &settings_item(app, text, Some("CmdOrCtrl+,"))?,
             &separator()?,
             &PredefinedMenuItem::services(app, Some(text.services))?,
             &separator()?,
@@ -139,7 +139,7 @@ pub fn app_menu(app: &AppHandle, language: UiLanguage) -> tauri::Result<Menu<Wry
     Menu::with_items(app, &[&app_submenu, &edit, &window])
 }
 
-/// The menu bar icon's menu: About, Options and Quit.
+/// The menu bar icon's menu: About, Settings and Quit.
 ///
 /// # Errors
 ///
@@ -152,28 +152,28 @@ pub fn icon_menu(app: &AppHandle, language: UiLanguage) -> tauri::Result<Menu<Wr
         &[
             &PredefinedMenuItem::about(app, Some(text.about), None)?,
             &PredefinedMenuItem::separator(app)?,
-            &options_item(app, text, None)?,
+            &settings_item(app, text, None)?,
             &PredefinedMenuItem::separator(app)?,
             &PredefinedMenuItem::quit(app, Some(text.quit))?,
         ],
     )
 }
 
-/// Tells the coordinator when Options was chosen, from either menu.
+/// Tells the coordinator when Settings was chosen, from either menu.
 #[expect(
     clippy::needless_pass_by_value,
     reason = "Tauri passes menu events by value"
 )]
 pub fn report_choice(app: &AppHandle, event: MenuEvent) {
-    if event.id() == OPTIONS {
-        windows::report(app, Event::OptionsChosen);
+    if event.id() == SETTINGS {
+        windows::report(app, Event::SettingsChosen);
     }
 }
 
-fn options_item(
+fn settings_item(
     app: &AppHandle,
     text: &MenuTexts,
     shortcut: Option<&str>,
 ) -> tauri::Result<MenuItem<Wry>> {
-    MenuItem::with_id(app, OPTIONS, text.options, true, shortcut)
+    MenuItem::with_id(app, SETTINGS, text.settings, true, shortcut)
 }

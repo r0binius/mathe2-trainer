@@ -20,10 +20,10 @@ export default defineConfig({
     },
   },
 
-  // One page per window: the main window and the popover.
+  // One page per window: the main window, the popover and the Settings window.
   build: {
     rolldownOptions: {
-      input: ['index.html', 'popover.html'],
+      input: ['index.html', 'popover.html', 'settings.html'],
     },
   },
 

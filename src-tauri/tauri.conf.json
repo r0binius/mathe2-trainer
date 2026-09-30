@@ -15,12 +15,21 @@
       {
         "label": "main",
         "title": "Mouseless",
-        "width": 600,
-        "height": 480,
-        "resizable": false,
+        "width": 820,
+        "height": 560,
+        "minWidth": 640,
+        "minHeight": 440,
         "titleBarStyle": "Overlay",
         "hiddenTitle": true,
-        "backgroundColor": "#000000"
+        "trafficLightPosition": {
+          "x": 19,
+          "y": 27
+        },
+        "transparent": true,
+        "windowEffects": {
+          "effects": ["sidebar"],
+          "state": "followsWindowActiveState"
+        }
       },
       {
         "label": "popover",
@@ -30,15 +39,28 @@
         "visible": false,
         "decorations": false,
         "transparent": true,
-        "theme": "Dark",
         "resizable": false,
         "alwaysOnTop": true,
         "visibleOnAllWorkspaces": true,
         "windowEffects": {
-          "effects": ["popover"],
+          "effects": ["liquidGlassRegular", "popover"],
           "state": "active",
-          "radius": 10
+          "radius": 16
         }
+      },
+      {
+        "label": "settings",
+        "title": "Mouseless",
+        "url": "settings.html",
+        "width": 560,
+        "height": 420,
+        "visible": false,
+        "resizable": false,
+        "minimizable": false,
+        "maximizable": false,
+        "center": true,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true
       }
     ],
     "security": {

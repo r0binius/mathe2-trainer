@@ -30,7 +30,7 @@ const slots = defineSlots<{
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 40px 0 24px;
+  padding: 20px 0 16px;
 }
 
 .text {
@@ -38,15 +38,15 @@ const slots = defineSlots<{
   min-width: 0;
 }
 
+/* macOS's large title. */
 .title {
-  font-size: 34px;
+  font-size: 26px;
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .meta {
-  margin-top: 4px;
-  color: var(--color-text-muted);
-  font-size: 14px;
-  font-weight: 600;
+  margin-top: 2px;
+  color: var(--color-label-secondary);
 }
 </style>

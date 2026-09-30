@@ -43,15 +43,24 @@ export const keymapSourceKey: InjectionKey<KeymapSource> = Symbol('keymap source
 export type Windows = {
   /** Closes the popover from inside it, giving focus back to the app it was opened over. */
   readonly dismissPopover: () => Promise<Result<void, PlatformError>>;
-  /**
-   * Calls `listener` whenever the main window should open its options, until the returned
-   * function stops it.
-   */
-  readonly onOptionsRequested: (listener: () => void) => () => void;
 };
 
 /** Where the app provides the window coordinator to the windows. */
 export const windowsKey: InjectionKey<Windows> = Symbol('windows');
+
+/**
+ * What one window changed that the others show too, which the Rust side tells every window
+ * about. Each function calls `listener` on every change, until the function it returns stops it.
+ */
+export type Changes = {
+  /** The settings were saved, such as in the Settings window. */
+  readonly onSettingsChanged: (listener: () => void) => () => void;
+  /** All progress was reset. */
+  readonly onProgressReset: (listener: () => void) => () => void;
+};
+
+/** Where the app provides the changes of other windows to the stores. */
+export const changesKey: InjectionKey<Changes> = Symbol('changes');
 
 /** Where the app provides the platform's key labels (⌘, ⌥, …) to the screens. */
 export const keyLabelsKey: InjectionKey<KeyLabels> = Symbol('key labels');
@@ -112,9 +121,12 @@ export const missingProgressRepository: ProgressRepository = {
 export const missingKeymapSource: KeymapSource = { load: unavailable, onChange: () => ignore };
 
 /** What a window injects when the app provided no window coordinator: nothing happens. */
-export const missingWindows: Windows = {
-  dismissPopover: unavailable,
-  onOptionsRequested: () => ignore,
+export const missingWindows: Windows = { dismissPopover: unavailable };
+
+/** What a store injects when the app provided no changes: no other window changes anything. */
+export const missingChanges: Changes = {
+  onSettingsChanged: () => ignore,
+  onProgressReset: () => ignore,
 };
 
 function ignore(): void {
