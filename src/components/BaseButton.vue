@@ -15,6 +15,8 @@ const { variant = 'neutral', size = 'regular' } = defineProps<{
   variant?: 'neutral' | 'accent' | 'danger' | 'dangerText';
   /** `large` for a screen's main action next to its heading. */
   size?: 'regular' | 'large';
+  /** Whether a button that stands for a choice is the one chosen, for VoiceOver. */
+  pressed?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -29,6 +31,7 @@ const emit = defineEmits<{
     :class="[variant, size]"
     type="button"
     :aria-label="label"
+    :aria-pressed="pressed"
     :title="label"
     @click="emit('click', $event)"
   >

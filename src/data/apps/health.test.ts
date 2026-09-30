@@ -103,6 +103,8 @@ function describeRejection(rejection: Rejection): string {
       return `${rejection.reason} ${rejection.key}`;
     case 'modifier-only':
     case 'reserved':
+    case 'needs-modifier':
+    case 'app-standard':
       return rejection.reason;
   }
 }

@@ -3,9 +3,12 @@ import { onScopeDispose, ref } from 'vue';
 
 import BaseButton from '@/components/BaseButton.vue';
 import type { LanguageSetting } from '@/domain/settings/language';
+import type { Settings } from '@/domain/settings/settings';
 import { useText } from '@/i18n';
 import { useProgressStore } from '@/stores/progress';
 import { useSettingsStore } from '@/stores/settings';
+
+import TriggerOption from './TriggerOption.vue';
 
 const emit = defineEmits<{
   /** The panel should close: its close button or Escape was pressed. */
@@ -26,19 +29,34 @@ const languages: readonly (readonly [LanguageSetting, string])[] = [
 ];
 
 const failed = ref(false);
+/** Whether a trigger shortcut is being recorded, which takes Escape from the panel. */
+const recording = ref(false);
 const confirming = ref(false);
 const confirmTimer = ref<ReturnType<typeof setTimeout>>();
+
+/** Saves the settings with `changes`, and shows when that failed. */
+async function change(changes: Partial<Settings>): Promise<void> {
+  if (settings.settings.status !== 'loaded') {
+    return;
+  }
+
+  const saved = await settings.save({ ...settings.settings.value, ...changes });
+  failed.value = saved.kind === 'err';
+}
 
 async function chooseLanguage(event: Event): Promise<void> {
   const select = event.target;
 
-  if (settings.settings.status !== 'loaded' || !(select instanceof HTMLSelectElement)) {
-    return;
+  if (select instanceof HTMLSelectElement) {
+    await change({
+      language: languages.find(([value]) => value === select.value)?.[0] ?? 'system',
+    });
   }
+}
 
-  const language = languages.find(([value]) => value === select.value)?.[0] ?? 'system';
-  const saved = await settings.save({ ...settings.settings.value, language });
-  failed.value = saved.kind === 'err';
+/** The checked state of a checkbox that changed. */
+function checkedOf(event: Event): boolean {
+  return event.target instanceof HTMLInputElement && event.target.checked;
 }
 
 async function reset(): Promise<void> {
@@ -61,7 +79,7 @@ async function reset(): Promise<void> {
 function onKeyDown(event: KeyboardEvent): void {
   event.stopPropagation();
 
-  if (event.key === 'Escape') {
+  if (event.key === 'Escape' && !recording.value) {
     emit('close');
   }
 }
@@ -80,6 +98,50 @@ onScopeDispose(() => {
       <h2>{{ text.ui('options.title') }}</h2>
       <BaseButton icon="close" :label="text.ui('options.close')" @click="emit('close')" />
     </header>
+
+    <template v-if="settings.settings.status === 'loaded'">
+      <div class="row">
+        <span class="label">{{ text.ui('options.trigger') }}</span>
+        <TriggerOption
+          :trigger="settings.settings.value.trigger"
+          @choose="(trigger) => change({ trigger })"
+          @recording="(active) => (recording = active)"
+        />
+      </div>
+
+      <!-- One icon always stays: the one left can't be turned off. -->
+      <div class="row" :title="text.ui('options.keepOneIcon')">
+        <span class="label">{{ text.ui('options.icons') }}</span>
+        <label class="check">
+          <input
+            type="checkbox"
+            :checked="settings.settings.value.showMenuBarIcon"
+            :disabled="!settings.settings.value.showDockIcon"
+            @change="change({ showMenuBarIcon: checkedOf($event) })"
+          />
+          {{ text.ui('options.menuBarIcon') }}
+        </label>
+        <label class="check">
+          <input
+            type="checkbox"
+            :checked="settings.settings.value.showDockIcon"
+            :disabled="!settings.settings.value.showMenuBarIcon"
+            @change="change({ showDockIcon: checkedOf($event) })"
+          />
+          {{ text.ui('options.dockIcon') }}
+        </label>
+      </div>
+
+      <div class="row">
+        <label class="label" for="launch-at-login">{{ text.ui('options.launchAtLogin') }}</label>
+        <input
+          id="launch-at-login"
+          type="checkbox"
+          :checked="settings.settings.value.launchAtLogin"
+          @change="change({ launchAtLogin: checkedOf($event) })"
+        />
+      </div>
+    </template>
 
     <div class="row">
       <label class="label" for="language">{{ text.ui('options.language') }}</label>
@@ -133,6 +195,13 @@ onScopeDispose(() => {
   width: 120px;
   color: var(--color-text-muted);
   font-weight: 600;
+}
+
+.check {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  margin-right: 16px;
 }
 
 .select {

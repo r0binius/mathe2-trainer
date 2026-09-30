@@ -1,44 +1,50 @@
 //! The menu bar icon: a click opens or closes the popover, a right click opens its menu.
 
-use tauri::menu::{Menu, PredefinedMenuItem};
+use tauri::menu::Menu;
 use tauri::tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
-use tauri::{AppHandle, PhysicalRect, Rect, include_image};
+use tauri::{AppHandle, PhysicalRect, Rect, Wry, include_image};
 
 use super::coordinator::Event;
-use super::{menu, windows};
+use super::windows;
 
 /// The menu bar icon's ID, to find it again.
 const ID: &str = "menu-bar-icon";
 
-/// Adds the icon to the menu bar. Its Options item reaches the app's menu handler.
+/// Adds the icon to the menu bar, with `menu` on a right click. The menu's items reach the app's
+/// menu handler.
 ///
 /// # Errors
 ///
-/// Returns an error if macOS doesn't let the app add the icon or its menu.
-pub fn create(app: &AppHandle) -> tauri::Result<TrayIcon> {
-    let menu = Menu::with_items(
-        app,
-        &[
-            &PredefinedMenuItem::about(app, None, None)?,
-            &PredefinedMenuItem::separator(app)?,
-            &menu::options_item(app)?,
-            &PredefinedMenuItem::separator(app)?,
-            &PredefinedMenuItem::quit(app, None)?,
-        ],
-    )?;
-
+/// Returns an error if macOS doesn't let the app add the icon.
+pub fn create(app: &AppHandle, menu: &Menu<Wry>) -> tauri::Result<TrayIcon> {
     TrayIconBuilder::with_id(ID)
         // A template image is drawn in the menu bar's text color, in light and dark mode.
         .icon(include_image!("icons/tray.png"))
         .icon_as_template(true)
         .tooltip("Mouseless")
-        .menu(&menu)
+        .menu(menu)
         .show_menu_on_left_click(false)
         .on_tray_icon_event(report_click)
         .build(app)
 }
 
-/// Where the icon is on screen, in physical pixels; `None` without an icon.
+/// Shows or hides the icon, and replaces its menu, such as in another language.
+///
+/// # Errors
+///
+/// Returns an error if macOS doesn't let the app change the icon.
+pub fn update(app: &AppHandle, visible: bool, menu: Menu<Wry>) -> tauri::Result<()> {
+    match app.tray_by_id(ID) {
+        Some(icon) => {
+            icon.set_menu(Some(menu))?;
+            icon.set_visible(visible)
+        }
+        None => Ok(()),
+    }
+}
+
+/// Where the icon is on screen, in physical pixels; `None` without an icon or while it's hidden,
+/// when macOS reports no place or an empty one.
 ///
 /// # Errors
 ///
@@ -47,7 +53,11 @@ pub fn area(app: &AppHandle) -> tauri::Result<Option<PhysicalRect<i32, u32>>> {
     app.tray_by_id(ID)
         .map(|icon| icon.rect())
         .transpose()
-        .map(|rect| rect.flatten().map(physical))
+        .map(|rect| {
+            rect.flatten()
+                .map(physical)
+                .filter(|area| area.size.width > 0 && area.size.height > 0)
+        })
 }
 
 /// Tells the coordinator the icon was clicked, once the button comes back up like a menu bar

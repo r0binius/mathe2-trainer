@@ -19,3 +19,5 @@ pub mod macos;
 
 #[cfg(target_os = "macos")]
 pub use self::current::current;
+#[cfg(target_os = "macos")]
+pub use self::macos::preferred_languages;

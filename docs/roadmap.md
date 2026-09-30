@@ -446,17 +446,13 @@ Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcu
 - [x] 7.1 Tray icon and popover window
 - [x] 7.2 `WindowCoordinator` (Mediator)
 - [x] 7.3 Trigger: hold ⌘ event tap and global shortcut
-- [ ] 7.4 Dock icon, autostart, single instance
+- [x] 7.4 Dock icon, autostart, single instance
 - [ ] 7.5 Strict CSP, verified in the running app
 
 **Carried over**
 
-- The options get the trigger (with recording a shortcut, checked by the shortcut policy), the menu bar and Dock icons and launch at login, once Rust applies them.
 - Opening the popover activates Mouseless, so a main window behind other apps comes forward with it. If that bothers in use, make the popover a non-activating panel.
-- Refresh the end of today (`useSummaryContext`) when the window is shown, since the app keeps running past midnight.
-- Log Rust's own errors with `log::error!` (the plugin is set up; so far only the frontend logs).
-- The tray menu is English only: translate it once the language setting reaches Rust (7.4).
-- The recorder can't offer `IntlBackslash` (the ISO key left of 1): global-hotkey has no macOS key code for it. Trigger errors (`ErrorKind::Trigger`) are only logged so far; the recorder shows them.
+- The recorder can't offer `IntlBackslash` (the ISO key left of 1): global-hotkey has no macOS key code for it. A shortcut that can't be registered (such as one another app holds) is only logged (`ErrorKind::Trigger`); `set_settings` could return it so the recorder shows it.
 
 **Concepts:** the Mediator pattern, macOS activation policy and focus handling, event taps, the Content Security Policy.
 
@@ -486,6 +482,7 @@ Branch `chore/packaging`. Build and sign the app. There's no importer: progress 
 
 **Carried over**
 
+- Check launch at login with the packaged app: debug builds skip it, so `tauri dev` never registers the debug binary.
 - Set `minimumSystemVersion` (macOS 14): the app relies on ES2023 (`toSorted`), `color-mix()` and native CSS nesting in the system's WebKit.
 - The two logos from macosicons.com are community icons: fine for personal use, to be checked before the app is published.
 

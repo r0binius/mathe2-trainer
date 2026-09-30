@@ -22,8 +22,8 @@ pub async fn get_settings(database: State<'_, Arc<Database>>) -> Result<Settings
         .await
 }
 
-/// Replaces the settings, and applies the trigger. A trigger that can't be set up is logged: the
-/// settings are saved all the same.
+/// Replaces the settings, and applies them outside the webview. What can't be applied is logged:
+/// the settings are saved all the same.
 ///
 /// # Errors
 ///
@@ -34,15 +34,15 @@ pub async fn set_settings(
     database: State<'_, Arc<Database>>,
     settings: Settings,
 ) -> Result<(), AppError> {
-    let trigger = settings.trigger.clone();
+    let saved = settings.clone();
 
     database
-        .run(move |connection| settings::save(connection, &settings))
+        .run(move |connection| settings::save(connection, &saved))
         .await?;
-    // Watching the keyboard and reading the layout only work on the main thread.
+    // Watching the keyboard, reading the layout and changing menus only work on the main thread.
     let handle = app.clone();
-    if let Err(error) = app.run_on_main_thread(move || app::apply_trigger(&handle, trigger)) {
-        log::error!("cannot apply the trigger: {error}");
+    if let Err(error) = app.run_on_main_thread(move || app::apply_settings(&handle, &settings)) {
+        log::error!("cannot apply the settings: {error}");
     }
     Ok(())
 }

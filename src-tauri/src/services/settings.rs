@@ -35,13 +35,52 @@ pub enum Language {
     De,
 }
 
+/// A language the interface is written in.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum UiLanguage {
+    /// English.
+    En,
+    /// German.
+    De,
+}
+
+impl Language {
+    /// The language the interface shows for this setting: the chosen one, or the first of the
+    /// system's `preferred` languages the interface is written in, else English. Like the
+    /// frontend's `uiLanguageFor`, so the menus match the windows.
+    #[must_use]
+    pub fn in_interface(self, preferred: &[String]) -> UiLanguage {
+        match self {
+            Self::En => UiLanguage::En,
+            Self::De => UiLanguage::De,
+            Self::System => preferred
+                .iter()
+                .find_map(|tag| ui_language_of(tag))
+                .unwrap_or(UiLanguage::En),
+        }
+    }
+}
+
+/// The interface language for a BCP 47 tag, by its primary language: `de-AT` is German.
+fn ui_language_of(tag: &str) -> Option<UiLanguage> {
+    let primary = tag.split('-').next().unwrap_or_default();
+
+    if primary.eq_ignore_ascii_case("en") {
+        Some(UiLanguage::En)
+    } else if primary.eq_ignore_ascii_case("de") {
+        Some(UiLanguage::De)
+    } else {
+        None
+    }
+}
+
 /// Everything the user can set, in the shape the frontend sends and receives.
 #[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Settings {
     /// How the popover is opened.
     pub trigger: Trigger,
-    /// Whether the app has an icon in the menu bar.
+    /// Whether the app has an icon in the menu bar. See [`Settings::shows_menu_bar_icon`].
     pub show_menu_bar_icon: bool,
     /// Whether the app has an icon in the Dock.
     pub show_dock_icon: bool,
@@ -49,6 +88,15 @@ pub struct Settings {
     pub launch_at_login: bool,
     /// The language of the interface.
     pub language: Language,
+}
+
+impl Settings {
+    /// Whether the menu bar icon shows: as set, but always without a Dock icon, so the app keeps a
+    /// visible way to reach it. The options never hide both; this holds if the settings do anyway.
+    #[must_use]
+    pub fn shows_menu_bar_icon(&self) -> bool {
+        self.show_menu_bar_icon || !self.show_dock_icon
+    }
 }
 
 /// The old app's defaults.
@@ -133,6 +181,46 @@ mod tests {
 
     use super::*;
     use crate::services::database::Database;
+
+    fn tags(tags: &[&str]) -> Vec<String> {
+        tags.iter().map(ToString::to_string).collect()
+    }
+
+    #[test]
+    fn the_system_language_is_the_first_preferred_one_the_interface_has() {
+        let preferred = tags(&["fr-FR", "de-AT", "en-US"]);
+
+        assert_eq!(Language::System.in_interface(&preferred), UiLanguage::De);
+    }
+
+    #[test]
+    fn falls_back_to_english() {
+        assert_eq!(
+            Language::System.in_interface(&tags(&["fr-FR"])),
+            UiLanguage::En
+        );
+        assert_eq!(Language::System.in_interface(&[]), UiLanguage::En);
+    }
+
+    #[test]
+    fn a_chosen_language_wins_over_the_system() {
+        assert_eq!(Language::En.in_interface(&tags(&["de-DE"])), UiLanguage::En);
+    }
+
+    #[test]
+    fn keeps_the_menu_bar_icon_without_a_dock_icon() {
+        let hidden = Settings {
+            show_menu_bar_icon: false,
+            ..Settings::default()
+        };
+        let both_hidden = Settings {
+            show_dock_icon: false,
+            ..hidden.clone()
+        };
+
+        assert!(!hidden.shows_menu_bar_icon());
+        assert!(both_hidden.shows_menu_bar_icon());
+    }
 
     fn changed() -> Settings {
         Settings {

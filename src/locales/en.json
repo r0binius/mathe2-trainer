@@ -56,6 +56,22 @@
   "options": {
     "title": "Options",
     "close": "Close",
+    "trigger": "Open the popover",
+    "holdCommand": "Hold ⌘",
+    "recordShortcut": "Record a shortcut",
+    "pressShortcut": "Press the shortcut …",
+    "rejected": {
+      "duplicateKey": "A key is in it twice.",
+      "modifierOnly": "Add a key to the modifiers.",
+      "reserved": "macOS uses this shortcut itself.",
+      "needsModifier": "Use ⌘, ⌃ or ⌥ with it.",
+      "appStandard": "Apps use ⌘ with one key themselves. Add another modifier."
+    },
+    "icons": "Icons",
+    "menuBarIcon": "Menu bar",
+    "dockIcon": "Dock",
+    "keepOneIcon": "One icon always stays, so Mouseless can be reached.",
+    "launchAtLogin": "Launch at login",
     "language": "Language",
     "system": "Same as system",
     "progress": "Progress",

@@ -56,6 +56,22 @@
   "options": {
     "title": "Einstellungen",
     "close": "Schließen",
+    "trigger": "Popover öffnen",
+    "holdCommand": "⌘ halten",
+    "recordShortcut": "Kurzbefehl aufnehmen",
+    "pressShortcut": "Kurzbefehl drücken …",
+    "rejected": {
+      "duplicateKey": "Eine Taste kommt doppelt vor.",
+      "modifierOnly": "Nimm eine Taste zu den Sondertasten dazu.",
+      "reserved": "Diesen Kurzbefehl nutzt macOS selbst.",
+      "needsModifier": "Nutze ⌘, ⌃ oder ⌥ dazu.",
+      "appStandard": "⌘ mit einer Taste nutzen Apps selbst. Nimm eine weitere Sondertaste dazu."
+    },
+    "icons": "Symbole",
+    "menuBarIcon": "Menüleiste",
+    "dockIcon": "Dock",
+    "keepOneIcon": "Ein Symbol bleibt immer, damit Mouseless erreichbar ist.",
+    "launchAtLogin": "Beim Anmelden öffnen",
     "language": "Sprache",
     "system": "Wie im System",
     "progress": "Fortschritt",

@@ -29,6 +29,8 @@ pub enum Event {
     OptionsChosen,
     /// The Dock icon was clicked.
     DockClicked,
+    /// The app was launched while it was running, which starts no second one.
+    LaunchedAgain,
     /// The main window's close button or ⌘W was pressed.
     MainClosing,
 }
@@ -65,7 +67,7 @@ pub fn coordinate(showing: Showing, event: Event) -> Vec<Action> {
             vec![Action::ClosePopover, Action::ShowMain, Action::OpenOptions]
         }
         Event::OptionsChosen => vec![Action::ShowMain, Action::OpenOptions],
-        Event::DockClicked => vec![Action::ShowMain],
+        Event::DockClicked | Event::LaunchedAgain => vec![Action::ShowMain],
         Event::MainClosing => vec![Action::HideMain],
     }
 }
@@ -176,6 +178,14 @@ mod tests {
     #[test]
     fn the_dock_icon_brings_back_the_main_window() {
         assert_eq!(coordinate(NOTHING, Event::DockClicked), [Action::ShowMain]);
+    }
+
+    #[test]
+    fn launching_the_app_again_brings_back_the_main_window() {
+        assert_eq!(
+            coordinate(NOTHING, Event::LaunchedAgain),
+            [Action::ShowMain]
+        );
     }
 
     #[test]

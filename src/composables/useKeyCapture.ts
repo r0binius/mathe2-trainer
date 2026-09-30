@@ -55,7 +55,8 @@ export function useKeyCapture(
   return readonly(held);
 }
 
-function keyPressOf(event: KeyboardEvent): KeyPress {
+/** What a keyboard event says about the key and the modifiers held. */
+export function keyPressOf(event: KeyboardEvent): KeyPress {
   return {
     code: event.code,
     control: event.ctrlKey,

@@ -5,11 +5,14 @@ import germanKeymap from './germanKeymap.fixture.json';
 import {
   checkShortcut,
   macosReserved,
+  needsModifier,
   noDuplicateKeys,
+  notAppStandard,
   notModifierOnly,
   notReserved,
   practicableKeys,
   practicePolicy,
+  triggerPolicy,
 } from './policy';
 import { resolveKeys } from './resolve';
 
@@ -57,6 +60,48 @@ describe('notReserved', () => {
 
   it('passes a combination that only contains a reserved one', () => {
     expect(rule(['Shift', 'Alt', 'Meta', 'Escape'])).toBeUndefined();
+  });
+});
+
+describe('needsModifier', () => {
+  it('passes a combination with ⌘, ⌃ or ⌥', () => {
+    expect(needsModifier(['Meta', 'k'])).toBeUndefined();
+    expect(needsModifier(['Control', 'k'])).toBeUndefined();
+    expect(needsModifier(['Alt', 'k'])).toBeUndefined();
+  });
+
+  it('rejects a key alone or with only Shift', () => {
+    expect(needsModifier(['F6'])).toStrictEqual({ reason: 'needs-modifier' });
+    expect(needsModifier(['Shift', 'k'])).toStrictEqual({ reason: 'needs-modifier' });
+  });
+});
+
+describe('notAppStandard', () => {
+  it('rejects ⌘ with one key', () => {
+    expect(notAppStandard(['Meta', 'c'])).toStrictEqual({ reason: 'app-standard' });
+  });
+
+  it('passes ⌘ with another modifier and a key', () => {
+    expect(notAppStandard(['Shift', 'Meta', 'm'])).toBeUndefined();
+  });
+
+  it('passes other modifiers with one key', () => {
+    expect(notAppStandard(['Control', 'm'])).toBeUndefined();
+  });
+});
+
+describe('triggerPolicy', () => {
+  const policy = triggerPolicy(macosReserved);
+
+  it("accepts the old app's default, ⇧⌘M", () => {
+    expect(checkShortcut(policy, ['Shift', 'Meta', 'm'])).toStrictEqual(ok(['Shift', 'Meta', 'm']));
+  });
+
+  it('rejects a combination macOS takes', () => {
+    expect(checkShortcut(policy, ['Meta', 'Space'])).toStrictEqual(err({ reason: 'app-standard' }));
+    expect(checkShortcut(policy, ['Shift', 'Meta', '3'])).toStrictEqual(
+      err({ reason: 'reserved' }),
+    );
   });
 });
 

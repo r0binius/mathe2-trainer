@@ -5,11 +5,13 @@ import { isModifier, isSameCombination } from './combination';
 import type { Keymap } from './keymap';
 import { resolveKeys } from './resolve';
 
-/** Why a combination can't be practiced. */
+/** Why a combination can't be practiced, or can't open the popover. */
 export type Rejection =
   | { readonly reason: 'duplicate-key'; readonly key: string }
   | { readonly reason: 'modifier-only' }
-  | { readonly reason: 'reserved' };
+  | { readonly reason: 'reserved' }
+  | { readonly reason: 'needs-modifier' }
+  | { readonly reason: 'app-standard' };
 
 /** One check of a {@link ShortcutPolicy}: a rejection, or `undefined` when the keys pass. */
 export type PolicyRule = (keys: KeyCombination) => Rejection | undefined;
@@ -67,6 +69,34 @@ export function notReserved(reserved: readonly KeyCombination[]): PolicyRule {
       ? { reason: 'reserved' }
       : undefined;
   };
+}
+
+/**
+ * Rejects a combination without ⌘, ⌃ or ⌥: as a global shortcut, it would take a key, or Shift and
+ * a key, away from typing everywhere.
+ */
+export function needsModifier(keys: KeyCombination): Rejection | undefined {
+  return keys.some((key) => key === 'Meta' || key === 'Control' || key === 'Alt')
+    ? undefined
+    : { reason: 'needs-modifier' };
+}
+
+/**
+ * Rejects ⌘ with one key, such as ⌘C or ⌘Q: apps use nearly all of them for their standard
+ * commands, which a global shortcut would take away from every app.
+ */
+export function notAppStandard(keys: KeyCombination): Rejection | undefined {
+  return keys.length === 2 && keys.includes('Meta') && keys.filter(isModifier).length === 1
+    ? { reason: 'app-standard' }
+    : undefined;
+}
+
+/**
+ * The rules a combination has to pass to open the popover. `reserved` holds the platform's list,
+ * such as {@link macosReserved}.
+ */
+export function triggerPolicy(reserved: readonly KeyCombination[]): ShortcutPolicy {
+  return [noDuplicateKeys, notModifierOnly, needsModifier, notAppStandard, notReserved(reserved)];
 }
 
 /**
