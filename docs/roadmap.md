@@ -412,6 +412,23 @@ Branch `chore/rust-review`. The Rust code is refactored along three references, 
 - **References disagree, so write down which one decides.** Canonical wants `mod.rs` and `unwrap` in tests; the Rust book prefers `foo.rs`, and High Assurance calls the layout a preference. Choosing once per question and recording it in `conventions.md` beats rediscovering the conflict in every review.
 - **Render the diagram to check it.** Moving boxes by coordinates in XML looked right until draw.io's CLI rendered the page: two arrows cut through boxes, and an old bend point made a box seem to point where it didn't.
 
+## Memory leaks 🚧
+
+Branch `fix/memory-leaks`. An audit of both sides for listeners, timers, subscriptions and callbacks that outlive their owner, before step 7 keeps the popover open for days. Everything is cleaned up except one listener per answer in a practice session, and one intentional Rust leak that nothing keeps from happening twice.
+
+**Decisions**
+
+- The practice session's timer removes its `abort` listener when it fires, so a session no longer collects one per correct answer.
+- The layout observer stays leaked on purpose, since it lives as long as the app, but a second registration fails with an error (a `static` flag) instead of leaking again and sending every change twice. A guard that removes the observer on drop would need more `unsafe` for a registration that never ends.
+- A failed `listen` for layout changes is logged instead of being an unhandled rejection.
+
+**Sub-steps**
+
+- [x] ML.1 The session timer removes its abort listener
+- [ ] ML.2 The layout observer registers once
+- [ ] ML.3 Failed layout listening is logged
+- [ ] ML.4 Smoke test, UML and what we learned
+
 ## 7. Menu bar popover and trigger ⏳ ([#7](https://codeberg.org/gobin/mouseless/issues/7))
 
 Branch `feature/popover`. Tray icon, popover window, hold ⌘ and global shortcut, window coordination, typed events between the windows (`settings-changed`, moved here from step 4), dock icon, autostart, single instance, and a strict CSP.

@@ -59,15 +59,11 @@ export function usePracticeSession<Pool>(
 
   function run(effect: SessionEffect, dispatch: (msg: SessionMsg) => void, signal: AbortSignal) {
     switch (effect.type) {
-      case 'advanceAfter': {
-        const timer = setTimeout(() => {
+      case 'advanceAfter':
+        afterDelay(effect.ms, signal, () => {
           dispatch({ type: 'advance', presentation: effect.presentation, ...roll() });
-        }, effect.ms);
-        signal.addEventListener('abort', () => {
-          clearTimeout(timer);
         });
         return;
-      }
       case 'tested':
       case 'learningChanged':
         void save(effect).then(reportFailure);
@@ -107,4 +103,22 @@ export function usePracticeSession<Pool>(
     { session, held, saveFailed: readonly(saveFailed) },
     { skip, forget },
   ];
+}
+
+/**
+ * Runs `action` after `ms`, unless `signal` aborts first. Whichever comes first removes the
+ * other, so nothing stays registered: a session would otherwise collect one abort listener per
+ * answer until it ends.
+ */
+function afterDelay(ms: number, signal: AbortSignal, action: () => void): void {
+  const timer = setTimeout(() => {
+    signal.removeEventListener('abort', cancel);
+    action();
+  }, ms);
+
+  function cancel(): void {
+    clearTimeout(timer);
+  }
+
+  signal.addEventListener('abort', cancel, { once: true });
 }

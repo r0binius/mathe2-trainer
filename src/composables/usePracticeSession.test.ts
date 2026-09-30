@@ -47,6 +47,13 @@ function practice(save: Save = () => Promise.resolve(ok(undefined))) {
   };
 }
 
+/** The listeners a spy on `addEventListener` or `removeEventListener` saw for `abort`. */
+function abortListeners(spy: {
+  readonly mock: { readonly calls: readonly (readonly unknown[])[] };
+}) {
+  return spy.mock.calls.filter(([type]) => type === 'abort').map(([, listener]) => listener);
+}
+
 function press(code: string): void {
   window.dispatchEvent(new KeyboardEvent('keydown', { code, metaKey: true }));
 }
@@ -57,6 +64,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 
 describe('usePracticeSession', () => {
@@ -88,6 +96,18 @@ describe('usePracticeSession', () => {
     vi.advanceTimersByTime(successPauseMs);
 
     expect(view.session.value).toMatchObject({ phase: 'presenting', item: b });
+  });
+
+  it('leaves no abort listener behind once it moved on', () => {
+    const added = vi.spyOn(AbortSignal.prototype, 'addEventListener');
+    const removed = vi.spyOn(AbortSignal.prototype, 'removeEventListener');
+    practice();
+
+    press('KeyA');
+    vi.advanceTimersByTime(successPauseMs);
+
+    expect(abortListeners(added)).toHaveLength(1);
+    expect(abortListeners(removed)).toStrictEqual(abortListeners(added));
   });
 
   it('skips to the next item', () => {
