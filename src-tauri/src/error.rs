@@ -21,6 +21,9 @@ pub enum AppError {
     /// Work on the database stopped before it finished, such as by panicking.
     #[error("the database work was interrupted: {0}")]
     Interrupted(#[source] tauri::Error),
+    /// The keyboard layout couldn't be read from the system.
+    #[error("the keyboard layout couldn't be read: {0}")]
+    Keymap(String),
 }
 
 /// What kind of error the frontend received, so it can decide what to show.
@@ -34,6 +37,8 @@ pub enum ErrorKind {
     Storage,
     /// Reading or writing stored data failed.
     Database,
+    /// Reading the keyboard layout failed.
+    Keymap,
 }
 
 impl AppError {
@@ -43,6 +48,7 @@ impl AppError {
         match self {
             Self::DataDirectory(_) => ErrorKind::Storage,
             Self::Database(_) | Self::Migration(_) | Self::Interrupted(_) => ErrorKind::Database,
+            Self::Keymap(_) => ErrorKind::Keymap,
         }
     }
 }

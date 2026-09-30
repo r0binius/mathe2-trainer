@@ -1873,6 +1873,7 @@ dependencies = [
 name = "mouseless"
 version = "0.1.0"
 dependencies = [
+ "objc2-core-foundation",
  "rusqlite",
  "rusqlite_migration",
  "serde",

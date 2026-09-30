@@ -29,9 +29,11 @@ pub fn run() -> tauri::Result<()> {
         .setup(|app| {
             let directory = app.path().app_data_dir().map_err(AppError::DataDirectory)?;
             app.manage(Arc::new(Database::open_in(&directory)?));
+            app.manage(platform::current());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            commands::keymap::get_keymap,
             commands::progress::load_progress,
             commands::progress::save_set_progress,
             commands::progress::record_review,

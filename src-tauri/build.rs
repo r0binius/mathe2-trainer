@@ -5,6 +5,7 @@ use tauri_build::{AppManifest, Attributes};
 /// The app's own commands. Tauri generates an `allow-…` permission for each, and a window can only
 /// invoke the ones its capability grants.
 const COMMANDS: &[&str] = &[
+    "get_keymap",
     "load_progress",
     "save_set_progress",
     "record_review",

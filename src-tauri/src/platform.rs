@@ -4,9 +4,6 @@
 //! The rest of the app works against the traits, so a platform is added without changing it (the
 //! Bridge pattern in `architecture.md`).
 
-// Wired to the `get_keymap` command in step 6.3; the expectation fails once that uses it.
-#![expect(dead_code, reason = "not wired to a command yet")]
-
 mod key_code;
 #[cfg(target_os = "macos")]
 mod macos;
@@ -48,6 +45,21 @@ pub struct Layout {
     pub id: String,
     /// What each key types.
     pub keymap: Keymap,
+}
+
+/// The platform's implementations of the traits, for the system the app is built for.
+pub struct Platform {
+    /// Reads the keyboard layout.
+    pub keymap: Box<dyn KeymapSource + Send + Sync>,
+}
+
+/// The implementations for macOS.
+#[cfg(target_os = "macos")]
+#[must_use]
+pub fn current() -> Platform {
+    Platform {
+        keymap: Box::new(macos::SystemKeymap),
+    }
 }
 
 /// Reads the keyboard layout in use.
