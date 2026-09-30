@@ -324,7 +324,7 @@ Branch `chore/technical-debt`. An assessment of the whole codebase after step 5 
 - **A second fixture finds real data bugs.** Running the capture contract on a US layout showed six shortcuts written from a German keyboard that can't be practiced on US.
 - **Check external services' terms before building on them.** Codeberg's hosted runners require a free license and stop jobs after 5 or 10 minutes; learning that first would have saved the CI detour, now reverted and kept in the history for an own Forgejo.
 
-## 6. Native keyboard layout 🚧 ([#6](https://codeberg.org/gobin/mouseless/issues/6))
+## 6. Native keyboard layout ✅ ([#6](https://codeberg.org/gobin/mouseless/issues/6))
 
 Branch `feature/native-keymap`. Read the current keyboard layout in Rust, replacing `native-keymap`.
 
@@ -361,6 +361,16 @@ Branch `feature/native-keymap`. Read the current keyboard layout in Rust, replac
 **Concepts:** FFI and `unsafe`, `objc2`, Core Foundation memory rules, traits as ports (Bridge pattern).
 
 **Resources:** [The Rustonomicon](https://doc.rust-lang.org/nomicon/) · [objc2](https://docs.rs/objc2/latest/objc2/) · [UCKeyTranslate](https://developer.apple.com/documentation/coreservices/1390584-uckeytranslate)
+
+**What we learned**
+
+- **Check the consumer, not the spec.** The keymap was built with the W3C's names for the two ISO keys, but WebKit's `event.code` keeps macOS's crossed codes. Pressing the keys in the running app found it; the names only have to match what key capture reads.
+- **Let a real reader judge the fixtures.** The German fixture matched the reader exactly, while the hand-written US one had two mistakes, and U.S. International turned out to be a different layout with dead keys. A dump tool beats writing data from tables.
+- **Main-thread APIs shape the tools.** libtest runs every test on its own thread, so the layout can't be read in a test; a Cargo example can. A guard that returns an error made this visible instead of crashing.
+- **FFI stays small when the logic moves out.** The `unsafe` module only reads raw data and registers a callback; the key mapping is a pure table with tests, and `CFRetained` plus lifetimes carry Core Foundation's Copy and Get rules.
+- **A callback through C needs one thin pointer.** Being generic over the closure type (`layout_changed::<F>`) avoids double boxing, and leaking the one callback that lives as long as the app is honest about its lifetime.
+- **Subscriptions are effects.** `onChange` couldn't live in the functional core, so ports with effects moved to the shell next to `Logger`, while ports that only return data stay in the domain.
+- **Tests find what the data can't be pressed as, not what's wrong.** The six impossible US shortcuts were flagged, but Next window resolving to ⇧⌘, on US wasn't; knowing the apps' real shortcuts still takes a person.
 
 ## 7. Menu bar popover and trigger ⏳ ([#7](https://codeberg.org/gobin/mouseless/issues/7))
 
