@@ -202,7 +202,7 @@ src/
 │  ├─ scheduling/   scheduler.ts (port), fsrs.ts, days.ts
 │  ├─ progress/     setProgress.ts, storedProgress.ts, repository.ts (port), reconcile.ts, summary.ts
 │  ├─ settings/     settings.ts (types, decoder), language.ts, repository.ts (port)
-│  └─ shared/       result.ts (errors as values), decode.ts (JSON decoders), storage.ts (StorageError), loadable.ts
+│  └─ shared/       result.ts (errors as values), decode.ts (JSON decoders), platformError.ts (failed platform calls), loadable.ts
 ├─ data/            apps.ts (the list), apps/<id>/ index.ts, de.json, en.json, logo.svg
 ├─ platform/        ipc.ts (commandCaller), settings.ts, progress.ts, keymap.ts, log.ts, lookup.ts, window.ts
 ├─ stores/          settings.ts, progress.ts, keymap.ts

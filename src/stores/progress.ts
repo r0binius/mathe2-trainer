@@ -11,9 +11,9 @@ import { cardOf, setProgressOf, withCard, withSetRecord } from '@/domain/progres
 import { scheduleWithFsrs } from '@/domain/scheduling/fsrs';
 import { reviewCard } from '@/domain/scheduling/scheduler';
 import type { Loadable } from '@/domain/shared/loadable';
+import type { PlatformError } from '@/domain/shared/platformError';
 import type { Result } from '@/domain/shared/result';
 import { err } from '@/domain/shared/result';
-import type { StorageError } from '@/domain/shared/storage';
 import type { AppDefinition } from '@/domain/shortcuts/types';
 import {
   consoleLogger,
@@ -25,7 +25,7 @@ import {
 /** A test that counts for reviews, as the session reports it, plus when and on which layout. */
 export type TestResult = Omit<LoggedReview, 'grade'>;
 
-const notLoaded: StorageError = { kind: 'notLoaded', message: 'progress is not loaded yet' };
+const notLoaded: PlatformError = { kind: 'notLoaded', message: 'progress is not loaded yet' };
 
 /**
  * Learning progress and review cards on every layout. Loading reconciles them with the app data;
@@ -43,9 +43,9 @@ export const useProgressStore = defineStore('progress', () => {
    * it to the progress as it is by then, so saves close together don't undo each other.
    */
   async function saveThenShow(
-    saving: Promise<Result<void, StorageError>>,
+    saving: Promise<Result<void, PlatformError>>,
     change: (stored: StoredProgress) => StoredProgress,
-  ): Promise<Result<void, StorageError>> {
+  ): Promise<Result<void, PlatformError>> {
     const saved = await saving;
 
     if (saved.kind === 'ok' && progress.value.status === 'loaded') {
@@ -92,7 +92,7 @@ export const useProgressStore = defineStore('progress', () => {
     key: SetKey,
     snapshot: LearnSnapshot,
     at: number,
-  ): Promise<Result<void, StorageError>> {
+  ): Promise<Result<void, PlatformError>> {
     if (progress.value.status !== 'loaded') {
       return err(notLoaded);
     }
@@ -103,7 +103,7 @@ export const useProgressStore = defineStore('progress', () => {
   }
 
   /** Grades a test, schedules its card and logs it. A failed first test creates no card. */
-  async function recordReview(test: TestResult): Promise<Result<void, StorageError>> {
+  async function recordReview(test: TestResult): Promise<Result<void, PlatformError>> {
     if (progress.value.status !== 'loaded') {
       return err(notLoaded);
     }
@@ -116,7 +116,7 @@ export const useProgressStore = defineStore('progress', () => {
   }
 
   /** Deletes all progress, cards and the review log, on every layout. */
-  async function reset(): Promise<Result<void, StorageError>> {
+  async function reset(): Promise<Result<void, PlatformError>> {
     const deleted = await repository.reset();
 
     if (deleted.kind === 'ok') {

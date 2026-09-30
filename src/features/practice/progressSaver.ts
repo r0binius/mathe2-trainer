@@ -1,8 +1,8 @@
 import type { LayoutId } from '@/domain/keyboard/keymap';
 import type { ProgressEffect } from '@/domain/practice/session';
+import type { PlatformError } from '@/domain/shared/platformError';
 import type { Result } from '@/domain/shared/result';
 import { err } from '@/domain/shared/result';
-import type { StorageError } from '@/domain/shared/storage';
 import type { useProgressStore } from '@/stores/progress';
 
 /** What saving practice results needs of the progress store. */
@@ -18,7 +18,7 @@ export type SaveTarget = {
   readonly setId?: string;
 };
 
-const noSet: StorageError = { kind: 'storage', message: 'learning progress without a set' };
+const noSet: PlatformError = { kind: 'storage', message: 'learning progress without a set' };
 
 /**
  * Saves a practice session's results into the progress store, at the time `now` gives: a test
@@ -28,7 +28,7 @@ export function progressSaver(
   progress: ProgressActions,
   { appId, layout, setId }: SaveTarget,
   now: () => number,
-): (effect: ProgressEffect) => Promise<Result<void, StorageError>> {
+): (effect: ProgressEffect) => Promise<Result<void, PlatformError>> {
   return function save(effect) {
     const at = now();
 

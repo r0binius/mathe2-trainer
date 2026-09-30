@@ -6,9 +6,9 @@ import type { Keymap } from '@/domain/keyboard/keymap';
 import { reviewPool, reviewStrategy } from '@/domain/practice/review';
 import type { PracticeItem, ProgressEffect } from '@/domain/practice/session';
 import { successPauseMs } from '@/domain/practice/session';
+import type { PlatformError } from '@/domain/shared/platformError';
 import type { Result } from '@/domain/shared/result';
 import { err, ok } from '@/domain/shared/result';
-import type { StorageError } from '@/domain/shared/storage';
 
 import type { PracticeShell } from './usePracticeSession';
 import { usePracticeSession } from './usePracticeSession';
@@ -21,7 +21,7 @@ const keymap: Keymap = {
 const a: PracticeItem = { id: 'app/Meta+a', keys: ['Meta', 'a'], title: 'a' };
 const b: PracticeItem = { id: 'app/Meta+b', keys: ['Meta', 'b'], title: 'b' };
 
-type Save = (effect: ProgressEffect) => Promise<Result<void, StorageError>>;
+type Save = (effect: ProgressEffect) => Promise<Result<void, PlatformError>>;
 
 function practice(save: Save = () => Promise.resolve(ok(undefined))) {
   const shell: PracticeShell = { keymap: () => keymap, save, now: () => 1000, random: () => 0 };

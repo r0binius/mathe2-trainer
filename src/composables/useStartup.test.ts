@@ -7,9 +7,9 @@ import type { KeymapSource } from '@/domain/keyboard/keymap';
 import type { ProgressRepository } from '@/domain/progress/repository';
 import type { SettingsRepository } from '@/domain/settings/repository';
 import type { Settings } from '@/domain/settings/settings';
+import type { PlatformError } from '@/domain/shared/platformError';
 import type { Result } from '@/domain/shared/result';
 import { err, ok } from '@/domain/shared/result';
-import type { StorageError } from '@/domain/shared/storage';
 import { createAppI18n } from '@/i18n';
 import { keymapSourceKey, progressRepositoryKey, settingsRepositoryKey } from '@/ports';
 
@@ -28,7 +28,7 @@ function unused(): never {
 }
 
 /** Mounts a window that starts up with the given settings, and shows the context's status. */
-async function startWith(settings: Result<Settings, StorageError>) {
+async function startWith(settings: Result<Settings, PlatformError>) {
   const settingsRepository: SettingsRepository = {
     load: () => Promise.resolve(settings),
     save: unused,

@@ -7,9 +7,9 @@ import type { KeymapSource } from '@/domain/keyboard/keymap';
 import type { KeyLabels } from '@/domain/keyboard/labels';
 import type { ProgressRepository } from '@/domain/progress/repository';
 import type { SettingsRepository } from '@/domain/settings/repository';
+import type { PlatformError } from '@/domain/shared/platformError';
 import type { Err } from '@/domain/shared/result';
 import { err } from '@/domain/shared/result';
-import type { StorageError } from '@/domain/shared/storage';
 
 /** Where the app provides the settings repository to the stores. */
 export const settingsRepositoryKey: InjectionKey<SettingsRepository> =
@@ -50,12 +50,12 @@ export const consoleLogger: Logger = {
   },
 };
 
-const notProvided: StorageError = {
+const notProvided: PlatformError = {
   kind: 'storage',
   message: 'no repository was provided to the app',
 };
 
-function unavailable(): Promise<Err<StorageError>> {
+function unavailable(): Promise<Err<PlatformError>> {
   return Promise.resolve(err(notProvided));
 }
 

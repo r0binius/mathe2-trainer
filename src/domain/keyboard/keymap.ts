@@ -1,5 +1,5 @@
+import type { PlatformError } from '../shared/platformError';
 import type { Result } from '../shared/result';
-import type { StorageError } from '../shared/storage';
 
 /**
  * The physical keys that type characters, in keyboard order, named by their
@@ -112,5 +112,5 @@ export type CurrentLayout = {
 
 /** Reads the keyboard layout in use from the system. */
 export type KeymapSource = {
-  readonly load: () => Promise<Result<CurrentLayout, StorageError>>;
+  readonly load: () => Promise<Result<CurrentLayout, PlatformError>>;
 };

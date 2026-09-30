@@ -1,8 +1,8 @@
 import type { DecodeError, Decoder } from '@/domain/shared/decode';
 import { literal, object, oneOf, string } from '@/domain/shared/decode';
+import type { PlatformError } from '@/domain/shared/platformError';
 import type { Result } from '@/domain/shared/result';
 import { err, ok } from '@/domain/shared/result';
-import type { StorageError } from '@/domain/shared/storage';
 
 /** Arguments of a command, by the names of its Rust parameters in camelCase. */
 export type CommandArgs = Readonly<Record<string, unknown>>;
@@ -18,7 +18,7 @@ export type CommandCall = <T>(
   command: string,
   decoder: Decoder<T>,
   args?: CommandArgs,
-) => Promise<Result<T, StorageError>>;
+) => Promise<Result<T, PlatformError>>;
 
 /** How the Rust side sends an `AppError`. */
 const decodeAppError = object({
@@ -36,7 +36,7 @@ export function commandCaller(invoke: Invoke): CommandCall {
   return async function call(command, decoder, args) {
     const answer = await invoke(command, args).then(
       (response) => ok(response),
-      (error: unknown) => err(storageErrorOf(error)),
+      (error: unknown) => err(platformErrorOf(error)),
     );
 
     return answer.kind === 'ok' ? decodeAnswer(command, decoder, answer.value) : answer;
@@ -47,7 +47,7 @@ function decodeAnswer<T>(
   command: string,
   decoder: Decoder<T>,
   response: unknown,
-): Result<T, StorageError> {
+): Result<T, PlatformError> {
   const decoded = decoder(response);
 
   if (decoded.kind === 'ok') {
@@ -61,7 +61,7 @@ function decodeAnswer<T>(
 }
 
 /** The command's own error, or a failed call when Tauri rejected it before the command ran. */
-function storageErrorOf(error: unknown): StorageError {
+function platformErrorOf(error: unknown): PlatformError {
   const appError = decodeAppError(error);
 
   return appError.kind === 'ok' ? appError.value : { kind: 'ipc', message: String(error) };

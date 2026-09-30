@@ -11,8 +11,8 @@ import type {
   SessionMsg,
 } from '@/domain/practice/session';
 import { startSession, updateSession } from '@/domain/practice/session';
+import type { PlatformError } from '@/domain/shared/platformError';
 import type { Result } from '@/domain/shared/result';
-import type { StorageError } from '@/domain/shared/storage';
 import { consoleLogger, loggerKey } from '@/ports';
 
 import { useKeyCapture } from './useKeyCapture';
@@ -24,7 +24,7 @@ import { useProgram } from './useProgram';
  */
 export type PracticeShell = {
   readonly keymap: () => Keymap;
-  readonly save: (effect: ProgressEffect) => Promise<Result<void, StorageError>>;
+  readonly save: (effect: ProgressEffect) => Promise<Result<void, PlatformError>>;
   readonly now: () => number;
   readonly random: () => number;
 };
@@ -75,7 +75,7 @@ export function usePracticeSession<Pool>(
     }
   }
 
-  function reportFailure(saved: Result<void, StorageError>): void {
+  function reportFailure(saved: Result<void, PlatformError>): void {
     if (saved.kind === 'err') {
       saveFailed.value = true;
       logger.error(`Could not save practice progress: ${saved.error.message}`);
