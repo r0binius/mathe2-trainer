@@ -7,7 +7,7 @@ use tauri::{Manager, RunEvent};
 use super::coordinator::Event;
 use super::settings::apply_settings;
 use super::trigger::{self, Triggers};
-use super::{menu, tray, windows};
+use super::{layout, menu, tray, windows};
 use crate::error::AppError;
 use crate::services::database::Database;
 use crate::services::settings::{self, UiLanguage};
@@ -49,7 +49,7 @@ pub fn run() -> tauri::Result<()> {
             let settings = database.with(|connection| settings::load(connection))?;
             app.manage(database);
             let platform = platform::current();
-            commands::keymap::emit_changes(app.handle(), &platform)?;
+            layout::follow_changes(app.handle(), &platform)?;
             app.manage(platform);
             windows::report_window_events(app.handle())?;
             // English until the settings are applied, right after.
