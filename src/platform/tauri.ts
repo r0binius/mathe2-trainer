@@ -9,18 +9,18 @@ import { keymapSource } from './keymap';
 import { progressRepository } from './progress';
 import { settingsRepository } from './settings';
 
-/** Every repository the stores need, and the source of the keyboard layout. */
-export type Repositories = {
+/** What the Rust side provides to the stores: the repositories and the keyboard layout. */
+export type Ports = {
   readonly settings: SettingsRepository;
   readonly progress: ProgressRepository;
   readonly keymap: KeymapSource;
 };
 
 /**
- * The repositories backed by the Rust side. The only place that hands Tauri's real `invoke` and
- * `listen` to them, called once at startup.
+ * The ports backed by the Rust side. The only place that hands Tauri's real `invoke` and `listen`
+ * to them, called once at startup.
  */
-export function tauriRepositories(): Repositories {
+export function tauriPorts(): Ports {
   return {
     settings: settingsRepository(invoke),
     progress: progressRepository(invoke),

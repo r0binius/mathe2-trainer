@@ -156,7 +156,7 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 
 **Facade: simple entry points to subsystems**
 
-- Frontend `platform/` is the only code that imports `@tauri-apps/api`. Its repositories take Tauri's `invoke` as an argument (`settingsRepository(invoke)`), so they're tested with a fake one, and every call returns a `Result` instead of rejecting. Stores see `settings.load()`, `progress.saveSet(record)` and later `lookup.onResult(cb)`.
+- Frontend `platform/` is the only code that imports `@tauri-apps/api`. Its ports take Tauri's `invoke` and `listen` as arguments (`settingsRepository(invoke)`, `keymapSource(invoke, listen)`), so they're tested with fakes, and every call returns a `Result` instead of rejecting. `tauriPorts()` is the one place that hands them the real ones. Stores see `settings.load()`, `progress.saveSet(record)`, `keymap.onChange(listener)` and later `lookup.onResult(cb)`.
 - Rust `commands/` is a facade over the services for the frontend.
 
 **Mediator: window coordination** (`src-tauri/src/app/coordinator.rs`)
