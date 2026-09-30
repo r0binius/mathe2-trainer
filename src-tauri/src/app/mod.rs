@@ -7,6 +7,7 @@ mod menu;
 mod popover;
 mod run;
 mod settings;
+mod shortcut;
 mod tray;
 mod trigger;
 mod windows;
