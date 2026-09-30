@@ -31,6 +31,7 @@ What `pnpm check` can't prove: the app running on a real Mac. Walk through it wi
 ## Learning and review
 
 - [ ] Training shows the keys, pressed keys pop up, a correct answer shows ✓ and moves on after a second.
+- [ ] In a long session (a whole set, twice), moving on after a correct answer stays as quick as at the start.
 - [ ] Testing hides the keys; a wrong answer shakes and shows the pressed keys against the right ones.
 - [ ] **Forgot** (only while testing) shows the right keys; pressing them moves on, and the shortcut counts as failed.
 - [ ] "N mastered" shows when a shortcut is learned; leaving with **Overview** keeps the learned ones.

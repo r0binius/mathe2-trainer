@@ -412,7 +412,7 @@ Branch `chore/rust-review`. The Rust code is refactored along three references, 
 - **References disagree, so write down which one decides.** Canonical wants `mod.rs` and `unwrap` in tests; the Rust book prefers `foo.rs`, and High Assurance calls the layout a preference. Choosing once per question and recording it in `conventions.md` beats rediscovering the conflict in every review.
 - **Render the diagram to check it.** Moving boxes by coordinates in XML looked right until draw.io's CLI rendered the page: two arrows cut through boxes, and an old bend point made a box seem to point where it didn't.
 
-## Memory leaks 🚧
+## Memory leaks ✅
 
 Branch `fix/memory-leaks`. An audit of both sides for listeners, timers, subscriptions and callbacks that outlive their owner, before step 7 keeps the popover open for days. Everything is cleaned up except one listener per answer in a practice session, and one intentional Rust leak that nothing keeps from happening twice.
 
@@ -427,7 +427,15 @@ Branch `fix/memory-leaks`. An audit of both sides for listeners, timers, subscri
 - [x] ML.1 The session timer removes its abort listener
 - [x] ML.2 The layout observer registers once
 - [x] ML.3 Failed layout listening is logged
-- [ ] ML.4 Smoke test, UML and what we learned
+- [x] ML.4 Smoke test, UML and what we learned
+
+**What we learned**
+
+- **Cleanup has two exits.** The timer was cancelled when the session ended, but its cancel handler stayed behind when the timer fired first. Whatever registers two things that race must remove the loser, whichever wins.
+- **Measure a leak at its registration.** Spying on `AbortSignal.prototype` (not `EventTarget`, which happy-dom's signals don't go through) counted the listeners directly; memory tools would only have shown a slow drift.
+- **An intentional leak needs a guard.** Leaking the layout observer is right for something that lives as long as the app, but only if nothing can do it twice; the guard lives in `SystemKeymap`, since a module-level flag would break the rule against singletons.
+- **Check a fix against every rule, not only the bug.** The first version of the guard was a `static`; asking whether it fits the functional style and The Elm Architecture found it, and moved `undefined` to a `Result` in the same review.
+- **Unhandled rejections are silent failures.** Nothing leaked, but a failed `listen` would never have reached the log; a test with a failing `listen` made Vitest report the rejection itself.
 
 ## 7. Menu bar popover and trigger ⏳ ([#7](https://codeberg.org/gobin/mouseless/issues/7))
 

@@ -1586,10 +1586,10 @@
         <mxCell id="platform_keymap" value="&amp;laquo;platform&amp;raquo;&lt;br&gt;&lt;b&gt;platform/keymap&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;swimlaneFillColor=#ffffff;">
           <mxGeometry x="808" y="646" width="356" height="86" as="geometry" />
         </mxCell>
-        <mxCell id="platform_keymap_r0" value="keymapSource(invoke, listen): KeymapSource" parent="platform_keymap" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="platform_keymap_r0" value="keymapSource(invoke, listen, logger): KeymapSource" parent="platform_keymap" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="356" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="platform_keymap_s6_0" value="onChange: listen(&#x27;keymap-changed&#x27;)" parent="platform_keymap" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="platform_keymap_s6_0" value="onChange: listen(&#x27;keymap-changed&#x27;), a failure logged" parent="platform_keymap" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="60" width="356" height="20" as="geometry" />
         </mxCell>
         <mxCell id="e_Settings_LanguageSetting" value="" parent="1" edge="1" source="Settings" target="LanguageSetting" style="html=1;fontSize=10;labelBackgroundColor=#ffffff;endArrow=open;endSize=10;dashed=1;edgeStyle=orthogonalEdgeStyle;rounded=0;exitX=0;exitY=0.6;entryX=0;entryY=0.3;">
@@ -2083,13 +2083,16 @@
           <mxGeometry x="0" y="60" width="330" height="20" as="geometry" />
         </mxCell>
         <mxCell id="SystemKeymap" value="&amp;laquo;struct · macOS&amp;raquo;&lt;br&gt;&lt;b&gt;SystemKeymap&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="40" y="1080" width="360" height="86" as="geometry" />
+          <mxGeometry x="40" y="1080" width="360" height="106" as="geometry" />
         </mxCell>
-        <mxCell id="SystemKeymap_r0" value="impl KeymapSource" parent="SystemKeymap" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="SystemKeymap_observing" value="observing: AtomicBool  (watched only once)" parent="SystemKeymap" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="360" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="SystemKeymap_r1" value="makes a TextInputSources per call (main thread)" parent="SystemKeymap" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="SystemKeymap_r0" value="impl KeymapSource" parent="SystemKeymap" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="60" width="360" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="SystemKeymap_r1" value="makes a TextInputSources per call (main thread)" parent="SystemKeymap" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry x="0" y="80" width="360" height="20" as="geometry" />
         </mxCell>
         <mxCell id="input_source" value="«module»&lt;br&gt;&lt;b&gt;macos::input_source&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
           <mxGeometry x="440" y="1080" width="380" height="134" as="geometry" />
@@ -2238,7 +2241,7 @@
         <mxCell id="macos_carbon_r5" value="selected_layout, id, key_tables, connected_keyboard_type" parent="macos_carbon" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="128" width="380" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="macos_carbon_r6" value="observe_selection(on_change)  (leaked, DeliverImmediately)" parent="macos_carbon" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="macos_carbon_r6" value="observe_selection(observing, on_change)  (once; leaked)" parent="macos_carbon" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="148" width="380" height="20" as="geometry" />
         </mxCell>
         <mxCell id="macos_carbon_sep7" value="" parent="macos_carbon" vertex="1" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;">
