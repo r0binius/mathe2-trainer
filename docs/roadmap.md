@@ -425,7 +425,7 @@ Branch `fix/memory-leaks`. An audit of both sides for listeners, timers, subscri
 **Sub-steps**
 
 - [x] ML.1 The session timer removes its abort listener
-- [ ] ML.2 The layout observer registers once
+- [x] ML.2 The layout observer registers once
 - [ ] ML.3 Failed layout listening is logged
 - [ ] ML.4 Smoke test, UML and what we learned
 

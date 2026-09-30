@@ -14,6 +14,7 @@
 
 use std::ffi::c_void;
 use std::ptr::{self, NonNull};
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use objc2::MainThreadMarker;
 use objc2_core_foundation::{
@@ -62,6 +63,10 @@ const NO_DEAD_KEYS: u32 = 1;
 
 /// The most UTF-16 units one key press types; `UCKeyTranslate` shortens longer output.
 const MAX_LENGTH: usize = 4;
+
+/// Whether the layout is observed already. The observer is leaked, so a second registration
+/// would leak another one and report every change twice.
+static OBSERVING: AtomicBool = AtomicBool::new(false);
 
 /// The Text Input Sources API, which only works on the main thread: it isn't thread safe, and its
 /// notifications arrive on the run loop of the thread that registered for them.
@@ -132,13 +137,15 @@ impl TextInputSources {
     /// # Errors
     ///
     /// Returns [`AppError::Keymap`] if macOS offers no distributed notification center or no name
-    /// for the notification.
+    /// for the notification, or if the layout is observed already.
     pub fn observe_selection<F: Fn() + 'static>(self, on_change: F) -> Result<(), AppError> {
         let center = CFNotificationCenter::distributed_center()
             .ok_or_else(|| AppError::keymap("there's no distributed notification center"))?;
         // SAFETY: a constant the framework defines for the whole run.
         let name = unsafe { kTISNotifySelectedKeyboardInputSourceChanged };
         let name = name.ok_or_else(|| AppError::keymap("there's no layout change notification"))?;
+        // Claimed only now, so a registration that failed above can be tried again.
+        claim_once(&OBSERVING)?;
         // Observed for the whole run and never removed, so the callback is leaked on purpose.
         let observer: &'static F = Box::leak(Box::new(on_change));
 
@@ -175,6 +182,20 @@ impl TextInputSources {
         let value = unsafe { pointer.as_ref() }?;
 
         value.downcast_ref()
+    }
+}
+
+/// Claims `flag` for the one registration it stands for.
+///
+/// # Errors
+///
+/// Returns [`AppError::Keymap`] if it was claimed before.
+fn claim_once(flag: &AtomicBool) -> Result<(), AppError> {
+    // Only the flag itself is shared, no data it guards, so the weakest ordering is enough.
+    if flag.swap(true, Ordering::Relaxed) {
+        Err(AppError::keymap("the layout is observed already"))
+    } else {
+        Ok(())
     }
 }
 
@@ -251,6 +272,20 @@ unsafe extern "C-unwind" fn selection_changed<F: Fn()>(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn observes_only_once() {
+        let observing = AtomicBool::new(false);
+
+        let first = claim_once(&observing);
+        let second = claim_once(&observing).map_err(|error| error.to_string());
+
+        assert!(first.is_ok());
+        assert_eq!(
+            second,
+            Err("cannot read the keyboard layout: the layout is observed already".to_owned())
+        );
+    }
 
     #[test]
     fn is_refused_off_the_main_thread() {

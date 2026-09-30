@@ -48,11 +48,13 @@ pub trait KeymapSource {
     fn current_layout(&self) -> Result<Layout, AppError>;
 
     /// Calls `on_change` whenever the user may have selected another layout, for as long as the
-    /// app runs. The layout may also be the same one, so read it again and compare.
+    /// app runs. The layout may also be the same one, so read it again and compare. Call it once:
+    /// the observation is never removed.
     ///
     /// # Errors
     ///
-    /// Returns an error if the system doesn't let the app observe the layout.
+    /// Returns an error if the system doesn't let the app observe the layout, or if it's observed
+    /// already.
     fn watch_changes(&self, on_change: Box<dyn Fn()>) -> Result<(), AppError>;
 }
 
