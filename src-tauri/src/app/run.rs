@@ -1,10 +1,11 @@
-//! Builds the Tauri app: its plugins, managed state, commands and menu bar icon.
+//! Builds the Tauri app: its plugins, managed state, commands, menus and menu bar icon.
 
 use std::sync::Arc;
 
-use tauri::Manager;
+use tauri::{Manager, RunEvent};
 
-use super::{popover, tray};
+use super::coordinator::Event;
+use super::{menu, tray, windows};
 use crate::error::AppError;
 use crate::services::database::Database;
 use crate::{commands, platform};
@@ -21,6 +22,8 @@ pub fn run() -> tauri::Result<()> {
                 .level(tauri_plugin_log::log::LevelFilter::Info)
                 .build(),
         )
+        .menu(menu::app_menu)
+        .on_menu_event(menu::report_choice)
         .setup(|app| {
             let directory = app
                 .path()
@@ -30,7 +33,7 @@ pub fn run() -> tauri::Result<()> {
             let platform = platform::current();
             commands::keymap::emit_changes(app.handle(), &platform)?;
             app.manage(platform);
-            popover::hide_on_blur(app.handle())?;
+            windows::report_window_events(app.handle())?;
             tray::create(app.handle())?;
             Ok(())
         })
@@ -43,6 +46,13 @@ pub fn run() -> tauri::Result<()> {
             commands::progress::reset_progress,
             commands::settings::get_settings,
             commands::settings::set_settings,
+            commands::windows::dismiss_popover,
         ])
-        .run(tauri::generate_context!())
+        .build(tauri::generate_context!())?
+        .run(|app, event| {
+            if let RunEvent::Reopen { .. } = event {
+                windows::report(app, Event::DockClicked);
+            }
+        });
+    Ok(())
 }

@@ -36,6 +36,23 @@ export type KeymapSource = {
 /** Where the app provides the source of the current keyboard layout to the stores. */
 export const keymapSourceKey: InjectionKey<KeymapSource> = Symbol('keymap source');
 
+/**
+ * The window coordinator on the Rust side, which decides what the windows do. A shell port like
+ * {@link KeymapSource}.
+ */
+export type Windows = {
+  /** Closes the popover from inside it, giving focus back to the app it was opened over. */
+  readonly dismissPopover: () => Promise<Result<void, PlatformError>>;
+  /**
+   * Calls `listener` whenever the main window should open its options, until the returned
+   * function stops it.
+   */
+  readonly onOptionsRequested: (listener: () => void) => () => void;
+};
+
+/** Where the app provides the window coordinator to the windows. */
+export const windowsKey: InjectionKey<Windows> = Symbol('windows');
+
 /** Where the app provides the platform's key labels (⌘, ⌥, …) to the screens. */
 export const keyLabelsKey: InjectionKey<KeyLabels> = Symbol('key labels');
 
@@ -94,6 +111,12 @@ export const missingProgressRepository: ProgressRepository = {
 /** What a store injects when the app provided no keymap source: loading fails, nothing changes. */
 export const missingKeymapSource: KeymapSource = { load: unavailable, onChange: () => ignore };
 
+/** What a window injects when the app provided no window coordinator: nothing happens. */
+export const missingWindows: Windows = {
+  dismissPopover: unavailable,
+  onOptionsRequested: () => ignore,
+};
+
 function ignore(): void {
-  // Nothing to stop: a missing source never reports a change.
+  // Nothing to stop: a missing port never reports anything.
 }

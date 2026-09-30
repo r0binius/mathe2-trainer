@@ -28,7 +28,7 @@ export type CommandCall = <T>(
 
 /** How the Rust side sends an `AppError`. */
 const decodeAppError = object({
-  kind: oneOf([literal('storage'), literal('database'), literal('keymap')]),
+  kind: oneOf([literal('storage'), literal('database'), literal('keymap'), literal('window')]),
   message: string,
 });
 
@@ -71,4 +71,37 @@ function platformErrorOf(error: unknown): PlatformError {
   const appError = decodeAppError(error);
 
   return appError.kind === 'ok' ? appError.value : { kind: 'ipc', message: String(error) };
+}
+
+/**
+ * Builds the function that calls a listener on every `event` from the Rust side, until the
+ * returned function stops it. It never rejects, like {@link commandCaller}: if listening fails,
+ * `onFailure` gets the reason, and stopping does nothing.
+ */
+export function subscriber(
+  listen: Listen,
+  event: string,
+  onFailure: (message: string) => void,
+): (listener: () => void) => () => void {
+  return function subscribe(listener) {
+    const listening = listen(event, listener).then(ok, (error: unknown) => {
+      onFailure(String(error));
+      return err(String(error));
+    });
+
+    return () => {
+      void listening.then(stopListening);
+    };
+  };
+}
+
+/** Stops listening, if listening started. */
+function stopListening(listened: Result<() => void, string>): void {
+  switch (listened.kind) {
+    case 'ok':
+      listened.value();
+      return;
+    case 'err':
+      return;
+  }
 }

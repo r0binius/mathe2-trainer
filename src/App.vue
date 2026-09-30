@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { inject, onScopeDispose, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import BaseButton from './components/BaseButton.vue';
@@ -7,6 +7,7 @@ import { useStartup } from './composables/useStartup';
 import { apps } from './data/apps';
 import OptionsPanel from './features/options/OptionsPanel.vue';
 import { useText } from './i18n';
+import { missingWindows, windowsKey } from './ports';
 import { depthOf } from './routes';
 
 const [context, retry] = useStartup(apps);
@@ -15,6 +16,13 @@ const text = useText();
 
 /** Whether the options panel is open over the screens. */
 const optionsOpen = ref(false);
+
+// Options chosen from the app menu (⌘,) or the menu bar icon's menu.
+onScopeDispose(
+  inject(windowsKey, missingWindows).onOptionsRequested(() => {
+    optionsOpen.value = true;
+  }),
+);
 
 /** Deeper screens slide in over the current one; going back slides it away again. */
 const slide = ref<'deeper' | 'back'>('deeper');

@@ -3,76 +3,44 @@
 //! `tauri.conf.json` creates it hidden at startup, so it's loaded before it first opens.
 
 use tauri::{
-    AppHandle, Manager, Monitor, PhysicalPosition, PhysicalRect, PhysicalSize, Rect, WebviewWindow,
-    WindowEvent,
+    AppHandle, Manager, Monitor, PhysicalPosition, PhysicalRect, PhysicalSize, WebviewWindow,
 };
-use tauri_plugin_log::log;
 
 /// The popover's window label, as in `tauri.conf.json` and its capability.
 const LABEL: &str = "popover";
 
-/// Opens the popover below the menu bar icon at `icon`, or closes it if it's open.
+/// The popover window.
 ///
 /// # Errors
 ///
-/// Returns an error if the popover window is missing or macOS doesn't let the app move, show or
-/// hide it.
-pub fn toggle(app: &AppHandle, icon: Rect) -> tauri::Result<()> {
-    let popover = window(app)?;
-
-    if popover.is_visible()? {
-        popover.hide()
-    } else {
-        open_below(&popover, physical(icon))
-    }
-}
-
-/// Closes the popover whenever it loses focus, like a menu: clicking anywhere else closes it.
-///
-/// # Errors
-///
-/// Returns an error if the popover window is missing.
-pub fn hide_on_blur(app: &AppHandle) -> tauri::Result<()> {
-    let popover = window(app)?;
-    let handle = popover.clone();
-
-    popover.on_window_event(move |event| {
-        if let WindowEvent::Focused(false) = event
-            && let Err(error) = handle.hide()
-        {
-            log::error!("cannot close the popover: {error}");
-        }
-    });
-    Ok(())
-}
-
-fn window(app: &AppHandle) -> tauri::Result<WebviewWindow> {
+/// Returns an error if `tauri.conf.json` didn't create it.
+pub fn window(app: &AppHandle) -> tauri::Result<WebviewWindow> {
     app.get_webview_window(LABEL)
         .ok_or(tauri::Error::WebviewNotFound)
 }
 
-fn open_below(popover: &WebviewWindow, icon: PhysicalRect<i32, u32>) -> tauri::Result<()> {
+/// Opens the popover below the menu bar icon at `icon`, and focuses it.
+///
+/// # Errors
+///
+/// Returns an error if macOS doesn't let the app move, show or focus it.
+pub fn open_below(
+    popover: &WebviewWindow,
+    icon: Option<PhysicalRect<i32, u32>>,
+) -> tauri::Result<()> {
     let monitors = popover.available_monitors()?;
 
-    // Without a screen under the icon, the popover opens where it was last.
-    if let Some(monitor) = monitors
-        .iter()
-        .find(|monitor| shows(monitor, icon.position))
+    // Without the icon or a screen under it, the popover opens where it was last.
+    if let Some(icon) = icon
+        && let Some(monitor) = monitors
+            .iter()
+            .find(|monitor| shows(monitor, icon.position))
     {
         let position = below(icon, popover.outer_size()?, *monitor.work_area());
         popover.set_position(position)?;
     }
     popover.show()?;
     popover.set_focus()
-}
-
-/// The icon's place in physical pixels. On macOS, the tray already reports it in physical pixels,
-/// so the scale factor of `1.0` only satisfies the conversion.
-fn physical(icon: Rect) -> PhysicalRect<i32, u32> {
-    PhysicalRect {
-        position: icon.position.to_physical(1.0),
-        size: icon.size.to_physical(1.0),
-    }
 }
 
 /// Whether `point` lies on the monitor's screen, menu bar included.

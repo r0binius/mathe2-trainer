@@ -53,6 +53,12 @@ pub enum AppError {
         /// What went wrong, for the logs.
         reason: String,
     },
+    /// A window couldn't be found, shown, hidden or told something.
+    #[error("cannot change a window: {source}")]
+    Window {
+        /// Why Tauri couldn't do it.
+        source: tauri::Error,
+    },
 }
 
 impl AppError {
@@ -72,6 +78,7 @@ impl AppError {
                 ErrorKind::Database
             }
             Self::Keymap { .. } => ErrorKind::Keymap,
+            Self::Window { .. } => ErrorKind::Window,
         }
     }
 }
@@ -100,6 +107,8 @@ pub enum ErrorKind {
     Database,
     /// Reading the keyboard layout failed.
     Keymap,
+    /// Showing or hiding a window failed.
+    Window,
 }
 
 #[cfg(test)]

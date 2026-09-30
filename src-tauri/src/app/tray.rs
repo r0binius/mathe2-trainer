@@ -2,12 +2,15 @@
 
 use tauri::menu::{Menu, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
-use tauri::{AppHandle, include_image};
-use tauri_plugin_log::log;
+use tauri::{AppHandle, PhysicalRect, Rect, include_image};
 
-use super::popover;
+use super::coordinator::Event;
+use super::{menu, windows};
 
-/// Adds the icon to the menu bar.
+/// The menu bar icon's ID, to find it again.
+const ID: &str = "menu-bar-icon";
+
+/// Adds the icon to the menu bar. Its Options item reaches the app's menu handler.
 ///
 /// # Errors
 ///
@@ -18,36 +21,57 @@ pub fn create(app: &AppHandle) -> tauri::Result<TrayIcon> {
         &[
             &PredefinedMenuItem::about(app, None, None)?,
             &PredefinedMenuItem::separator(app)?,
+            &menu::options_item(app)?,
+            &PredefinedMenuItem::separator(app)?,
             &PredefinedMenuItem::quit(app, None)?,
         ],
     )?;
 
-    TrayIconBuilder::new()
+    TrayIconBuilder::with_id(ID)
         // A template image is drawn in the menu bar's text color, in light and dark mode.
         .icon(include_image!("icons/tray.png"))
         .icon_as_template(true)
         .tooltip("Mouseless")
         .menu(&menu)
         .show_menu_on_left_click(false)
-        .on_tray_icon_event(toggle_on_click)
+        .on_tray_icon_event(report_click)
         .build(app)
 }
 
-/// Opens or closes the popover when the icon is clicked, once the button comes back up like a
-/// menu bar item does.
+/// Where the icon is on screen, in physical pixels; `None` without an icon.
+///
+/// # Errors
+///
+/// Returns an error if macOS doesn't say where the icon is.
+pub fn area(app: &AppHandle) -> tauri::Result<Option<PhysicalRect<i32, u32>>> {
+    app.tray_by_id(ID)
+        .map(|icon| icon.rect())
+        .transpose()
+        .map(|rect| rect.flatten().map(physical))
+}
+
+/// Tells the coordinator the icon was clicked, once the button comes back up like a menu bar
+/// item does.
 #[expect(
     clippy::needless_pass_by_value,
     reason = "Tauri passes tray events by value"
 )]
-fn toggle_on_click(tray: &TrayIcon, event: TrayIconEvent) {
+fn report_click(tray: &TrayIcon, event: TrayIconEvent) {
     if let TrayIconEvent::Click {
-        rect,
         button: MouseButton::Left,
         button_state: MouseButtonState::Up,
         ..
     } = event
-        && let Err(error) = popover::toggle(tray.app_handle(), rect)
     {
-        log::error!("cannot open or close the popover: {error}");
+        windows::report(tray.app_handle(), Event::IconClicked);
+    }
+}
+
+/// The icon's place in physical pixels. On macOS, the tray already reports it in physical pixels,
+/// so the scale factor of `1.0` only satisfies the conversion.
+fn physical(icon: Rect) -> PhysicalRect<i32, u32> {
+    PhysicalRect {
+        position: icon.position.to_physical(1.0),
+        size: icon.size.to_physical(1.0),
     }
 }

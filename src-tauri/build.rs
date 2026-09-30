@@ -13,6 +13,7 @@ const COMMANDS: &[&str] = &[
     "reset_progress",
     "get_settings",
     "set_settings",
+    "dismiss_popover",
 ];
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

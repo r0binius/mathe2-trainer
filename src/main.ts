@@ -16,6 +16,7 @@ import {
   loggerKey,
   progressRepositoryKey,
   settingsRepositoryKey,
+  windowsKey,
 } from './ports';
 import { createAppRouter } from './router';
 
@@ -30,4 +31,5 @@ createApp(App)
   .provide(keymapSourceKey, ports.keymap)
   .provide(keyLabelsKey, macosKeyLabels)
   .provide(loggerKey, tauriLogger)
+  .provide(windowsKey, ports.windows)
   .mount('#app');
