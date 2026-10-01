@@ -543,7 +543,7 @@ Branch `feature/menu-lookup`. Read any app's menu shortcuts through the Accessib
 - **Dev builds borrow the terminal's permissions.** Under `tauri dev`, macOS checks Accessibility for the terminal, so the request flow needs a packaged build to test.
 - **A sub-step can be split for review.** The lookup UI went in as four commits (data, search, the program, the view), each reviewed on its own.
 
-## 9. Packaging ⏳ ([#9](https://codeberg.org/gobin/mouseless/issues/9))
+## 9. Packaging ✅ ([#9](https://codeberg.org/gobin/mouseless/issues/9))
 
 Branch `chore/packaging`. Build and sign the app. There's no importer: progress and settings start fresh.
 
@@ -556,14 +556,16 @@ Branch `chore/packaging`. Build and sign the app. There's no importer: progress 
 
 - For this Mac only, like the old app: `pnpm tauri build` makes just `Mouseless.app` (no disk image), ad-hoc signed (`signingIdentity: "-"`), with no notarization.
 - Version 1.0.0, kept only in `Cargo.toml`: Tauri reads it from there when `tauri.conf.json` has none, and the private `package.json` doesn't need one.
-- At least macOS 14 (`minimumSystemVersion`), category Productivity.
+- At least macOS 14 (`minimumSystemVersion`), for ES2023 (`toSorted`), `color-mix()` and native CSS nesting in the system's WebKit. Category Productivity.
 - No launch at login: the setting, its toggle and the autostart plugin are gone. A stored `launchAtLogin` row needs no migration: loading skips keys that are no longer settings, and the next save rewrites the table.
 
-**Carried over**
+**What we learned**
 
-- Check the popover's Accessibility request with the packaged app: `tauri dev` uses the terminal's access (smoke test → Lookup).
-- Set `minimumSystemVersion` (macOS 14): the app relies on ES2023 (`toSorted`), `color-mix()` and native CSS nesting in the system's WebKit.
-- The two logos from macosicons.com are community icons: fine for personal use, to be checked before the app is published.
+- **An ad-hoc signature is a hash of the build.** macOS ties Input Monitoring and Accessibility to the signature, so every rebuild loses both grants; only a certificate gives an identity that lasts.
+- **One place for the version.** Without `version` in `tauri.conf.json`, Tauri takes `Cargo.toml`'s, and a private `package.json` needs none.
+- **Storing only changed settings makes removing one free.** Loading skips keys that are no longer settings, so launch at login went without a migration.
+- **The bundle's file name collides, not its identifier.** The old and new app have different IDs but are both `Mouseless.app` in `/Applications`.
+- **Check the code before describing it.** The review first claimed dev and packaged builds share a database; `database.rs` gives debug builds their own file.
 
 ## 10. Linux ⏳ ([#10](https://codeberg.org/gobin/mouseless/issues/10))
 
@@ -588,5 +590,5 @@ Found along the way, not tied to a step yet.
 - **Popover focus:** opening the popover activates Mouseless, so a main window behind other apps comes forward with it. If that bothers in use, make the popover a non-activating panel.
 - **Trigger recorder:** it can't offer `IntlBackslash` (the ISO key left of 1), since global-hotkey has no macOS key code for it. A shortcut that can't be registered (such as one another app holds) is only logged (`ErrorKind::Trigger`); `set_settings` could return it so the recorder shows it.
 - **Globe shortcuts in menus:** the Accessibility API's modifier mask has no flag for the Globe key (🌐), so a menu item like Finder's _Fill_ (probably 🌐⌃F) reads as ⌃F. Fixing it needs another source than the menu item's attributes.
-- **Developer ID signing:** an ad-hoc signature changes with every build, so macOS forgets the Input Monitoring and Accessibility grants after a rebuild. Sign with an Apple Developer certificate (and notarize) once there is an account, and before the app is handed to others.
+- **Developer ID signing:** an ad-hoc signature changes with every build, so macOS forgets the Input Monitoring and Accessibility grants after a rebuild. Sign with an Apple Developer certificate (and notarize) once there is an account, and before the app is handed to others. Before that, check the two community logos from macosicons.com, which are fine for personal use only.
 - **TypeScript 7** once typescript-eslint and vue-tsc support it, and dropping the `is-immutable-type` patch once its upstream fix lands (both in `CLAUDE.md`).
