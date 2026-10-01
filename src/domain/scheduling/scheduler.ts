@@ -76,7 +76,7 @@ export type Scheduler = (
 
 /**
  * When a review happened, and the local UTC offset at that moment in minutes east of UTC (+120 in
- * German summer time; `-new Date(at).getTimezoneOffset()` in the shell). The scheduler counts days
+ * German summer time; `localTimeAt` in the shell). The scheduler counts days
  * in local time, the same days as {@link dueCards}.
  */
 export type ReviewTime = {

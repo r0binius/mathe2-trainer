@@ -13,6 +13,7 @@ import { summarizeApp } from '@/domain/progress/summary';
 import type { AppDefinition } from '@/domain/shortcuts/types';
 import type { UiKey } from '@/i18n';
 import { useText } from '@/i18n';
+import { localTimeAt } from '@/localTime';
 import { toApp, toReview } from '@/routes';
 import { useProgressStore } from '@/stores/progress';
 
@@ -40,14 +41,12 @@ const unknown = '–';
  * focus, so the overview follows it to a new day.
  */
 const overview = computed(() => {
-  const lastMoment = props.context.endOfToday - 1;
-  const now = { at: lastMoment, utcOffsetMinutes: -new Date(lastMoment).getTimezoneOffset() };
   const log = progress.log.status === 'loaded' ? progress.log.value.entries : [];
 
   return summarizeOverview(
     props.apps.map((app) => summarizeApp(app, props.context)),
     log,
-    now,
+    localTimeAt(props.context.endOfToday - 1),
   );
 });
 

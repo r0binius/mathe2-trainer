@@ -7,6 +7,7 @@ import { uiLanguageFor } from '@/domain/settings/language';
 import type { Loadable } from '@/domain/shared/loadable';
 import type { AppDefinition } from '@/domain/shortcuts/types';
 import { useUiLanguage } from '@/i18n';
+import { localTimeAt } from '@/localTime';
 import { consoleLogger, loggerKey } from '@/ports';
 import { useKeymapStore } from '@/stores/keymap';
 import { useProgressStore } from '@/stores/progress';
@@ -41,11 +42,7 @@ export function useStartup(
 
   function loadLog(layout: LayoutId | undefined): void {
     if (layout !== undefined) {
-      const now = new Date();
-      void progress.loadLog(layout, {
-        at: now.getTime(),
-        utcOffsetMinutes: -now.getTimezoneOffset(),
-      });
+      void progress.loadLog(layout, localTimeAt(Date.now()));
     }
   }
 

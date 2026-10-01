@@ -7,6 +7,7 @@ import { endOfLocalDay } from '@/domain/scheduling/days';
 import { reservedFor } from '@/domain/settings/settings';
 import type { Loadable } from '@/domain/shared/loadable';
 import { allLoaded, mapLoadable } from '@/domain/shared/loadable';
+import { localTimeAt } from '@/localTime';
 import { useKeymapStore } from '@/stores/keymap';
 import { useProgressStore } from '@/stores/progress';
 import { useSettingsStore } from '@/stores/settings';
@@ -20,10 +21,10 @@ export function useSummaryContext(): ComputedRef<Loadable<SummaryContext>> {
   const settings = useSettingsStore();
   const keymap = useKeymapStore();
   const progress = useProgressStore();
-  const endOfToday = ref(endOfTodayFrom(new Date()));
+  const endOfToday = ref(endOfTodayNow());
 
   function refresh(): void {
-    endOfToday.value = endOfTodayFrom(new Date());
+    endOfToday.value = endOfTodayNow();
   }
 
   window.addEventListener('focus', refresh);
@@ -49,6 +50,6 @@ export function useSummaryContext(): ComputedRef<Loadable<SummaryContext>> {
   );
 }
 
-function endOfTodayFrom(now: Date): number {
-  return endOfLocalDay({ at: now.getTime(), utcOffsetMinutes: -now.getTimezoneOffset() });
+function endOfTodayNow(): number {
+  return endOfLocalDay(localTimeAt(Date.now()));
 }

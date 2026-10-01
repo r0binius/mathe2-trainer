@@ -3,6 +3,7 @@ import type { ProgressEffect } from '@/domain/practice/session';
 import type { PlatformError } from '@/domain/shared/platformError';
 import type { Result } from '@/domain/shared/result';
 import { err } from '@/domain/shared/result';
+import { localTimeAt } from '@/localTime';
 import type { useProgressStore } from '@/stores/progress';
 
 /** What saving practice results needs of the progress store. */
@@ -35,9 +36,8 @@ export function progressSaver(
     switch (effect.type) {
       case 'tested': {
         const { id, failed, durationMs } = effect;
-        const utcOffsetMinutes = -new Date(at).getTimezoneOffset();
 
-        return progress.recordReview({ id, layout, at, utcOffsetMinutes, failed, durationMs });
+        return progress.recordReview({ id, layout, ...localTimeAt(at), failed, durationMs });
       }
       case 'learningChanged':
         return setId === undefined
