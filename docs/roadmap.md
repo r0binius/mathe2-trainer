@@ -53,7 +53,7 @@ Branch `feature/keyboard-domain`. The pure core that turns shortcut definitions 
 - Translatable text is written as message keys (`title: 'essentials.find'`), with a catalog per app and language next to its data (`data/apps/vscodium/de.json`). German is required and the fallback; other languages are optional and can be added gradually. Keys are plain strings in the domain, which doesn't import the data, and the data health test checks them against `de`, including unused keys. App titles are product names and aren't translated. vue-i18n comes with the UI in step 5.
 - Porting the data: message keys are English camelCase names of what a shortcut does, grouped by set (`halves.topLeft`), and set IDs are camelCase too (`newitem` became `newItem`), and each catalog is nested JSON (`{ "halves": { "title": …, "topLeft": … } }`), vue-i18n's default shape. The 5 descriptions are sibling keys with a `Hint` suffix (`files.saveAsHint`), so every catalog entry stays a single string. Keys and German texts are ported verbatim, and a throwaway script checks each app 1:1 against the old file. Oddities go to the data health test (2.10) and are fixed there as separate changes. One app per commit.
 - Shortcut policy (`domain/keyboard/policy.ts`): a rule returns a `Rejection` (`duplicate-key` naming the key, `modifier-only`, `reserved`) or `undefined`, and `checkShortcut` returns the first rejection as a `Result`. `practicePolicy(reserved)` is the chain for the practice filter and the data health test. The caller passes the platform's list plus the current trigger and rebuilds the policy when the trigger changes, so there's no separate trigger rule and no stale trigger. The recorder's rules (needs ⌘, ⌃ or ⌥; not an app-standard shortcut like ⌘Q) come with the recorder in step 7. `macosReserved` lists what macOS takes before the practice window sees it: the old list plus ⌥⌘Space, ⌃Space, ⌃⌥Space, ⇧⌘3 and ⌃⌘Q. It hides a few ported shortcuts, such as Bitwig's ⌥⌘Space and VSCodium's ⌃Space, which can't be practiced while macOS takes them.
-- Key labels (`domain/keyboard/labels.ts`): `labelKey(labels, key)` returns `{ symbol, name? }`, where `labels` is a platform's table (`macosKeyLabels` now, a Linux table in step 10). The table replaces `keyboard-symbol` and the second labels of the old `Key` component. Names stay English, like the keycaps, and aren't translated. Any other key shows its character uppercased, unless the uppercase form is longer (`ß` → `SS`), which replaces the old hard-coded `ß` exception, and named keys keep their name (`F5`). New compared to the old app: `Home` ↖ and `End` ↘ as in macOS menus, and `Numpad0` as `0` with the name `Numpad`.
+- Key labels (`domain/keyboard/labels.ts`): `labelKey(labels, key)` returns `{ symbol, name? }`, where `labels` is a platform's table (`macosKeyLabels` now, a Linux table later). The table replaces `keyboard-symbol` and the second labels of the old `Key` component. Names stay English, like the keycaps, and aren't translated. Any other key shows its character uppercased, unless the uppercase form is longer (`ß` → `SS`), which replaces the old hard-coded `ß` exception, and named keys keep their name (`F5`). New compared to the old app: `Home` ↖ and `End` ↘ as in macOS menus, and `Numpad0` as `0` with the name `Numpad`.
 - Data health test (`src/data/apps/health.test.ts`): it finds the apps with `import.meta.glob`, so a new folder can't be forgotten (the app registry comes with the UI in step 5), and has one test per rule that lists every violation. Rules: app ID = folder name, unique set IDs, the same keys at most once per set (across sets they share a shortcut ID, as decided), known key names, characters the German layout types, and on the German fixture exactly one key besides the modifiers and no rejection by `practicePolicy([])` (reserved combinations are allowed in the data, practice hides them), in every alternative. Plus every message key in `de` and every `de` entry used. It found 4 shortcuts that can't be pressed on German (a US character that already needs the added modifier, such as ⇧⌘\` → ⇧⇧⌘´): macOS window cycling became ⌘< / ⇧⌘<, as in Terminal's German menu, and VSCodium's go to bracket, fold and unfold were dropped.
 - `is-immutable-type` is patched (`patches/`): its shared cache made `functional/prefer-immutable-types` results depend on which files were linted together ([is-immutable-type#625](https://github.com/RebeccaStevens/is-immutable-type/issues/625)). The patch gives each check its own cache. Remove it once upstream ships a fix.
 - Fixtures: one German keymap in our own `Keymap` shape (`germanKeymap.fixture.json`), which is exactly what the domain receives in the app. It was dumped from the old app's `native-keymap` and cleaned up: the ISO swap is applied, keys that type no character are left out, and `native-keymap` artifacts (`AudioVolumeUp`, the JIS keys) are removed. **No US keymap:** only German is in use, so add a fixture when someone uses another layout.
@@ -567,9 +567,29 @@ Branch `chore/packaging`. Build and sign the app. There's no importer: progress 
 - **The bundle's file name collides, not its identifier.** The old and new app have different IDs but are both `Mouseless.app` in `/Applications`.
 - **Check the code before describing it.** The review first claimed dev and packaged builds share a database; `database.rs` gives debug builds their own file.
 
-## 10. Linux ⏳ ([#10](https://codeberg.org/gobin/mouseless/issues/10))
+## Learning overview ⏳ ([#13](https://codeberg.org/gobin/mouseless/issues/13))
 
-Platform implementations for X11/Wayland, a UI driven by capabilities, and Linux key labels. Planned in detail once macOS is complete.
+A view of where learning stands: what's due for review today, and how much of everything is learned, so you see how you're doing and what's left for the day. Planned in detail when it starts.
+
+**Carried over**
+
+- The detail without a chosen app already lists the apps with reviews due today; the overview can grow from it.
+
+## App structure ⏳ ([#15](https://codeberg.org/gobin/mouseless/issues/15))
+
+Split the app into a trainer core and a part specific to keyboard shortcuts, so a vocabulary trainer and a Linux terminal trainer can reuse the core. After the learning overview, so the boundary is drawn around a finished feature set. Planned in detail when it starts.
+
+## UI/UX overhaul ⏳ ([#14](https://codeberg.org/gobin/mouseless/issues/14))
+
+Sharpen the look once the structure has settled. Planned in detail when it starts.
+
+**Carried over**
+
+- Fonts: the invariants call for the system font (_Native design_), so replacing it would change that decision.
+
+## Linux ⏳ ([#10](https://codeberg.org/gobin/mouseless/issues/10))
+
+Platform implementations for X11/Wayland, a UI driven by capabilities, and Linux key labels. Not scheduled yet; planned in detail when it starts.
 
 **Carried over**
 
