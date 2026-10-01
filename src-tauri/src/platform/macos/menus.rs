@@ -70,17 +70,8 @@ fn shortcuts_in_all(menus: Value, depth: usize) -> Result<Vec<MenuShortcut>, App
         return Ok(Vec::new());
     }
 
-    let items = menus
-        .iter()
-        .map(|menu| elements(menu, CHILDREN))
-        .collect::<Result<Vec<_>, _>>()?;
-    let shortcuts = items
-        .iter()
-        .flatten()
-        .map(|item| shortcuts_of(item, depth))
-        .collect::<Result<Vec<_>, _>>()?;
-
-    Ok(shortcuts.into_iter().flatten().collect())
+    let items = read_all(&menus, |menu| elements(menu, CHILDREN))?;
+    read_all(&items, |item| shortcuts_of(item, depth))
 }
 
 /// The item's own shortcut, if it has one, followed by those in its submenu.
@@ -99,6 +90,15 @@ fn shortcuts_of(item: &Element, depth: usize) -> Result<Vec<MenuShortcut>, AppEr
 
     let nested = shortcuts_in_all(submenu, depth.saturating_add(1))?;
     Ok(own.into_iter().chain(nested).collect())
+}
+
+/// What `read` returns for each element, joined, or the first error.
+fn read_all<T>(
+    elements: &[Element],
+    read: impl Fn(&Element) -> Result<Vec<T>, AppError>,
+) -> Result<Vec<T>, AppError> {
+    let read = elements.iter().map(read).collect::<Result<Vec<_>, _>>()?;
+    Ok(read.into_iter().flatten().collect())
 }
 
 fn value(element: &Element, attribute: &str) -> Result<Value, AppError> {
