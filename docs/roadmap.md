@@ -508,13 +508,13 @@ Branch `feature/native-design`. The app looks and behaves like a native Mac app,
 - **A grid needs a row height to scroll.** The sidebar didn't scroll because the window grid's only row grew with its content; `grid-template-rows: minmax(0, 1fr)` let it shrink to the window.
 - **A big step in one go needs screenshots, not only tests.** 406 tests passed while the sidebar couldn't scroll and the glass looked wrong; only looking at the running app found both.
 
-## 8. Menu shortcut lookup ⏳ ([#8](https://codeberg.org/gobin/mouseless/issues/8))
+## 8. Menu shortcut lookup 🚧 ([#8](https://codeberg.org/gobin/mouseless/issues/8))
 
 Branch `feature/menu-lookup`. Read any app's menu shortcuts through the Accessibility API, and show them with search in the popover.
 
 **Sub-steps**
 
-- [ ] 8.1 AX FFI and the permission flow
+- [x] 8.1 AX FFI and the permission flow
 - [ ] 8.2 Recursive menu walk and mapping into shortcut data
 - [ ] 8.3 Lookup UI with search
 

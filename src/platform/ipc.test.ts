@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { integer } from '@/domain/shared/decode';
 import { err, ok } from '@/domain/shared/result';
 
-import { commandCaller, nothing } from './ipc';
+import type { ReceivedEvent } from './ipc';
+import { commandCaller, decodingPayloads, nothing } from './ipc';
 
 describe('commandCaller', () => {
   it('invokes the command with its arguments and decodes the answer', async () => {
@@ -46,5 +47,32 @@ describe('nothing', () => {
   it('decodes the null a command without a result answers with', () => {
     expect(nothing(null)).toStrictEqual(ok(undefined));
     expect(nothing(0)).toStrictEqual(err({ path: '', expected: 'nothing' }));
+  });
+});
+
+describe('decodingPayloads', () => {
+  function sending(payload: unknown) {
+    return (listener: (received: ReceivedEvent) => void) => {
+      listener({ payload });
+      return vi.fn();
+    };
+  }
+
+  it('calls the listener with the decoded payload', () => {
+    const listener = vi.fn();
+
+    decodingPayloads(sending(42), integer, vi.fn())(listener);
+
+    expect(listener).toHaveBeenCalledWith(42);
+  });
+
+  it('reports a payload that does not decode, and leaves the listener out', () => {
+    const listener = vi.fn();
+    const onInvalid = vi.fn();
+
+    decodingPayloads(sending('42'), integer, onInvalid)(listener);
+
+    expect(onInvalid).toHaveBeenCalledWith('payload: expected an integer');
+    expect(listener).not.toHaveBeenCalled();
   });
 });

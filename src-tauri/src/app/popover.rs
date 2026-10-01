@@ -7,7 +7,7 @@ use tauri::{
 };
 
 /// The popover's window label, as in `tauri.conf.json` and its capability.
-const LABEL: &str = "popover";
+pub const LABEL: &str = "popover";
 
 /// The popover window.
 ///

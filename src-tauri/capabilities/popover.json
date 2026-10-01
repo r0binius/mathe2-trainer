@@ -3,5 +3,11 @@
   "identifier": "popover",
   "description": "Capability for the popover",
   "windows": ["popover"],
-  "permissions": ["allow-dismiss-popover", "log:allow-log"]
+  "permissions": [
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "allow-dismiss-popover",
+    "allow-ask-for-menu-access",
+    "log:allow-log"
+  ]
 }

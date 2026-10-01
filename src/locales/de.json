@@ -83,6 +83,9 @@
     "progressHint": "Löscht, was du gelernt hast, und alle Wiederholungen, auf jedem Tastaturlayout."
   },
   "popover": {
-    "placeholder": "Hier erscheinen die Kurzbefehle der App im Vordergrund."
+    "noApp": "Öffne das Popover über einer App, um ihre Kurzbefehle zu sehen.",
+    "placeholder": "Hier erscheinen die Kurzbefehle von {app}.",
+    "accessHint": "Um die Kurzbefehle von {app} zu zeigen, liest Mouseless ihre Menüs. Erlaube es in den Systemeinstellungen unter „Datenschutz & Sicherheit“ → „Bedienungshilfen“.",
+    "openSettings": "Systemeinstellungen öffnen"
   }
 }

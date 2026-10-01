@@ -13,11 +13,17 @@ export type CommandArgs = Readonly<Record<string, unknown>>;
  */
 export type Invoke = (command: string, args?: CommandArgs) => Promise<unknown>;
 
+/** An event from the Rust side, as Tauri's `listen` hands it over: its payload not yet decoded. */
+export type ReceivedEvent = { readonly payload: unknown };
+
 /**
- * Tauri's `listen` for an event without a payload, passed in like {@link Invoke}. It resolves to
- * the function that stops listening.
+ * Tauri's `listen`, passed in like {@link Invoke}. It resolves to the function that stops
+ * listening.
  */
-export type Listen = (event: string, handler: () => void) => Promise<() => void>;
+export type Listen = (
+  event: string,
+  handler: (received: ReceivedEvent) => void,
+) => Promise<() => void>;
 
 /** Invokes a command and decodes its answer. It never rejects: every failure is a result. */
 export type CommandCall = <T>(
@@ -33,6 +39,7 @@ const decodeAppError = object({
     literal('database'),
     literal('keymap'),
     literal('trigger'),
+    literal('lookup'),
     literal('window'),
   ]),
   message: string,
@@ -88,7 +95,7 @@ export function subscriber(
   listen: Listen,
   event: string,
   onFailure: (message: string) => void,
-): (listener: () => void) => () => void {
+): (listener: (received: ReceivedEvent) => void) => () => void {
   return function subscribe(listener) {
     const listening = listen(event, listener).then(ok, (error: unknown) => {
       onFailure(String(error));
@@ -98,6 +105,29 @@ export function subscriber(
     return () => {
       void listening.then(stopListening);
     };
+  };
+}
+
+/**
+ * Turns a {@link subscriber}'s listeners into listeners of the decoded payload. A payload that
+ * doesn't decode goes to `onInvalid` instead of the listener.
+ */
+export function decodingPayloads<T>(
+  subscribe: (listener: (received: ReceivedEvent) => void) => () => void,
+  decoder: Decoder<T>,
+  onInvalid: (message: string) => void,
+): (listener: (payload: T) => void) => () => void {
+  return function subscribeToPayload(listener) {
+    return subscribe(({ payload }) => {
+      const decoded = decoder(payload);
+
+      if (decoded.kind === 'ok') {
+        listener(decoded.value);
+      } else {
+        const { path, expected } = decoded.error;
+        onInvalid(`${path === '' ? 'payload' : path}: expected ${expected}`);
+      }
+    });
   };
 }
 

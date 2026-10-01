@@ -83,6 +83,9 @@
     "progressHint": "Deletes what you learned and all reviews, on every keyboard layout."
   },
   "popover": {
-    "placeholder": "The shortcuts of the app in front will show up here."
+    "noApp": "Open the popover over an app to see its shortcuts.",
+    "placeholder": "The shortcuts of {app} will show up here.",
+    "accessHint": "To show the shortcuts of {app}, Mouseless reads its menus. Allow it in System Settings under Privacy & Security → Accessibility.",
+    "openSettings": "Open System Settings"
   }
 }

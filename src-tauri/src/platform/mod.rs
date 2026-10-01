@@ -4,11 +4,13 @@
 //! The rest of the app works against the traits, so a platform is added without changing it (the
 //! Bridge pattern in `architecture.md`).
 
+mod app_menus;
 mod current;
 mod key_code;
 mod layout;
 mod modifier_hold;
 
+pub use self::app_menus::{AppMenus, MenuAccess, RunningApp};
 pub use self::current::Platform;
 pub use self::key_code::KeyCode;
 pub use self::layout::{KeyCharacters, Keymap, KeymapSource, Layout};

@@ -62,6 +62,7 @@ pub fn run() -> tauri::Result<()> {
         })
         .invoke_handler(tauri::generate_handler![
             commands::keymap::get_keymap,
+            commands::lookup::ask_for_menu_access,
             commands::progress::load_progress,
             commands::progress::save_set_progress,
             commands::progress::record_review,

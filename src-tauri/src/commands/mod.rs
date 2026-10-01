@@ -3,6 +3,7 @@
 //! ([`Database::run`](crate::services::database::Database::run)).
 
 pub mod keymap;
+pub mod lookup;
 pub mod progress;
 pub mod settings;
 pub mod windows;

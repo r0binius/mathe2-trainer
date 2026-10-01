@@ -22,13 +22,26 @@ thiserror = "2.0.21"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = { version = "0.6.4", default-features = false, features = ["std"] }
+objc2-app-kit = { version = "0.3.2", default-features = false, features = [
+  "std",
+  "libc",
+  "NSRunningApplication",
+  "NSWorkspace",
+] }
+objc2-application-services = { version = "0.3.2", default-features = false, features = [
+  "std",
+  "AXUIElement",
+  "HIServices",
+] }
 objc2-core-foundation = { version = "0.3.2", default-features = false, features = [
   "std",
+  "CFArray",
   "CFBase",
   "CFData",
   "CFDictionary",
   "CFMachPort",
   "CFNotificationCenter",
+  "CFNumber",
   "CFRunLoop",
   "CFString",
 ] }
@@ -37,11 +50,13 @@ objc2-foundation = { version = "0.3.2", default-features = false, features = [
   "NSArray",
   "NSLocale",
   "NSString",
+  "NSURL",
 ] }
 objc2-core-graphics = { version = "0.3.2", default-features = false, features = [
   "std",
   "CGEvent",
   "CGEventTypes",
+  "CGWindow",
 ] }
 
 [lints.rust]

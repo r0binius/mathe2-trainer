@@ -5,6 +5,7 @@ import type { InjectionKey } from 'vue';
 
 import type { CurrentLayout } from '@/domain/keyboard/keymap';
 import type { KeyLabels } from '@/domain/keyboard/labels';
+import type { PopoverOpened } from '@/domain/lookup/appInFront';
 import type { ProgressRepository } from '@/domain/progress/repository';
 import type { SettingsRepository } from '@/domain/settings/repository';
 import type { PlatformError } from '@/domain/shared/platformError';
@@ -47,6 +48,23 @@ export type Windows = {
 
 /** Where the app provides the window coordinator to the windows. */
 export const windowsKey: InjectionKey<Windows> = Symbol('windows');
+
+/**
+ * Looking up the shortcuts of the app the user works in, from its menus. A shell port like
+ * {@link Windows}.
+ */
+export type Lookup = {
+  /**
+   * Calls `listener` every time the popover opens, with the app it opens over, until the returned
+   * function stops it.
+   */
+  readonly onPopoverOpened: (listener: (opened: PopoverOpened) => void) => () => void;
+  /** Opens System Settings at Accessibility, where the user lets Mouseless read menus. */
+  readonly askForMenuAccess: () => Promise<Result<void, PlatformError>>;
+};
+
+/** Where the app provides the lookup to the popover. */
+export const lookupKey: InjectionKey<Lookup> = Symbol('lookup');
 
 /**
  * What one window changed that the others show too, which the Rust side tells every window
@@ -122,6 +140,12 @@ export const missingKeymapSource: KeymapSource = { load: unavailable, onChange: 
 
 /** What a window injects when the app provided no window coordinator: nothing happens. */
 export const missingWindows: Windows = { dismissPopover: unavailable };
+
+/** What the popover injects when the app provided no lookup: it never opens over an app. */
+export const missingLookup: Lookup = {
+  onPopoverOpened: () => ignore,
+  askForMenuAccess: unavailable,
+};
 
 /** What a store injects when the app provided no changes: no other window changes anything. */
 export const missingChanges: Changes = {

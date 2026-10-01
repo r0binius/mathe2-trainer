@@ -24,7 +24,7 @@ describe('keymapSource', () => {
     const listener = vi.fn();
 
     const stop = keymapSource(unused, listen, logger).onChange(listener);
-    listen.mock.calls[0]?.[1]();
+    listen.mock.calls[0]?.[1]({ payload: null });
     stop();
     await vi.waitFor(() => {
       expect(unlisten).toHaveBeenCalledOnce();

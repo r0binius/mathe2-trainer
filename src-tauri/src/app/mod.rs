@@ -3,6 +3,7 @@
 mod coordinator;
 mod hold;
 mod layout;
+mod lookup;
 mod menu;
 mod popover;
 mod run;

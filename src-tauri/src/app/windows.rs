@@ -4,7 +4,7 @@ use tauri::{AppHandle, Manager, WebviewWindow, WindowEvent};
 use tauri_plugin_log::log;
 
 use super::coordinator::{Action, Event, Showing, coordinate};
-use super::{popover, tray};
+use super::{lookup, popover, tray};
 use crate::error::AppError;
 
 /// The main window's label, as in `tauri.conf.json`.
@@ -64,7 +64,10 @@ fn showing(app: &AppHandle) -> tauri::Result<Showing> {
 
 fn apply(app: &AppHandle, action: Action) -> tauri::Result<()> {
     match action {
-        Action::OpenPopover => popover::open_below(&popover::window(app)?, tray::area(app)?),
+        Action::OpenPopover => {
+            lookup::tell_popover(app);
+            popover::open_below(&popover::window(app)?, tray::area(app)?)
+        }
         Action::ClosePopover => popover::window(app)?.hide(),
         Action::ReturnFocus => app.hide(),
         Action::ShowMain => bring_forward(&main(app)?),
