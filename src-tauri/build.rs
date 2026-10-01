@@ -15,6 +15,7 @@ const COMMANDS: &[&str] = &[
     "set_settings",
     "dismiss_popover",
     "ask_for_menu_access",
+    "read_menu_shortcuts",
 ];
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

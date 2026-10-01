@@ -10,7 +10,7 @@ mod key_code;
 mod layout;
 mod modifier_hold;
 
-pub use self::app_menus::{AppMenus, MenuAccess, RunningApp};
+pub use self::app_menus::{AppMenus, MenuAccess, MenuGroup, MenuShortcut, RunningApp};
 pub use self::current::Platform;
 pub use self::key_code::KeyCode;
 pub use self::layout::{KeyCharacters, Keymap, KeymapSource, Layout};

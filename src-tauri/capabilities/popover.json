@@ -8,6 +8,7 @@
     "core:event:allow-unlisten",
     "allow-dismiss-popover",
     "allow-ask-for-menu-access",
+    "allow-read-menu-shortcuts",
     "log:allow-log"
   ]
 }

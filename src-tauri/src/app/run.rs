@@ -5,6 +5,7 @@ use std::sync::Arc;
 use tauri::{Manager, RunEvent};
 
 use super::coordinator::Event;
+use super::lookup::AppInFrontState;
 use super::settings::apply_settings;
 use super::trigger::{self, Triggers};
 use super::{layout, menu, tray, windows};
@@ -41,6 +42,7 @@ pub fn run() -> tauri::Result<()> {
         .setup(|app| {
             // Managed first: a layout change asks for it from the moment layouts are watched.
             app.manage(Triggers::default());
+            app.manage(AppInFrontState::default());
             let directory = app
                 .path()
                 .app_data_dir()
@@ -63,6 +65,7 @@ pub fn run() -> tauri::Result<()> {
         .invoke_handler(tauri::generate_handler![
             commands::keymap::get_keymap,
             commands::lookup::ask_for_menu_access,
+            commands::lookup::read_menu_shortcuts,
             commands::progress::load_progress,
             commands::progress::save_set_progress,
             commands::progress::record_review,

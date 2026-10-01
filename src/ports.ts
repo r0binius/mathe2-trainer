@@ -6,6 +6,7 @@ import type { InjectionKey } from 'vue';
 import type { CurrentLayout } from '@/domain/keyboard/keymap';
 import type { KeyLabels } from '@/domain/keyboard/labels';
 import type { PopoverOpened } from '@/domain/lookup/appInFront';
+import type { MenuGroup } from '@/domain/lookup/menuShortcuts';
 import type { ProgressRepository } from '@/domain/progress/repository';
 import type { SettingsRepository } from '@/domain/settings/repository';
 import type { PlatformError } from '@/domain/shared/platformError';
@@ -61,6 +62,8 @@ export type Lookup = {
   readonly onPopoverOpened: (listener: (opened: PopoverOpened) => void) => () => void;
   /** Opens System Settings at Accessibility, where the user lets Mouseless read menus. */
   readonly askForMenuAccess: () => Promise<Result<void, PlatformError>>;
+  /** The shortcuts in the menus of the app the popover opened over last, by menu. */
+  readonly readMenuShortcuts: () => Promise<Result<readonly MenuGroup[], PlatformError>>;
 };
 
 /** Where the app provides the lookup to the popover. */
@@ -145,6 +148,7 @@ export const missingWindows: Windows = { dismissPopover: unavailable };
 export const missingLookup: Lookup = {
   onPopoverOpened: () => ignore,
   askForMenuAccess: unavailable,
+  readMenuShortcuts: unavailable,
 };
 
 /** What a store injects when the app provided no changes: no other window changes anything. */

@@ -5,8 +5,8 @@ use objc2_app_kit::{NSRunningApplication, NSWorkspace};
 use objc2_foundation::{NSString, NSURL};
 
 use crate::error::AppError;
-use crate::platform::macos::{accessibility, window_list};
-use crate::platform::{AppMenus, MenuAccess, RunningApp};
+use crate::platform::macos::{accessibility, menus, window_list};
+use crate::platform::{AppMenus, MenuAccess, MenuGroup, RunningApp};
 
 /// System Settings → Privacy & Security → Accessibility.
 const ACCESSIBILITY_SETTINGS: &str =
@@ -47,6 +47,10 @@ impl AppMenus for SystemAppMenus {
                 "macOS didn't open the Accessibility settings",
             ))
         }
+    }
+
+    fn read(&self, process: i32) -> Result<Vec<MenuGroup>, AppError> {
+        menus::read_menus(process)
     }
 }
 

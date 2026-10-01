@@ -28,4 +28,17 @@ describe('lookup', () => {
     ).resolves.toStrictEqual(ok(undefined));
     expect(invoke).toHaveBeenCalledWith('ask_for_menu_access', undefined);
   });
+
+  it('reads the menu shortcuts with read_menu_shortcuts', async () => {
+    const groups = [
+      { title: 'Ablage', shortcuts: [{ title: 'Neues Fenster', keys: ['Meta', 'n'] }] },
+    ];
+    const invoke = vi.fn(() => Promise.resolve(groups));
+    const listen = vi.fn<Listen>();
+
+    await expect(
+      lookup(invoke, listen, { warn: vi.fn(), error: vi.fn() }).readMenuShortcuts(),
+    ).resolves.toStrictEqual(ok(groups));
+    expect(invoke).toHaveBeenCalledWith('read_menu_shortcuts', undefined);
+  });
 });

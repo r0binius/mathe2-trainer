@@ -1,4 +1,5 @@
 import { decodePopoverOpened } from '@/domain/lookup/appInFront';
+import { decodeMenuGroups } from '@/domain/lookup/menuShortcuts';
 import type { Logger, Lookup } from '@/ports';
 
 import type { Invoke, Listen } from './ipc';
@@ -25,5 +26,6 @@ export function lookup(invoke: Invoke, listen: Listen, logger: Logger): Lookup {
       report,
     ),
     askForMenuAccess: () => call('ask_for_menu_access', nothing),
+    readMenuShortcuts: () => call('read_menu_shortcuts', decodeMenuGroups),
   };
 }

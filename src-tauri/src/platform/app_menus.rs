@@ -26,6 +26,25 @@ pub enum MenuAccess {
     Denied,
 }
 
+/// A shortcut in an app's menus.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+pub struct MenuShortcut {
+    /// The menu item's title, such as "New Note".
+    pub title: String,
+    /// The keys, named as in the shortcut data: modifiers in ⌃⌥⇧⌘ order, then the key, such as
+    /// `["Shift", "Meta", "n"]`.
+    pub keys: Vec<String>,
+}
+
+/// The shortcuts in one of an app's menus, those of its submenus included.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+pub struct MenuGroup {
+    /// The menu's title in the menu bar, such as "File".
+    pub title: String,
+    /// The shortcuts in menu order.
+    pub shortcuts: Vec<MenuShortcut>,
+}
+
 /// The apps in the session and their menus.
 pub trait AppMenus {
     /// The app the user works in: the one in front, or, when that's this app, the one whose window
@@ -42,4 +61,12 @@ pub trait AppMenus {
     ///
     /// Returns a lookup error if the system's settings can't be opened.
     fn ask_for_access(&self) -> Result<(), AppError>;
+
+    /// The shortcuts in the menus of the app running as `process`, by menu, in menu bar order.
+    /// Slow for apps with many menus, so it's called off the main thread.
+    ///
+    /// # Errors
+    ///
+    /// Returns a lookup error if access isn't granted, or the app has no menus or doesn't answer.
+    fn read(&self, process: i32) -> Result<Vec<MenuGroup>, AppError>;
 }
