@@ -508,7 +508,7 @@ Branch `feature/native-design`. The app looks and behaves like a native Mac app,
 - **A grid needs a row height to scroll.** The sidebar didn't scroll because the window grid's only row grew with its content; `grid-template-rows: minmax(0, 1fr)` let it shrink to the window.
 - **A big step in one go needs screenshots, not only tests.** 406 tests passed while the sidebar couldn't scroll and the glass looked wrong; only looking at the running app found both.
 
-## 8. Menu shortcut lookup 🚧 ([#8](https://codeberg.org/gobin/mouseless/issues/8))
+## 8. Menu shortcut lookup ✅ ([#8](https://codeberg.org/gobin/mouseless/issues/8))
 
 Branch `feature/menu-lookup`. Read any app's menu shortcuts through the Accessibility API, and show them with search in the popover.
 
@@ -518,13 +518,30 @@ Branch `feature/menu-lookup`. Read any app's menu shortcuts through the Accessib
 - [x] 8.2 Recursive menu walk and mapping into shortcut data
 - [x] 8.3 Lookup UI with search
 
-**Carried over**
+**Decisions**
 
-- The popover follows the settings, at least the language, through the `settings-changed` event that the native design adds. It reads `navigator.languages` for now.
+- The Accessibility API through `objc2-application-services`, its `unsafe` in `accessibility.rs`; the window list's in `window_list.rs`.
+- Access is asked for lazily: only an app without built-in sets shows the request, whose button shows macOS's prompt and opens System Settings.
+- The looked-up app is the frontmost one, or, when that's Mouseless, the owner of the topmost other window. Rust finds it before the popover takes focus, keeps its process, and tells the popover its name and bundle ID with `popover-opened`.
+- Rust maps menu items into the shortcut data's key names (`menu_keys.rs`); groups are the top-level menus, the Apple menu left out, Option alternates kept. The popover reads them with an async command, off the main thread, with a 1 s AX timeout.
+- Built-in sets win, matched by bundle ID (`bundleIds` in the data), so the menus aren't read for those apps.
+- Search is our own: every word in the title or the menu's title, ignoring case and accents. No fuse.js.
+- The popover's flow is an Elm program (`updateLookup`); an opening counter drops stale menus. It follows the language setting and the layout like the other windows.
 
 **Concepts:** the Accessibility API and permissions, recursion over trees, matching apps by bundle ID.
 
 **Resources:** [AXUIElement](https://developer.apple.com/documentation/applicationservices/axuielement_h)
+
+**What we learned**
+
+- **Check remembered constants against the running system.** Apple's menu glyph codes are no longer in the SDK's headers. A throwaway dump of ten apps' menus confirmed the table, and showed the only unknown codes were Globe and Dictation, which no shortcut can name.
+- **One message per item keeps a cross-process walk fast.** Reading an item's five attributes with `AXUIElementCopyMultipleAttributeValues` takes Finder's menus in 50 ms; big apps like Preview still take over a second, so it runs off the main thread with a timeout.
+- **Keep the target on the trusted side.** Rust remembers which process the popover opened over; the webview only learns its name and can't ask to read another one.
+- **A counter beats cancelling, again.** As with holding ⌘, numbering the openings made a slow answer for an earlier one simply not match.
+- **Recognize apps by what doesn't get translated.** Bundle IDs replaced the old match by the localized name, which had forced the Notes data to be titled "Notizen".
+- **`overflow: hidden` makes a flex item shrinkable.** The popover's title disappeared under the search field once a long list filled the column; `flex: none` keeps it. Only the running app showed it.
+- **Dev builds borrow the terminal's permissions.** Under `tauri dev`, macOS checks Accessibility for the terminal, so the request flow needs a packaged build to test.
+- **A sub-step can be split for review.** The lookup UI went in as four commits (data, search, the program, the view), each reviewed on its own.
 
 ## 9. Packaging ⏳ ([#9](https://codeberg.org/gobin/mouseless/issues/9))
 
@@ -537,6 +554,7 @@ Branch `chore/packaging`. Build and sign the app. There's no importer: progress 
 **Carried over**
 
 - Check launch at login with the packaged app: debug builds skip it, so `tauri dev` never registers the debug binary.
+- Check the popover's Accessibility request with the packaged app: `tauri dev` uses the terminal's access (smoke test → Lookup).
 - Set `minimumSystemVersion` (macOS 14): the app relies on ES2023 (`toSorted`), `color-mix()` and native CSS nesting in the system's WebKit.
 - The two logos from macosicons.com are community icons: fine for personal use, to be checked before the app is published.
 

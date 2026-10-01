@@ -119,6 +119,11 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 - _Pattern:_ each phase is an explicit state: `presenting` (training or testing, with the first mistake of a test), `succeeded` and `finished`. Each state defines which inputs it accepts.
 - _TS form:_ a discriminated union plus a pure `updateSession(session, msg) → { model, effects }`, which is the idiomatic TypeScript version of the State pattern, instead of a class per state. Invalid states can't be represented, and the compiler checks that every state is handled.
 
+**State: the popover's lookup** (`domain/lookup/lookup.ts`, an Elm model, §1.1)
+
+- _Problem:_ the old popover mixed loading flags, the permission answer and the built-in match in the component, and a slow answer for one app could show over the next.
+- `updateLookup(apps, lookup, msg)` moves between `waiting`, `noApp`, `builtIn`, `needsAccess`, `loading`, `loaded` and `failed`. Every opening counts up `openings`, and the `readMenus` effect carries that number, so menus read for an earlier opening are dropped. `useLookup` runs it.
+
 **Command: session inputs, IPC, menu actions**
 
 - Session inputs are messages (§1.1): `{ type: 'answer', keys, at }`, `{ type: 'skip', roll, at }`, `{ type: 'advance', roll, at }`. The component dispatches them, and the state machine interprets them, so tests can replay a whole session.
@@ -137,26 +142,26 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 - _Problem:_ two separate lists of forbidden shortcuts (`Keyboard.blockedShortcuts`, `OptionsOverlay.isAllowedShortcut`), and the current trigger is read only once.
 - `ShortcutPolicy` is an ordered list of rules: `noDuplicateKeys → notModifierOnly → notReserved(reserved)`, where `reserved` is the platform's list plus the current trigger, and the recorder (step 7) adds `needsModifier` and `notAppStandard`. Each rule either passes (`undefined`) or returns a reason (`{ reason: 'reserved' }`), and `checkShortcut` returns the first one as a `Result`. The data health test, the practice filter and the shortcut recorder use the same chain with different rule sets, and the recorder can show _why_ it rejected a shortcut.
 - Key resolution is a small chain as well: `value → withShift → withAlt → withShiftAlt → keep as code`.
-- Rust frontmost-app detection: `frontmostApplication → topmost other window → none`.
+- Rust frontmost-app detection: `frontmostApplication → topmost other window → none` (`process_in_front`, so Mouseless itself is never looked up).
 
 **Adapter: foreign APIs to our interfaces**
 
-- Rust `platform/macos/*` adapts NSWorkspace, AXUIElement and UCKeyTranslate to our traits and data types (`Keymap`, `MenuShortcut { title, keys, group }`). The `unsafe` calls of each foreign API stay in one small module behind safe functions (`carbon.rs` for Carbon, `event_tap.rs` for Core Graphics event taps), so the adapters around them are safe code.
-- Frontend `platform/*` adapts Tauri's `invoke` and `listen`, through hand-written wrappers that decode every answer, to the ports (`ProgressRepository`, `SettingsRepository`, `KeymapSource`, `Windows`, `Changes`).
+- Rust `platform/macos/*` adapts NSWorkspace, AXUIElement and UCKeyTranslate to our traits and data types (`Keymap`, `MenuGroup { title, shortcuts: [MenuShortcut { title, keys }] }`). A menu item's key equivalent (character, glyph, modifier mask) becomes keys named as in the shortcut data in `menu_keys.rs`, so the macOS details stay there. The `unsafe` calls of each foreign API stay in one small module behind safe functions (`carbon.rs` for Carbon, `event_tap.rs` for Core Graphics event taps, `accessibility.rs` for the Accessibility API, `window_list.rs` for Core Graphics' window list), so the adapters around them are safe code.
+- Frontend `platform/*` adapts Tauri's `invoke` and `listen`, through hand-written wrappers that decode every answer and every event payload, to the ports (`ProgressRepository`, `SettingsRepository`, `KeymapSource`, `Windows`, `Changes`, `Lookup`).
 
 **Bridge: features independent of the OS** (`src-tauri/src/platform/`)
 
-- The abstraction side (lookup service, trigger, keymap service) works against the traits `ActiveApp`, `MenuReader`, `KeymapSource`, `ModifierHold` and `Permissions`. The implementation side is `macos/` now and `linux/` later.
-- Both sides vary independently: adding Linux means no change to the lookup service.
+- The abstraction side (lookup, trigger, keymap) works against the traits `AppMenus` (the app in front, access to menus, reading them), `KeymapSource` and `ModifierHold`. The implementation side is `macos/` now and `linux/` later.
+- Both sides vary independently: adding Linux means no change to the lookup.
 - A `Capabilities` value (`{ menuShortcuts, holdModifier, activeApp }`) is sent to the UI once, so the UI hides what the platform can't do instead of branching on the OS.
 
 **Abstract Factory: the platform family**
 
-- `platform::current()` returns the matching set of implementations for the build target (chosen with `cfg`). The macOS `ActiveApp` never gets combined with a Linux `MenuReader`.
+- `platform::current()` returns the matching set of implementations for the build target (chosen with `cfg`), so a macOS keymap never gets combined with Linux menus.
 
 **Facade: simple entry points to subsystems**
 
-- Frontend `platform/` is the only code that imports `@tauri-apps/api`. Its ports take Tauri's `invoke` and `listen` as arguments (`settingsRepository(invoke)`, `keymapSource(invoke, listen)`), so they're tested with fakes, and every call returns a `Result` instead of rejecting. `tauriPorts()` is the one place that hands them the real ones. Stores see `settings.load()`, `progress.saveSet(record)`, `keymap.onChange(listener)` and later `lookup.onResult(cb)`.
+- Frontend `platform/` is the only code that imports `@tauri-apps/api`. Its ports take Tauri's `invoke` and `listen` as arguments (`settingsRepository(invoke)`, `keymapSource(invoke, listen)`), so they're tested with fakes, and every call returns a `Result` instead of rejecting. `tauriPorts()` is the one place that hands them the real ones. Stores see `settings.load()`, `progress.saveSet(record)`, `keymap.onChange(listener)`, and the popover `lookup.onPopoverOpened(listener)` and `lookup.readMenuShortcuts()`. Each window's entry calls `createWindow` (`window.ts`), which provides them all; the window's capability decides what it may call.
 - Rust `commands/` is a facade over the services for the frontend.
 
 **Mediator: window coordination** (`src-tauri/src/app/coordinator.rs`)
@@ -167,7 +172,7 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 
 **Observer: change propagation**
 
-- Tauri events (`keymap-changed`, `settings-changed`, `progress-reset`, later `lookup-result`) with typed listeners that are removed on scope dispose. `settings-changed` and `progress-reset` reach every window, so a change in the Settings window shows in the others.
+- Tauri events (`keymap-changed`, `settings-changed`, `progress-reset`, `popover-opened`) with typed listeners that are removed on scope dispose. `settings-changed` and `progress-reset` reach every window, so a change in the Settings window shows in the others. `popover-opened` goes to the popover alone and carries a payload, decoded like a command's answer (`decodingPayloads`).
 - Inside the frontend: Vue reactivity and Pinia. This replaces the custom `Emitter` and the global `Event` bus.
 - A keyboard layout change updates the `keymap` store, and everything computed from it re-resolves. Reloading the windows is no longer necessary.
 
@@ -198,27 +203,30 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 src/
 ├─ domain/
 │  ├─ keyboard/     keymap.ts (types), combination.ts, resolve.ts, capture.ts, policy.ts, labels.ts
-│  ├─ shortcuts/    types.ts, shortcutId.ts, lookup.ts
+│  ├─ shortcuts/    types.ts, shortcutId.ts, lookup.ts (findApp, findSet, findAppInFront)
+│  ├─ lookup/       appInFront.ts, menuShortcuts.ts (types, decoders), lookup.ts (Model, Msg, update), search.ts, rows.ts
 │  ├─ practice/     session.ts (Model, Msg, update), items.ts, learn.ts, review.ts, grading.ts
 │  ├─ scheduling/   scheduler.ts (port), fsrs.ts, days.ts
 │  ├─ progress/     setProgress.ts, storedProgress.ts, repository.ts (port), reconcile.ts, summary.ts
 │  ├─ settings/     settings.ts (types, decoder), language.ts, repository.ts (port)
 │  └─ shared/       result.ts (errors as values), decode.ts (JSON decoders), platformError.ts (failed platform calls), loadable.ts
 ├─ data/            apps.ts (the list), apps/<id>/ index.ts, de.json, en.json, logo.svg
-├─ platform/        ipc.ts (commandCaller, subscriber), settings.ts, progress.ts, keymap.ts, windows.ts, changes.ts, log.ts,
-│                   tauri.ts; lookup.ts in step 8
+├─ platform/        ipc.ts (commandCaller, subscriber, decodingPayloads), settings.ts, progress.ts, keymap.ts, windows.ts,
+│                   changes.ts, lookup.ts, log.ts, tauri.ts
 ├─ stores/          settings.ts, progress.ts, keymap.ts
 ├─ composables/     useProgram.ts (Elm runtime), usePracticeSession.ts, useKeyCapture.ts, useSpatialNav.ts
 │                   (+ spatial.ts), useStartup.ts, useSummaryContext.ts, useKeyLabels.ts
 ├─ features/        library/ (LibrarySidebar, StartScreen, AppScreen, SetScreen, SetRow), practice/ (Learn, Review,
-│                   PracticeStage), settings/ (SettingsWindow, its panes, SettingRow, TriggerOption), popover/
+│                   PracticeStage), settings/ (SettingsWindow, its panes, SettingRow, TriggerOption), popover/ (PopoverWindow,
+│                   ShortcutList, useLookup)
 ├─ components/      BaseButton, BaseIcon, KeyCap, KeyCapSmall, ResultBadge, CircleProgress, TextProgress,
 │                   PageLayout, ScreenHeading, ListSection, GroupedList, SkipButton
 ├─ styles/          main.css, tokens.css (custom properties), base.css
 ├─ locales/         en.json, de.json (UI text)
 ├─ i18n.ts          vue-i18n setup, useText, useUiLanguage
-├─ ports.ts         injection keys for what the entries provide (repositories, keymap source, windows, changes, key labels, logger), and the ports with effects (KeymapSource, Windows, Changes, Logger)
+├─ ports.ts         injection keys for what the entries provide (repositories, keymap source, windows, changes, lookup, key labels, logger), and the ports with effects (KeymapSource, Windows, Changes, Lookup, Logger)
 ├─ routes.ts        route names, paths, depths and helpers (toApp, …), imported by the screens
+├─ window.ts        createWindow: what every window's app is set up with
 ├─ router.ts, App.vue, main.ts (main window), popover.ts, settings.ts (one entry per window), policyViolations.ts
 src-tauri/
 ├─ migrations/      0001_settings.sql, … (one SQL file per schema change)
@@ -226,12 +234,15 @@ src-tauri/
 src-tauri/src/
 ├─ main.rs, lib.rs (modules only), error.rs
 ├─ app/             run.rs (plugins, managed state, commands), coordinator.rs (pure) + windows.rs, tray.rs, popover.rs,
-│                   menu.rs, trigger.rs, hold.rs (pure), shortcut.rs (pure), layout.rs, settings.rs (applies them)
-├─ commands/        settings.rs, progress.rs, keymap.rs, windows.rs; lookup.rs in step 8
-├─ services/        database.rs (connection, migrations), settings.rs, progress.rs, lookup.rs
-└─ platform/        layout.rs (KeymapSource and its data types), modifier_hold.rs (ModifierHold), current.rs (Platform,
-                    current()), key_code.rs, macos/ (carbon.rs and event_tap.rs, the only unsafe code; system_keymap.rs,
-                    system_modifier_hold.rs, input_source.rs, keymap.rs, languages.rs, fixture.rs), linux/
+│                   menu.rs, trigger.rs, hold.rs (pure), shortcut.rs (pure), layout.rs, settings.rs (applies them),
+│                   lookup.rs (the app in front, popover-opened, reading its menus off the main thread)
+├─ commands/        settings.rs, progress.rs, keymap.rs, windows.rs, lookup.rs
+├─ services/        database.rs (connection, migrations), settings.rs, progress.rs
+└─ platform/        layout.rs (KeymapSource and its data types), modifier_hold.rs (ModifierHold), app_menus.rs (AppMenus and
+                    its data types), current.rs (Platform, current()), key_code.rs, macos/ (carbon.rs, event_tap.rs,
+                    accessibility.rs and window_list.rs, the only unsafe code; system_keymap.rs, system_modifier_hold.rs,
+                    system_app_menus.rs, menus.rs, menu_keys.rs (pure), input_source.rs, keymap.rs, languages.rs, fixture.rs),
+                    linux/
 ```
 
 ## 7. Testing strategy

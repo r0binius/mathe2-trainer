@@ -59,6 +59,15 @@ What `pnpm check` can't prove: the app running on a real Mac. Walk through it wi
 - [ ] A recorded shortcut (⇧⌘M) opens the popover from any app; after switching the layout (German ↔ US) it still works by its character.
 - [ ] The recorder rejects ⌘C, K alone and ⌘Space with the reason; Escape cancels recording.
 
+## Lookup
+
+- [ ] Over Finder (hold ⌘ or click the icon), the popover shows "Finder", a search field with the cursor in it, and the menu shortcuts by menu, without the Apple menu; ⌘↑ and ⌘⌫ show as glyphs.
+- [ ] Over Notes, it shows the built-in sets in the UI language instead of the menus, also without Accessibility access.
+- [ ] Typing filters by title and menu, ignoring case and accents ("offnen" finds "Öffnen"); reopening starts with an empty search.
+- [ ] Holding ⌘ while the main window has focus looks up the app whose window is topmost, never Mouseless.
+- [ ] Without Accessibility access (`tccutil reset Accessibility com.robin.mouseless`, in a packaged build: `tauri dev` uses the terminal's access), another app shows the request, and **Open System Settings** opens Privacy & Security → Accessibility.
+- [ ] Switching the layout or the language while the popover is closed shows in it the next time.
+
 ## Security
 
 - [ ] After using every page, the popover and the Settings window, the log shows no "content security policy blocked" line.
@@ -74,5 +83,4 @@ What `pnpm check` can't prove: the app running on a real Mac. Walk through it wi
 
 ## Later steps
 
-- [ ] Step 8: the popover shows the frontmost app's menu shortcuts, with search and Escape, and focus returns to the app.
 - [ ] Step 9: the packaged app installs, starts at login (and stops when the option is off) and keeps its data across updates.
