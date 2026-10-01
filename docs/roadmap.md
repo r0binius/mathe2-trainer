@@ -549,7 +549,13 @@ Branch `chore/packaging`. Build and sign the app. There's no importer: progress 
 
 **Sub-steps**
 
-- [ ] 9.1 Bundle config and signing
+- [x] 9.1 Bundle config and signing
+
+**Decisions**
+
+- For this Mac only, like the old app: `pnpm tauri build` makes just `Mouseless.app` (no disk image), ad-hoc signed (`signingIdentity: "-"`), with no notarization.
+- Version 1.0.0, kept only in `Cargo.toml`: Tauri reads it from there when `tauri.conf.json` has none, and the private `package.json` doesn't need one.
+- At least macOS 14 (`minimumSystemVersion`), category Productivity.
 
 **Carried over**
 
@@ -581,4 +587,5 @@ Found along the way, not tied to a step yet.
 - **Popover focus:** opening the popover activates Mouseless, so a main window behind other apps comes forward with it. If that bothers in use, make the popover a non-activating panel.
 - **Trigger recorder:** it can't offer `IntlBackslash` (the ISO key left of 1), since global-hotkey has no macOS key code for it. A shortcut that can't be registered (such as one another app holds) is only logged (`ErrorKind::Trigger`); `set_settings` could return it so the recorder shows it.
 - **Globe shortcuts in menus:** the Accessibility API's modifier mask has no flag for the Globe key (🌐), so a menu item like Finder's _Fill_ (probably 🌐⌃F) reads as ⌃F. Fixing it needs another source than the menu item's attributes.
+- **Developer ID signing:** an ad-hoc signature changes with every build, so macOS forgets the Input Monitoring and Accessibility grants after a rebuild. Sign with an Apple Developer certificate (and notarize) once there is an account, and before the app is handed to others.
 - **TypeScript 7** once typescript-eslint and vue-tsc support it, and dropping the `is-immutable-type` patch once its upstream fix lands (both in `CLAUDE.md`).
