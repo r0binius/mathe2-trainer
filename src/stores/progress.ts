@@ -1,16 +1,21 @@
 import { defineStore } from 'pinia';
 import { inject, onScopeDispose, shallowRef } from 'vue';
 
+import type { LayoutId } from '@/domain/keyboard/keymap';
 import { gradeRecall } from '@/domain/practice/grading';
 import type { LearnSnapshot } from '@/domain/practice/snapshot';
+import { logStart } from '@/domain/progress/overview';
 import { progressChanged, reconcileProgress } from '@/domain/progress/reconcile';
 import type { LoggedReview } from '@/domain/progress/repository';
+import type { LayoutLog } from '@/domain/progress/reviewLog';
 import { recordLearning } from '@/domain/progress/setProgress';
 import type { SetKey, StoredProgress } from '@/domain/progress/storedProgress';
 import { cardOf, setProgressOf, withCard, withSetRecord } from '@/domain/progress/storedProgress';
 import { scheduleWithFsrs } from '@/domain/scheduling/fsrs';
+import type { ReviewTime } from '@/domain/scheduling/scheduler';
 import { reviewCard } from '@/domain/scheduling/scheduler';
 import type { Loadable } from '@/domain/shared/loadable';
+import { loadableOf, mapLoadable } from '@/domain/shared/loadable';
 import type { PlatformError } from '@/domain/shared/platformError';
 import type { Result } from '@/domain/shared/result';
 import { err } from '@/domain/shared/result';
@@ -30,8 +35,9 @@ export type TestResult = Omit<LoggedReview, 'grade'>;
 const notLoaded: PlatformError = { kind: 'notLoaded', message: 'progress is not loaded yet' };
 
 /**
- * Learning progress and review cards on every layout. Loading reconciles them with the app data;
- * a change is computed by the domain, saved, and only then shown.
+ * Learning progress and review cards on every layout, and the review log of the current one.
+ * Loading reconciles them with the app data; a change is computed by the domain, saved, and only
+ * then shown.
  */
 export const useProgressStore = defineStore('progress', () => {
   const repository = inject(progressRepositoryKey, missingProgressRepository);
@@ -39,6 +45,10 @@ export const useProgressStore = defineStore('progress', () => {
   const progress = shallowRef<Loadable<StoredProgress>>({ status: 'loading' });
   /** How often progress was reset, so a running practice session can tell it's gone. */
   const resets = shallowRef(0);
+  /** The review log of the current layout, for the overview. */
+  const log = shallowRef<Loadable<LayoutLog>>({ status: 'loading' });
+  /** The layout whose log was asked for last, so the log of an earlier one is dropped. */
+  const logLayout = shallowRef<LayoutId>();
 
   /**
    * Waits for a save and, once it's stored, applies the change to the progress shown. It applies
@@ -89,6 +99,27 @@ export const useProgressStore = defineStore('progress', () => {
     }
   }
 
+  /** Loads the review log of `layout` for the overview, from a year back as of `now`. */
+  async function loadLog(layout: LayoutId, now: ReviewTime): Promise<void> {
+    logLayout.value = layout;
+    const loaded = await repository.loadLog(layout, logStart(now));
+
+    if (logLayout.value === layout) {
+      log.value = mapLoadable(loadableOf(loaded), (entries) => ({ layout, entries }));
+    }
+  }
+
+  /** Adds a logged review to the log shown, if it's the log of the review's layout. */
+  function addToLog({ layout, at, utcOffsetMinutes, grade }: LoggedReview): void {
+    if (log.value.status === 'loaded' && log.value.value.layout === layout) {
+      const { entries } = log.value.value;
+      log.value = {
+        status: 'loaded',
+        value: { layout, entries: [...entries, { at, utcOffsetMinutes, grade }] },
+      };
+    }
+  }
+
   /** Saves a learning session's snapshot into its set's progress. */
   async function saveLearning(
     key: SetKey,
@@ -112,14 +143,21 @@ export const useProgressStore = defineStore('progress', () => {
 
     const review = { ...test, grade: gradeRecall(test) };
     const card = reviewCard(scheduleWithFsrs, cardOf(progress.value.value, test), review);
-    return saveThenShow(repository.recordReview(review, card), (stored) =>
+    const saved = await saveThenShow(repository.recordReview(review, card), (stored) =>
       card === undefined ? stored : withCard(stored, card),
     );
+
+    if (saved.kind === 'ok') {
+      addToLog(review);
+    }
+
+    return saved;
   }
 
   /** Shows the progress as gone, which ends a running practice session. */
   function forgetAll(): void {
     progress.value = { status: 'loaded', value: { sets: [], cards: [] } };
+    log.value = mapLoadable(log.value, ({ layout }) => ({ layout, entries: [] }));
     resets.value += 1;
   }
 
@@ -139,5 +177,5 @@ export const useProgressStore = defineStore('progress', () => {
 
   onScopeDispose(inject(changesKey, missingChanges).onProgressReset(forgetAll));
 
-  return { progress, resets, load, saveLearning, recordReview, reset };
+  return { progress, resets, log, load, loadLog, saveLearning, recordReview, reset };
 });

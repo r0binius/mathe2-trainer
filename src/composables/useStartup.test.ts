@@ -39,7 +39,7 @@ async function startWith(settings: Result<Settings, PlatformError>) {
   };
   const progressRepository: ProgressRepository = {
     load: vi.fn(() => Promise.resolve(ok({ progress: { sets: [], cards: [] }, skipped: [] }))),
-    loadLog: unused,
+    loadLog: vi.fn(() => Promise.resolve(ok([]))),
     saveSet: unused,
     recordReview: unused,
     replace: unused,
@@ -80,6 +80,17 @@ describe('useStartup', () => {
 
     expect(host.textContent).toBe('loaded');
     expect(progressRepository.load).toHaveBeenCalledOnce();
+  });
+
+  it('loads the review log of the current layout', async () => {
+    const { progressRepository } = await startWith(ok(german));
+
+    await vi.waitFor(() => {
+      expect(progressRepository.loadLog).toHaveBeenCalledWith(
+        'com.apple.keylayout.German',
+        expect.any(Number),
+      );
+    });
   });
 
   it('switches the UI to the chosen language, and tells the document', async () => {

@@ -2,10 +2,14 @@ import { createPinia } from 'pinia';
 import { describe, expect, it, vi } from 'vitest';
 import { createApp } from 'vue';
 
+import { logStart } from '@/domain/progress/overview';
 import type { ProgressRepository } from '@/domain/progress/repository';
+import type { ReviewLogEntry } from '@/domain/progress/reviewLog';
 import type { SetRecord, StoredProgress } from '@/domain/progress/storedProgress';
 import { validMemory } from '@/domain/scheduling/memory.fixture';
 import type { Card } from '@/domain/scheduling/scheduler';
+import type { PlatformError } from '@/domain/shared/platformError';
+import type { Result } from '@/domain/shared/result';
 import { err, ok } from '@/domain/shared/result';
 import type { AppDefinition } from '@/domain/shortcuts/types';
 import { progressRepositoryKey } from '@/ports';
@@ -13,6 +17,7 @@ import { progressRepositoryKey } from '@/ports';
 import { useProgressStore } from './progress';
 
 const german = 'com.apple.keylayout.German';
+const us = 'com.apple.keylayout.US';
 const at = Date.UTC(2026, 8, 28, 10);
 const locked = { kind: 'database', message: 'database is locked' } as const;
 
@@ -205,6 +210,85 @@ describe('recordReview', () => {
       undefined,
     );
     expect(store.progress).toStrictEqual({ status: 'loaded', value: stored });
+  });
+});
+
+describe('loadLog', () => {
+  const now = { at, utcOffsetMinutes: 120 };
+  const log: readonly ReviewLogEntry[] = [{ at: at - 1000, utcOffsetMinutes: 120, grade: 'good' }];
+
+  it('loads the review log of a layout from a year back', async () => {
+    const loadLog = vi.fn(() => Promise.resolve(ok(log)));
+    const store = storeWith(repositoryWith({ loadLog }));
+
+    expect(store.log).toStrictEqual({ status: 'loading' });
+    await store.loadLog(german, now);
+    expect(loadLog).toHaveBeenCalledWith(german, logStart(now));
+    expect(store.log).toStrictEqual({ status: 'loaded', value: { layout: german, entries: log } });
+  });
+
+  it('shows that loading the log failed', async () => {
+    const store = storeWith(repositoryWith({ loadLog: () => Promise.resolve(err(locked)) }));
+
+    await store.loadLog(german, now);
+    expect(store.log).toStrictEqual({ status: 'failed', error: locked });
+  });
+
+  it('drops a log that arrives after another layout was asked for', async () => {
+    const slowly = new Promise<Result<readonly ReviewLogEntry[], PlatformError>>((resolve) => {
+      setTimeout(() => {
+        resolve(ok(log));
+      }, 10);
+    });
+    const loadLog = vi
+      .fn<ProgressRepository['loadLog']>()
+      .mockReturnValueOnce(slowly)
+      .mockResolvedValueOnce(ok([]));
+    const store = storeWith(repositoryWith({ loadLog }));
+
+    const germanLoaded = store.loadLog(german, now);
+    await store.loadLog(us, now);
+    await germanLoaded;
+    expect(store.log).toStrictEqual({ status: 'loaded', value: { layout: us, entries: [] } });
+  });
+
+  it('adds a recorded test to the log of its layout, as it was graded', async () => {
+    const store = storeWith(repositoryWith({ loadLog: () => Promise.resolve(ok(log)) }));
+
+    await store.load(apps);
+    await store.loadLog(german, now);
+    await store.recordReview(test);
+    expect(store.log).toStrictEqual({
+      status: 'loaded',
+      value: { layout: german, entries: [...log, { at, utcOffsetMinutes: 120, grade: 'good' }] },
+    });
+  });
+
+  it('leaves the log alone when the test was on another layout, or not saved', async () => {
+    const store = storeWith(
+      repositoryWith({
+        loadLog: () => Promise.resolve(ok(log)),
+        recordReview: vi
+          .fn<ProgressRepository['recordReview']>()
+          .mockResolvedValueOnce(ok(undefined))
+          .mockResolvedValueOnce(err(locked)),
+      }),
+    );
+
+    await store.load(apps);
+    await store.loadLog(german, now);
+    await store.recordReview({ ...test, layout: us });
+    await store.recordReview(test);
+    expect(store.log).toStrictEqual({ status: 'loaded', value: { layout: german, entries: log } });
+  });
+
+  it('empties the log on a reset', async () => {
+    const store = storeWith(repositoryWith({ loadLog: () => Promise.resolve(ok(log)) }));
+
+    await store.load(apps);
+    await store.loadLog(german, now);
+    await store.reset();
+    expect(store.log).toStrictEqual({ status: 'loaded', value: { layout: german, entries: [] } });
   });
 });
 

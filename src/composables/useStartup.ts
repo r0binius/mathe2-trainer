@@ -1,6 +1,7 @@
 import type { ComputedRef } from 'vue';
-import { inject, onMounted, watch } from 'vue';
+import { computed, inject, onMounted, watch } from 'vue';
 
+import type { LayoutId } from '@/domain/keyboard/keymap';
 import type { SummaryContext } from '@/domain/progress/summary';
 import { uiLanguageFor } from '@/domain/settings/language';
 import type { Loadable } from '@/domain/shared/loadable';
@@ -15,7 +16,8 @@ import { useSummaryContext } from './useSummaryContext';
 
 /**
  * Starts the main window: loads the settings, the layout and the progress (reconciled with
- * `apps`) once it's mounted, keeps the UI in the chosen language, and logs why loading failed.
+ * `apps`) once it's mounted, and the review log of each layout in use, keeps the UI in the chosen
+ * language, and logs why loading failed.
  * Returns what the screens summarize progress with, once it's loaded, and how to load again
  * after a failure.
  */
@@ -27,6 +29,9 @@ export function useStartup(
   const progress = useProgressStore();
   const context = useSummaryContext();
   const logger = inject(loggerKey, consoleLogger);
+  const layoutId = computed(() =>
+    keymap.layout.status === 'loaded' ? keymap.layout.value.id : undefined,
+  );
 
   useUiLanguage(() =>
     settings.settings.status === 'loaded'
@@ -34,13 +39,25 @@ export function useStartup(
       : undefined,
   );
 
+  function loadLog(layout: LayoutId | undefined): void {
+    if (layout !== undefined) {
+      const now = new Date();
+      void progress.loadLog(layout, {
+        at: now.getTime(),
+        utcOffsetMinutes: -now.getTimezoneOffset(),
+      });
+    }
+  }
+
   function load(): void {
     void settings.load();
     void keymap.load();
     void progress.load(apps);
+    loadLog(layoutId.value);
   }
 
   onMounted(load);
+  watch(layoutId, loadLog);
 
   watch(context, (loaded) => {
     if (loaded.status === 'failed') {
