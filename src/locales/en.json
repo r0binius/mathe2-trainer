@@ -84,7 +84,11 @@
   },
   "popover": {
     "noApp": "Open the popover over an app to see its shortcuts.",
-    "placeholder": "The shortcuts of {app} will show up here.",
+    "search": "Search",
+    "loading": "Reading the menus of {app} …",
+    "failed": "Couldn't read the menus of {app}.",
+    "noShortcuts": "{app} has no shortcuts in its menus.",
+    "noMatches": "No shortcuts match.",
     "accessHint": "To show the shortcuts of {app}, Mouseless reads its menus. Allow it in System Settings under Privacy & Security → Accessibility.",
     "openSettings": "Open System Settings"
   }

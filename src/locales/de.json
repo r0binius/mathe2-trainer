@@ -84,7 +84,11 @@
   },
   "popover": {
     "noApp": "Öffne das Popover über einer App, um ihre Kurzbefehle zu sehen.",
-    "placeholder": "Hier erscheinen die Kurzbefehle von {app}.",
+    "search": "Suchen",
+    "loading": "Die Menüs von {app} werden gelesen …",
+    "failed": "Die Menüs von {app} konnten nicht gelesen werden.",
+    "noShortcuts": "In den Menüs von {app} gibt es keine Kurzbefehle.",
+    "noMatches": "Keine passenden Kurzbefehle.",
     "accessHint": "Um die Kurzbefehle von {app} zu zeigen, liest Mouseless ihre Menüs. Erlaube es in den Systemeinstellungen unter „Datenschutz & Sicherheit“ → „Bedienungshilfen“.",
     "openSettings": "Systemeinstellungen öffnen"
   }

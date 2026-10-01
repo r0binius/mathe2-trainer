@@ -6,6 +6,8 @@
   "permissions": [
     "core:event:allow-listen",
     "core:event:allow-unlisten",
+    "allow-get-keymap",
+    "allow-get-settings",
     "allow-dismiss-popover",
     "allow-ask-for-menu-access",
     "allow-read-menu-shortcuts",

@@ -109,6 +109,12 @@ export function practicePolicy(reserved: readonly KeyCombination[]): ShortcutPol
   return [noDuplicateKeys, notModifierOnly, notReserved(reserved)];
 }
 
+/**
+ * The rules a shortcut has to pass to be shown in the popover: only that it can be pressed. Unlike
+ * practice, reserved combinations stay, since the app in front really has them.
+ */
+export const lookupPolicy: ShortcutPolicy = [noDuplicateKeys, notModifierOnly];
+
 /** Checks resolved keys against a policy: the keys, or the first rule's rejection. */
 export function checkShortcut(
   policy: ShortcutPolicy,

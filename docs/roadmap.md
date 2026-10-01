@@ -516,7 +516,7 @@ Branch `feature/menu-lookup`. Read any app's menu shortcuts through the Accessib
 
 - [x] 8.1 AX FFI and the permission flow
 - [x] 8.2 Recursive menu walk and mapping into shortcut data
-- [ ] 8.3 Lookup UI with search
+- [x] 8.3 Lookup UI with search
 
 **Carried over**
 
