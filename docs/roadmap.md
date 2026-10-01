@@ -606,7 +606,6 @@ Found along the way, not tied to a step yet.
 - **Dead-key layouts:** on U.S. International, Shift+6 and Shift+`are dead keys that type`ˆ`and`˜`(spacing accents), so shortcuts written with`^`or`~` don't resolve there. Resolve a character to the dead key that types its accent, if such layouts matter.
 - **VoiceOver:** two identical announcements in a row are read once; a counter in the text would repeat a second identical mistake.
 - **Keyboard navigation:** going back focuses the screen's first element rather than the item you came from.
-- **`yoke-derive`** is held at 0.8.2: 0.8.3 was yanked, and 0.8.4 was under a day old on 2026-09-30. `cargo update -p yoke-derive` once it's past the cooldown, then `pnpm rust:audit`.
 - **Popover focus:** opening the popover activates Mouseless, so a main window behind other apps comes forward with it. If that bothers in use, make the popover a non-activating panel.
 - **Trigger recorder:** it can't offer `IntlBackslash` (the ISO key left of 1), since global-hotkey has no macOS key code for it. A shortcut that can't be registered (such as one another app holds) is only logged (`ErrorKind::Trigger`); `set_settings` could return it so the recorder shows it.
 - **Globe shortcuts in menus:** the Accessibility API's modifier mask has no flag for the Globe key (🌐), so a menu item like Finder's _Fill_ (probably 🌐⌃F) reads as ⌃F. Fixing it needs another source than the menu item's attributes.
