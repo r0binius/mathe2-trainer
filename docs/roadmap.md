@@ -619,7 +619,7 @@ Platform implementations for X11/Wayland, a UI driven by capabilities, and Linux
 
 Found along the way, not tied to a step yet.
 
-- **CI:** once the repository moves to its own Forgejo instance with a runner. The workflow is in the history (`7f6594b`); Codeberg's hosted runners required a free license.
+- **CI:** once the repository moves to its own Forgejo instance with a runner. The workflow is in the history (`5c3d104`); Codeberg's hosted runners required a free license.
 - **Data:** the German Notes catalog calls _Monostyled_ "Proportional", which means the opposite; check Apple's German menu name.
 - **Set screen:** show trained shortcuts (kept since the debt round) apart from new ones, not only the learned ones.
 - **Dead-key layouts:** on U.S. International, Shift+6 and Shift+`are dead keys that type`ˆ`and`˜`(spacing accents), so shortcuts written with`^`or`~` don't resolve there. Resolve a character to the dead key that types its accent, if such layouts matter.
