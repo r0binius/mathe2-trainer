@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, useTemplateRef } from 'vue';
 
-import BaseIcon from '@/components/BaseIcon.vue';
 import GroupedList from '@/components/GroupedList.vue';
 import ListSection from '@/components/ListSection.vue';
+import NavigationRow from '@/components/NavigationRow.vue';
 import PageLayout from '@/components/PageLayout.vue';
 import TextProgress from '@/components/TextProgress.vue';
 import { useSpatialNav } from '@/composables/useSpatialNav';
@@ -92,17 +92,15 @@ const figures = computed((): readonly { readonly value: string; readonly label: 
 
       <ListSection v-if="overview.dueApps.length > 0" :title="text.ui('library.dueToday')">
         <GroupedList>
-          <RouterLink
+          <NavigationRow
             v-for="summary in overview.dueApps"
             :key="summary.app.id"
-            class="row"
             :to="toReview(summary.app.id)"
           >
-            <img class="logo" :src="logoOf(summary.app.id)" alt="" />
-            <span class="title truncate">{{ text.appTitle(summary.app) }}</span>
-            <span class="meta">{{ text.ui('library.due', { n: summary.due }) }}</span>
-            <BaseIcon class="arrow" name="chevronRight" :size="12" />
-          </RouterLink>
+            <template #leading><img class="logo" :src="logoOf(summary.app.id)" alt="" /></template>
+            {{ text.appTitle(summary.app) }}
+            <template #meta>{{ text.ui('library.due', { n: summary.due }) }}</template>
+          </NavigationRow>
         </GroupedList>
       </ListSection>
 
@@ -116,26 +114,24 @@ const figures = computed((): readonly { readonly value: string; readonly label: 
           }}
         </p>
         <GroupedList>
-          <RouterLink
+          <NavigationRow
             v-for="summary in overview.learnedApps"
             :key="summary.app.id"
-            class="row"
             :to="toApp(summary.app.id)"
           >
-            <img class="logo" :src="logoOf(summary.app.id)" alt="" />
-            <span class="title truncate">{{ text.appTitle(summary.app) }}</span>
-            <!-- A meter: the learned share in the accent on a lighter track of it. -->
-            <span class="meter" aria-hidden="true">
-              <span
-                class="fill"
-                :style="{ width: `${(summary.learned / summary.shortcuts) * 100}%` }"
-              />
-            </span>
-            <span class="meta">
+            <template #leading><img class="logo" :src="logoOf(summary.app.id)" alt="" /></template>
+            {{ text.appTitle(summary.app) }}
+            <template #meta>
+              <!-- A meter: the learned share in the accent on a lighter track of it. -->
+              <span class="meter" aria-hidden="true">
+                <span
+                  class="fill"
+                  :style="{ width: `${(summary.learned / summary.shortcuts) * 100}%` }"
+                />
+              </span>
               <TextProgress :value="summary.learned" :max="summary.shortcuts" />
-            </span>
-            <BaseIcon class="arrow" name="chevronRight" :size="12" />
-          </RouterLink>
+            </template>
+          </NavigationRow>
         </GroupedList>
       </ListSection>
       <p v-else class="hint">{{ text.ui('library.choose') }}</p>
@@ -181,18 +177,6 @@ const figures = computed((): readonly { readonly value: string; readonly label: 
   color: var(--color-label-secondary);
 }
 
-.row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 6px 12px;
-
-  &:active {
-    background-color: var(--color-fill);
-  }
-}
-
 .logo {
   width: 20px;
   height: 20px;
@@ -200,12 +184,8 @@ const figures = computed((): readonly { readonly value: string; readonly label: 
   object-fit: contain;
 }
 
-.title {
-  flex: 1 1 auto;
-}
-
 .meter {
-  flex: 0 1 120px;
+  width: 120px;
   height: 6px;
   overflow: hidden;
   border-radius: 3px;
@@ -217,16 +197,6 @@ const figures = computed((): readonly { readonly value: string; readonly label: 
   height: 100%;
   border-radius: 3px;
   background-color: var(--color-accent);
-}
-
-.meta {
-  flex: none;
-  color: var(--color-label-secondary);
-  font-variant-numeric: tabular-nums;
-}
-
-.arrow {
-  color: var(--color-label-tertiary);
 }
 
 .hint {
