@@ -576,7 +576,7 @@ Branch `feature/learning-overview`. A view of where learning stands: what's due 
 - [x] LO.1 Reading the review log
 - [x] LO.2 The overview's figures
 - [x] LO.3 The progress store keeps the log
-- [ ] LO.4 The Overview screen
+- [x] LO.4 The Overview screen
 
 **Decisions**
 

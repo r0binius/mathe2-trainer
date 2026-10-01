@@ -19,6 +19,19 @@
     "dueToday": "Heute zu wiederholen",
     "apps": "Apps"
   },
+  "overview": {
+    "title": "Übersicht",
+    "dueToday": "heute fällig",
+    "reviewedToday": "heute wiederholt",
+    "recallRate": "ohne Fehler erinnert, 30 Tage",
+    "daysInARow": "Tage in Folge",
+    "activity": "Wiederholungen, letzte 4 Wochen",
+    "activityLabel": "{n} Wiederholung in den letzten 4 Wochen | {n} Wiederholungen in den letzten 4 Wochen",
+    "reviewsOn": "{when}: {n}",
+    "progress": "Fortschritt",
+    "learnedOf": "{learned} von {shortcuts} gelernt",
+    "logFailed": "Der Wiederholungsverlauf konnte nicht geladen werden."
+  },
   "app": {
     "sets": "Sets",
     "review": "{n} wiederholen",

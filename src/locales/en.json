@@ -19,6 +19,19 @@
     "dueToday": "Due for review",
     "apps": "Apps"
   },
+  "overview": {
+    "title": "Overview",
+    "dueToday": "due today",
+    "reviewedToday": "reviewed today",
+    "recallRate": "recalled without a mistake, 30 days",
+    "daysInARow": "days in a row",
+    "activity": "Reviews, last 4 weeks",
+    "activityLabel": "{n} review in the last 4 weeks | {n} reviews in the last 4 weeks",
+    "reviewsOn": "{when}: {n}",
+    "progress": "Progress",
+    "learnedOf": "{learned} of {shortcuts} learned",
+    "logFailed": "The review history couldn't be loaded."
+  },
   "app": {
     "sets": "Sets",
     "review": "Review {n}",

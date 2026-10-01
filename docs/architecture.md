@@ -216,9 +216,9 @@ src/
 ├─ stores/          settings.ts, progress.ts, keymap.ts
 ├─ composables/     useProgram.ts (Elm runtime), usePracticeSession.ts, useKeyCapture.ts, useSpatialNav.ts
 │                   (+ spatial.ts), useStartup.ts, useSummaryContext.ts, useKeyLabels.ts
-├─ features/        library/ (LibrarySidebar, StartScreen, AppScreen, SetScreen, SetRow), practice/ (Learn, Review,
-│                   PracticeStage), settings/ (SettingsWindow, its panes, SettingRow, TriggerOption), popover/ (PopoverWindow,
-│                   ShortcutList, useLookup)
+├─ features/        library/ (LibrarySidebar, OverviewScreen, ActivityChart, AppScreen, SetScreen,
+│                   SetRow), practice/ (Learn, Review, PracticeStage), settings/ (SettingsWindow, its panes,
+│                   SettingRow, TriggerOption), popover/ (PopoverWindow, ShortcutList, useLookup)
 ├─ components/      BaseButton, BaseIcon, KeyCap, KeyCapSmall, ResultBadge, CircleProgress, TextProgress,
 │                   PageLayout, ScreenHeading, ListSection, GroupedList, SkipButton
 ├─ styles/          main.css, tokens.css (custom properties), base.css

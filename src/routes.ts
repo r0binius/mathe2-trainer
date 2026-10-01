@@ -1,20 +1,20 @@
 import type { RouteLocationRaw } from 'vue-router';
 
 /** The main window's pages, by route name. */
-export type RouteName = 'library' | 'app' | 'review' | 'set' | 'learn';
+export type RouteName = 'overview' | 'app' | 'review' | 'set' | 'learn';
 
 /** Where each screen lives. */
 export const routePaths: Readonly<Record<RouteName, string>> = {
-  library: '/',
+  overview: '/',
   app: '/apps/:appId',
   review: '/apps/:appId/review',
   set: '/apps/:appId/sets/:setId',
   learn: '/apps/:appId/sets/:setId/learn',
 };
 
-/** The route to the start page, where no app is selected. */
-export function toLibrary(): RouteLocationRaw {
-  return { name: 'library' };
+/** The route to the overview of learning, the page the window starts on. */
+export function toOverview(): RouteLocationRaw {
+  return { name: 'overview' };
 }
 
 /** The route to an app's sets. */

@@ -2,11 +2,12 @@
 import { computed, useTemplateRef } from 'vue';
 import { useRoute } from 'vue-router';
 
+import BaseIcon from '@/components/BaseIcon.vue';
 import type { SummaryContext } from '@/domain/progress/summary';
 import { groupByCategory, recentFirst, summarizeApp } from '@/domain/progress/summary';
 import type { AppDefinition } from '@/domain/shortcuts/types';
 import { useText } from '@/i18n';
-import { toApp } from '@/routes';
+import { toApp, toOverview } from '@/routes';
 
 import { logoOf } from './logos';
 
@@ -18,7 +19,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  /** → was pressed on an app: focus moves on into its detail. */
+  /** → was pressed on a row: focus moves on into its detail. */
   enter: [];
 }>();
 
@@ -44,19 +45,20 @@ const steps: Readonly<Record<string, number>> = { ArrowUp: -1, ArrowDown: 1 };
 
 /** The app the detail shows, which the sidebar highlights. */
 const selectedId = computed(() => route.params['appId']);
+const overviewShown = computed(() => route.name === 'overview');
 
 function items(): readonly HTMLAnchorElement[] {
   return [...(list.value?.querySelectorAll('a') ?? [])];
 }
 
-/** Focuses the selected app, or the first one: where focus goes back to from the detail. */
+/** Focuses the selected row, or the first one: where focus goes back to from the detail. */
 function focusSelected(): void {
   const all = items();
 
   (all.find((item) => item.getAttribute('aria-current') === 'page') ?? all[0])?.focus();
 }
 
-/** ↑ and ↓ select the app above or below, as in a native sidebar; → moves into the detail. */
+/** ↑ and ↓ select the row above or below, as in a native sidebar; → moves into the detail. */
 function onKeyDown(event: KeyboardEvent): void {
   const all = items();
   const index = all.findIndex((item) => item === document.activeElement);
@@ -82,6 +84,12 @@ defineExpose({ focusSelected });
     <div class="titlebar" data-tauri-drag-region />
 
     <div ref="list" class="list" @keydown="onKeyDown">
+      <section class="section">
+        <RouterLink class="item" :class="{ selected: overviewShown }" :to="toOverview()">
+          <BaseIcon class="icon" name="chart" :size="16" />
+          <span class="title truncate">{{ text.ui('overview.title') }}</span>
+        </RouterLink>
+      </section>
       <section v-for="section in sections" :key="section.id" class="section">
         <h2 class="heading">{{ section.title }}</h2>
         <RouterLink
@@ -161,6 +169,17 @@ defineExpose({ focusSelected });
   height: 20px;
   flex: none;
   object-fit: contain;
+}
+
+/* A symbol in the space of an app's logo, in the accent as in Finder's sidebar. */
+.icon {
+  width: 20px;
+  flex: none;
+  color: var(--color-accent);
+
+  .list:focus-within .selected & {
+    color: inherit;
+  }
 }
 
 .title {

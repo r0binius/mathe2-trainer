@@ -33,10 +33,10 @@ async function open(path: string) {
 }
 
 describe('createAppRouter', () => {
-  it('gives the library the apps', async () => {
+  it('gives the overview the apps', async () => {
     const router = await open('/');
 
-    expect(router.currentRoute.value.name).toBe('library');
+    expect(router.currentRoute.value.name).toBe('overview');
     expect(propsOf(router)).toStrictEqual({ apps: [notes] });
   });
 
@@ -53,13 +53,13 @@ describe('createAppRouter', () => {
     });
   });
 
-  it('goes to the library for an app or set that does not exist', async () => {
-    expect((await open('/apps/mail')).currentRoute.value.name).toBe('library');
-    expect((await open('/apps/notes/sets/formats')).currentRoute.value.name).toBe('library');
-    expect((await open('/apps/mail/sets/basics/learn')).currentRoute.value.name).toBe('library');
+  it('goes to the overview for an app or set that does not exist', async () => {
+    expect((await open('/apps/mail')).currentRoute.value.name).toBe('overview');
+    expect((await open('/apps/notes/sets/formats')).currentRoute.value.name).toBe('overview');
+    expect((await open('/apps/mail/sets/basics/learn')).currentRoute.value.name).toBe('overview');
   });
 
-  it('goes to the library for a path it does not know', async () => {
-    expect((await open('/nowhere/at/all')).currentRoute.value.name).toBe('library');
+  it('goes to the overview for a path it does not know', async () => {
+    expect((await open('/nowhere/at/all')).currentRoute.value.name).toBe('overview');
   });
 });

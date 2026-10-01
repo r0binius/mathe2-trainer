@@ -32,6 +32,8 @@ export type Text = {
   readonly appTitle: (app: AppDefinition) => string;
   /** When something is, in days from today: "today", "tomorrow", "in 3 days". */
   readonly inDays: (days: number) => string;
+  /** A share from 0 to 1 as a whole percentage, as the language writes it: "86 %" or "86%". */
+  readonly percent: (share: number) => string;
 };
 
 /** Sets up the translations of the UI and of the shortcut data, in the given language. */
@@ -79,6 +81,10 @@ export function useText(): Text {
     () => new Intl.RelativeTimeFormat(locale.value, { numeric: 'auto' }),
   );
 
+  const percentFormat = computed(
+    () => new Intl.NumberFormat(locale.value, { style: 'percent', maximumFractionDigits: 0 }),
+  );
+
   function appTitle({ id, title }: AppDefinition): string {
     const key = `apps.${id}.appTitle`;
 
@@ -89,7 +95,11 @@ export function useText(): Text {
     return relativeTime.value.format(days, 'day');
   }
 
-  return { ui, count, app, appTitle, inDays };
+  function percent(share: number): string {
+    return percentFormat.value.format(share);
+  }
+
+  return { ui, count, app, appTitle, inDays, percent };
 }
 
 /**
