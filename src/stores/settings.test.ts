@@ -13,7 +13,6 @@ const settings: Settings = {
   trigger: { kind: 'holdCommand' },
   showMenuBarIcon: true,
   showDockIcon: true,
-  launchAtLogin: true,
   language: 'system',
 };
 

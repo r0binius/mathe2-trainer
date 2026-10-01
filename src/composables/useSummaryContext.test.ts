@@ -30,7 +30,6 @@ const settings: Settings = {
   trigger: { kind: 'shortcut', keys: ['Shift', 'Meta', 'm'] },
   showMenuBarIcon: true,
   showDockIcon: true,
-  launchAtLogin: true,
   language: 'system',
 };
 

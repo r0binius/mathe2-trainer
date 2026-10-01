@@ -84,8 +84,6 @@ pub struct Settings {
     pub show_menu_bar_icon: bool,
     /// Whether the app has an icon in the Dock.
     pub show_dock_icon: bool,
-    /// Whether the app starts when the user logs in.
-    pub launch_at_login: bool,
     /// The language of the interface.
     pub language: Language,
 }
@@ -106,7 +104,6 @@ impl Default for Settings {
             trigger: Trigger::HoldCommand,
             show_menu_bar_icon: true,
             show_dock_icon: true,
-            launch_at_login: true,
             language: Language::System,
         }
     }
@@ -269,7 +266,6 @@ mod tests {
                 "trigger": { "kind": "shortcut", "keys": ["Meta", "Shift", "m"] },
                 "showMenuBarIcon": true,
                 "showDockIcon": false,
-                "launchAtLogin": true,
                 "language": "de",
             }),
         );
@@ -285,7 +281,6 @@ mod tests {
             "trigger": { "kind": "holdCommand" },
             "showMenuBarIcon": true,
             "showDockIcon": true,
-            "launchAtLogin": true,
             "language": "system",
             "showDockIcons": false,
         });
@@ -345,13 +340,13 @@ mod tests {
         insert(&database, "showDockIcon", r#""no""#);
         insert(&database, "trigger", r#"{"kind":"doubleTap"}"#);
         insert(&database, "showDockIcons", "false");
-        insert(&database, "launchAtLogin", "false");
+        insert(&database, "showMenuBarIcon", "false");
         insert(&database, "language", r#""fr""#);
 
         assert_eq!(
             loaded(&database),
             Settings {
-                launch_at_login: false,
+                show_menu_bar_icon: false,
                 ..Settings::default()
             },
         );

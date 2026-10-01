@@ -13,11 +13,7 @@ defineProps<{
 
 const emit = defineEmits<{
   /** A control changed the setting it stands for. */
-  change: [
-    changes: Partial<
-      Pick<Settings, 'language' | 'showMenuBarIcon' | 'showDockIcon' | 'launchAtLogin'>
-    >,
-  ];
+  change: [changes: Partial<Pick<Settings, 'language' | 'showMenuBarIcon' | 'showDockIcon'>>];
 }>();
 
 const text = useText();
@@ -51,14 +47,6 @@ function checkedOf(event: Event): boolean {
         <option value="system">{{ text.ui('settings.system') }}</option>
         <option v-for="[value, name] in languages" :key="value" :value="value">{{ name }}</option>
       </select>
-    </SettingRow>
-    <SettingRow :label="text.ui('settings.launchAtLogin')" label-for="launch-at-login">
-      <input
-        id="launch-at-login"
-        type="checkbox"
-        :checked="settings.launchAtLogin"
-        @change="emit('change', { launchAtLogin: checkedOf($event) })"
-      />
     </SettingRow>
   </GroupedList>
 

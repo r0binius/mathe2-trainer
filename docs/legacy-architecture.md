@@ -332,7 +332,7 @@ In the renderer:
 - **Windows:** main window 600×480, not resizable, `hiddenInset` title bar (traffic lights over the content, `Page` adds spacing), black background. Closing it destroys it; `activate` (dock click) and `showMainWindow` recreate it.
 - The app stays alive with no windows and quits with ⌘Q.
 - **Dock icon:** hidden at startup only, so toggling it requires a restart ("Restart App" button). The menu bar toggle works the same way.
-- **Autostart:** login item in packaged builds only, updated whenever `autoStart` changes.
+- **Autostart:** login item in packaged builds only, updated whenever `autoStart` changes. The rewrite dropped it in step 9.
 - **App menu:** standard roles, plus Preferences (⌘,), which broadcasts `showOptions` to all windows and shows them, and "Show Developer Tools".
 - **Layout change:** all windows reload.
 

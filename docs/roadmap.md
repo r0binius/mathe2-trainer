@@ -550,16 +550,17 @@ Branch `chore/packaging`. Build and sign the app. There's no importer: progress 
 **Sub-steps**
 
 - [x] 9.1 Bundle config and signing
+- [x] 9.2 Remove launch at login
 
 **Decisions**
 
 - For this Mac only, like the old app: `pnpm tauri build` makes just `Mouseless.app` (no disk image), ad-hoc signed (`signingIdentity: "-"`), with no notarization.
 - Version 1.0.0, kept only in `Cargo.toml`: Tauri reads it from there when `tauri.conf.json` has none, and the private `package.json` doesn't need one.
 - At least macOS 14 (`minimumSystemVersion`), category Productivity.
+- No launch at login: the setting, its toggle and the autostart plugin are gone. A stored `launchAtLogin` row needs no migration: loading skips keys that are no longer settings, and the next save rewrites the table.
 
 **Carried over**
 
-- Check launch at login with the packaged app: debug builds skip it, so `tauri dev` never registers the debug binary.
 - Check the popover's Accessibility request with the packaged app: `tauri dev` uses the terminal's access (smoke test → Lookup).
 - Set `minimumSystemVersion` (macOS 14): the app relies on ES2023 (`toSorted`), `color-mix()` and native CSS nesting in the system's WebKit.
 - The two logos from macosicons.com are community icons: fine for personal use, to be checked before the app is published.

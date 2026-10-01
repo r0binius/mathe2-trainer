@@ -201,7 +201,7 @@
         <mxCell id="coregraphics" value="&lt;b&gt;Core Graphics · AppKit&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;event taps, window list, Input Monitoring; NSWorkspace, NSLocale; Accessibility (AXUIElement); objc2 crates&lt;/font&gt;" parent="Core__Rust__src_tauri__" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;shape=module;jettyWidth=10;jettyHeight=6;align=center;">
           <mxGeometry x="300" y="300" width="210" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="plugins" value="&lt;b&gt;Tauri plugins&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;single-instance, autostart, global-shortcut, log&lt;/font&gt;" parent="Core__Rust__src_tauri__" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;shape=module;jettyWidth=10;jettyHeight=6;align=center;">
+        <mxCell id="plugins" value="&lt;b&gt;Tauri plugins&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;single-instance, global-shortcut, log&lt;/font&gt;" parent="Core__Rust__src_tauri__" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;shape=module;jettyWidth=10;jettyHeight=6;align=center;">
           <mxGeometry x="40" y="40" width="250" height="60" as="geometry" />
         </mxCell>
         <mxCell id="e_platform_rust_coregraphics" value="FFI, main thread" parent="Core__Rust__src_tauri__" edge="1" source="platform_rust" target="coregraphics" style="html=1;fontSize=10;labelBackgroundColor=#ffffff;endArrow=open;endSize=10;dashed=1;">
@@ -1359,7 +1359,7 @@
           <mxGeometry x="0" y="60" width="305" height="20" as="geometry" />
         </mxCell>
         <mxCell id="Settings" value="&amp;laquo;type&amp;raquo;&lt;br&gt;&lt;b&gt;Settings&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="408" y="156" width="235" height="174" as="geometry" />
+          <mxGeometry x="408" y="156" width="235" height="154" as="geometry" />
         </mxCell>
         <mxCell id="Settings_r" value="trigger: Trigger" parent="Settings" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="235" height="20" as="geometry" />
@@ -1370,14 +1370,11 @@
         <mxCell id="Settings_r__" value="showDockIcon: boolean" parent="Settings" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="80" width="235" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="Settings_r___" value="launchAtLogin: boolean" parent="Settings" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
-          <mxGeometry x="0" y="100" width="235" height="20" as="geometry" />
-        </mxCell>
         <mxCell id="Settings_sep" value="" parent="Settings" vertex="1" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;">
-          <mxGeometry x="0" y="140" width="235" height="8" as="geometry" />
+          <mxGeometry x="0" y="120" width="235" height="8" as="geometry" />
         </mxCell>
         <mxCell id="Settings_r____" value="decodeSettings: Decoder&lt;Settings&gt;" parent="Settings" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
-          <mxGeometry x="0" y="148" width="235" height="20" as="geometry" />
+          <mxGeometry x="0" y="128" width="235" height="20" as="geometry" />
         </mxCell>
         <mxCell id="SettingsRepository" value="&amp;laquo;port&amp;raquo;&lt;br&gt;&lt;b&gt;SettingsRepository&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;swimlaneFillColor=#ffffff;">
           <mxGeometry x="408" y="340" width="350" height="86" as="geometry" />
@@ -1563,7 +1560,7 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="Settings_r_language" value="language: LanguageSetting" parent="Settings" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
-          <mxGeometry x="0" y="120" width="235" height="20" as="geometry" />
+          <mxGeometry x="0" y="100" width="235" height="20" as="geometry" />
         </mxCell>
         <mxCell id="Loadable_T__r_map" value="mapLoadable(loadable, transform): Loadable" parent="Loadable_T_" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="128" width="299" height="20" as="geometry" />
@@ -1927,7 +1924,7 @@
           <mxGeometry x="0" y="60" width="369" height="20" as="geometry" />
         </mxCell>
         <mxCell id="Settings__Rust_" value="&amp;laquo;struct · serde camelCase&amp;raquo;&lt;br&gt;&lt;b&gt;Settings (Rust)&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="421" y="380" width="300" height="194" as="geometry" />
+          <mxGeometry x="421" y="380" width="300" height="174" as="geometry" />
         </mxCell>
         <mxCell id="Settings__Rust__r" value="trigger: Trigger" parent="Settings__Rust_" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="300" height="20" as="geometry" />
@@ -1938,17 +1935,14 @@
         <mxCell id="Settings__Rust__r__" value="show_dock_icon: bool" parent="Settings__Rust_" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="80" width="300" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="Settings__Rust__r___" value="launch_at_login: bool" parent="Settings__Rust_" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
-          <mxGeometry x="0" y="100" width="300" height="20" as="geometry" />
-        </mxCell>
         <mxCell id="Settings__Rust__sep" value="" parent="Settings__Rust_" vertex="1" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;">
-          <mxGeometry x="0" y="140" width="300" height="8" as="geometry" />
+          <mxGeometry x="0" y="120" width="300" height="8" as="geometry" />
         </mxCell>
         <mxCell id="Settings__Rust__r____" value="Default: hold ⌘, all on, system language" parent="Settings__Rust_" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
-          <mxGeometry x="0" y="148" width="300" height="20" as="geometry" />
+          <mxGeometry x="0" y="128" width="300" height="20" as="geometry" />
         </mxCell>
         <mxCell id="Settings__Rust__shows" value="shows_menu_bar_icon(): bool" parent="Settings__Rust_" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
-          <mxGeometry x="0" y="168" width="300" height="20" as="geometry" />
+          <mxGeometry x="0" y="148" width="300" height="20" as="geometry" />
         </mxCell>
         <mxCell id="Trigger__Rust_" value="&amp;laquo;enum · tag = &amp;quot;kind&amp;quot;&amp;raquo;&lt;br&gt;&lt;b&gt;Trigger (Rust)&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
           <mxGeometry x="421" y="584" width="216" height="86" as="geometry" />
@@ -2077,7 +2071,7 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="Settings__Rust__r_language" value="language: Language" parent="Settings__Rust_" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
-          <mxGeometry x="0" y="120" width="300" height="20" as="geometry" />
+          <mxGeometry x="0" y="100" width="300" height="20" as="geometry" />
         </mxCell>
         <mxCell id="Language__Rust_" value="&amp;laquo;enum · lowercase&amp;raquo;&lt;br&gt;&lt;b&gt;Language (Rust)&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
           <mxGeometry x="647" y="584" width="200" height="154" as="geometry" />
@@ -2359,7 +2353,7 @@
         <mxCell id="run_0" value="run(): plugins single-instance (first)," parent="run" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="340" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="run_1" value="  autostart, global-shortcut, log" parent="run" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="run_1" value="  global-shortcut, log" parent="run" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="60" width="340" height="20" as="geometry" />
         </mxCell>
         <mxCell id="run_2" value="setup: Triggers, Database, settings::load," parent="run" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
@@ -2558,7 +2552,7 @@
           <mxGeometry x="0" y="148" width="360" height="20" as="geometry" />
         </mxCell>
         <mxCell id="settings_apply" value="&amp;laquo;module&amp;raquo;&lt;br&gt;&lt;b&gt;app::settings&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="40" y="900" width="340" height="140" as="geometry" />
+          <mxGeometry x="40" y="900" width="340" height="120" as="geometry" />
         </mxCell>
         <mxCell id="settings_apply_0" value="apply_settings(app, &amp;Settings):" parent="settings_apply" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="340" height="20" as="geometry" />
@@ -2566,14 +2560,11 @@
         <mxCell id="settings_apply_1" value="  trigger, Dock, app menu, menu bar" parent="settings_apply" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="60" width="340" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="settings_apply_2" value="  icon + menu, launch at login" parent="settings_apply" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="settings_apply_2" value="  icon + menu" parent="settings_apply" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="80" width="340" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="settings_apply_3" value="  (release builds only)" parent="settings_apply" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
-          <mxGeometry x="0" y="100" width="340" height="20" as="geometry" />
-        </mxCell>
         <mxCell id="settings_apply_4" value="runs at startup and after set_settings" parent="settings_apply" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
-          <mxGeometry x="0" y="120" width="340" height="20" as="geometry" />
+          <mxGeometry x="0" y="100" width="340" height="20" as="geometry" />
         </mxCell>
         <mxCell id="shortcut" value="&amp;laquo;module · pure&amp;raquo;&lt;br&gt;&lt;b&gt;app::shortcut&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
           <mxGeometry x="420" y="900" width="380" height="120" as="geometry" />

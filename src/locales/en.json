@@ -72,7 +72,6 @@
     "menuBarIcon": "Show in menu bar",
     "dockIcon": "Show in Dock",
     "keepOneIcon": "One of the two always stays, so Mouseless can be reached.",
-    "launchAtLogin": "Launch at login",
     "language": "Language",
     "system": "Same as system",
     "progress": "Progress",

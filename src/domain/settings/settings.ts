@@ -14,7 +14,6 @@ export type Settings = {
   readonly trigger: Trigger;
   readonly showMenuBarIcon: boolean;
   readonly showDockIcon: boolean;
-  readonly launchAtLogin: boolean;
   readonly language: LanguageSetting;
 };
 
@@ -28,7 +27,6 @@ export const decodeSettings: Decoder<Settings> = object({
   trigger: decodeTrigger,
   showMenuBarIcon: boolean,
   showDockIcon: boolean,
-  launchAtLogin: boolean,
   language: decodeLanguageSetting,
 });
 

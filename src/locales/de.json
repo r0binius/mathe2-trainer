@@ -72,7 +72,6 @@
     "menuBarIcon": "In der Menüleiste zeigen",
     "dockIcon": "Im Dock zeigen",
     "keepOneIcon": "Eines der beiden bleibt immer, damit Mouseless erreichbar ist.",
-    "launchAtLogin": "Beim Anmelden öffnen",
     "language": "Sprache",
     "system": "Wie im System",
     "progress": "Fortschritt",
