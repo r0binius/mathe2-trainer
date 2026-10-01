@@ -1018,7 +1018,7 @@
           <mxGeometry x="0" y="40" width="267" height="20" as="geometry" />
         </mxCell>
         <mxCell id="scheduler" value="&amp;laquo;module&amp;raquo;&lt;br&gt;&lt;b&gt;scheduler&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="440" y="396" width="395" height="154" as="geometry" />
+          <mxGeometry x="440" y="396" width="395" height="174" as="geometry" />
         </mxCell>
         <mxCell id="scheduler_r" value="dayMs" parent="scheduler" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="395" height="20" as="geometry" />
@@ -1026,20 +1026,23 @@
         <mxCell id="scheduler_r_" value="decodeCard: Decoder&lt;Card&gt;" parent="scheduler" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="60" width="395" height="20" as="geometry" />
         </mxCell>
+        <mxCell id="scheduler_r_grade" value="decodeGrade: Decoder&lt;Grade&gt;" parent="scheduler" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="80" width="395" height="20" as="geometry" />
+        </mxCell>
         <mxCell id="scheduler_sep" value="" parent="scheduler" vertex="1" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;">
-          <mxGeometry x="0" y="80" width="395" height="8" as="geometry" />
+          <mxGeometry x="0" y="100" width="395" height="8" as="geometry" />
         </mxCell>
         <mxCell id="scheduler_r__" value="parseCardMemory(fields): Result&lt;CardMemory, InvalidMemory&gt;" parent="scheduler" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
-          <mxGeometry x="0" y="88" width="395" height="20" as="geometry" />
-        </mxCell>
-        <mxCell id="scheduler_r___" value="reviewCard(scheduler, card, review): Card | undefined" parent="scheduler" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="108" width="395" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="scheduler_r____" value="dueCards(cards, layout, endOfToday): Card[]" parent="scheduler" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="scheduler_r___" value="reviewCard(scheduler, card, review): Card | undefined" parent="scheduler" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="128" width="395" height="20" as="geometry" />
         </mxCell>
+        <mxCell id="scheduler_r____" value="dueCards(cards, layout, endOfToday): Card[]" parent="scheduler" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry x="0" y="148" width="395" height="20" as="geometry" />
+        </mxCell>
         <mxCell id="InvalidMemory" value="&amp;laquo;type&amp;raquo;&lt;br&gt;&lt;b&gt;InvalidMemory&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="440" y="580" width="337" height="86" as="geometry" />
+          <mxGeometry x="440" y="600" width="337" height="86" as="geometry" />
         </mxCell>
         <mxCell id="InvalidMemory_r" value="reason: 'not-finite' | 'stability' | 'difficulty'" parent="InvalidMemory" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="337" height="20" as="geometry" />
@@ -1141,28 +1144,31 @@
           <mxGeometry x="0" y="60" width="324" height="20" as="geometry" />
         </mxCell>
         <mxCell id="ProgressRepository" value="&amp;laquo;port&amp;raquo;&lt;br&gt;&lt;b&gt;ProgressRepository&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="1285" y="592" width="363" height="166" as="geometry" />
+          <mxGeometry x="1285" y="592" width="363" height="186" as="geometry" />
         </mxCell>
         <mxCell id="ProgressRepository_r" value="load(): Promise&lt;Result&lt;LoadedProgress, PlatformError&gt;&gt;" parent="ProgressRepository" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="363" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="ProgressRepository_r_" value="saveSet(record): Promise&lt;Result&lt;void, PlatformError&gt;&gt;" parent="ProgressRepository" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
-          <mxGeometry x="0" y="60" width="363" height="20" as="geometry" />
+        <mxCell id="ProgressRepository_r_log" value="loadLog(layout, since): Promise&lt;Result&lt;ReviewLogEntry[], …&gt;&gt;" parent="ProgressRepository" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="60" width="363" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="ProgressRepository_r__" value="recordReview(review: LoggedReview, card?)" parent="ProgressRepository" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="ProgressRepository_r_" value="saveSet(record): Promise&lt;Result&lt;void, PlatformError&gt;&gt;" parent="ProgressRepository" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="80" width="363" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="ProgressRepository_r___" value="    : Promise&lt;Result&lt;void, PlatformError&gt;&gt;" parent="ProgressRepository" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="ProgressRepository_r__" value="recordReview(review: LoggedReview, card?)" parent="ProgressRepository" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="100" width="363" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="ProgressRepository_r____" value="replace(progress): Promise&lt;Result&lt;void, …&gt;&gt;" parent="ProgressRepository" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="ProgressRepository_r___" value="    : Promise&lt;Result&lt;void, PlatformError&gt;&gt;" parent="ProgressRepository" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="120" width="363" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="ProgressRepository_r_____" value="reset(): Promise&lt;Result&lt;void, …&gt;&gt;" parent="ProgressRepository" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="ProgressRepository_r____" value="replace(progress): Promise&lt;Result&lt;void, …&gt;&gt;" parent="ProgressRepository" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="140" width="363" height="20" as="geometry" />
         </mxCell>
+        <mxCell id="ProgressRepository_r_____" value="reset(): Promise&lt;Result&lt;void, …&gt;&gt;" parent="ProgressRepository" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry x="0" y="160" width="363" height="20" as="geometry" />
+        </mxCell>
         <mxCell id="LoggedReview" value="&amp;laquo;type&amp;raquo;&lt;br&gt;&lt;b&gt;LoggedReview&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="1285" y="788" width="216" height="86" as="geometry" />
+          <mxGeometry x="1285" y="808" width="216" height="86" as="geometry" />
         </mxCell>
         <mxCell id="LoggedReview_r" value="= Review &amp; Recall" parent="LoggedReview" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="216" height="20" as="geometry" />
@@ -1216,7 +1222,7 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="summary" value="&amp;laquo;module&amp;raquo;&lt;br&gt;&lt;b&gt;progress/summary&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="40" y="914" width="520" height="214" as="geometry" />
+          <mxGeometry x="40" y="934" width="520" height="214" as="geometry" />
         </mxCell>
         <mxCell id="summary_r0" value="SummaryContext = PracticeContext &amp; { layout, progress, endOfToday }" parent="summary" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="520" height="20" as="geometry" />
@@ -1246,7 +1252,7 @@
           <mxGeometry x="0" y="188" width="520" height="20" as="geometry" />
         </mxCell>
         <mxCell id="days" value="&amp;laquo;module&amp;raquo;&lt;br&gt;&lt;b&gt;scheduling/days&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="600" y="914" width="400" height="86" as="geometry" />
+          <mxGeometry x="600" y="934" width="400" height="126" as="geometry" />
         </mxCell>
         <mxCell id="days_r0" value="endOfLocalDay({ at, utcOffsetMinutes }): number" parent="days" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="400" height="20" as="geometry" />
@@ -1254,8 +1260,50 @@
         <mxCell id="days_r1" value="daysUntil(time, endOfToday): number" parent="days" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="60" width="400" height="20" as="geometry" />
         </mxCell>
+        <mxCell id="days_r2" value="localDay({ at, utcOffsetMinutes }): number" parent="days" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="80" width="400" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="days_r3" value="startOfLocalDay(day, time): number" parent="days" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="100" width="400" height="20" as="geometry" />
+        </mxCell>
         <mxCell id="SetProgress_r_trained" value="trained: ShortcutId[]" parent="SetProgress" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="60" width="160" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="reviewLog" value="&amp;laquo;module&amp;raquo;&lt;br&gt;&lt;b&gt;progress/reviewLog&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;swimlaneFillColor=#ffffff;">
+          <mxGeometry x="600" y="1070" width="400" height="114" as="geometry" />
+        </mxCell>
+        <mxCell id="reviewLog_r0" value="ReviewLogEntry = ReviewTime &amp; { grade }" parent="reviewLog" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="40" width="400" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="reviewLog_r1" value="LayoutLog { layout, entries }" parent="reviewLog" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="60" width="400" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="reviewLog_sep2" value="" parent="reviewLog" vertex="1" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;">
+          <mxGeometry y="80" width="400" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="reviewLog_r3" value="decodeReviewLog: Decoder&lt;ReviewLogEntry[]&gt;" parent="reviewLog" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="88" width="400" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="overview" value="&amp;laquo;module&amp;raquo;&lt;br&gt;&lt;b&gt;progress/overview&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;swimlaneFillColor=#ffffff;">
+          <mxGeometry x="40" y="1160" width="520" height="154" as="geometry" />
+        </mxCell>
+        <mxCell id="overview_r0" value="Overview { due, dueApps, reviewedToday, learned, shortcuts," parent="overview" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="40" width="520" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="overview_r1" value="  learnedApps, recallRate?, daysInARow, activity }" parent="overview" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="60" width="520" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="overview_r2" value="logDays 365, rateDays 30, activityDays 28" parent="overview" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="80" width="520" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="overview_sep3" value="" parent="overview" vertex="1" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;">
+          <mxGeometry y="100" width="520" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="overview_r4" value="summarizeOverview(apps: AppSummary[], log, now): Overview" parent="overview" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="108" width="520" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="overview_r5" value="logStart(now): number  (local midnight, 365 days back)" parent="overview" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="128" width="520" height="20" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
@@ -1388,7 +1436,7 @@
         <mxCell id="ProgressRepository" value="&amp;laquo;port&amp;raquo;&lt;br&gt;&lt;b&gt;ProgressRepository&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;swimlaneFillColor=#ffffff;">
           <mxGeometry x="408" y="516" width="299" height="86" as="geometry" />
         </mxCell>
-        <mxCell id="ProgressRepository_r" value="load, saveSet, recordReview, replace, reset" parent="ProgressRepository" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="ProgressRepository_r" value="load, loadLog, saveSet, recordReview, replace, reset" parent="ProgressRepository" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="299" height="20" as="geometry" />
         </mxCell>
         <mxCell id="ProgressRepository_r_" value="(see Classes – scheduling &amp; progress)" parent="ProgressRepository" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
@@ -1482,25 +1530,31 @@
           <mxGeometry x="0" y="140" width="360" height="20" as="geometry" />
         </mxCell>
         <mxCell id="useProgressStore" value="&amp;laquo;Pinia store&amp;raquo;&lt;br&gt;&lt;b&gt;useProgressStore&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="1214" y="410" width="356" height="154" as="geometry" />
+          <mxGeometry x="1214" y="410" width="356" height="194" as="geometry" />
         </mxCell>
         <mxCell id="useProgressStore_r" value="progress: Loadable&lt;StoredProgress&gt;" parent="useProgressStore" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="356" height="20" as="geometry" />
         </mxCell>
+        <mxCell id="useProgressStore_r_log" value="log: Loadable&lt;LayoutLog&gt;  (current layout)" parent="useProgressStore" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="60" width="356" height="20" as="geometry" />
+        </mxCell>
         <mxCell id="useProgressStore_sep" value="" parent="useProgressStore" vertex="1" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;">
-          <mxGeometry x="0" y="60" width="356" height="8" as="geometry" />
+          <mxGeometry x="0" y="80" width="356" height="8" as="geometry" />
         </mxCell>
         <mxCell id="useProgressStore_r_" value="load(apps): Promise&lt;void&gt;  (reconciles, writes back)" parent="useProgressStore" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
-          <mxGeometry x="0" y="68" width="356" height="20" as="geometry" />
-        </mxCell>
-        <mxCell id="useProgressStore_r__" value="saveLearning(key, snapshot, at): Promise&lt;Result&gt;" parent="useProgressStore" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="88" width="356" height="20" as="geometry" />
         </mxCell>
+        <mxCell id="useProgressStore_r_loadLog" value="loadLog(layout, now): Promise&lt;void&gt;  (drops an older layout’s)" parent="useProgressStore" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="108" width="356" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="useProgressStore_r__" value="saveLearning(key, snapshot, at): Promise&lt;Result&gt;" parent="useProgressStore" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry x="0" y="128" width="356" height="20" as="geometry" />
+        </mxCell>
         <mxCell id="useProgressStore_r___" value="recordReview(test: TestResult): Promise&lt;Result&gt;" parent="useProgressStore" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
-          <mxGeometry x="0" y="108" width="356" height="20" as="geometry" />
+          <mxGeometry x="0" y="148" width="356" height="20" as="geometry" />
         </mxCell>
         <mxCell id="useProgressStore_r____" value="reset(): Promise&lt;Result&gt;" parent="useProgressStore" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
-          <mxGeometry x="0" y="128" width="356" height="20" as="geometry" />
+          <mxGeometry x="0" y="168" width="356" height="20" as="geometry" />
         </mxCell>
         <mxCell id="main_ts" value="&amp;laquo;composition root&amp;raquo;&lt;br&gt;&lt;b&gt;main.ts&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;swimlaneFillColor=#ffffff;">
           <mxGeometry x="1620" y="220" width="350" height="126" as="geometry" />
@@ -1593,7 +1647,7 @@
           <mxGeometry x="0" y="108" width="340" height="20" as="geometry" />
         </mxCell>
         <mxCell id="useKeymapStore" value="&amp;laquo;Pinia store&amp;raquo;&lt;br&gt;&lt;b&gt;useKeymapStore&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="1214" y="594" width="356" height="114" as="geometry" />
+          <mxGeometry x="1214" y="634" width="356" height="114" as="geometry" />
         </mxCell>
         <mxCell id="useKeymapStore_r0" value="layout: Loadable&lt;CurrentLayout&gt;" parent="useKeymapStore" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="356" height="20" as="geometry" />
@@ -1658,7 +1712,7 @@
           <mxGeometry x="0" y="88" width="520" height="20" as="geometry" />
         </mxCell>
         <mxCell id="composables" value="&amp;laquo;composables&amp;raquo;&lt;br&gt;&lt;b&gt;composables/ (others)&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="1160" y="962" width="470" height="146" as="geometry" />
+          <mxGeometry x="1160" y="1002" width="470" height="166" as="geometry" />
         </mxCell>
         <mxCell id="composables_r0" value="useKeyCapture(keymap, answer) → held keys" parent="composables" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="470" height="20" as="geometry" />
@@ -1672,8 +1726,11 @@
         <mxCell id="composables_r3" value="useSummaryContext(), useKeyLabels() → labelOf" parent="composables" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="100" width="470" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="composables_r4" value="useText() → { ui, count, app, inDays }, useUiLanguage" parent="composables" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="composables_r4" value="useText() → { ui, count, app, inDays, percent }, useUiLanguage" parent="composables" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="120" width="470" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="composables_r5" value="localTimeAt(at): ReviewTime  (localTime.ts)" parent="composables" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="140" width="470" height="20" as="geometry" />
         </mxCell>
         <mxCell id="e_usePracticeSession_useProgram" value="" parent="1" edge="1" source="usePracticeSession" target="useProgram" style="html=1;fontSize=10;labelBackgroundColor=#ffffff;endArrow=open;endSize=10;dashed=1;">
           <mxGeometry relative="1" as="geometry" />
@@ -1693,7 +1750,7 @@
         <mxCell id="features_library" value="«feature»&lt;br&gt;&lt;b&gt;features/library, settings&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;swimlaneFillColor=#ffffff;">
           <mxGeometry x="600" y="1148" width="520" height="106" as="geometry" />
         </mxCell>
-        <mxCell id="features_library_r0" value="LibrarySidebar, StartScreen, AppScreen, SetScreen" parent="features_library" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="features_library_r0" value="LibrarySidebar, OverviewScreen, ActivityChart, AppScreen, SetScreen" parent="features_library" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="520" height="20" as="geometry" />
         </mxCell>
         <mxCell id="features_library_r1" value="SetRow, logoOf(appId), focusSidebarKey" parent="features_library" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
@@ -1703,7 +1760,7 @@
           <mxGeometry x="0" y="80" width="520" height="20" as="geometry" />
         </mxCell>
         <mxCell id="router" value="&amp;laquo;routes&amp;raquo;&lt;br&gt;&lt;b&gt;routes.ts / router.ts&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="1160" y="1148" width="470" height="106" as="geometry" />
+          <mxGeometry x="1160" y="1208" width="470" height="106" as="geometry" />
         </mxCell>
         <mxCell id="router_r0" value="routes.ts: RouteName, routePaths, toApp(), toSet(), …" parent="router" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="470" height="20" as="geometry" />
@@ -1739,7 +1796,7 @@
           <mxGeometry x="0" y="40" width="356" height="20" as="geometry" />
         </mxCell>
               <mxCell id="KeymapSource_shell" value="&amp;laquo;port · shell (ports.ts)&amp;raquo;&lt;br&gt;&lt;b&gt;KeymapSource&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="1214" y="760" width="420" height="86" as="geometry" />
+          <mxGeometry x="1214" y="800" width="420" height="86" as="geometry" />
         </mxCell>
         <mxCell id="KeymapSource_shell_r0" value="load(): Promise&lt;Result&lt;CurrentLayout, PlatformError&gt;&gt;" parent="KeymapSource_shell" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="420" height="20" as="geometry" />
@@ -1762,7 +1819,7 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="commands" value="&amp;laquo;Tauri commands · async unless noted&amp;raquo;&lt;br&gt;&lt;b&gt;commands&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="40" y="40" width="330" height="266" as="geometry" />
+          <mxGeometry x="40" y="40" width="330" height="286" as="geometry" />
         </mxCell>
         <mxCell id="commands_r" value="get_settings() -&gt; Settings" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="330" height="20" as="geometry" />
@@ -1773,32 +1830,35 @@
         <mxCell id="commands_r__" value="load_progress() -&gt; StoredProgress" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="80" width="330" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="commands_r___" value="save_set_progress(record)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
-          <mxGeometry x="0" y="100" width="330" height="20" as="geometry" />
+        <mxCell id="commands_r_log" value="load_review_log(layout, since) -&gt; Vec&lt;ReviewLogEntry&gt;" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="100" width="330" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="commands_r____" value="record_review(review, card: Option&lt;Card&gt;)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="commands_r___" value="save_set_progress(record)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="120" width="330" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="commands_r_____" value="replace_progress(progress)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="commands_r____" value="record_review(review, card: Option&lt;Card&gt;)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="140" width="330" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="commands_r______" value="reset_progress()  (emits progress-reset)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="commands_r_____" value="replace_progress(progress)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="160" width="330" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="commands_s6_0" value="get_keymap() -&gt; Layout  (sync: main thread)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="commands_r______" value="reset_progress()  (emits progress-reset)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="180" width="330" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="commands_s6_1" value="dismiss_popover()  (sync: main thread)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="commands_s6_0" value="get_keymap() -&gt; Layout  (sync: main thread)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="200" width="330" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="commands_s6_2" value="ask_for_menu_access()  (sync)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="commands_s6_1" value="dismiss_popover()  (sync: main thread)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="220" width="330" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="commands_s6_3" value="read_menu_shortcuts() -&gt; Vec&lt;MenuGroup&gt;" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="commands_s6_2" value="ask_for_menu_access()  (sync)" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="240" width="330" height="20" as="geometry" />
         </mxCell>
+        <mxCell id="commands_s6_3" value="read_menu_shortcuts() -&gt; Vec&lt;MenuGroup&gt;" parent="commands" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry x="0" y="260" width="330" height="20" as="geometry" />
+        </mxCell>
         <mxCell id="Database" value="&amp;laquo;struct&amp;raquo;&lt;br&gt;&lt;b&gt;Database&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="40" y="276" width="331" height="174" as="geometry" />
+          <mxGeometry x="40" y="356" width="331" height="174" as="geometry" />
         </mxCell>
         <mxCell id="Database_r" value="0: Mutex&lt;Connection&gt;" parent="Database" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="331" height="20" as="geometry" />
@@ -1819,7 +1879,7 @@
           <mxGeometry x="0" y="148" width="331" height="20" as="geometry" />
         </mxCell>
         <mxCell id="database" value="&amp;laquo;module&amp;raquo;&lt;br&gt;&lt;b&gt;database&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="40" y="460" width="318" height="94" as="geometry" />
+          <mxGeometry x="40" y="540" width="318" height="94" as="geometry" />
         </mxCell>
         <mxCell id="database_r" value="Json&lt;T&gt;: ToSql + FromSql as JSON text" parent="database" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="318" height="20" as="geometry" />
@@ -1827,11 +1887,11 @@
         <mxCell id="database_sep" value="" parent="database" vertex="1" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;">
           <mxGeometry x="0" y="60" width="318" height="8" as="geometry" />
         </mxCell>
-        <mxCell id="database_r_" value="query_all(connection, sql, read_row) -&gt; Vec&lt;T&gt;" parent="database" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="database_r_" value="query_all(connection, sql, params, read_row) -&gt; Vec&lt;T&gt;" parent="database" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="68" width="318" height="20" as="geometry" />
         </mxCell>
         <mxCell id="AppError" value="&amp;laquo;enum · thiserror&amp;raquo;&lt;br&gt;&lt;b&gt;AppError&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="40" y="584" width="340" height="274" as="geometry" />
+          <mxGeometry x="40" y="664" width="340" height="274" as="geometry" />
         </mxCell>
         <mxCell id="AppError_r" value="FindDataDirectory { source: tauri::Error }" parent="AppError" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="340" height="20" as="geometry" />
@@ -1867,7 +1927,7 @@
           <mxGeometry x="0" y="200" width="340" height="20" as="geometry" />
         </mxCell>
         <mxCell id="ErrorKind" value="&amp;laquo;enum&amp;raquo;&lt;br&gt;&lt;b&gt;ErrorKind&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="40" y="868" width="160" height="146" as="geometry" />
+          <mxGeometry x="40" y="948" width="160" height="146" as="geometry" />
         </mxCell>
         <mxCell id="ErrorKind_r" value="Storage  → &quot;storage&quot;" parent="ErrorKind" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="160" height="20" as="geometry" />
@@ -1885,12 +1945,12 @@
           <mxGeometry x="0" y="120" width="160" height="20" as="geometry" />
         </mxCell>
         <mxCell id="services__progress" value="&amp;laquo;module&amp;raquo;&lt;br&gt;&lt;b&gt;services::progress&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="421" y="40" width="382" height="214" as="geometry" />
+          <mxGeometry x="421" y="40" width="382" height="234" as="geometry" />
         </mxCell>
         <mxCell id="services__progress_r" value="SetRecord, SetProgress, Card," parent="services__progress" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="382" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="services__progress_r_" value="Grade, Review, StoredProgress" parent="services__progress" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="services__progress_r_" value="Grade, Review, ReviewLogEntry, StoredProgress" parent="services__progress" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="60" width="382" height="20" as="geometry" />
         </mxCell>
         <mxCell id="services__progress_r_checks" value="Card checks its memory as it’s deserialized (try_from)" parent="services__progress" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
@@ -1902,20 +1962,23 @@
         <mxCell id="services__progress_r__" value="load(connection) -&gt; StoredProgress" parent="services__progress" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="108" width="382" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="services__progress_r___" value="save_set(connection, record)" parent="services__progress" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
-          <mxGeometry x="0" y="128" width="382" height="20" as="geometry" />
+        <mxCell id="services__progress_r_log" value="review_log(connection, layout, since) -&gt; Vec&lt;ReviewLogEntry&gt;" parent="services__progress" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry y="128" width="382" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="services__progress_r____" value="record_review(connection, review, card)  (1 transaction)" parent="services__progress" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="services__progress_r___" value="save_set(connection, record)" parent="services__progress" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="148" width="382" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="services__progress_r_____" value="replace(connection, progress)  (keeps the log)" parent="services__progress" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="services__progress_r____" value="record_review(connection, review, card)  (1 transaction)" parent="services__progress" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="168" width="382" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="services__progress_r______" value="reset(connection)  (all 3 tables)" parent="services__progress" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+        <mxCell id="services__progress_r_____" value="replace(connection, progress)  (keeps the log)" parent="services__progress" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="188" width="382" height="20" as="geometry" />
         </mxCell>
+        <mxCell id="services__progress_r______" value="reset(connection)  (all 3 tables)" parent="services__progress" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
+          <mxGeometry x="0" y="208" width="382" height="20" as="geometry" />
+        </mxCell>
         <mxCell id="services__settings" value="&amp;laquo;module&amp;raquo;&lt;br&gt;&lt;b&gt;services::settings&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="421" y="264" width="369" height="86" as="geometry" />
+          <mxGeometry x="421" y="284" width="369" height="86" as="geometry" />
         </mxCell>
         <mxCell id="services__settings_r" value="load(connection) -&gt; Settings  (defaults + stored rows)" parent="services__settings" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="369" height="20" as="geometry" />
@@ -1924,7 +1987,7 @@
           <mxGeometry x="0" y="60" width="369" height="20" as="geometry" />
         </mxCell>
         <mxCell id="Settings__Rust_" value="&amp;laquo;struct · serde camelCase&amp;raquo;&lt;br&gt;&lt;b&gt;Settings (Rust)&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="421" y="380" width="300" height="174" as="geometry" />
+          <mxGeometry x="421" y="400" width="300" height="174" as="geometry" />
         </mxCell>
         <mxCell id="Settings__Rust__r" value="trigger: Trigger" parent="Settings__Rust_" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="300" height="20" as="geometry" />
@@ -1945,7 +2008,7 @@
           <mxGeometry x="0" y="148" width="300" height="20" as="geometry" />
         </mxCell>
         <mxCell id="Trigger__Rust_" value="&amp;laquo;enum · tag = &amp;quot;kind&amp;quot;&amp;raquo;&lt;br&gt;&lt;b&gt;Trigger (Rust)&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="421" y="584" width="216" height="86" as="geometry" />
+          <mxGeometry x="421" y="604" width="216" height="86" as="geometry" />
         </mxCell>
         <mxCell id="Trigger__Rust__r" value="HoldCommand" parent="Trigger__Rust_" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="216" height="20" as="geometry" />
@@ -2074,7 +2137,7 @@
           <mxGeometry x="0" y="100" width="300" height="20" as="geometry" />
         </mxCell>
         <mxCell id="Language__Rust_" value="&amp;laquo;enum · lowercase&amp;raquo;&lt;br&gt;&lt;b&gt;Language (Rust)&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="647" y="584" width="200" height="154" as="geometry" />
+          <mxGeometry x="647" y="604" width="200" height="154" as="geometry" />
         </mxCell>
         <mxCell id="Language__Rust__r0" value="System  → &quot;system&quot;" parent="Language__Rust_" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="200" height="20" as="geometry" />
@@ -2107,7 +2170,7 @@
           <mxGeometry x="0" y="120" width="235" height="20" as="geometry" />
         </mxCell>
               <mxCell id="KeymapSource_rust" value="&amp;laquo;trait · port&amp;raquo;&lt;br&gt;&lt;b&gt;KeymapSource&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="40" y="1050" width="360" height="86" as="geometry" />
+          <mxGeometry x="40" y="1130" width="360" height="86" as="geometry" />
         </mxCell>
         <mxCell id="KeymapSource_rust_r0" value="current_layout() -&gt; Result&lt;Layout, AppError&gt;" parent="KeymapSource_rust" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="360" height="20" as="geometry" />
@@ -2116,7 +2179,7 @@
           <mxGeometry x="0" y="60" width="360" height="20" as="geometry" />
         </mxCell>
         <mxCell id="Platform" value="&amp;laquo;struct&amp;raquo;&lt;br&gt;&lt;b&gt;Platform&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="440" y="1050" width="380" height="134" as="geometry" />
+          <mxGeometry x="440" y="1070" width="380" height="134" as="geometry" />
         </mxCell>
         <mxCell id="Platform_r0" value="keymap: Box&lt;dyn KeymapSource + Send + Sync&gt;" parent="Platform" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="380" height="20" as="geometry" />
@@ -2143,7 +2206,7 @@
           <mxGeometry x="0" y="60" width="330" height="20" as="geometry" />
         </mxCell>
         <mxCell id="SystemKeymap" value="&amp;laquo;struct · macOS&amp;raquo;&lt;br&gt;&lt;b&gt;SystemKeymap&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="40" y="1180" width="360" height="106" as="geometry" />
+          <mxGeometry x="40" y="1260" width="360" height="106" as="geometry" />
         </mxCell>
         <mxCell id="SystemKeymap_observing" value="observing: AtomicBool  (watched only once)" parent="SystemKeymap" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="360" height="20" as="geometry" />
@@ -2155,7 +2218,7 @@
           <mxGeometry x="0" y="80" width="360" height="20" as="geometry" />
         </mxCell>
         <mxCell id="input_source" value="«module»&lt;br&gt;&lt;b&gt;macos::input_source&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="440" y="1180" width="380" height="134" as="geometry" />
+          <mxGeometry x="440" y="1234" width="380" height="134" as="geometry" />
         </mxCell>
         <mxCell id="input_source_r0" value="current_layout(sources: TextInputSources," parent="input_source" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="380" height="20" as="geometry" />
@@ -2188,7 +2251,7 @@
           <mxGeometry x="0" y="100" width="220" height="20" as="geometry" />
         </mxCell>
         <mxCell id="macos_keymap" value="&amp;laquo;module&amp;raquo;&lt;br&gt;&lt;b&gt;macos::keymap&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="440" y="1360" width="380" height="134" as="geometry" />
+          <mxGeometry x="440" y="1414" width="380" height="134" as="geometry" />
         </mxCell>
         <mxCell id="macos_keymap_r0" value="Keyboard { Ansi, Iso }" parent="macos_keymap" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="380" height="20" as="geometry" />
@@ -2218,7 +2281,7 @@
           <mxGeometry x="0" y="80" width="260" height="20" as="geometry" />
         </mxCell>
         <mxCell id="dump_keymap" value="&amp;laquo;example&amp;raquo;&lt;br&gt;&lt;b&gt;examples/dump_keymap&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="40" y="1360" width="360" height="86" as="geometry" />
+          <mxGeometry x="40" y="1440" width="360" height="86" as="geometry" />
         </mxCell>
         <mxCell id="dump_keymap_r0" value="cargo run --example dump_keymap [-- --ansi]" parent="dump_keymap" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="360" height="20" as="geometry" />
@@ -2260,7 +2323,7 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="services__values" value="«module»&lt;br&gt;&lt;b&gt;services::values&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="421" y="750" width="380" height="174" as="geometry" />
+          <mxGeometry x="421" y="770" width="380" height="174" as="geometry" />
         </mxCell>
         <mxCell id="services__values_r0" value="ShortcutId(String)    contains &quot;/&quot;" parent="services__values" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="380" height="20" as="geometry" />
@@ -2284,7 +2347,7 @@
           <mxGeometry x="0" y="148" width="380" height="20" as="geometry" />
         </mxCell>
         <mxCell id="macos_carbon" value="«module · unsafe code, like event_tap»&lt;br&gt;&lt;b&gt;macos::carbon&lt;/b&gt;" parent="1" vertex="1" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=40;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;swimlaneFillColor=#ffffff;">
-          <mxGeometry x="440" y="1520" width="380" height="202" as="geometry" />
+          <mxGeometry x="440" y="1574" width="380" height="202" as="geometry" />
         </mxCell>
         <mxCell id="macos_carbon_r0" value="extern &quot;C&quot;: TIS…, LMGetKbdType, KBGetLayoutType," parent="macos_carbon" vertex="1" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;fontSize=11;fontFamily=Menlo;html=0;">
           <mxGeometry x="0" y="40" width="380" height="20" as="geometry" />

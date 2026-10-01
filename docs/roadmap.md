@@ -567,7 +567,7 @@ Branch `chore/packaging`. Build and sign the app. There's no importer: progress 
 - **The bundle's file name collides, not its identifier.** The old and new app have different IDs but are both `Mouseless.app` in `/Applications`.
 - **Check the code before describing it.** The review first claimed dev and packaged builds share a database; `database.rs` gives debug builds their own file.
 
-## Learning overview ⏳ ([#13](https://codeberg.org/gobin/mouseless/issues/13))
+## Learning overview ✅ ([#13](https://codeberg.org/gobin/mouseless/issues/13))
 
 Branch `feature/learning-overview`. A view of where learning stands: what's due for review today, and how much of everything is learned, so you see how you're doing and what's left for the day.
 
@@ -584,6 +584,15 @@ Branch `feature/learning-overview`. A view of where learning stands: what's due 
 - It shows today (what's due, by app, and the reviews done), progress (learned out of all practicable shortcuts, overall and by app), performance (the share of tests without a mistake over 30 days, and the days in a row with practice) and the reviews per day over 4 weeks as a small chart in plain SVG.
 - Everything counts the current layout, and days are local days, from each review's stored UTC offset.
 - The review log reaches the frontend as rows (time, UTC offset, grade) of the last year, through `load_review_log`; the pure domain computes every figure. The progress store keeps the log, adds each new review and forgets it on a reset, so the overview stays current.
+
+**What we learned**
+
+- **Count each moment in its own time zone.** A review stores its UTC offset, so `localDay` puts a review made before a change to summer time on the day it was made, not the day it is now.
+- **Let the store keep what a screen derives from.** The overview is computed from the store's log, and the store adds each saved review to it, so the figures change without reloading or events.
+- **A late answer for an old question is dropped, again.** Remembering which layout was asked for last keeps a slow log from overwriting the new layout's.
+- **Check helpers against the oldest supported WebKit.** `Promise.withResolvers` (ES2024) isn't in the project's `lib`, nor in macOS 14's WebKit; a timer did the test's job.
+- **A small reformat can break the previous commit's check.** One longer word in a Markdown table made Prettier re-pad the whole table; run the formatter after every edit, not only before the first commit.
+- **A blank screenshot is a permission, not a bug.** `screencapture -l` returns only the frame without Screen Recording access, so a person still looks at new screens.
 
 ## App structure ⏳ ([#15](https://codeberg.org/gobin/mouseless/issues/15))
 

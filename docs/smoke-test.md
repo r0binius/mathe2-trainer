@@ -13,9 +13,18 @@ What `pnpm check` can't prove: the app running on a real Mac. Walk through it wi
 ## Sidebar, app and set
 
 - [ ] The sidebar lists each app once, by category; after learning, the app moves under _Recent_. It scrolls when the window is short.
-- [ ] With no app chosen, the detail shows the hint and the apps with reviews due today.
 - [ ] An app shows its sets; one with due cards shows **Review N** and its due count in the sidebar; otherwise "Next review …".
 - [ ] A set lists its shortcuts with their keys on the current layout, ✓ for learned ones, and **Start learning** / **Continue**; the toolbar's back capsule returns to the app.
+
+## Overview
+
+- [ ] The window opens on _Overview_, the first row of the sidebar; ↑ from the first app selects it, and an unknown route leads back to it.
+- [ ] Its four figures show what's due today, the reviews done today, the share without a mistake over 30 days, and the days in a row; with no reviews yet, the share shows "–".
+- [ ] After a review, going back to the Overview shows the review in today's figures and bar, without a restart.
+- [ ] The chart shows 4 weeks with today on the right; hovering a bar names its day and count; VoiceOver reads the total and each day.
+- [ ] _Due for review_ opens an app's review; _Progress_ lists the apps with something learned, best learned first, and opens the app. With nothing learned, the hint to choose an app shows instead.
+- [ ] Switching the keyboard layout shows that layout's figures; **Reset progress** in Settings empties them.
+- [ ] At 640 px wide the four figures stay in one row, in light and dark.
 
 ## Keyboard
 
