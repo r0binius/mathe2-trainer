@@ -7,6 +7,7 @@ import en from './en.json';
 export const notes = {
   id: 'notes',
   title: 'Notes',
+  bundleIds: ['com.apple.Notes'],
   category: 'productivity',
   catalogs: { de, en },
   sets: [

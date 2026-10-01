@@ -7,6 +7,7 @@ import en from './en.json';
 export const bitwarden = {
   id: 'bitwarden',
   title: 'Bitwarden',
+  bundleIds: ['com.bitwarden.desktop'],
   category: 'system',
   catalogs: { de, en },
   sets: [

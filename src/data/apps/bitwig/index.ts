@@ -10,6 +10,7 @@ import en from './en.json';
 export const bitwig = {
   id: 'bitwig',
   title: 'Bitwig Studio',
+  bundleIds: ['com.bitwig.studio'],
   category: 'music',
   catalogs: { de, en },
   sets: [

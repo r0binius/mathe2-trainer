@@ -15,6 +15,8 @@ import en from './en.json';
 export const macos = {
   id: 'macos',
   title: 'macOS',
+  // macOS itself, not an app: the popover never opens over it.
+  bundleIds: [],
   category: 'system',
   catalogs: { de, en },
   sets: [

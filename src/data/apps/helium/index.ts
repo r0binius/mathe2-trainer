@@ -7,6 +7,7 @@ import en from './en.json';
 export const helium = {
   id: 'helium',
   title: 'Helium',
+  bundleIds: ['net.imput.helium'],
   category: 'internet',
   catalogs: { de, en },
   sets: [

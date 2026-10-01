@@ -36,6 +36,7 @@ const more: ShortcutSet = {
 const app: AppDefinition = {
   id: 'app',
   title: 'App',
+  bundleIds: [],
   category: 'productivity',
   catalogs: { de: {}, en: {} },
   sets: [basics, more],
@@ -157,7 +158,7 @@ describe('recentFirst', () => {
 describe('groupByCategory', () => {
   function summaryOf(id: string, category: AppDefinition['category']): AppSummary {
     return {
-      app: { id, title: id, category, catalogs: { de: {}, en: {} }, sets: [] },
+      app: { id, title: id, bundleIds: [], category, catalogs: { de: {}, en: {} }, sets: [] },
       shortcuts: 0,
       learned: 0,
       due: 0,

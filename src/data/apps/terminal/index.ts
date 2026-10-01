@@ -10,6 +10,7 @@ import en from './en.json';
 export const terminal = {
   id: 'terminal',
   title: 'Terminal',
+  bundleIds: ['com.apple.Terminal'],
   category: 'development',
   catalogs: { de, en },
   sets: [

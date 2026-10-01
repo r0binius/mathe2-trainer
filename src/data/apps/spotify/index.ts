@@ -7,6 +7,7 @@ import en from './en.json';
 export const spotify = {
   id: 'spotify',
   title: 'Spotify',
+  bundleIds: ['com.spotify.client'],
   category: 'music',
   catalogs: { de, en },
   sets: [

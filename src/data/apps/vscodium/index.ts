@@ -14,6 +14,7 @@ import en from './en.json';
 export const vscodium = {
   id: 'vscodium',
   title: 'VSCodium',
+  bundleIds: ['com.vscodium'],
   category: 'development',
   catalogs: { de, en },
   sets: [

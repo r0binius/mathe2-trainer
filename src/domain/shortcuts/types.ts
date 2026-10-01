@@ -66,6 +66,7 @@ export type Catalog = { readonly [key: string]: string | Catalog };
  * export const rectangle = {
  *   id: 'rectangle',
  *   title: 'Rectangle',
+ *   bundleIds: ['com.knollsoft.Rectangle'],
  *   category: 'system',
  *   catalogs: { de, en },
  *   sets: [
@@ -86,6 +87,11 @@ export type AppDefinition = {
    * does Notes, a catalog's `appTitle` names it in that language.
    */
   readonly title: string;
+  /**
+   * The bundle IDs of the app's builds, such as `com.apple.Notes`, by which the popover recognizes
+   * it in front. The health test keeps them unique.
+   */
+  readonly bundleIds: readonly string[];
   readonly category: AppCategory;
   /**
    * The texts its message keys point to, in every language the UI speaks. The health test keeps

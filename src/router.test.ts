@@ -11,6 +11,7 @@ const basics: ShortcutSet = { id: 'basics', title: 'basics.title', shortcuts: []
 const notes: AppDefinition = {
   id: 'notes',
   title: 'Notes',
+  bundleIds: [],
   category: 'productivity',
   catalogs: { de: {}, en: {} },
   sets: [basics],

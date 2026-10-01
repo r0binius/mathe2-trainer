@@ -1,3 +1,4 @@
+import type { AppInFront } from '../lookup/appInFront';
 import type { AppDefinition, ShortcutSet } from './types';
 
 /** A set, and the app it belongs to. */
@@ -21,4 +22,15 @@ export function findSet(
   const set = app?.sets.find(({ id }) => id === setId);
 
   return app === undefined || set === undefined ? undefined : { app, set };
+}
+
+/**
+ * The app with built-in sets that's in front, recognized by its bundle ID rather than its name,
+ * which the system translates. `undefined` if Mouseless has no sets for it.
+ */
+export function findAppInFront(
+  apps: readonly AppDefinition[],
+  { bundleId }: AppInFront,
+): AppDefinition | undefined {
+  return bundleId === undefined ? undefined : apps.find((app) => app.bundleIds.includes(bundleId));
 }

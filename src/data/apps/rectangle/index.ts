@@ -10,6 +10,7 @@ import en from './en.json';
 export const rectangle = {
   id: 'rectangle',
   title: 'Rectangle',
+  bundleIds: ['com.knollsoft.Rectangle'],
   category: 'system',
   catalogs: { de, en },
   sets: [

@@ -146,6 +146,10 @@ describe('app data', () => {
     expect(logos).toStrictEqual(folders);
   });
 
+  it('gives each bundle ID to one app', () => {
+    expect(duplicatesIn(apps.flatMap((app) => app.bundleIds))).toStrictEqual([]);
+  });
+
   it('uses each set ID once per app', () => {
     const duplicates = apps.flatMap((app) =>
       duplicatesIn(app.sets.map((set) => set.id)).map((id) => `${app.id}/${id}`),

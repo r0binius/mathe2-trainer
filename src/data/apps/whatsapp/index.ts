@@ -7,6 +7,7 @@ import en from './en.json';
 export const whatsapp = {
   id: 'whatsapp',
   title: 'WhatsApp',
+  bundleIds: ['net.whatsapp.WhatsApp'],
   category: 'communication',
   catalogs: { de, en },
   sets: [
