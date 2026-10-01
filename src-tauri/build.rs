@@ -7,6 +7,7 @@ use tauri_build::{AppManifest, Attributes};
 const COMMANDS: &[&str] = &[
     "get_keymap",
     "load_progress",
+    "load_review_log",
     "save_set_progress",
     "record_review",
     "replace_progress",

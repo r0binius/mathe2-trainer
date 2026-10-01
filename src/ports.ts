@@ -132,6 +132,7 @@ export const missingSettingsRepository: SettingsRepository = {
 /** What a store injects when the app provided no progress repository: every call fails. */
 export const missingProgressRepository: ProgressRepository = {
   load: unavailable,
+  loadLog: unavailable,
   saveSet: unavailable,
   recordReview: unavailable,
   replace: unavailable,

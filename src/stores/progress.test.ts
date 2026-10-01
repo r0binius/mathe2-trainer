@@ -63,6 +63,7 @@ const test = {
 function repositoryWith(overrides: Partial<ProgressRepository>): ProgressRepository {
   return {
     load: () => Promise.resolve(ok({ progress: stored, skipped: [] })),
+    loadLog: () => Promise.resolve(ok([])),
     saveSet: vi.fn(() => Promise.resolve(ok(undefined))),
     recordReview: vi.fn(() => Promise.resolve(ok(undefined))),
     replace: vi.fn(() => Promise.resolve(ok(undefined))),

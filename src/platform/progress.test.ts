@@ -49,6 +49,14 @@ describe('progressRepository', () => {
     expect(invoke).toHaveBeenCalledWith('load_progress', undefined);
   });
 
+  it('loads the review log of a layout with load_review_log', async () => {
+    const log = [{ at: 1000, utcOffsetMinutes: 120, grade: 'good' }];
+    const invoke = answering(log);
+
+    await expect(progressRepository(invoke).loadLog(german, 500)).resolves.toStrictEqual(ok(log));
+    expect(invoke).toHaveBeenCalledWith('load_review_log', { layout: german, since: 500 });
+  });
+
   it('saves a set record with save_set_progress', async () => {
     const invoke = answering(null);
 

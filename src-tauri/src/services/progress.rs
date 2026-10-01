@@ -4,6 +4,7 @@
 //! deserialized, with the frontend decoders' rules: IDs and times by their types
 //! ([`values`](crate::services::values)), a card's memory by [`Card`]'s own rules.
 
+use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ValueRef};
 use rusqlite::{Connection, Row, ToSql, named_params};
 use serde::{Deserialize, Serialize};
 
@@ -118,7 +119,7 @@ impl TryFrom<CardFields> for Card {
 }
 
 /// How well a shortcut was recalled, on FSRS's scale.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Deserialize)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Grade {
     /// Forgotten.
@@ -149,6 +150,18 @@ impl ToSql for Grade {
     }
 }
 
+impl FromSql for Grade {
+    fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
+        match value.as_str()? {
+            "again" => Ok(Self::Again),
+            "hard" => Ok(Self::Hard),
+            "good" => Ok(Self::Good),
+            "easy" => Ok(Self::Easy),
+            other => Err(FromSqlError::Other(format!("unknown grade {other}").into())),
+        }
+    }
+}
+
 /// A graded test of a shortcut and what was measured, one entry of the review log. It only comes
 /// from the frontend, so it's never serialized.
 #[derive(Clone, Debug, Eq, PartialEq, Deserialize)]
@@ -170,6 +183,19 @@ pub struct Review {
     pub duration_ms: u32,
 }
 
+/// A logged test as the overview reads it, as the frontend's `ReviewLogEntry`: when it was
+/// answered, and its grade.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ReviewLogEntry {
+    /// When the test was answered.
+    pub at: EpochMillis,
+    /// The local UTC offset at that moment, in minutes east of UTC, so days count in local time.
+    pub utc_offset_minutes: i32,
+    /// The grade the measurements gave.
+    pub grade: Grade,
+}
+
 /// All stored progress that depends on which shortcuts exist, as the frontend's
 /// `StoredProgress`.
 #[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
@@ -189,16 +215,41 @@ const SELECT_CARDS: &str = "
     SELECT shortcut_id, layout, stability, difficulty, last_review_at, due_at, reps, lapses
     FROM cards ORDER BY shortcut_id, layout";
 
+const SELECT_REVIEW_LOG: &str = "
+    SELECT reviewed_at, utc_offset_minutes, grade FROM reviews
+    WHERE layout = :layout AND reviewed_at >= :since
+    ORDER BY reviewed_at, id";
+
 /// Reads all set records and cards, on every layout.
 ///
 /// # Errors
 ///
 /// Returns a database error if they can't be read.
 pub fn load(connection: &Connection) -> Result<StoredProgress, AppError> {
-    let sets = query_all(connection, SELECT_SETS, read_set_record)?;
-    let cards = query_all(connection, SELECT_CARDS, read_card)?;
+    let sets = query_all(connection, SELECT_SETS, (), read_set_record)?;
+    let cards = query_all(connection, SELECT_CARDS, (), read_card)?;
 
     Ok(StoredProgress { sets, cards })
+}
+
+/// Reads the review log on one layout from `since` on, oldest first.
+///
+/// # Errors
+///
+/// Returns a database error if it can't be read.
+pub fn review_log(
+    connection: &Connection,
+    layout: &LayoutId,
+    since: EpochMillis,
+) -> Result<Vec<ReviewLogEntry>, AppError> {
+    let params = named_params! { ":layout": layout, ":since": since };
+
+    Ok(query_all(
+        connection,
+        SELECT_REVIEW_LOG,
+        params,
+        read_log_entry,
+    )?)
 }
 
 /// Stores a set's progress, replacing what was stored for that set and layout.
@@ -398,6 +449,14 @@ fn read_card(row: &Row<'_>) -> rusqlite::Result<Card> {
     })
 }
 
+fn read_log_entry(row: &Row<'_>) -> rusqlite::Result<ReviewLogEntry> {
+    Ok(ReviewLogEntry {
+        at: row.get("reviewed_at")?,
+        utc_offset_minutes: row.get("utc_offset_minutes")?,
+        grade: row.get("grade")?,
+    })
+}
+
 // serde types.
 
 /// A card as the webview sends it, before [`Card::try_from`] checks it.
@@ -499,7 +558,7 @@ mod tests {
 
     fn logged(database: &Database) -> Vec<LoggedReview> {
         database
-            .with(|connection| Ok(query_all(connection, SELECT_LOG, logged_review)?))
+            .with(|connection| Ok(query_all(connection, SELECT_LOG, (), logged_review)?))
             .expect("the review log is read")
     }
 
@@ -651,6 +710,45 @@ mod tests {
 
         assert_eq!(loaded(&database).cards, []);
         assert_eq!(logged(&database).len(), 1);
+    }
+
+    #[test]
+    fn a_log_entry_reaches_the_frontend_in_camel_case() {
+        let entry = ReviewLogEntry {
+            at: EpochMillis::stored(1_000),
+            utc_offset_minutes: 120,
+            grade: Grade::Hard,
+        };
+
+        assert_eq!(
+            serde_json::to_value(entry).expect("a log entry serializes"),
+            json!({ "at": 1_000, "utcOffsetMinutes": 120, "grade": "hard" }),
+        );
+    }
+
+    #[test]
+    fn reads_the_log_of_one_layout_from_a_time_on() {
+        let database = Database::in_memory();
+        let at = |millis, layout_id, grade| Review {
+            at: EpochMillis::stored(millis),
+            layout: layout(layout_id),
+            ..review(grade)
+        };
+
+        reviewed(&database, &at(3_000, GERMAN, Grade::Easy), None);
+        reviewed(&database, &at(1_000, GERMAN, Grade::Good), None);
+        reviewed(&database, &at(2_000, GERMAN, Grade::Again), None);
+        reviewed(&database, &at(2_500, US, Grade::Good), None);
+        let log = database
+            .with(|connection| review_log(connection, &layout(GERMAN), EpochMillis::stored(2_000)))
+            .expect("the review log is read");
+
+        let entry = |millis, grade| ReviewLogEntry {
+            at: EpochMillis::stored(millis),
+            utc_offset_minutes: 120,
+            grade,
+        };
+        assert_eq!(log, [entry(2_000, Grade::Again), entry(3_000, Grade::Easy)]);
     }
 
     #[test]

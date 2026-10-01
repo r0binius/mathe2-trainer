@@ -1,6 +1,6 @@
 import type { LayoutId } from '../keyboard/keymap';
 import type { Decoder } from '../shared/decode';
-import { andThen, integer, number, object, string } from '../shared/decode';
+import { andThen, integer, literal, number, object, oneOf, string } from '../shared/decode';
 import type { Result } from '../shared/result';
 import { err, ok } from '../shared/result';
 import type { ShortcutId } from '../shortcuts/shortcutId';
@@ -8,6 +8,14 @@ import { decodeShortcutId } from '../shortcuts/shortcutId';
 
 /** How well a shortcut was recalled, on the scale FSRS schedules with. */
 export type Grade = 'again' | 'hard' | 'good' | 'easy';
+
+/** Decodes a grade. */
+export const decodeGrade: Decoder<Grade> = oneOf([
+  literal('again'),
+  literal('hard'),
+  literal('good'),
+  literal('easy'),
+]);
 
 /** One day in milliseconds. Times in the domain are epoch milliseconds. */
 export const dayMs = 24 * 60 * 60 * 1000;

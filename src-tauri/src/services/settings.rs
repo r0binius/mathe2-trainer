@@ -116,7 +116,12 @@ impl Default for Settings {
 ///
 /// Returns a database error if the settings can't be read.
 pub fn load(connection: &Connection) -> Result<Settings, AppError> {
-    let stored = query_all(connection, "SELECT key, value FROM settings", read_entry)?;
+    let stored = query_all(
+        connection,
+        "SELECT key, value FROM settings",
+        (),
+        read_entry,
+    )?;
 
     Ok(stored
         .iter()
@@ -246,7 +251,7 @@ mod tests {
         let sql = "SELECT key, value FROM settings ORDER BY key";
 
         database
-            .with(|connection| Ok(query_all(connection, sql, read_entry)?))
+            .with(|connection| Ok(query_all(connection, sql, (), read_entry)?))
             .expect("the stored settings are read")
     }
 

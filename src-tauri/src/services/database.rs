@@ -4,7 +4,7 @@ use std::path::Path;
 use std::sync::{Arc, Mutex, PoisonError};
 
 use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSqlOutput, ValueRef};
-use rusqlite::{Connection, Row, ToSql};
+use rusqlite::{Connection, Params, Row, ToSql};
 use rusqlite_migration::{M, Migrations};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
@@ -119,7 +119,7 @@ impl<T: DeserializeOwned> FromSql for Json<T> {
     }
 }
 
-/// Every row `sql` selects, read by `read_row`.
+/// Every row `sql` selects with `params`, read by `read_row`.
 ///
 /// # Errors
 ///
@@ -127,10 +127,11 @@ impl<T: DeserializeOwned> FromSql for Json<T> {
 pub fn query_all<T>(
     connection: &Connection,
     sql: &str,
+    params: impl Params,
     read_row: fn(&Row<'_>) -> rusqlite::Result<T>,
 ) -> rusqlite::Result<Vec<T>> {
     let mut statement = connection.prepare(sql)?;
-    statement.query_map((), read_row)?.collect()
+    statement.query_map(params, read_row)?.collect()
 }
 
 #[cfg(test)]

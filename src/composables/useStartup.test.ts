@@ -39,6 +39,7 @@ async function startWith(settings: Result<Settings, PlatformError>) {
   };
   const progressRepository: ProgressRepository = {
     load: vi.fn(() => Promise.resolve(ok({ progress: { sets: [], cards: [] }, skipped: [] }))),
+    loadLog: unused,
     saveSet: unused,
     recordReview: unused,
     replace: unused,

@@ -569,11 +569,21 @@ Branch `chore/packaging`. Build and sign the app. There's no importer: progress 
 
 ## Learning overview ⏳ ([#13](https://codeberg.org/gobin/mouseless/issues/13))
 
-A view of where learning stands: what's due for review today, and how much of everything is learned, so you see how you're doing and what's left for the day. Planned in detail when it starts.
+Branch `feature/learning-overview`. A view of where learning stands: what's due for review today, and how much of everything is learned, so you see how you're doing and what's left for the day.
 
-**Carried over**
+**Sub-steps**
 
-- The detail without a chosen app already lists the apps with reviews due today; the overview can grow from it.
+- [x] LO.1 Reading the review log
+- [ ] LO.2 The overview's figures
+- [ ] LO.3 The progress store keeps the log
+- [ ] LO.4 The Overview screen
+
+**Decisions**
+
+- An _Overview_ row at the top of the sidebar, selected at launch, replaces the start screen (the detail without a chosen app).
+- It shows today (what's due, by app, and the reviews done), progress (learned out of all practicable shortcuts, overall and by app), performance (the share of tests without a mistake over 30 days, and the days in a row with practice) and the reviews per day over 4 weeks as a small chart in plain SVG.
+- Everything counts the current layout, and days are local days, from each review's stored UTC offset.
+- The review log reaches the frontend as rows (time, UTC offset, grade) of the last year, through `load_review_log`; the pure domain computes every figure. The progress store keeps the log, adds each new review and forgets it on a reset, so the overview stays current.
 
 ## App structure ⏳ ([#15](https://codeberg.org/gobin/mouseless/issues/15))
 

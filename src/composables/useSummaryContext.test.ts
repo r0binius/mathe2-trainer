@@ -44,6 +44,7 @@ function appWith(loadSettings: SettingsRepository['load']) {
   const settingsRepository: SettingsRepository = { load: loadSettings, save: unused };
   const progressRepository: ProgressRepository = {
     load: () => Promise.resolve(ok({ progress: { sets: [], cards: [] }, skipped: [] })),
+    loadLog: unused,
     saveSet: unused,
     recordReview: unused,
     replace: unused,

@@ -9,6 +9,7 @@
     "core:window:allow-start-dragging",
     "allow-get-keymap",
     "allow-load-progress",
+    "allow-load-review-log",
     "allow-save-set-progress",
     "allow-record-review",
     "allow-replace-progress",

@@ -1,4 +1,5 @@
 import type { ProgressRepository } from '@/domain/progress/repository';
+import { decodeReviewLog } from '@/domain/progress/reviewLog';
 import { decodeStoredProgress } from '@/domain/progress/storedProgress';
 
 import type { Invoke } from './ipc';
@@ -10,6 +11,7 @@ export function progressRepository(invoke: Invoke): ProgressRepository {
 
   return {
     load: () => call('load_progress', decodeStoredProgress),
+    loadLog: (layout, since) => call('load_review_log', decodeReviewLog, { layout, since }),
     saveSet: (record) => call('save_set_progress', nothing, { record }),
     // `null` rather than a missing argument: Rust reads either as `None`, and `null` is explicit.
     recordReview: (review, card) => call('record_review', nothing, { review, card: card ?? null }),

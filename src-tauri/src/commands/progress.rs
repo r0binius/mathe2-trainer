@@ -7,7 +7,8 @@ use tauri_plugin_log::log;
 
 use crate::error::AppError;
 use crate::services::database::Database;
-use crate::services::progress::{self, Card, Review, SetRecord, StoredProgress};
+use crate::services::progress::{self, Card, Review, ReviewLogEntry, SetRecord, StoredProgress};
+use crate::services::values::{EpochMillis, LayoutId};
 
 /// The event every window drops its progress on, after one of them reset it. It carries nothing.
 const PROGRESS_RESET: &str = "progress-reset";
@@ -21,6 +22,22 @@ const PROGRESS_RESET: &str = "progress-reset";
 pub async fn load_progress(database: State<'_, Arc<Database>>) -> Result<StoredProgress, AppError> {
     database
         .run(move |connection| progress::load(connection))
+        .await
+}
+
+/// Returns the review log on one layout from `since` on, oldest first.
+///
+/// # Errors
+///
+/// Returns a database error if it can't be read.
+#[tauri::command]
+pub async fn load_review_log(
+    database: State<'_, Arc<Database>>,
+    layout: LayoutId,
+    since: EpochMillis,
+) -> Result<Vec<ReviewLogEntry>, AppError> {
+    database
+        .run(move |connection| progress::review_log(connection, &layout, since))
         .await
 }
 

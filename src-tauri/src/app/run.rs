@@ -66,6 +66,7 @@ pub fn run() -> tauri::Result<()> {
             commands::lookup::ask_for_menu_access,
             commands::lookup::read_menu_shortcuts,
             commands::progress::load_progress,
+            commands::progress::load_review_log,
             commands::progress::save_set_progress,
             commands::progress::record_review,
             commands::progress::replace_progress,
