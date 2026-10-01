@@ -43,3 +43,7 @@ VS Code recommends the needed extensions (`.vscode/extensions.json`). Files are 
 ## Git
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) and branches follow [Conventional Branch](https://conventionalbranch.org). Git hooks installed by `pnpm install` check both. See [conventions](docs/conventions.md#git).
+
+## License
+
+[GPL-3.0-or-later](LICENSE). The app logos in `src/data/apps/*/logo.svg` belong to their owners and are not covered by this license.
