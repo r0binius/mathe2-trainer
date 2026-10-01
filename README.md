@@ -26,7 +26,7 @@ The original Mouseless was abandoned about four years ago. I really like the ide
 | Command            | Description                                               |
 | ------------------ | --------------------------------------------------------- |
 | `pnpm tauri dev`   | Run the app with hot reloading                            |
-| `pnpm tauri build` | Build the app bundle                                      |
+| `pnpm tauri build` | Build `Mouseless.app`, ad-hoc signed for this Mac         |
 | `pnpm check`       | Run every check below; must pass before each commit       |
 | `pnpm format`      | Format all files with Prettier (`format:check` to verify) |
 | `pnpm lint`        | Lint with ESLint (`lint:fix` to apply fixes)              |

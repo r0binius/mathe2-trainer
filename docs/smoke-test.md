@@ -81,6 +81,8 @@ What `pnpm check` can't prove: the app running on a real Mac. Walk through it wi
 - [ ] The language also switches the app menu and the icon's menu (English "Settings…", German "Einstellungen …").
 - [ ] After midnight, focusing the window moves due counts to the new day.
 
-## Later steps
+## Packaged app
 
-- [ ] Step 9: the packaged app installs, starts at login (and stops when the option is off) and keeps its data across updates.
+- [ ] `pnpm tauri build` makes `Mouseless.app`; copied to `/Applications`, it starts, and **About Mouseless** shows its version.
+- [ ] It keeps its own database (`mouseless.db`, beside the dev build's `mouseless-dev.db`) across a reinstall.
+- [ ] After a rebuild, it asks for Input Monitoring and Accessibility again: the ad-hoc signature changed.
