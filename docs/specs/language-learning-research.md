@@ -1,6 +1,6 @@
 # Language learning: research
 
-What the research says about learning a language, and what that means for a language app built on the trainer core ([#15](https://codeberg.org/gobin/mouseless/issues/15)). This is the input for `trainer-core.md`: the core has to carry what the language app needs, and the app's own design starts from here.
+What the research says about learning a language, and what that means for a language app built later from this repository. The app's design starts from here.
 
 Each finding is marked by how firm it is:
 
@@ -100,9 +100,9 @@ Sentence mining means collecting sentences from real material (books, series, ar
 
 Evidence for commercial apps is thin and mostly commissioned. Duolingo's early study (Vesselinov & Grego, 2012) was paid for by the company; a 2024 study found gains in all skills after about 27 hours. Independent reviews point to problems with persistence and motivation more than method. There's room for an app that applies the research above directly.
 
-## 9. What the language app needs from the core
+## 9. What the language app needs beyond Mouseless
 
-Each line is traced to a section above. `trainer-core.md` decides which of these the core provides and which the app adds.
+Each line is traced to a section above.
 
 | Need                                                                                    | Why              | Mouseless today                      |
 | --------------------------------------------------------------------------------------- | ---------------- | ------------------------------------ |

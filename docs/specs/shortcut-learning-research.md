@@ -1,6 +1,6 @@
 # Shortcut learning: research
 
-What the research says about learning keyboard shortcuts, and how well Mouseless follows it. The companion to `language-learning-research.md`, with the same markers (**strong**, **moderate**, **weak**) and the same purpose: show which parts of the trainer rest on evidence, which are heuristics, and what the trainer core ([#15](https://codeberg.org/gobin/mouseless/issues/15)) should leave room for.
+What the research says about learning keyboard shortcuts, and how well Mouseless follows it. The companion to `language-learning-research.md`, with the same markers (**strong**, **moderate**, **weak**) and the same purpose: show which parts of the trainer rest on evidence and which are heuristics. The changes it suggests are planned in [#18](https://codeberg.org/gobin/mouseless/issues/18).
 
 ## What learning a shortcut is
 
@@ -80,12 +80,7 @@ Mouseless's core loop is scientifically sound. It tests rather than shows, sched
 | Learned after one correct recall   | Below the recommendation | Two or three correct recalls in a session                         |
 | Transfer to real use               | Not addressed            | A coach that reacts to menu use; usage counts in the overview     |
 
-None of these is needed for #15. What #15 takes from this:
-
-- **Grading is a strategy per trainer** with access to the learner's past times, so relative limits can replace fixed ones without touching the core.
-- **The learning criterion is a parameter** of the learning flow, not a constant.
-- **Item order within a set can follow frequency or usefulness**, as for words.
-- **The in-context parts** (popover, a future coach, usage counts) stay in the shortcut part; the terminal trainer may have its own equivalent (a shell hook), the language app has none.
+These, together with putting the most-used commands of a set first (§4), are the scope of [#18](https://codeberg.org/gobin/mouseless/issues/18).
 
 ## Sources
 

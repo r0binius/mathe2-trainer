@@ -594,13 +594,20 @@ Branch `feature/learning-overview`. A view of where learning stands: what's due 
 - **A small reformat can break the previous commit's check.** One longer word in a Markdown table made Prettier re-pad the whole table; run the formatter after every edit, not only before the first commit.
 - **A blank screenshot is a permission, not a bug.** `screencapture -l` returns only the frame without Screen Recording access, so a person still looks at new screens.
 
-## App structure ⏳ ([#15](https://codeberg.org/gobin/mouseless/issues/15))
+## Science-backed training ⏳ ([#18](https://codeberg.org/gobin/mouseless/issues/18))
 
-Split the app into a trainer core and a part specific to keyboard shortcuts, so a vocabulary trainer and a Linux terminal trainer can reuse the core. After the learning overview, so the boundary is drawn around a finished feature set. Planned in detail when it starts.
+Close the gaps between the shortcut trainer and the research in `docs/specs/shortcut-learning-research.md` (§5). Its core loop already rests on strong or moderate evidence; these parts are heuristics or missing:
+
+- **Grading limits:** relative to the learner's own times and the number of keys, instead of a fixed 2 s and 6 s.
+- **Learning criterion:** two or three correct recalls before a shortcut counts as learned, instead of one.
+- **Order:** the most-used commands of a set first.
+- **Transfer to real use:** a coach that offers a command's shortcut when it's chosen from a menu, and opt-in counts of learned shortcuts used in their apps, so the overview shows transfer, not only recall.
+
+Planned in detail when it starts.
 
 ## UI/UX overhaul ⏳ ([#14](https://codeberg.org/gobin/mouseless/issues/14))
 
-Sharpen the look once the structure has settled. Planned in detail when it starts.
+Sharpen the look. Planned in detail when it starts.
 
 **Carried over**
 
@@ -629,5 +636,4 @@ Found along the way, not tied to a step yet.
 - **Trigger recorder:** it can't offer `IntlBackslash` (the ISO key left of 1), since global-hotkey has no macOS key code for it. A shortcut that can't be registered (such as one another app holds) is only logged (`ErrorKind::Trigger`); `set_settings` could return it so the recorder shows it.
 - **Globe shortcuts in menus:** the Accessibility API's modifier mask has no flag for the Globe key (🌐), so a menu item like Finder's _Fill_ (probably 🌐⌃F) reads as ⌃F. Fixing it needs another source than the menu item's attributes.
 - **Developer ID signing:** an ad-hoc signature changes with every build, so macOS forgets the Input Monitoring and Accessibility grants after a rebuild. Sign with an Apple Developer certificate (and notarize) once there is an account, and before the app is handed to others. Before that, check the two community logos from macosicons.com, which are fine for personal use only.
-- **Learning research** (`docs/specs/shortcut-learning-research.md` §5): grading limits relative to the learner's own times and the number of keys instead of a fixed 2 s and 6 s; two or three correct recalls before a shortcut counts as learned; a coach that offers a command's shortcut when it's chosen from a menu, and opt-in counts of learned shortcuts used in their apps, so the overview can show transfer to real use.
 - **TypeScript 7** once typescript-eslint and vue-tsc support it, and dropping the `is-immutable-type` patch once its upstream fix lands (both in `CLAUDE.md`).
