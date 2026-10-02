@@ -615,9 +615,9 @@ Close the gaps between the shortcut trainer and the research in `docs/specs/shor
 - One switch, off by default (_Learn from how I work_), lets Mouseless watch menu choices and key presses of known shortcuts. Only counts per shortcut and day are stored, and turning it off deletes them.
 - Menu choices of known shortcuts fill an app's _Your commands_ set and, unless turned off, show a brief banner with the keys. The overview shows the share done by keyboard and the commands still chosen from menus.
 
-## UI/UX overhaul ⏳ ([#14](https://codeberg.org/gobin/mouseless/issues/14))
+## UI/UX overhaul ✅ ([#14](https://codeberg.org/gobin/mouseless/issues/14))
 
-Give Mouseless a look of its own, after Halloy and Gram: IBM Plex Sans and Mono, a warm dark and a paper light palette with one accent per meaning, a flat frame, compact chrome and lists, and a generous practice stage. It replaces the _native Mac app_ invariant. The design is in `docs/specs/ui-overhaul.md`.
+Branch `feature/ui-overhaul`. Give Mouseless a look of its own, after Halloy and Gram: IBM Plex Sans and Mono, a warm dark and a paper light palette with one accent per meaning, a flat frame, compact chrome and lists, and a generous practice stage. It replaces the _native Mac app_ invariant. The design is in `docs/specs/ui-overhaul.md`.
 
 **Sub-steps**
 
@@ -631,9 +631,19 @@ Give Mouseless a look of its own, after Halloy and Gram: IBM Plex Sans and Mono,
 **Decisions**
 
 - Away from the native look (no system materials, system blue or SF Pro), still a Mac window: traffic lights, system appearance, keyboard conventions.
-- IBM Plex Sans for text, Plex Mono for keys, figures and labels, bundled; modifier symbols in the system font.
+- IBM Plex Sans for text, Plex Mono for keys, figures and captions, bundled from Fontsource (IBM's own packages install telemetry); key symbols fall back to the system font.
 - Our own light and dark palette following the system appearance, checked for contrast; accents for action, learned, mistake, due and info.
-- A flat 32 px title bar, no sidebar or popover glass; compact frame and lists, a generous practice stage; equal spacing on a panel's edges, actions in its bottom-right corner.
+- A quiet, flat 32 px title bar (traffic lights, the app's name, a page's buttons); pages name themselves in their content. No sidebar or popover glass; compact frame and lists, a generous practice stage; equal spacing on a panel's edges, actions in its bottom-right corner.
+
+**What we learned**
+
+- **A preview is a spec, so copy its numbers.** The first pass followed the spec's rounded sizes and drifted: a busier title bar, looser rows, a missing heading. Taking paddings, heights and sizes from the preview's CSS closed the gap.
+- **Font smoothing changes the look.** `-webkit-font-smoothing: antialiased` drew Plex visibly thinner than the browser preview; WebKit's default matches it.
+- **Read a font file before planning markup around it.** Fontsource's Latin files have no key symbols but ↑ and ↓, so leaving those two out of the range lets every symbol fall back to the system font, with no wrapper element.
+- **Check a package's install scripts, not only its licence.** IBM's Plex packages pull in a telemetry dependency; Fontsource ships the same OFL fonts with none.
+- **Check light colors against their neighbours, not only against text.** _Raised_ on _box_ is nearly invisible in light, so empty tracks use the border color.
+- **A global class name has to be free.** `.label` was already a scoped class in `SkipButton`; the shared caption became `.caption`.
+- **Keyboard hints need keys that are free.** Practice takes every key as an answer, so the preview's `esc` and `⇥` hints had no keys to show.
 
 ## Linux ⏳ ([#10](https://codeberg.org/gobin/mouseless/issues/10))
 

@@ -5,16 +5,27 @@ What `pnpm check` can't prove: the app running on a real Mac. Walk through it wi
 ## Start and window
 
 - [ ] The window opens at 820×560, resizes down to 640×440, and fades in once loaded.
-- [ ] It follows the system's appearance, light and dark, and its accent color; the sidebar shows macOS's sidebar material.
-- [ ] The traffic lights sit in the sidebar, level with the toolbar's capsules, and the window drags by the toolbar.
+- [ ] It follows the system's appearance with Mouseless's own palette: paper light and warm dark, opaque, with no system material or accent color.
+- [ ] The title bar is 32 px and quiet: the traffic lights centred in it, `mouseless` in mono after them, a hairline below across sidebar and detail; the window drags by it.
 - [ ] With the database unreadable (e.g. rename `mouseless-dev.db` to a folder), the start shows the error and **Try again** loads again once it's readable.
 - [ ] The log file `~/Library/Logs/com.robin.mouseless/Mouseless.log` gets the warnings and errors.
+
+## Look
+
+- [ ] Text is IBM Plex Sans, keys, counts, figures and captions IBM Plex Mono; key symbols (⌘ ⇧ ⌥ ⌃ ↑ →) all come from the system font and look alike.
+- [ ] Pages name themselves with a heading in their content (Overview, the app, the set), not in the title bar.
+- [ ] Practice shows where it is (`NOTES · BASICS · LEARN`) above a stage bar with one segment per shortcut: a track while unseen, honey once trained, sage once learned.
+- [ ] Key caps are raised in mono; a right press outlines them in sage with ✓, a wrong one in rose with ✗.
+- [ ] Buttons have their labels centred; a panel's actions sit as far from its right edge as from its bottom.
+- [ ] Settings rows have switches (square-ish, in the action color when on) and a flat language menu that opens the system's menu.
+- [ ] Empty tracks (overview meters, progress circles, the stage bar) are visible in light as well as dark.
+- [ ] With _Reduce motion_ on, the shake, the slide between shortcuts, the key cap pop and the switch's slide are gone.
 
 ## Sidebar, app and set
 
 - [ ] The sidebar lists each app once, by category; after learning, the app moves under _Recent_. It scrolls when the window is short.
 - [ ] An app shows its sets; one with due cards shows **Review N** and its due count in the sidebar; otherwise "Next review …".
-- [ ] A set lists its shortcuts with their keys on the current layout, ✓ for learned ones, and **Start learning** / **Continue**; the toolbar's back capsule returns to the app.
+- [ ] A set lists its shortcuts with their keys on the current layout, ✓ for learned ones, and **Start learning** / **Continue**; the title bar's back button returns to the app.
 
 ## Overview
 
@@ -28,7 +39,7 @@ What `pnpm check` can't prove: the app running on a real Mac. Walk through it wi
 
 ## Keyboard
 
-- [ ] In the sidebar, ↑ and ↓ select the app above or below, and → moves into the detail; the selection is accent-colored while the sidebar has focus.
+- [ ] In the sidebar, ↑ and ↓ select the app above or below, and → moves into the detail; the selection is a raised row with an action-colored bar on its left edge.
 - [ ] In the detail, the arrows move focus between rows; ← at the edge and Escape go back, to the sidebar from an app.
 - [ ] Each page focuses its main action, unless focus is in the sidebar; Enter on **Start** starts learning.
 - [ ] During practice, ⌘W, ⌘Q, ⌘H, ⌘M, ⌘C/⌘V and ⌘R are answers, not menu actions.
@@ -53,7 +64,7 @@ What `pnpm check` can't prove: the app running on a real Mac. Walk through it wi
 
 ## Menu bar and popover
 
-- [ ] The menu bar icon shows, tinted for light and dark menu bars; a click opens the popover centred below it, in Liquid Glass.
+- [ ] The menu bar icon shows, tinted for light and dark menu bars; a click opens the popover centred below it, as an opaque panel with a hairline, small corners and a shadow.
 - [ ] A click elsewhere closes the popover; a second click on the icon and Escape close it and give focus back to the app in front.
 - [ ] With the main window open, closing the popover leaves the main window in front.
 - [ ] A right click on the icon shows About, Settings and Quit, in the UI language.
@@ -83,7 +94,7 @@ What `pnpm check` can't prove: the app running on a real Mac. Walk through it wi
 
 ## Settings
 
-- [ ] The toolbar switches between General, Popover and Progress, and shows the pane's name.
+- [ ] The tabs in the title bar switch between General, Popover and Progress; the chosen tab is raised, its icon in the action color.
 - [ ] The language switches the Settings window and the main window at once, and is kept after a restart.
 - [ ] **Reset progress** asks for a second click, clears everything, and ends a practice session running in the main window.
 - [ ] The menu bar and Dock icons switch at once, and the last one left can't be turned off.
