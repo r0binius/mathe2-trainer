@@ -602,6 +602,8 @@ Close the gaps between the shortcut trainer and the research in `docs/specs/shor
 
 - [x] 18.1 Learning criterion
 - [ ] 18.2 Relative grading
+  - [x] 18.2a Key counts in the review log
+  - [ ] 18.2b Typical times and grading limits
 - [ ] 18.3 Spike: menu choices
 - [ ] 18.4 The switch and the coach
 - [ ] 18.5 The banner

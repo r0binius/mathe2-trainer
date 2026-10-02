@@ -4,7 +4,7 @@ import { easyWithinMs, gradeRecall, hardAfterMs } from './grading';
 
 describe('gradeRecall', () => {
   it('grades a test with a mistake as again, however fast', () => {
-    expect(gradeRecall({ failed: true, durationMs: 500 })).toBe('again');
+    expect(gradeRecall({ failed: true, durationMs: 500, keyCount: 2 })).toBe('again');
   });
 
   it.each([
@@ -14,7 +14,7 @@ describe('gradeRecall', () => {
     [6000, 'good'],
     [6001, 'hard'],
   ] as const)('grades a first try after %i ms as %s', (durationMs, grade) => {
-    expect(gradeRecall({ failed: false, durationMs })).toBe(grade);
+    expect(gradeRecall({ failed: false, durationMs, keyCount: 2 })).toBe(grade);
   });
 
   it('keeps the old app’s 6 s limit for hard, and adds 2 s for easy', () => {

@@ -49,6 +49,7 @@ export type ProgressEffect =
       readonly id: ShortcutId;
       readonly failed: boolean;
       readonly durationMs: number;
+      readonly keyCount: number;
     }
   | {
       readonly type: 'learningChanged';
@@ -57,7 +58,7 @@ export type ProgressEffect =
 
 /** Reports an attempt as a test that counts for reviews. */
 export function testedEffect({ item, failed, durationMs }: Attempt): ProgressEffect {
-  return { type: 'tested', id: item.id, failed, durationMs };
+  return { type: 'tested', id: item.id, failed, durationMs, keyCount: item.keys.length };
 }
 
 /**

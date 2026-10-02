@@ -4,6 +4,8 @@ import type { Grade } from '../scheduling/scheduler';
 export type Recall = {
   readonly failed: boolean;
   readonly durationMs: number;
+  /** How many keys the answer took on the layout, which decides whose times it compares with. */
+  readonly keyCount: number;
 };
 
 /** A first try faster than this reads the title and presses from muscle memory. */

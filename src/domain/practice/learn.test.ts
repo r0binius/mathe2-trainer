@@ -151,7 +151,7 @@ describe('learnStrategy.complete', () => {
         entries: [entry(a, 'trained', { recalls: 1 }), entry(b, 'learned')],
         tested: [a.id],
       },
-      effects: [{ type: 'tested', id: a.id, failed: false, durationMs: 1000 }],
+      effects: [{ type: 'tested', id: a.id, failed: false, durationMs: 1000, keyCount: 2 }],
     });
   });
 
@@ -190,7 +190,7 @@ describe('learnStrategy.complete', () => {
     expect(complete(pool, attempt({ item: b, failed: true }))).toStrictEqual({
       pool: { entries: [entry(a, 'unseen'), entry(b, 'trained')], tested: [b.id] },
       effects: [
-        { type: 'tested', id: b.id, failed: true, durationMs: 1000 },
+        { type: 'tested', id: b.id, failed: true, durationMs: 1000, keyCount: 2 },
         {
           type: 'learningChanged',
           snapshot: { shortcuts: [a.id, b.id], learned: [], trained: [b.id], complete: false },
@@ -209,7 +209,7 @@ describe('learnStrategy.complete', () => {
 
   it('reports no progress when a learned shortcut stays learned', () => {
     expect(complete(pool, attempt({ item: b })).effects).toStrictEqual([
-      { type: 'tested', id: b.id, failed: false, durationMs: 1000 },
+      { type: 'tested', id: b.id, failed: false, durationMs: 1000, keyCount: 2 },
     ]);
   });
 

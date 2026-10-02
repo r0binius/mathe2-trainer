@@ -31,6 +31,7 @@ const review: LoggedReview = {
   utcOffsetMinutes: 120,
   failed: false,
   durationMs: 3000,
+  keyCount: 2,
 };
 
 const progress: StoredProgress = { sets: [record], cards: [card] };
@@ -50,7 +51,16 @@ describe('progressRepository', () => {
   });
 
   it('loads the review log of a layout with load_review_log', async () => {
-    const log = [{ at: 1000, utcOffsetMinutes: 120, grade: 'good' }];
+    const log = [
+      {
+        at: 1000,
+        utcOffsetMinutes: 120,
+        grade: 'good',
+        failed: false,
+        durationMs: 3000,
+        keyCount: 2,
+      },
+    ];
     const invoke = answering(log);
 
     await expect(progressRepository(invoke).loadLog(german, 500)).resolves.toStrictEqual(ok(log));

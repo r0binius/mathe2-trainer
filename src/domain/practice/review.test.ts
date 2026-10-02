@@ -32,14 +32,14 @@ describe('reviewStrategy.complete', () => {
   it('counts a recalled shortcut as done, and reports the test', () => {
     expect(complete(reviewPool([a, b]), attempt())).toStrictEqual({
       pool: { queue: [b], done: 1 },
-      effects: [{ type: 'tested', id: a.id, failed: false, durationMs: 1000 }],
+      effects: [{ type: 'tested', id: a.id, failed: false, durationMs: 1000, keyCount: 2 }],
     });
   });
 
   it('sends a shortcut tested with a mistake to the back of the queue, and reports the test', () => {
     expect(complete(reviewPool([a, b, c]), attempt({ failed: true }))).toStrictEqual({
       pool: { queue: [b, c, a], done: 0 },
-      effects: [{ type: 'tested', id: a.id, failed: true, durationMs: 1000 }],
+      effects: [{ type: 'tested', id: a.id, failed: true, durationMs: 1000, keyCount: 2 }],
     });
   });
 
@@ -48,7 +48,7 @@ describe('reviewStrategy.complete', () => {
 
     expect(complete(failed.pool, attempt())).toStrictEqual({
       pool: { queue: [], done: 1 },
-      effects: [{ type: 'tested', id: a.id, failed: false, durationMs: 1000 }],
+      effects: [{ type: 'tested', id: a.id, failed: false, durationMs: 1000, keyCount: 2 }],
     });
   });
 });

@@ -63,6 +63,7 @@ const test = {
   utcOffsetMinutes: 120,
   failed: false,
   durationMs: 3000,
+  keyCount: 2,
 } as const;
 
 function repositoryWith(overrides: Partial<ProgressRepository>): ProgressRepository {
@@ -215,7 +216,9 @@ describe('recordReview', () => {
 
 describe('loadLog', () => {
   const now = { at, utcOffsetMinutes: 120 };
-  const log: readonly ReviewLogEntry[] = [{ at: at - 1000, utcOffsetMinutes: 120, grade: 'good' }];
+  const log: readonly ReviewLogEntry[] = [
+    { at: at - 1000, utcOffsetMinutes: 120, grade: 'good', failed: false, durationMs: 3000 },
+  ];
 
   it('loads the review log of a layout from a year back', async () => {
     const loadLog = vi.fn(() => Promise.resolve(ok(log)));
@@ -260,7 +263,20 @@ describe('loadLog', () => {
     await store.recordReview(test);
     expect(store.log).toStrictEqual({
       status: 'loaded',
-      value: { layout: german, entries: [...log, { at, utcOffsetMinutes: 120, grade: 'good' }] },
+      value: {
+        layout: german,
+        entries: [
+          ...log,
+          {
+            at,
+            utcOffsetMinutes: 120,
+            grade: 'good',
+            failed: false,
+            durationMs: 3000,
+            keyCount: 2,
+          },
+        ],
+      },
     });
   });
 

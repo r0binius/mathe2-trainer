@@ -35,9 +35,16 @@ export function progressSaver(
 
     switch (effect.type) {
       case 'tested': {
-        const { id, failed, durationMs } = effect;
+        const { id, failed, durationMs, keyCount } = effect;
 
-        return progress.recordReview({ id, layout, ...localTimeAt(at), failed, durationMs });
+        return progress.recordReview({
+          id,
+          layout,
+          ...localTimeAt(at),
+          failed,
+          durationMs,
+          keyCount,
+        });
       }
       case 'learningChanged':
         return setId === undefined

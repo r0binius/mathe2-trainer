@@ -34,7 +34,13 @@ function tested(
   grade: ReviewLogEntry['grade'] = 'good',
   hour = 12,
 ): ReviewLogEntry {
-  return { at: now.at - daysAgo * dayMs + (hour - 12) * hourMs, utcOffsetMinutes: 120, grade };
+  return {
+    at: now.at - daysAgo * dayMs + (hour - 12) * hourMs,
+    utcOffsetMinutes: 120,
+    grade,
+    failed: grade === 'again',
+    durationMs: 3000,
+  };
 }
 
 describe('summarizeOverview', () => {

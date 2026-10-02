@@ -27,6 +27,7 @@ const inOrder: PracticeStrategy<readonly Presentation[]> = {
         id: attempt.item.id,
         failed: attempt.failed,
         durationMs: attempt.durationMs,
+        keyCount: attempt.item.keys.length,
       },
     ],
   }),
@@ -94,7 +95,7 @@ describe('answering', () => {
     ).toStrictEqual({
       model: succeeded([]),
       effects: [
-        { type: 'tested', id: find.id, failed: false, durationMs: 2500 },
+        { type: 'tested', id: find.id, failed: false, durationMs: 2500, keyCount: 2 },
         { type: 'advanceAfter', ms: successPauseMs, presentation: 1 },
       ],
     });
@@ -152,7 +153,7 @@ describe('answering', () => {
     expect(
       updateSession(inOrder, missed.model, { type: 'answer', keys: ['Meta', 'f'], at: 4000 })
         .effects,
-    ).toContainEqual({ type: 'tested', id: find.id, failed: true, durationMs: 3000 });
+    ).toContainEqual({ type: 'tested', id: find.id, failed: true, durationMs: 3000, keyCount: 2 });
   });
 
   it('ignores answers after a success, while the result is shown', () => {
@@ -178,7 +179,7 @@ describe('forgetting', () => {
     expect(
       updateSession(inOrder, forgot.model, { type: 'answer', keys: ['Meta', 'f'], at: 4000 })
         .effects,
-    ).toContainEqual({ type: 'tested', id: find.id, failed: true, durationMs: 3000 });
+    ).toContainEqual({ type: 'tested', id: find.id, failed: true, durationMs: 3000, keyCount: 2 });
   });
 
   it('ignores forgetting while training, since the keys are shown', () => {
@@ -268,14 +269,14 @@ describe('skipping', () => {
       ...inOrder,
       skip: (pool) => ({
         pool,
-        effects: [{ type: 'tested', id: 'x/y', failed: true, durationMs: 0 }],
+        effects: [{ type: 'tested', id: 'x/y', failed: true, durationMs: 0, keyCount: 1 }],
       }),
     };
 
     expect(
       updateSession(reporting, presenting(training), { type: 'skip', roll: 0, at: 5000 }).effects,
     ).toStrictEqual<readonly ProgressEffect[]>([
-      { type: 'tested', id: 'x/y', failed: true, durationMs: 0 },
+      { type: 'tested', id: 'x/y', failed: true, durationMs: 0, keyCount: 1 },
     ]);
   });
 

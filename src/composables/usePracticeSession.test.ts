@@ -86,6 +86,7 @@ describe('usePracticeSession', () => {
       id: a.id,
       failed: false,
       durationMs: 0,
+      keyCount: 2,
     });
   });
 

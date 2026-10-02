@@ -110,13 +110,13 @@ export const useProgressStore = defineStore('progress', () => {
   }
 
   /** Adds a logged review to the log shown, if it's the log of the review's layout. */
-  function addToLog({ layout, at, utcOffsetMinutes, grade }: LoggedReview): void {
+  function addToLog(review: LoggedReview): void {
+    const { layout, at, utcOffsetMinutes, grade, failed, durationMs, keyCount } = review;
+
     if (log.value.status === 'loaded' && log.value.value.layout === layout) {
       const { entries } = log.value.value;
-      log.value = {
-        status: 'loaded',
-        value: { layout, entries: [...entries, { at, utcOffsetMinutes, grade }] },
-      };
+      const entry = { at, utcOffsetMinutes, grade, failed, durationMs, keyCount };
+      log.value = { status: 'loaded', value: { layout, entries: [...entries, entry] } };
     }
   }
 

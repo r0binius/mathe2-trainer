@@ -42,8 +42,8 @@ The factors are a proposal. At a typical time of 3 s they give easy under 1.8 s 
 
 What changes underneath:
 
-- The review log reaches the frontend with each review's card, duration and whether it failed (the `reviews` table has them; `load_review_log` doesn't return them yet).
-- The number of keys comes from the practice item of the card, resolved on the current layout. Reviews of cards without an item (removed shortcuts) are left out.
+- The review log reaches the frontend with each review's duration, whether it failed, and its number of keys.
+- **The number of keys is stored with each review** (`reviews.key_count`, migration 0004): the session knows the keys it tested, so the count is what was actually pressed then. It stays right when a shortcut is renamed or removed, and grading needs no lookup of the apps. Reviews logged before have no count and are left out. (Decided in 18.2 instead of resolving each card's practice item on the current layout.)
 - `gradeRecall` takes the typical time as an argument, so it stays a pure function; the session gets it from the store with each test.
 
 **A caveat:** a test's time includes reading the title, so long titles are slower to answer. Grouping by number of keys doesn't correct for that; if the grades look skewed, title length is the next factor to look at.

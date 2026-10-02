@@ -20,7 +20,7 @@ describe('progressSaver', () => {
     const progress = actions();
     const save = progressSaver(progress, { appId: 'app', layout: german }, () => at);
 
-    await save({ type: 'tested', id: 'app/Meta+k', failed: true, durationMs: 1200 });
+    await save({ type: 'tested', id: 'app/Meta+k', failed: true, durationMs: 1200, keyCount: 2 });
 
     expect(progress.recordReview).toHaveBeenCalledWith({
       id: 'app/Meta+k',
@@ -29,6 +29,7 @@ describe('progressSaver', () => {
       utcOffsetMinutes: -new Date(at).getTimezoneOffset(),
       failed: true,
       durationMs: 1200,
+      keyCount: 2,
     });
   });
 

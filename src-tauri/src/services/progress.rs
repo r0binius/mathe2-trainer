@@ -4,6 +4,8 @@
 //! deserialized, with the frontend decoders' rules: IDs and times by their types
 //! ([`values`](crate::services::values)), a card's memory by [`Card`]'s own rules.
 
+use std::num::NonZeroU8;
+
 use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ValueRef};
 use rusqlite::{Connection, Row, ToSql, named_params};
 use serde::{Deserialize, Serialize};
@@ -181,10 +183,12 @@ pub struct Review {
     pub failed: bool,
     /// Time from showing the shortcut to the correct answer.
     pub duration_ms: u32,
+    /// How many keys the shortcut had on the layout, at least one.
+    pub key_count: NonZeroU8,
 }
 
-/// A logged test as the overview reads it, as the frontend's `ReviewLogEntry`: when it was
-/// answered, and its grade.
+/// A logged test as the overview and grading read it, as the frontend's `ReviewLogEntry`: when
+/// it was answered, its grade, and what it was graded from.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ReviewLogEntry {
@@ -194,6 +198,14 @@ pub struct ReviewLogEntry {
     pub utc_offset_minutes: i32,
     /// The grade the measurements gave.
     pub grade: Grade,
+    /// Whether wrong keys were pressed first.
+    pub failed: bool,
+    /// Time from showing the shortcut to the correct answer.
+    pub duration_ms: u32,
+    /// How many keys the shortcut had. Left out, not `null`, for reviews logged before it was
+    /// stored, as the frontend's optional property.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub key_count: Option<u8>,
 }
 
 /// All stored progress that depends on which shortcuts exist, as the frontend's
@@ -216,7 +228,7 @@ const SELECT_CARDS: &str = "
     FROM cards ORDER BY shortcut_id, layout";
 
 const SELECT_REVIEW_LOG: &str = "
-    SELECT reviewed_at, utc_offset_minutes, grade FROM reviews
+    SELECT reviewed_at, utc_offset_minutes, grade, failed, duration_ms, key_count FROM reviews
     WHERE layout = :layout AND reviewed_at >= :since
     ORDER BY reviewed_at, id";
 
@@ -360,12 +372,15 @@ fn insert_review(connection: &Connection, review: &Review) -> rusqlite::Result<(
         utc_offset_minutes,
         failed,
         duration_ms,
+        key_count,
     } = review;
 
     connection.execute(
         "INSERT INTO reviews
-            (shortcut_id, layout, reviewed_at, utc_offset_minutes, grade, failed, duration_ms)
-         VALUES (:id, :layout, :at, :utc_offset_minutes, :grade, :failed, :duration_ms)",
+            (shortcut_id, layout, reviewed_at, utc_offset_minutes, grade, failed, duration_ms,
+             key_count)
+         VALUES (:id, :layout, :at, :utc_offset_minutes, :grade, :failed, :duration_ms,
+                 :key_count)",
         named_params! {
             ":id": id,
             ":layout": layout,
@@ -374,6 +389,7 @@ fn insert_review(connection: &Connection, review: &Review) -> rusqlite::Result<(
             ":grade": grade,
             ":failed": failed,
             ":duration_ms": duration_ms,
+            ":key_count": key_count.get(),
         },
     )?;
     Ok(())
@@ -454,6 +470,9 @@ fn read_log_entry(row: &Row<'_>) -> rusqlite::Result<ReviewLogEntry> {
         at: row.get("reviewed_at")?,
         utc_offset_minutes: row.get("utc_offset_minutes")?,
         grade: row.get("grade")?,
+        failed: row.get("failed")?,
+        duration_ms: row.get("duration_ms")?,
+        key_count: row.get("key_count")?,
     })
 }
 
@@ -527,21 +546,32 @@ mod tests {
             utc_offset_minutes: 120,
             failed: grade == Grade::Again,
             duration_ms: 1_500,
+            key_count: NonZeroU8::new(2).expect("2 is not zero"),
         }
     }
 
-    /// A review log row: shortcut, layout, time, UTC offset, grade, failed and duration.
-    type LoggedReview = (String, String, i64, i32, String, bool, u32);
+    /// A review log row: shortcut, layout, time, UTC offset, grade, failed, duration and keys.
+    type LoggedReview = (String, String, i64, i32, String, bool, u32, Option<u8>);
 
     const SELECT_LOG: &str = "
-        SELECT shortcut_id, layout, reviewed_at, utc_offset_minutes, grade, failed, duration_ms
+        SELECT shortcut_id, layout, reviewed_at, utc_offset_minutes, grade, failed, duration_ms,
+               key_count
         FROM reviews ORDER BY id";
 
     /// The row [`review`] logs with the given grade.
     fn logged_as(grade: &str) -> LoggedReview {
         let (id, layout) = ("macos/Meta+m".to_owned(), GERMAN.to_owned());
 
-        (id, layout, 1_000, 120, grade.to_owned(), false, 1_500)
+        (
+            id,
+            layout,
+            1_000,
+            120,
+            grade.to_owned(),
+            false,
+            1_500,
+            Some(2),
+        )
     }
 
     fn logged_review(row: &Row<'_>) -> rusqlite::Result<LoggedReview> {
@@ -552,8 +582,9 @@ mod tests {
         let grade = row.get("grade")?;
         let failed = row.get("failed")?;
         let duration = row.get("duration_ms")?;
+        let keys = row.get("key_count")?;
 
-        Ok((id, layout, at, offset, grade, failed, duration))
+        Ok((id, layout, at, offset, grade, failed, duration, keys))
     }
 
     fn logged(database: &Database) -> Vec<LoggedReview> {
@@ -606,6 +637,7 @@ mod tests {
             "utcOffsetMinutes": 120,
             "failed": false,
             "durationMs": 1_500,
+            "keyCount": 2,
         });
 
         let set = serde_json::to_value(record(GERMAN, &["macos/Meta+m"], None));
@@ -667,7 +699,17 @@ mod tests {
     fn checks_the_ids_and_times_of_a_review() {
         let review = json!({
             "id": "macos/Meta+m", "layout": "", "grade": "good", "at": -1,
-            "utcOffsetMinutes": 120, "failed": false, "durationMs": 1_500,
+            "utcOffsetMinutes": 120, "failed": false, "durationMs": 1_500, "keyCount": 2,
+        });
+
+        assert!(serde_json::from_value::<Review>(review).is_err());
+    }
+
+    #[test]
+    fn rejects_a_review_of_no_keys() {
+        let review = json!({
+            "id": "macos/Meta+m", "layout": GERMAN, "grade": "good", "at": 1_000,
+            "utcOffsetMinutes": 120, "failed": false, "durationMs": 1_500, "keyCount": 0,
         });
 
         assert!(serde_json::from_value::<Review>(review).is_err());
@@ -718,11 +760,28 @@ mod tests {
             at: EpochMillis::stored(1_000),
             utc_offset_minutes: 120,
             grade: Grade::Hard,
+            failed: false,
+            duration_ms: 1_500,
+            key_count: Some(2),
+        };
+        let older = ReviewLogEntry {
+            key_count: None,
+            ..entry.clone()
         };
 
         assert_eq!(
             serde_json::to_value(entry).expect("a log entry serializes"),
-            json!({ "at": 1_000, "utcOffsetMinutes": 120, "grade": "hard" }),
+            json!({
+                "at": 1_000, "utcOffsetMinutes": 120, "grade": "hard", "failed": false,
+                "durationMs": 1_500, "keyCount": 2,
+            }),
+        );
+        assert_eq!(
+            serde_json::to_value(older).expect("an older log entry serializes"),
+            json!({
+                "at": 1_000, "utcOffsetMinutes": 120, "grade": "hard", "failed": false,
+                "durationMs": 1_500,
+            }),
         );
     }
 
@@ -747,8 +806,29 @@ mod tests {
             at: EpochMillis::stored(millis),
             utc_offset_minutes: 120,
             grade,
+            failed: grade == Grade::Again,
+            duration_ms: 1_500,
+            key_count: Some(2),
         };
         assert_eq!(log, [entry(2_000, Grade::Again), entry(3_000, Grade::Easy)]);
+    }
+
+    #[test]
+    fn reads_a_review_logged_before_key_counts_without_one() {
+        let database = Database::in_memory();
+        let insert = "
+            INSERT INTO reviews
+                (shortcut_id, layout, reviewed_at, utc_offset_minutes, grade, failed, duration_ms)
+            VALUES ('macos/Meta+m', :layout, 1000, 120, 'good', 0, 1500)";
+
+        database
+            .with(|connection| Ok(connection.execute(insert, named_params! { ":layout": GERMAN })?))
+            .expect("an older review is logged");
+        let log = database
+            .with(|connection| review_log(connection, &layout(GERMAN), EpochMillis::stored(0)))
+            .expect("the review log is read");
+
+        assert_eq!(log.first().map(|entry| entry.key_count), Some(None));
     }
 
     #[test]
