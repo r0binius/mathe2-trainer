@@ -60,7 +60,7 @@ All colours are roles in `src/styles/tokens.css`; components use the roles, neve
 | Practice key caps                   | Plex Mono   | 22 px / 500, caps 52 px high                                         |
 | Modifier symbols                    | system font | the size of their surroundings, 500                                  |
 
-The fonts are bundled as woff2 (400, 500, 600 of each, Latin) from Fontsource (`@fontsource/ibm-plex-sans`, `@fontsource/ibm-plex-mono`, OFL); IBM's own packages install a telemetry dependency. The CSP's `default-src 'self'` already allows them. The Latin files have no key symbols except ↑ and ↓, so `styles/fonts.css` leaves those two out of the range too: every key symbol then falls back to the system font, with no markup of its own.
+The fonts are bundled as woff2 (Latin; Sans in 400, 500 and 600, Mono in 400 and 500) from Fontsource (`@fontsource/ibm-plex-sans`, `@fontsource/ibm-plex-mono`, OFL); IBM's own packages install a telemetry dependency. The CSP's `default-src 'self'` already allows them. The Latin files have no key symbols except ↑ and ↓, so `styles/fonts.css` leaves those two out of the range too: every key symbol then falls back to the system font, with no markup of its own.
 
 **Shape and space:**
 

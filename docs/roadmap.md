@@ -644,6 +644,9 @@ Branch `feature/ui-overhaul`. Give Mouseless a look of its own, after Halloy and
 - **Check light colors against their neighbours, not only against text.** _Raised_ on _box_ is nearly invisible in light, so empty tracks use the border color.
 - **A global class name has to be free.** `.label` was already a scoped class in `SkipButton`; the shared caption became `.caption`.
 - **Keyboard hints need keys that are free.** Practice takes every key as an answer, so the preview's `esc` and `⇥` hints had no keys to show.
+- **A restyle leaves repetition behind.** The refactor round after it found the same window listeners, language line, logo, back button and practice setup in several places, each now one composable or component (`useWindowListener`, `useSettingsLanguage`, `AppLogo`, `BackButton`, `usePracticeScreen`), and a font face nothing used.
+- **A removal needs the options it was added with.** `removeEventListener` only removes a capturing listener when given `capture` again, so `useWindowListener` passes the same options to both.
+- **Group parameters by kind to keep types unmixed.** `functional/no-mixed-types` rejected one options object of data and functions; what to practice (data) and how the screen hooks in (functions) became two.
 
 ## Linux ⏳ ([#10](https://codeberg.org/gobin/mouseless/issues/10))
 
