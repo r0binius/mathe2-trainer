@@ -29,8 +29,8 @@ const slots = defineSlots<{
 .heading {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 20px 0 16px;
+  gap: 10px;
+  padding-bottom: 16px;
 }
 
 .text {
@@ -38,15 +38,16 @@ const slots = defineSlots<{
   min-width: 0;
 }
 
-/* macOS's large title. */
+/* The screen's title. */
 .title {
-  font-size: 26px;
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.25;
 }
 
 .meta {
-  margin-top: 2px;
+  margin-top: 1px;
   color: var(--color-text-secondary);
+  font-size: 12px;
 }
 </style>

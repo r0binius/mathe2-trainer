@@ -51,8 +51,8 @@ const days = computed(() =>
   display: flex;
   align-items: flex-end;
   gap: 2px;
-  height: 72px;
-  padding-top: 16px;
+  height: 56px;
+  padding-top: 14px;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -70,7 +70,7 @@ const days = computed(() =>
   width: 100%;
   max-width: 24px;
   min-height: 2px;
-  border-radius: 4px 4px 0 0;
+  border-radius: 3px 3px 0 0;
   background-color: var(--color-action);
 }
 
@@ -79,15 +79,16 @@ const days = computed(() =>
   position: absolute;
   bottom: 100%;
   color: var(--color-text-secondary);
+  font-family: var(--font-mono);
   font-size: 11px;
-  font-variant-numeric: tabular-nums;
 }
 
 .axis {
   display: flex;
   justify-content: space-between;
   margin-top: 4px;
-  color: var(--color-text-secondary);
-  font-size: 11px;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 10px;
 }
 </style>

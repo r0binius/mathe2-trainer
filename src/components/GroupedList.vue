@@ -15,23 +15,16 @@ defineSlots<{
 </template>
 
 <style scoped>
-/* A grouped box, as the lists in System Settings are: no border, and separators inset. */
+/* A grouped box: a hairline around it and between its rows, from edge to edge. */
 .list {
   overflow: hidden;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-box);
   background-color: var(--color-box);
   list-style: none;
 
-  > :deep(*) {
-    position: relative;
-  }
-
-  > :deep(* + *)::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto 12px;
-    height: 1px;
-    background-color: var(--color-border);
+  > :deep(* + *) {
+    border-top: 1px solid var(--color-border);
   }
 }
 </style>

@@ -12,14 +12,15 @@ defineProps<{
 </template>
 
 <style scoped>
-/* A key in a list: its glyph in secondary text, one after the other. */
+/* A key in a list: its glyph in mono, in full text color, one after the other. */
 .key {
   display: inline-flex;
   justify-content: center;
-  min-width: 13px;
-  color: var(--color-text-secondary);
+  min-width: 12px;
+  color: var(--color-text);
   font-family: var(--font-mono);
   font-size: 13px;
+  font-weight: 500;
   line-height: 1;
 }
 </style>

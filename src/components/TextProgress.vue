@@ -18,6 +18,7 @@ defineProps<{
 <style scoped>
 .progress {
   display: inline-flex;
+  font-family: var(--font-mono);
 }
 
 .separator {

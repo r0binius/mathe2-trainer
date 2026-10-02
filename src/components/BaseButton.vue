@@ -8,12 +8,12 @@ const { variant = 'neutral', size = 'regular' } = defineProps<{
   /** What an icon-only button does, for VoiceOver and as its tooltip. */
   label?: string;
   /**
-   * What kind of macOS button it is: `neutral` a push button, `accent` the default button (the
-   * one main action on a screen), `danger` a push button for a destructive action, `dangerText`
-   * a destructive action next to text, and `toolbar` a borderless button in a toolbar.
+   * What kind of button it is: `neutral` a quiet button, `accent` the one main action on a
+   * screen, `danger` a quiet button for a destructive action, `dangerText` a destructive action
+   * next to text, and `toolbar` a borderless button in the title bar.
    */
   variant?: 'neutral' | 'accent' | 'danger' | 'dangerText' | 'toolbar';
-  /** `large` for a screen's main action next to its heading, as macOS's large control size. */
+  /** `large` for a screen's main action next to its heading. */
   size?: 'regular' | 'large';
   /** Whether a button that stands for a choice is the one chosen, for VoiceOver. */
   pressed?: boolean;
@@ -41,33 +41,39 @@ const emit = defineEmits<{
 </template>
 
 <style scoped>
-/* A push button of macOS's regular control size. */
+/* A flat button of a fixed height, its label centred both ways by the flex box, not by padding. */
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  min-height: 22px;
+  height: 24px;
   padding: 0 10px;
   border-radius: var(--radius-control);
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 500;
   line-height: 1;
   white-space: nowrap;
 }
 
 .large {
-  min-height: 28px;
+  height: 28px;
   padding: 0 14px;
-  font-weight: 500;
+  font-size: 13px;
 }
 
+/* A quiet button: raised, with a hairline. */
 .neutral,
 .danger {
-  background-color: var(--color-button);
-  box-shadow: var(--shadow-button);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-raised);
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--color-raised), var(--color-text) 4%);
+  }
 
   &:active {
-    background-color: var(--color-button-pressed);
+    background-color: color-mix(in srgb, var(--color-raised), var(--color-text) 8%);
   }
 }
 
@@ -75,13 +81,17 @@ const emit = defineEmits<{
   color: var(--color-mistake);
 }
 
+/* The screen's main action, in the action color. */
 .accent {
   background-color: var(--color-action);
-  box-shadow: var(--shadow-button);
   color: var(--color-on-action);
 
+  &:hover {
+    filter: brightness(1.06);
+  }
+
   &:active {
-    filter: brightness(0.9);
+    filter: brightness(0.92);
   }
 }
 

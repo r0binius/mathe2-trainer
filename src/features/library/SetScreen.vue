@@ -104,9 +104,9 @@ const continues = computed(() => {
 .row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 7px 12px;
+  gap: 8px;
+  min-height: 28px;
+  padding: 4px 10px;
 }
 
 .check {
@@ -131,5 +131,6 @@ const continues = computed(() => {
 .keys {
   display: flex;
   flex: none;
+  gap: 2px;
 }
 </style>

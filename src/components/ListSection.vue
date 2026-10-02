@@ -18,10 +18,14 @@ defineSlots<{
 </template>
 
 <style scoped>
-/* A grouped form's section header, as in System Settings. */
+/* A section label: small uppercase mono, faint. */
 .title {
-  margin: 0 0 6px 2px;
-  font-size: 13px;
-  font-weight: 600;
+  margin: 0 0 6px 1px;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 </style>

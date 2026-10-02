@@ -23,21 +23,25 @@ defineSlots<{
     <slot name="leading" />
     <span class="title truncate"><slot /></span>
     <span class="meta"><slot name="meta" /></span>
-    <BaseIcon class="arrow" name="chevronRight" :size="12" />
+    <BaseIcon class="arrow" name="chevronRight" :size="10" />
   </RouterLink>
 </template>
 
 <style scoped>
-/* A row that opens another page, as a navigation row in System Settings. */
+/* A row that opens another page, with a chevron at its end. */
 .row {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 44px;
-  padding: 6px 12px;
+  min-height: 28px;
+  padding: 3px 10px;
+
+  &:hover {
+    background-color: var(--color-fill);
+  }
 
   &:active {
-    background-color: var(--color-fill);
+    background-color: var(--color-fill-hover);
   }
 }
 
@@ -51,7 +55,8 @@ defineSlots<{
   align-items: center;
   gap: 8px;
   color: var(--color-text-secondary);
-  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  font-size: 12px;
 }
 
 .arrow {

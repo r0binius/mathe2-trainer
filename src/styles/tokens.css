@@ -32,11 +32,8 @@
   /* The raised bottom edge of a key cap. */
   --color-key-edge: #d6cabb;
 
-  /* Until the buttons and the popover get their new styles (14.3, 14.5). */
+  /* Until the popover gets its new styles (14.5). */
   --color-selection: color-mix(in srgb, var(--color-action) 30%, transparent);
-  --color-button: var(--color-raised);
-  --color-button-pressed: var(--color-fill-hover);
-  --shadow-button: 0 0 0 1px var(--color-border);
 
   /* Small corners and no capsules: boxes, controls and key caps. */
   --radius-box: 5px;

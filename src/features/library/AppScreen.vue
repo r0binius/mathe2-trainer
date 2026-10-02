@@ -87,13 +87,13 @@ const nextReview = computed(() => {
 
 <style scoped>
 .logo {
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
 
 .sections {
   display: grid;
-  gap: 24px;
+  gap: 20px;
 }
 </style>

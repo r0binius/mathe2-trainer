@@ -45,11 +45,11 @@ const remaining = computed(() => (max > 0 ? (max - value) / max : 1));
 }
 
 .track {
-  stroke: var(--color-fill-hover);
+  stroke: var(--color-raised);
 }
 
 .done {
-  stroke: var(--color-action);
+  stroke: var(--color-learned);
   transition: stroke-dashoffset 0.5s ease;
 }
 </style>

@@ -57,20 +57,26 @@ function fromLog(value: string): string {
   return logLoaded.value ? value : unknown;
 }
 
-/** The four figures on top, each a value and what it counts. */
-const figures = computed((): readonly { readonly value: string; readonly label: UiKey }[] => {
-  const { due, reviewedToday, recallRate, daysInARow } = overview.value;
+/** What a figure's value means, which its color shows: due counts and recall in their accents. */
+type FigureTone = 'due' | 'learned' | 'plain';
 
-  return [
-    { value: String(due), label: 'overview.dueToday' },
-    { value: fromLog(String(reviewedToday)), label: 'overview.reviewedToday' },
-    {
-      value: fromLog(recallRate === undefined ? unknown : text.percent(recallRate)),
-      label: 'overview.recallRate',
-    },
-    { value: fromLog(String(daysInARow)), label: 'overview.daysInARow' },
-  ];
-});
+/** The four figures on top, each a value, what it counts and its tone. */
+const figures = computed(
+  (): readonly { readonly value: string; readonly label: UiKey; readonly tone: FigureTone }[] => {
+    const { due, reviewedToday, recallRate, daysInARow } = overview.value;
+
+    return [
+      { value: String(due), label: 'overview.dueToday', tone: due > 0 ? 'due' : 'plain' },
+      { value: fromLog(String(reviewedToday)), label: 'overview.reviewedToday', tone: 'plain' },
+      {
+        value: fromLog(recallRate === undefined ? unknown : text.percent(recallRate)),
+        label: 'overview.recallRate',
+        tone: recallRate === undefined ? 'plain' : 'learned',
+      },
+      { value: fromLog(String(daysInARow)), label: 'overview.daysInARow', tone: 'plain' },
+    ];
+  },
+);
 </script>
 
 <template>
@@ -79,7 +85,7 @@ const figures = computed((): readonly { readonly value: string; readonly label: 
       <dl class="figures">
         <div v-for="figure in figures" :key="figure.label" class="figure">
           <dt class="label">{{ text.ui(figure.label) }}</dt>
-          <dd class="value">{{ figure.value }}</dd>
+          <dd class="value" :class="figure.tone">{{ figure.value }}</dd>
         </div>
       </dl>
 
@@ -122,7 +128,7 @@ const figures = computed((): readonly { readonly value: string; readonly label: 
             <template #leading><img class="logo" :src="logoOf(summary.app.id)" alt="" /></template>
             {{ text.appTitle(summary.app) }}
             <template #meta>
-              <!-- A meter: the learned share in the accent on a lighter track of it. -->
+              <!-- A meter: the learned share in the learned color on a raised track. -->
               <span class="meter" aria-hidden="true">
                 <span
                   class="fill"
@@ -142,61 +148,76 @@ const figures = computed((): readonly { readonly value: string; readonly label: 
 <style scoped>
 .overview {
   display: grid;
-  gap: 24px;
-  padding-top: 8px;
+  gap: 20px;
 }
 
-/* Four figures in a row, each in a grouped box, the value large and its label below. */
+/* Four figures in a row, each in a box, the value in mono and its label below. */
 .figures {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
 }
 
 .figure {
   display: flex;
   flex-direction: column-reverse;
   gap: 2px;
-  padding: 10px 12px;
+  padding: 6px 10px 8px;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-box);
   background-color: var(--color-box);
 }
 
 .value {
-  font-size: 24px;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 19px;
+  font-weight: 500;
+
+  &.due {
+    color: var(--color-due);
+  }
+
+  &.learned {
+    color: var(--color-learned);
+  }
 }
 
+/* A figure's label: small uppercase mono, faint. */
 .label {
-  color: var(--color-text-secondary);
-  font-size: 11px;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .total {
-  margin: -2px 0 6px 2px;
+  margin: -2px 0 6px 1px;
   color: var(--color-text-secondary);
+  font-size: 12px;
 }
 
 .logo {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   flex: none;
   object-fit: contain;
 }
 
 .meter {
-  width: 120px;
-  height: 6px;
+  width: 90px;
+  height: 4px;
   overflow: hidden;
-  border-radius: 3px;
-  background-color: color-mix(in srgb, var(--color-action) 20%, transparent);
+  border-radius: 2px;
+  background-color: var(--color-raised);
 }
 
 .fill {
   display: block;
   height: 100%;
-  border-radius: 3px;
-  background-color: var(--color-action);
+  border-radius: 2px;
+  background-color: var(--color-learned);
 }
 
 .hint {
