@@ -280,6 +280,42 @@ describe('loadLog', () => {
     });
   });
 
+  it("grades a test relative to the learner's times in the log of its layout", async () => {
+    // A typical time of 1 s makes the 3 s test hard; the fixed limits would call it good.
+    const fast = Array.from({ length: 20 }, (_, index) => ({
+      at: at - 1000 - index,
+      utcOffsetMinutes: 120,
+      grade: 'easy' as const,
+      failed: false,
+      durationMs: 1000,
+      keyCount: 2,
+    }));
+    const repository = repositoryWith({ loadLog: () => Promise.resolve(ok(fast)) });
+    const store = storeWith(repository);
+
+    await store.load(apps);
+    await store.loadLog(german, now);
+    await store.recordReview(test);
+
+    expect(repository.recordReview).toHaveBeenCalledWith(
+      { ...test, grade: 'hard' },
+      expect.anything(),
+    );
+  });
+
+  it('grades with the fixed limits while the log is not loaded', async () => {
+    const repository = repositoryWith({});
+    const store = storeWith(repository);
+
+    await store.load(apps);
+    await store.recordReview(test);
+
+    expect(repository.recordReview).toHaveBeenCalledWith(
+      { ...test, grade: 'good' },
+      expect.anything(),
+    );
+  });
+
   it('leaves the log alone when the test was on another layout, or not saved', async () => {
     const store = storeWith(
       repositoryWith({

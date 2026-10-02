@@ -2,7 +2,8 @@ import { defineStore } from 'pinia';
 import { inject, onScopeDispose, shallowRef } from 'vue';
 
 import type { LayoutId } from '@/domain/keyboard/keymap';
-import { gradeRecall } from '@/domain/practice/grading';
+import type { GradeLimits } from '@/domain/practice/grading';
+import { fixedLimits, gradeLimits, gradeRecall } from '@/domain/practice/grading';
 import type { LearnSnapshot } from '@/domain/practice/snapshot';
 import { logStart } from '@/domain/progress/overview';
 import { progressChanged, reconcileProgress } from '@/domain/progress/reconcile';
@@ -135,13 +136,23 @@ export const useProgressStore = defineStore('progress', () => {
     return saveThenShow(repository.saveSet(record), (stored) => withSetRecord(stored, record));
   }
 
+  /**
+   * The grading limits for a test: relative to the learner's own times in the log of its layout,
+   * or fixed while that log isn't loaded.
+   */
+  function limitsFor({ layout, keyCount }: TestResult): GradeLimits {
+    return log.value.status === 'loaded' && log.value.value.layout === layout
+      ? gradeLimits(log.value.value.entries, keyCount)
+      : fixedLimits;
+  }
+
   /** Grades a test, schedules its card and logs it. A failed first test creates no card. */
   async function recordReview(test: TestResult): Promise<Result<void, PlatformError>> {
     if (progress.value.status !== 'loaded') {
       return err(notLoaded);
     }
 
-    const review = { ...test, grade: gradeRecall(test) };
+    const review = { ...test, grade: gradeRecall(test, limitsFor(test)) };
     const card = reviewCard(scheduleWithFsrs, cardOf(progress.value.value, test), review);
     const saved = await saveThenShow(repository.recordReview(review, card), (stored) =>
       card === undefined ? stored : withCard(stored, card),
