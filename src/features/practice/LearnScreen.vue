@@ -5,7 +5,6 @@ import { useRouter } from 'vue-router';
 import BaseButton from '@/components/BaseButton.vue';
 import PageLayout from '@/components/PageLayout.vue';
 import TextProgress from '@/components/TextProgress.vue';
-import { usePracticeSession } from '@/composables/usePracticeSession';
 import { practiceItems } from '@/domain/practice/items';
 import { learnPool, learnStrategy } from '@/domain/practice/learn';
 import { setProgressOf } from '@/domain/progress/storedProgress';
@@ -13,11 +12,9 @@ import type { SummaryContext } from '@/domain/progress/summary';
 import type { AppDefinition, ShortcutSet } from '@/domain/shortcuts/types';
 import { useText } from '@/i18n';
 import { toSet } from '@/routes';
-import { useProgressStore } from '@/stores/progress';
 
 import PracticeStage from './PracticeStage.vue';
-import { progressSaver } from './progressSaver';
-import { useSessionExit } from './useSessionExit';
+import { usePracticeScreen } from './usePracticeScreen';
 
 const props = defineProps<{
   /** The app the set belongs to. */
@@ -29,22 +26,24 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
-const progressStore = useProgressStore();
 const text = useText();
 const target = { appId: props.app.id, setId: props.set.id, layout: props.context.layout };
 
 // The session starts from the progress as it is now, and owns it from then on.
-const [{ session, held, saveFailed }, { skip, forget }] = usePracticeSession(
-  learnStrategy,
-  learnPool(
-    practiceItems(props.app.id, props.set, props.context),
-    setProgressOf(props.context.progress, target),
-  ),
+const [{ session, held, saveFailed }, { skip, forget }] = usePracticeScreen(
   {
-    keymap: () => props.context.keymap,
-    save: progressSaver(progressStore, target, Date.now),
-    now: Date.now,
-    random: Math.random,
+    strategy: learnStrategy,
+    pool: learnPool(
+      practiceItems(props.app.id, props.set, props.context),
+      setProgressOf(props.context.progress, target),
+    ),
+    target,
+  },
+  {
+    context: () => props.context,
+    leave: () => {
+      void router.push(toSet(props.app.id, props.set.id));
+    },
   },
 );
 
@@ -57,14 +56,6 @@ const announced = ref<number>();
 watch(learned, (count) => {
   announced.value = count;
 });
-
-useSessionExit(
-  () => session.value,
-  () => `${String(progressStore.resets)}/${props.context.layout}`,
-  () => {
-    void router.push(toSet(props.app.id, props.set.id));
-  },
-);
 </script>
 
 <template>

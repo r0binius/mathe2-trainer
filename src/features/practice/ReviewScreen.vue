@@ -5,7 +5,6 @@ import { useRouter } from 'vue-router';
 import BaseButton from '@/components/BaseButton.vue';
 import PageLayout from '@/components/PageLayout.vue';
 import TextProgress from '@/components/TextProgress.vue';
-import { usePracticeSession } from '@/composables/usePracticeSession';
 import { appPracticeItems, reviewItems } from '@/domain/practice/items';
 import type { LearnStage } from '@/domain/practice/learn';
 import { reviewPool, reviewStrategy } from '@/domain/practice/review';
@@ -14,11 +13,9 @@ import { dueCards } from '@/domain/scheduling/scheduler';
 import type { AppDefinition } from '@/domain/shortcuts/types';
 import { useText } from '@/i18n';
 import { toApp } from '@/routes';
-import { useProgressStore } from '@/stores/progress';
 
 import PracticeStage from './PracticeStage.vue';
-import { progressSaver } from './progressSaver';
-import { useSessionExit } from './useSessionExit';
+import { usePracticeScreen } from './usePracticeScreen';
 
 const props = defineProps<{
   /** The app whose due shortcuts are reviewed. */
@@ -28,9 +25,8 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
-const progressStore = useProgressStore();
 const text = useText();
-const { keymap, layout, progress, endOfToday } = props.context;
+const { layout, progress, endOfToday } = props.context;
 
 // The queue is what's due when the review starts; a card forgotten during it goes to the back.
 const due = reviewItems(
@@ -38,14 +34,13 @@ const due = reviewItems(
   appPracticeItems(props.app, props.context),
 );
 
-const [{ session, held, saveFailed }, { skip, forget }] = usePracticeSession(
-  reviewStrategy,
-  reviewPool(due),
+const [{ session, held, saveFailed }, { skip, forget }] = usePracticeScreen(
+  { strategy: reviewStrategy, pool: reviewPool(due), target: { appId: props.app.id, layout } },
   {
-    keymap: () => keymap,
-    save: progressSaver(progressStore, { appId: props.app.id, layout }, Date.now),
-    now: Date.now,
-    random: Math.random,
+    context: () => props.context,
+    leave: () => {
+      void router.push(toApp(props.app.id));
+    },
   },
 );
 
@@ -54,14 +49,6 @@ const done = computed(() => session.value.pool.done);
 /** The review as a bar: the reviewed cards as learned, the rest still to come. */
 const stages = computed(() =>
   due.map((_, index): LearnStage => (index < done.value ? 'learned' : 'unseen')),
-);
-
-useSessionExit(
-  () => session.value,
-  () => `${String(progressStore.resets)}/${props.context.layout}`,
-  () => {
-    void router.push(toApp(props.app.id));
-  },
 );
 </script>
 
