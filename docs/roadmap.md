@@ -596,14 +596,24 @@ Branch `feature/learning-overview`. A view of where learning stands: what's due 
 
 ## Science-backed training ⏳ ([#18](https://codeberg.org/gobin/mouseless/issues/18))
 
-Close the gaps between the shortcut trainer and the research in `docs/specs/shortcut-learning-research.md` (§5). Its core loop already rests on strong or moderate evidence; these parts are heuristics or missing:
+Close the gaps between the shortcut trainer and the research in `docs/specs/shortcut-learning-research.md` (§5): a learning criterion of two recalls, grading limits relative to the learner's own times, and a coach that connects practice to real use. The design is in `docs/specs/science-backed-training.md`.
 
-- **Grading limits:** relative to the learner's own times and the number of keys, instead of a fixed 2 s and 6 s.
-- **Learning criterion:** two or three correct recalls before a shortcut counts as learned, instead of one.
-- **Order:** the most-used commands of a set first.
-- **Transfer to real use:** a coach that offers a command's shortcut when it's chosen from a menu, and opt-in counts of learned shortcuts used in their apps, so the overview shows transfer, not only recall.
+**Sub-steps**
 
-Planned in detail when it starts.
+- [ ] 18.1 Learning criterion
+- [ ] 18.2 Relative grading
+- [ ] 18.3 Spike: menu choices
+- [ ] 18.4 The switch and the coach
+- [ ] 18.5 The banner
+- [ ] 18.6 Key presses
+- [ ] 18.7 Your commands and the overview
+
+**Decisions**
+
+- A shortcut is learned after two correct recalls without the keys, with others in between; a mistake resets the count.
+- Easy and hard are relative to the learner's median time for shortcuts with as many keys (the last 200 correct first tries), with today's 2 s and 6 s until there are 20.
+- One switch, off by default (_Learn from how I work_), lets Mouseless watch menu choices and key presses of known shortcuts. Only counts per shortcut and day are stored, and turning it off deletes them.
+- Menu choices of known shortcuts fill an app's _Your commands_ set and, unless turned off, show a brief banner with the keys. The overview shows the share done by keyboard and the commands still chosen from menus.
 
 ## UI/UX overhaul ⏳ ([#14](https://codeberg.org/gobin/mouseless/issues/14))
 
