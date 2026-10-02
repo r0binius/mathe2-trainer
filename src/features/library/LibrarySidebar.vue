@@ -9,7 +9,7 @@ import type { AppDefinition } from '@/domain/shortcuts/types';
 import { useText } from '@/i18n';
 import { toApp, toOverview } from '@/routes';
 
-import { logoOf } from './logos';
+import AppLogo from './AppLogo.vue';
 
 const props = defineProps<{
   /** Every app Mouseless teaches. */
@@ -101,7 +101,7 @@ defineExpose({ focusSelected });
           :class="{ selected: selectedId === summary.app.id }"
           :to="toApp(summary.app.id)"
         >
-          <img class="logo" :src="logoOf(summary.app.id)" alt="" />
+          <AppLogo :app-id="summary.app.id" />
           <span class="title truncate">{{ text.appTitle(summary.app) }}</span>
           <span v-if="summary.due > 0" class="due">{{ summary.due }}</span>
         </RouterLink>
@@ -170,13 +170,6 @@ defineExpose({ focusSelected });
   &:focus-visible {
     outline: none;
   }
-}
-
-.logo {
-  width: 14px;
-  height: 14px;
-  flex: none;
-  object-fit: contain;
 }
 
 /* A symbol in the space of an app's logo, in the action color. */

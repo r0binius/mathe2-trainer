@@ -15,7 +15,7 @@ import type { AppDefinition } from '@/domain/shortcuts/types';
 import { useText } from '@/i18n';
 import { toReview } from '@/routes';
 
-import { logoOf } from './logos';
+import AppLogo from './AppLogo.vue';
 import SetRow from './SetRow.vue';
 import { focusSidebarKey } from './sidebarFocus';
 
@@ -59,7 +59,7 @@ const nextReview = computed(() => {
   <PageLayout>
     <nav ref="nav">
       <ScreenHeading :title="text.appTitle(app)">
-        <template #leading><img class="logo" :src="logoOf(app.id)" alt="" /></template>
+        <template #leading><AppLogo :app-id="app.id" :size="32" /></template>
         <template v-if="nextReview !== undefined" #meta>{{ nextReview }}</template>
         <template v-if="summary.due > 0" #action>
           <BaseButton variant="accent" size="large" @click="router.push(toReview(app.id))">
@@ -86,12 +86,6 @@ const nextReview = computed(() => {
 </template>
 
 <style scoped>
-.logo {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-}
-
 .sections {
   display: grid;
   gap: 20px;

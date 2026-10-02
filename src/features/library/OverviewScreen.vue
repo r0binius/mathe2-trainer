@@ -19,7 +19,7 @@ import { toApp, toReview } from '@/routes';
 import { useProgressStore } from '@/stores/progress';
 
 import ActivityChart from './ActivityChart.vue';
-import { logoOf } from './logos';
+import AppLogo from './AppLogo.vue';
 
 const props = defineProps<{
   /** Every app Mouseless teaches. */
@@ -105,7 +105,7 @@ const figures = computed(
             :key="summary.app.id"
             :to="toReview(summary.app.id)"
           >
-            <template #leading><img class="logo" :src="logoOf(summary.app.id)" alt="" /></template>
+            <template #leading><AppLogo :app-id="summary.app.id" /></template>
             {{ text.appTitle(summary.app) }}
             <template #meta>{{ text.ui('library.due', { n: summary.due }) }}</template>
           </NavigationRow>
@@ -127,7 +127,7 @@ const figures = computed(
             :key="summary.app.id"
             :to="toApp(summary.app.id)"
           >
-            <template #leading><img class="logo" :src="logoOf(summary.app.id)" alt="" /></template>
+            <template #leading><AppLogo :app-id="summary.app.id" /></template>
             {{ text.appTitle(summary.app) }}
             <template #meta>
               <!-- A meter: the learned share in the learned color on a track in the border color. -->
@@ -193,13 +193,6 @@ const figures = computed(
   margin: -2px 0 6px 1px;
   color: var(--color-text-secondary);
   font-size: 12px;
-}
-
-.logo {
-  width: 14px;
-  height: 14px;
-  flex: none;
-  object-fit: contain;
 }
 
 .meter {
