@@ -5,6 +5,7 @@
 export const icons = {
   chevronLeft: { d: 'M14.5 5L7.5 12L14.5 19', filled: false },
   chevronRight: { d: 'M9.5 5L16.5 12L9.5 19', filled: false },
+  chevronDown: { d: 'M5 9.5L12 16.5L19 9.5', filled: false },
   skip: { d: 'M4.5 6.5L11.5 12L4.5 17.5ZM12.5 6.5L19.5 12L12.5 17.5Z', filled: true },
   keyboard: {
     d: 'M4 6.5H20Q21 6.5 21 7.5V16.5Q21 17.5 20 17.5H4Q3 17.5 3 16.5V7.5Q3 6.5 4 6.5ZM6.5 10H7M9.5 10H10M12.5 10H13M15.5 10H16M17.5 10H18M8.5 14H15.5',

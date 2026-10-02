@@ -5,6 +5,7 @@ import GroupedList from '@/components/GroupedList.vue';
 import ListSection from '@/components/ListSection.vue';
 import NavigationRow from '@/components/NavigationRow.vue';
 import PageLayout from '@/components/PageLayout.vue';
+import ScreenHeading from '@/components/ScreenHeading.vue';
 import TextProgress from '@/components/TextProgress.vue';
 import { useSpatialNav } from '@/composables/useSpatialNav';
 import { summarizeOverview } from '@/domain/progress/overview';
@@ -80,8 +81,9 @@ const figures = computed(
 </script>
 
 <template>
-  <PageLayout :title="text.ui('overview.title')">
+  <PageLayout>
     <nav ref="nav" class="overview">
+      <ScreenHeading class="heading" :title="text.ui('overview.title')" />
       <dl class="figures">
         <div v-for="figure in figures" :key="figure.label" class="figure">
           <dt class="label">{{ text.ui(figure.label) }}</dt>
@@ -148,7 +150,12 @@ const figures = computed(
 <style scoped>
 .overview {
   display: grid;
-  gap: 20px;
+  gap: 10px;
+}
+
+/* The grid's gap spaces the heading, so it needs no padding of its own. */
+.heading {
+  padding-bottom: 0;
 }
 
 /* Four figures in a row, each in a box, the value in mono and its label below. */
@@ -162,7 +169,7 @@ const figures = computed(
   display: flex;
   flex-direction: column-reverse;
   gap: 2px;
-  padding: 6px 10px 8px;
+  padding: 6px 9px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-box);
   background-color: var(--color-box);
@@ -186,7 +193,7 @@ const figures = computed(
 .label {
   color: var(--color-text-tertiary);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -199,8 +206,8 @@ const figures = computed(
 }
 
 .logo {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   flex: none;
   object-fit: contain;
 }

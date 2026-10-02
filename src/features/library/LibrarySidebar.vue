@@ -80,8 +80,10 @@ defineExpose({ focusSelected });
 
 <template>
   <nav class="sidebar" :aria-label="text.ui('library.apps')">
-    <!-- The window's buttons sit here; dragging the space moves the window. -->
-    <div class="titlebar" data-tauri-drag-region />
+    <!-- The window's buttons sit here, then the app's name; dragging the space moves the window. -->
+    <div class="titlebar" data-tauri-drag-region>
+      <span class="name" aria-hidden="true" data-tauri-drag-region>mouseless</span>
+    </div>
 
     <div ref="list" class="list" @keydown="onKeyDown">
       <section class="section">
@@ -119,9 +121,20 @@ defineExpose({ focusSelected });
 }
 
 .titlebar {
+  display: flex;
   flex: none;
+  align-items: center;
   height: var(--titlebar-height);
+  padding-left: 78px;
   border-bottom: 1px solid var(--color-border);
+}
+
+/* The app's name after the window's buttons, small in mono, as a quiet mark. */
+.name {
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .list {
@@ -130,13 +143,9 @@ defineExpose({ focusSelected });
   overflow: hidden auto;
 }
 
-.section + .section {
-  margin-top: 8px;
-}
-
 /* A section label: small uppercase mono, faint. */
 .heading {
-  padding: 4px 8px 2px;
+  padding: 10px 8px 4px;
   color: var(--color-text-tertiary);
   font-family: var(--font-mono);
   font-size: 11px;
@@ -171,15 +180,15 @@ defineExpose({ focusSelected });
 }
 
 .logo {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   flex: none;
   object-fit: contain;
 }
 
 /* A symbol in the space of an app's logo, in the action color. */
 .icon {
-  width: 16px;
+  width: 14px;
   flex: none;
   color: var(--color-action);
 }

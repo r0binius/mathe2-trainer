@@ -25,6 +25,8 @@ const props = defineProps<{
   saveFailed: boolean;
   /** How far each shortcut of the session got, shown as a bar on top. */
   stages: readonly LearnStage[];
+  /** Where the session is, such as the app, set and mode, shown as a label above the bar. */
+  context: readonly string[];
 }>();
 
 const emit = defineEmits<{
@@ -91,6 +93,7 @@ watch(
   <div class="practice">
     <p class="visually-hidden" aria-live="polite">{{ announcement }}</p>
 
+    <p class="context">{{ context.join(' · ') }}</p>
     <StageBar :stages="stages" />
 
     <Transition name="shortcut" mode="out-in">
@@ -142,6 +145,17 @@ watch(
   flex-direction: column;
   height: 100%;
   text-align: center;
+}
+
+/* Where the session is: small uppercase mono, faint, as the section labels. */
+.context {
+  margin-bottom: 8px;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .shortcut {

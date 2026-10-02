@@ -68,7 +68,7 @@ useSessionExit(
 </script>
 
 <template>
-  <PageLayout :title="text.appTitle(app)" :subtitle="text.app(app.id, set.title)">
+  <PageLayout>
     <template #start>
       <BaseButton
         variant="toolbar"
@@ -84,6 +84,7 @@ useSessionExit(
       :held="held"
       :save-failed="saveFailed"
       :stages="stages"
+      :context="[text.appTitle(app), text.app(app.id, set.title), text.ui('learn.title')]"
       @skip="skip"
       @forget="forget"
     >

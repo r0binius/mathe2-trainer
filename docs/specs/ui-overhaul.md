@@ -67,8 +67,10 @@ The fonts are bundled as woff2 (400, 500, 600 of each, Latin) from Fontsource (`
 - Radii: 5 px for boxes and figures, 4 px for buttons, toggles and search fields, 6 px for key caps. No capsules.
 - Spacing: a 4 px grid. A panel's edges have the same spacing on every side, and a panel's actions sit in its bottom-right corner, as far from the right edge as from the bottom.
 - Controls have a fixed height (24 px for buttons), with their label centred in both directions by flex alignment, not by padding.
-- Title bar: 32 px, with the traffic lights centred in it.
-- Sidebar: 176 px, rows about 22 px; list rows about 26 px.
+- Title bar: 32 px and quiet: the traffic lights centred in it, the app's name in small mono after them, and only a page's buttons (back, actions). Pages name themselves with a heading in their content.
+- Sidebar: 176 px, rows about 24 px with 14 px logos; list rows 26 px; content padding 12 px on top, 14 px on the sides and bottom. The preview's CSS is the reference for sizes.
+
+**Rendering:** text keeps WebKit's default smoothing; `antialiased` draws Plex visibly thinner than the preview did.
 
 **Motion:** short and calm, 120–180 ms ease-out. A mistake shakes the key caps once (as now); a correct press outlines them in `learned` briefly. Everything is off under _Reduce motion_.
 
@@ -80,7 +82,7 @@ The fonts are bundled as woff2 (400, 500, 600 of each, Latin) from Fontsource (`
 - **App and set screens:** the same lists and labels; shortcut keys in mono at full text colour.
 - **Practice:**
   - A stage bar on top: one segment per shortcut, `border` for unseen, `due` for trained, `learned` for learned.
-  - The prompt and its description; the title bar already names the app and the set, so the stage repeats neither.
+  - Above the bar, where the session is as a mono label (app · set · learn, or app · review); then the prompt and its description.
   - The footer counts in words what the bar shows (learned of all, or reviewed of due), for VoiceOver.
   - Key caps on `raised` with a hairline border and a 3 px `key-edge` bottom; `learned` outline when correct, `mistake` outline and colour after a mistake, next to the expected keys.
   - Skip stays a button, styled quiet. The preview showed keyboard hints (`esc` stop, `⇥` skip), but practice takes every key as an answer, and shortcuts use both keys (⌃⇥), so there are no such keys to show. Keys for them are a separate decision.

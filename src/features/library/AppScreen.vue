@@ -56,7 +56,7 @@ const nextReview = computed(() => {
 </script>
 
 <template>
-  <PageLayout :title="text.appTitle(app)">
+  <PageLayout>
     <nav ref="nav">
       <ScreenHeading :title="text.appTitle(app)">
         <template #leading><img class="logo" :src="logoOf(app.id)" alt="" /></template>

@@ -16,7 +16,7 @@ import TriggerPane from './TriggerPane.vue';
 
 type Pane = 'general' | 'trigger' | 'progress';
 
-/** The panes in the toolbar, as in the Settings windows of Apple's apps. */
+/** The panes, as tabs in the title bar. */
 const panes: readonly { readonly id: Pane; readonly icon: IconName; readonly title: UiKey }[] = [
   { id: 'general', icon: 'gear', title: 'settings.panes.general' },
   { id: 'trigger', icon: 'keyboard', title: 'settings.panes.trigger' },
@@ -56,9 +56,9 @@ async function change(changes: Partial<Settings>): Promise<void> {
 
 <template>
   <div class="window">
-    <!-- The title bar with the pane's name, and the toolbar that switches panes below it. -->
+    <!-- The title bar holds the tabs that switch panes; the chosen tab names the pane. -->
     <header class="toolbar" data-tauri-drag-region>
-      <h1 class="title" data-tauri-drag-region>{{ text.ui(title) }}</h1>
+      <h1 class="visually-hidden">{{ text.ui(title) }}</h1>
       <div class="tabs" role="tablist" data-tauri-drag-region>
         <button
           v-for="pane in panes"
@@ -70,7 +70,7 @@ async function change(changes: Partial<Settings>): Promise<void> {
           :aria-selected="shown === pane.id"
           @click="shown = pane.id"
         >
-          <BaseIcon :name="pane.icon" :size="22" />
+          <BaseIcon class="icon" :name="pane.icon" :size="14" />
           <span>{{ text.ui(pane.title) }}</span>
         </button>
       </div>
@@ -104,53 +104,59 @@ async function change(changes: Partial<Settings>): Promise<void> {
 }
 
 .toolbar {
-  display: grid;
+  display: flex;
   flex: none;
-  justify-items: center;
-  padding: 7px 0 6px;
+  align-items: center;
+  justify-content: center;
+  height: var(--titlebar-height);
   border-bottom: 1px solid var(--color-border);
-}
-
-.title {
-  font-size: 13px;
-  font-weight: 700;
+  background-color: var(--color-window);
 }
 
 .tabs {
   display: flex;
   gap: 2px;
-  margin-top: 8px;
 }
 
-/* A toolbar item with its icon over its label; the chosen pane's is tinted with the accent. */
+/* A tab: its icon before its label; the chosen one is raised onto the box color. */
 .tab {
-  display: grid;
-  justify-items: center;
-  gap: 2px;
-  min-width: 64px;
-  padding: 4px 8px;
-  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
   color: var(--color-text-secondary);
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 500;
 
   &:hover {
+    background-color: var(--color-fill);
     color: var(--color-text);
   }
 
   &.selected {
-    background-color: var(--color-fill);
+    border-color: var(--color-border);
+    background-color: var(--color-box);
+    color: var(--color-text);
+  }
+}
+
+.icon {
+  .selected & {
     color: var(--color-action);
   }
 }
 
 .pane {
   flex: 1 1 auto;
-  padding: 20px;
+  padding: 16px;
   overflow: hidden auto;
 }
 
 .failed {
-  margin-top: 12px;
+  margin-top: 10px;
   color: var(--color-mistake);
 }
 </style>

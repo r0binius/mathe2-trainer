@@ -30,7 +30,7 @@ const slots = defineSlots<{
   display: flex;
   align-items: center;
   gap: 10px;
-  padding-bottom: 16px;
+  padding-bottom: 10px;
 }
 
 .text {

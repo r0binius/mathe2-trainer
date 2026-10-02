@@ -44,6 +44,7 @@
     "continue": "Continue"
   },
   "learn": {
+    "title": "Learn",
     "back": "Overview",
     "mastered": "{n} mastered"
   },

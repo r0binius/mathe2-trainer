@@ -15,7 +15,7 @@ defineSlots<{
 </script>
 
 <template>
-  <!-- A row of a grouped form, as in System Settings: the label leading, the control trailing. -->
+  <!-- A row of a grouped form: the label leading, the control trailing. -->
   <div class="row">
     <div class="text">
       <label v-if="labelFor" :for="labelFor">{{ label }}</label>
@@ -32,8 +32,8 @@ defineSlots<{
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  min-height: 44px;
-  padding: 8px 12px;
+  min-height: 30px;
+  padding: 5px 9px;
 }
 
 .text {
@@ -41,7 +41,7 @@ defineSlots<{
 }
 
 .hint {
-  margin-top: 2px;
+  margin-top: 1px;
   color: var(--color-text-secondary);
   font-size: 11px;
 }

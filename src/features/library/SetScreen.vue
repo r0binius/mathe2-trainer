@@ -50,7 +50,7 @@ const continues = computed(() => {
 </script>
 
 <template>
-  <PageLayout :title="text.appTitle(app)" :subtitle="title">
+  <PageLayout>
     <template #start>
       <BaseButton
         variant="toolbar"
@@ -105,8 +105,8 @@ const continues = computed(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 28px;
-  padding: 4px 10px;
+  min-height: 26px;
+  padding: 3px 9px;
 }
 
 .check {

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BaseIcon from '@/components/BaseIcon.vue';
 import GroupedList from '@/components/GroupedList.vue';
 import type { LanguageSetting } from '@/domain/settings/language';
 import type { Settings } from '@/domain/settings/settings';
@@ -43,10 +44,16 @@ function checkedOf(event: Event): boolean {
 <template>
   <GroupedList>
     <SettingRow :label="text.ui('settings.language')" label-for="language">
-      <select id="language" :value="settings.language" @change="chooseLanguage">
-        <option value="system">{{ text.ui('settings.system') }}</option>
-        <option v-for="[value, name] in languages" :key="value" :value="value">{{ name }}</option>
-      </select>
+      <!-- A flat menu button; the chevron stands in for the system's arrows. -->
+      <span class="select">
+        <select id="language" :value="settings.language" @change="chooseLanguage">
+          <option value="system">{{ text.ui('settings.system') }}</option>
+          <option v-for="[value, name] in languages" :key="value" :value="value">
+            {{ name }}
+          </option>
+        </select>
+        <BaseIcon class="chevron" name="chevronDown" :size="10" />
+      </span>
     </SettingRow>
   </GroupedList>
 
@@ -79,6 +86,33 @@ function checkedOf(event: Event): boolean {
 
 <style scoped>
 .icons {
-  margin-top: 16px;
+  margin-top: 12px;
+}
+
+.select {
+  position: relative;
+  display: inline-flex;
+}
+
+select {
+  height: 24px;
+  padding: 0 24px 0 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background-color: var(--color-raised);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  appearance: none;
+}
+
+.chevron {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  color: var(--color-text-secondary);
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 </style>
