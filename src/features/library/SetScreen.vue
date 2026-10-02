@@ -2,6 +2,7 @@
 import { computed, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
 
+import BackButton from '@/components/BackButton.vue';
 import BaseButton from '@/components/BaseButton.vue';
 import GroupedList from '@/components/GroupedList.vue';
 import KeyCapSmall from '@/components/KeyCapSmall.vue';
@@ -52,12 +53,7 @@ const continues = computed(() => {
 <template>
   <PageLayout>
     <template #start>
-      <BaseButton
-        variant="toolbar"
-        icon="chevronLeft"
-        :label="text.ui('set.back')"
-        @click="router.push(toApp(app.id))"
-      />
+      <BackButton :to="toApp(app.id)" :label="text.ui('set.back')" />
     </template>
 
     <nav ref="nav">

@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
-import BaseButton from '@/components/BaseButton.vue';
+import BackButton from '@/components/BackButton.vue';
 import PageLayout from '@/components/PageLayout.vue';
 import TextProgress from '@/components/TextProgress.vue';
 import { appPracticeItems, reviewItems } from '@/domain/practice/items';
@@ -55,12 +55,7 @@ const stages = computed(() =>
 <template>
   <PageLayout>
     <template #start>
-      <BaseButton
-        variant="toolbar"
-        icon="chevronLeft"
-        :label="text.ui('review.back')"
-        @click="router.push(toApp(app.id))"
-      />
+      <BackButton :to="toApp(app.id)" :label="text.ui('review.back')" />
     </template>
 
     <PracticeStage

@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
-import BaseButton from '@/components/BaseButton.vue';
+import BackButton from '@/components/BackButton.vue';
 import PageLayout from '@/components/PageLayout.vue';
 import TextProgress from '@/components/TextProgress.vue';
 import { practiceItems } from '@/domain/practice/items';
@@ -61,12 +61,7 @@ watch(learned, (count) => {
 <template>
   <PageLayout>
     <template #start>
-      <BaseButton
-        variant="toolbar"
-        icon="chevronLeft"
-        :label="text.ui('learn.back')"
-        @click="router.push(toSet(app.id, set.id))"
-      />
+      <BackButton :to="toSet(app.id, set.id)" :label="text.ui('learn.back')" />
     </template>
 
     <PracticeStage
