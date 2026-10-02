@@ -93,7 +93,7 @@ watch(
   <div class="practice">
     <p class="visually-hidden" aria-live="polite">{{ announcement }}</p>
 
-    <p class="context">{{ context.join(' · ') }}</p>
+    <p class="context caption">{{ context.join(' · ') }}</p>
     <StageBar :stages="stages" />
 
     <Transition name="shortcut" mode="out-in">
@@ -147,15 +147,8 @@ watch(
   text-align: center;
 }
 
-/* Where the session is: small uppercase mono, faint, as the section labels. */
 .context {
   margin-bottom: 8px;
-  color: var(--color-text-tertiary);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .shortcut {

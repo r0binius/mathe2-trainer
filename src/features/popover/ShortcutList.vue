@@ -44,7 +44,7 @@ defineExpose({
     <p v-if="groups.length === 0" class="hint">{{ empty }}</p>
     <p v-else-if="shown.length === 0" class="hint">{{ text.ui('popover.noMatches') }}</p>
     <section v-for="group in shown" :key="group.title" class="group">
-      <h2 class="group-title">{{ group.title }}</h2>
+      <h2 class="group-title caption">{{ group.title }}</h2>
       <ul>
         <li v-for="(row, index) in group.items" :key="index" class="row">
           <span class="title truncate">{{ row.title }}</span>
@@ -94,15 +94,8 @@ defineExpose({
   margin-top: 4px;
 }
 
-/* A section label: small uppercase mono, faint. */
 .group-title {
   padding: 6px 2px 2px;
-  color: var(--color-text-tertiary);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 ul {

@@ -86,7 +86,7 @@ const figures = computed(
       <ScreenHeading class="heading" :title="text.ui('overview.title')" />
       <dl class="figures">
         <div v-for="figure in figures" :key="figure.label" class="figure">
-          <dt class="label">{{ text.ui(figure.label) }}</dt>
+          <dt class="caption">{{ text.ui(figure.label) }}</dt>
           <dd class="value" :class="figure.tone">{{ figure.value }}</dd>
         </div>
       </dl>
@@ -187,16 +187,6 @@ const figures = computed(
   &.learned {
     color: var(--color-learned);
   }
-}
-
-/* A figure's label: small uppercase mono, faint. */
-.label {
-  color: var(--color-text-tertiary);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .total {

@@ -93,7 +93,7 @@ defineExpose({ focusSelected });
         </RouterLink>
       </section>
       <section v-for="section in sections" :key="section.id" class="section">
-        <h2 class="heading">{{ section.title }}</h2>
+        <h2 class="heading caption">{{ section.title }}</h2>
         <RouterLink
           v-for="summary in section.apps"
           :key="summary.app.id"
@@ -143,15 +143,8 @@ defineExpose({ focusSelected });
   overflow: hidden auto;
 }
 
-/* A section label: small uppercase mono, faint. */
 .heading {
   padding: 10px 8px 4px;
-  color: var(--color-text-tertiary);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .item {

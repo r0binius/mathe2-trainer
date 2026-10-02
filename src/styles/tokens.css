@@ -23,7 +23,6 @@
   --color-learned: #56702f;
   --color-mistake: #b03f54;
   --color-due: #8c600a;
-  --color-info: #2a7366;
 
   /* Fills for rows and controls under the pointer, from the text color. */
   --color-fill: color-mix(in srgb, var(--color-text) 6%, transparent);
@@ -65,7 +64,6 @@
     --color-learned: #b4bd8f;
     --color-mistake: #ec7a85;
     --color-due: #f2d16b;
-    --color-info: #93d0b8;
 
     --color-key-edge: #1a181c;
   }

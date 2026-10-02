@@ -42,7 +42,7 @@ All colours are roles in `src/styles/tokens.css`; components use the roles, neve
 | `learned`        | `#b4bd8f` sage  | `#56702f`            | Learned, correct, recall rate, progress meters                    |
 | `mistake`        | `#ec7a85` rose  | `#b03f54`            | Wrong keys, errors                                                |
 | `due`            | `#f2d16b` honey | `#8c600a`            | Due counts, trained stage                                         |
-| `info`           | `#93d0b8` mint  | `#2a7366`            | Hints that aren't warnings                                        |
+| `info`           | `#93d0b8` mint  | `#2a7366`            | Hints that aren't warnings; in `tokens.css` from its first use    |
 | `key-edge`       | `#1a181c`       | `#d6cabb`            | The raised bottom edge of a key cap                               |
 
 **Contrast** (WCAG, checked): text and every accent at least 4.5:1 on `content` and `box`; tertiary text at least 3:1 (labels and hints only); `on-action` on `action` at least 5:1.
@@ -53,7 +53,7 @@ All colours are roles in `src/styles/tokens.css`; components use the roles, neve
 | ----------------------------------- | ----------- | -------------------------------------------------------------------- |
 | Body, rows, buttons                 | Plex Sans   | 13 px / 400, 500 for buttons; 12 px in the popover and settings rows |
 | Screen titles                       | Plex Sans   | 17 px / 600                                                          |
-| Section labels                      | Plex Mono   | 11 px / 500, uppercase, 0.08 em tracking, `text-tertiary`            |
+| Section labels (`.caption`)         | Plex Mono   | 11 px / 500, uppercase, 0.08 em tracking, `text-tertiary`            |
 | Figures (overview)                  | Plex Mono   | 19 px / 500                                                          |
 | Keys in lists (popover, set screen) | Plex Mono   | 13 px / 500, `text`                                                  |
 | Practice prompt                     | Plex Sans   | 30 px / 500                                                          |
