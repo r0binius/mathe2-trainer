@@ -86,7 +86,7 @@ defineExpose({ focusSelected });
     <div ref="list" class="list" @keydown="onKeyDown">
       <section class="section">
         <RouterLink class="item" :class="{ selected: overviewShown }" :to="toOverview()">
-          <BaseIcon class="icon" name="chart" :size="16" />
+          <BaseIcon class="icon" name="chart" :size="14" />
           <span class="title truncate">{{ text.ui('overview.title') }}</span>
         </RouterLink>
       </section>
@@ -109,54 +109,60 @@ defineExpose({ focusSelected });
 </template>
 
 <style scoped>
-/* Transparent from edge to edge, so the window's sidebar material shows through, as on macOS 27. */
+/* The window's color from edge to edge, with hairlines to the detail and below the title bar. */
 .sidebar {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  border-right: 1px solid var(--color-border);
+  background-color: var(--color-window);
 }
 
 .titlebar {
   flex: none;
-  height: var(--toolbar-height);
+  height: var(--titlebar-height);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .list {
   flex: 1 1 auto;
-  padding: 0 10px 10px;
-  font-size: 13px;
+  padding: 6px;
   overflow: hidden auto;
 }
 
 .section + .section {
-  margin-top: 16px;
+  margin-top: 8px;
 }
 
-/* A sidebar section header: small, semibold and faint. */
+/* A section label: small uppercase mono, faint. */
 .heading {
-  padding: 0 6px 4px;
+  padding: 4px 8px 2px;
   color: var(--color-text-tertiary);
+  font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .item {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 32px;
+  height: 24px;
   padding: 0 8px;
   border-radius: var(--radius-box);
+  color: var(--color-text-secondary);
 
-  /* The selection is bold, lightened accent while the sidebar has focus, and gray otherwise. */
-  &.selected {
-    background-color: var(--color-fill-hover);
-    font-weight: 600;
+  &:hover {
+    background-color: var(--color-fill);
   }
 
-  .list:focus-within &.selected {
-    background-color: var(--color-selection);
-    color: var(--color-on-action);
+  /* The selection: a raised row with a bar in the action color on its leading edge. */
+  &.selected {
+    background-color: var(--color-box);
+    box-shadow: inset 2px 0 0 var(--color-action);
+    color: var(--color-text);
   }
 
   &:focus-visible {
@@ -165,34 +171,28 @@ defineExpose({ focusSelected });
 }
 
 .logo {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   flex: none;
   object-fit: contain;
 }
 
-/* A symbol in the space of an app's logo, in the accent as in Finder's sidebar. */
+/* A symbol in the space of an app's logo, in the action color. */
 .icon {
-  width: 20px;
+  width: 16px;
   flex: none;
   color: var(--color-action);
-
-  .list:focus-within .selected & {
-    color: inherit;
-  }
 }
 
 .title {
   flex: 1 1 auto;
 }
 
-/* A count like Mail's unread one. */
+/* How many of the app's shortcuts are due, in the due color. */
 .due {
-  color: var(--color-text-secondary);
-  font-variant-numeric: tabular-nums;
-
-  .list:focus-within .selected & {
-    color: inherit;
-  }
+  color: var(--color-due);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
 }
 </style>

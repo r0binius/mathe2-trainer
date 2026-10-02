@@ -44,11 +44,6 @@ provide(focusSidebarKey, () => {
 </template>
 
 <style scoped>
-/* The window is transparent, so the sidebar shows macOS's sidebar material behind it. */
-:global(body) {
-  background-color: transparent;
-}
-
 .window {
   display: grid;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);

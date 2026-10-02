@@ -90,13 +90,17 @@ const emit = defineEmits<{
   color: var(--color-mistake);
 }
 
-/* A toolbar item: a glass capsule, as on macOS 27. */
+/* A title bar item: flat, with a fill under the pointer. */
 .toolbar {
-  min-width: 36px;
-  min-height: 36px;
-  padding: 0 10px;
-  background-color: var(--color-capsule);
-  box-shadow: inset 0 0 0 0.5px var(--color-capsule-edge);
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0 6px;
+  color: var(--color-text-secondary);
+
+  &:hover {
+    background-color: var(--color-fill);
+    color: var(--color-text);
+  }
 
   &:active {
     background-color: var(--color-fill-hover);

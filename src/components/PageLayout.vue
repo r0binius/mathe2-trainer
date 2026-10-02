@@ -18,7 +18,7 @@ defineSlots<{
 
 <template>
   <div class="page">
-    <!-- Dragging the toolbar moves the window, as the native one would. -->
+    <!-- Dragging the toolbar moves the window, as a title bar would. -->
     <header class="toolbar" data-tauri-drag-region>
       <slot name="start" />
       <div class="title truncate" data-tauri-drag-region>
@@ -40,21 +40,22 @@ defineSlots<{
   background-color: var(--color-content);
 }
 
-/* The window's toolbar, as on macOS 27: capsules centred on the window's buttons, the title next
-to them, and no line below. */
+/* The detail's part of the title bar: flat, in the window's color, with the page's title and
+actions in it and a hairline below, continuing the sidebar's. */
 .toolbar {
   display: flex;
   flex: none;
   align-items: center;
-  gap: 12px;
-  height: var(--toolbar-height);
-  padding: 0 8px 0 12px;
+  gap: 8px;
+  height: var(--titlebar-height);
+  padding: 0 4px 0 16px;
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-window);
 }
 
 .title {
   flex: 1 1 auto;
-  font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .subtitle {
@@ -64,7 +65,7 @@ to them, and no line below. */
 
 .content {
   flex: 1 1 auto;
-  padding: 0 20px 20px;
+  padding: 16px;
   overflow: hidden auto;
   overscroll-behavior: contain;
 }

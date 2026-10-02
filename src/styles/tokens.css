@@ -32,20 +32,19 @@
   /* The raised bottom edge of a key cap. */
   --color-key-edge: #d6cabb;
 
-  /* Until the frame, sidebar and buttons get their new styles (14.2, 14.3). */
+  /* Until the buttons and the popover get their new styles (14.3, 14.5). */
   --color-selection: color-mix(in srgb, var(--color-action) 30%, transparent);
   --color-button: var(--color-raised);
   --color-button-pressed: var(--color-fill-hover);
   --shadow-button: 0 0 0 1px var(--color-border);
-  --color-capsule: var(--color-raised);
-  --color-capsule-edge: var(--color-border);
-  --toolbar-height: 52px;
 
   /* Small corners and no capsules: boxes, controls and key caps. */
   --radius-box: 5px;
   --radius-control: 4px;
   --radius-key: 6px;
 
+  /* The title bar, flat across the sidebar and the detail, with the window's buttons centred in it. */
+  --titlebar-height: 32px;
   --sidebar-width: 176px;
 
   --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
