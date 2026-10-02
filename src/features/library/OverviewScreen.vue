@@ -128,7 +128,7 @@ const figures = computed(
             <template #leading><img class="logo" :src="logoOf(summary.app.id)" alt="" /></template>
             {{ text.appTitle(summary.app) }}
             <template #meta>
-              <!-- A meter: the learned share in the learned color on a raised track. -->
+              <!-- A meter: the learned share in the learned color on a track in the border color. -->
               <span class="meter" aria-hidden="true">
                 <span
                   class="fill"
@@ -210,7 +210,7 @@ const figures = computed(
   height: 4px;
   overflow: hidden;
   border-radius: 2px;
-  background-color: var(--color-raised);
+  background-color: var(--color-border);
 }
 
 .fill {

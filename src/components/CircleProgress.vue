@@ -45,7 +45,7 @@ const remaining = computed(() => (max > 0 ? (max - value) / max : 1));
 }
 
 .track {
-  stroke: var(--color-raised);
+  stroke: var(--color-border);
 }
 
 .done {

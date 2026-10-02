@@ -7,6 +7,7 @@ import PageLayout from '@/components/PageLayout.vue';
 import TextProgress from '@/components/TextProgress.vue';
 import { usePracticeSession } from '@/composables/usePracticeSession';
 import { appPracticeItems, reviewItems } from '@/domain/practice/items';
+import type { LearnStage } from '@/domain/practice/learn';
 import { reviewPool, reviewStrategy } from '@/domain/practice/review';
 import type { SummaryContext } from '@/domain/progress/summary';
 import { dueCards } from '@/domain/scheduling/scheduler';
@@ -50,6 +51,11 @@ const [{ session, held, saveFailed }, { skip, forget }] = usePracticeSession(
 
 const done = computed(() => session.value.pool.done);
 
+/** The review as a bar: the reviewed cards as learned, the rest still to come. */
+const stages = computed(() =>
+  due.map((_, index): LearnStage => (index < done.value ? 'learned' : 'unseen')),
+);
+
 useSessionExit(
   () => session.value,
   () => `${String(progressStore.resets)}/${props.context.layout}`,
@@ -75,6 +81,7 @@ useSessionExit(
       :session="session"
       :held="held"
       :save-failed="saveFailed"
+      :stages="stages"
       @skip="skip"
       @forget="forget"
     >

@@ -624,7 +624,7 @@ Give Mouseless a look of its own, after Halloy and Gram: IBM Plex Sans and Mono,
 - [x] 14.1 Tokens and fonts
 - [x] 14.2 Frame and sidebar
 - [x] 14.3 Lists, overview, app and set screens
-- [ ] 14.4 Practice
+- [x] 14.4 Practice
 - [ ] 14.5 Popover
 - [ ] 14.6 Settings window
 

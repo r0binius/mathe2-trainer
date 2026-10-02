@@ -6,11 +6,13 @@ import KeyCap from '@/components/KeyCap.vue';
 import SkipButton from '@/components/SkipButton.vue';
 import { useKeyLabels } from '@/composables/useKeyLabels';
 import type { KeyCombination } from '@/domain/keyboard/combination';
+import type { LearnStage } from '@/domain/practice/learn';
 import type { PracticeItem, Session } from '@/domain/practice/session';
 import { useText } from '@/i18n';
 
 import { announcementOf } from './announcement';
 import { keyCapsOf } from './keyCaps';
+import StageBar from './StageBar.vue';
 
 const props = defineProps<{
   /** The app whose shortcuts are practiced, for their texts. */
@@ -21,6 +23,8 @@ const props = defineProps<{
   held: KeyCombination;
   /** Whether a result couldn't be saved, shown as a notice. */
   saveFailed: boolean;
+  /** How far each shortcut of the session got, shown as a bar on top. */
+  stages: readonly LearnStage[];
 }>();
 
 const emit = defineEmits<{
@@ -87,6 +91,8 @@ watch(
   <div class="practice">
     <p class="visually-hidden" aria-live="polite">{{ announcement }}</p>
 
+    <StageBar :stages="stages" />
+
     <Transition name="shortcut" mode="out-in">
       <div
         v-if="session.phase !== 'finished'"
@@ -150,23 +156,27 @@ watch(
   animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
+/* The prompt: the stage's one large text. */
 .title {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 30px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
 .description {
-  max-width: 360px;
-  margin: 6px auto 0;
+  max-width: 400px;
+  margin: 8px auto 0;
   color: var(--color-text-secondary);
+  font-size: 14px;
 }
 
 .keys {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 40px;
-  margin-top: 28px;
+  gap: 36px;
+  margin-top: 32px;
 }
 
 .row {
@@ -187,7 +197,7 @@ watch(
   align-items: center;
   gap: 8px;
   color: var(--color-text-secondary);
-  font-variant-numeric: tabular-nums;
+  font-size: 12px;
 }
 
 .actions {
@@ -215,6 +225,17 @@ watch(
 .shortcut-leave-to {
   transform: translateX(-10px);
   opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shaking {
+    animation: none;
+  }
+
+  .shortcut-enter-active,
+  .shortcut-leave-active {
+    transition: none;
+  }
 }
 
 @keyframes shake {

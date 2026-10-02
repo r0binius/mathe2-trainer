@@ -3,8 +3,8 @@ import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import BaseButton from '@/components/BaseButton.vue';
-import CircleProgress from '@/components/CircleProgress.vue';
 import PageLayout from '@/components/PageLayout.vue';
+import TextProgress from '@/components/TextProgress.vue';
 import { usePracticeSession } from '@/composables/usePracticeSession';
 import { practiceItems } from '@/domain/practice/items';
 import { learnPool, learnStrategy } from '@/domain/practice/learn';
@@ -48,9 +48,8 @@ const [{ session, held, saveFailed }, { skip, forget }] = usePracticeSession(
   },
 );
 
-const learned = computed(
-  () => session.value.pool.entries.filter(({ stage }) => stage === 'learned').length,
-);
+const stages = computed(() => session.value.pool.entries.map(({ stage }) => stage));
+const learned = computed(() => stages.value.filter((stage) => stage === 'learned').length);
 
 /** The learned count to announce, while its message shows. */
 const announced = ref<number>();
@@ -84,11 +83,12 @@ useSessionExit(
       :session="session"
       :held="held"
       :save-failed="saveFailed"
+      :stages="stages"
       @skip="skip"
       @forget="forget"
     >
       <template #progress>
-        <CircleProgress v-if="learned > 0" :value="learned" :max="session.pool.entries.length" />
+        <TextProgress :value="learned" :max="stages.length" />
         <span
           v-if="announced !== undefined"
           :key="announced"

@@ -76,11 +76,12 @@ The fonts are bundled as woff2 (400, 500, 600 of each, Latin) from Fontsource (`
 
 - **Frame:** the main and Settings windows lose the sidebar material and transparency (`windowEffects` and `transparent` go from the main window), with a flat 32 px title bar in `window` and the traffic lights repositioned into it.
 - **Sidebar:** `window` background, rows in `text-secondary`; the selected row gets `box`, `text` and a 2 px `action` bar on its left edge. Section labels in the mono label style. Due counts in `due`, in mono.
-- **Overview:** four figure boxes with values in mono (due in `due`, recall rate in `learned`) and labels in the label style below; activity bars in `action`; progress meters in `learned` on a `raised` track, with counts in mono.
+- **Overview:** four figure boxes with values in mono (due in `due`, recall rate in `learned`) and labels in the label style below; activity bars in `action`; progress meters in `learned` on a `border` track, with counts in mono.
 - **App and set screens:** the same lists and labels; shortcut keys in mono at full text colour.
 - **Practice:**
-  - A stage bar on top: one segment per shortcut, `raised` for unseen, `due` for trained, `learned` for learned.
-  - Context as a label (app · set · learn or review), then the prompt and the instruction.
+  - A stage bar on top: one segment per shortcut, `border` for unseen, `due` for trained, `learned` for learned.
+  - The prompt and its description; the title bar already names the app and the set, so the stage repeats neither.
+  - The footer counts in words what the bar shows (learned of all, or reviewed of due), for VoiceOver.
   - Key caps on `raised` with a hairline border and a 3 px `key-edge` bottom; `learned` outline when correct, `mistake` outline and colour after a mistake, next to the expected keys.
   - Skip stays a button, styled quiet. The preview showed keyboard hints (`esc` stop, `⇥` skip), but practice takes every key as an answer, and shortcuts use both keys (⌃⇥), so there are no such keys to show. Keys for them are a separate decision.
   - The stage keeps its generous spacing; the frame around it stays compact.

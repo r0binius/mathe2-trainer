@@ -16,7 +16,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="key" :class="{ hidden, pressed }">
+  <div class="key" :class="[{ hidden, pressed }, result]">
     <div class="outline">{{ label.symbol }}</div>
 
     <Transition name="pop-up">
@@ -42,17 +42,18 @@ defineProps<{
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 56px;
-  height: 56px;
+  min-width: 52px;
+  height: 52px;
   padding: 0 12px;
   border-radius: var(--radius-key);
   font-family: var(--font-mono);
-  font-size: 24px;
+  font-size: 22px;
+  font-weight: 500;
 }
 
 /* Where the key goes: a shallow well, dashed while the key is being asked for. */
 .outline {
-  border: 1.5px solid var(--color-border);
+  border: 1px solid var(--color-border);
   background-color: var(--color-fill);
   color: var(--color-text-secondary);
 
@@ -69,26 +70,36 @@ defineProps<{
   }
 }
 
-/* The key itself, raised above its well like a key on a Mac keyboard. */
+/* The key itself: raised, with a hairline and a deeper bottom edge. Its outline turns to the
+learned or mistake color once the press is judged. */
 .cap {
   position: absolute;
   inset: 0;
+  border: 1px solid var(--color-border);
+  border-bottom: 3px solid var(--color-key-edge);
   background-color: var(--color-raised);
-  box-shadow:
-    0 0 0 0.5px var(--color-key-edge),
-    0 2px 0 var(--color-key-edge),
-    0 3px 6px rgb(0 0 0 / 12%);
   color: var(--color-text);
   will-change: transform;
+
+  .correct & {
+    border-color: var(--color-learned);
+    color: var(--color-learned);
+  }
+
+  .wrong & {
+    border-color: var(--color-mistake);
+    color: var(--color-mistake);
+  }
 }
 
 .name {
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 8px);
   left: -2px;
   width: calc(100% + 4px);
-  color: var(--color-text-secondary);
-  font-size: 11px;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 10px;
   text-align: center;
 
   .hidden:not(.pressed) & {
@@ -109,6 +120,13 @@ defineProps<{
 
 .pop-up-leave-active {
   animation: pop-up-leave 0.2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pop-up-enter-active,
+  .pop-up-leave-active {
+    animation: none;
+  }
 }
 
 @keyframes pop-up-enter {

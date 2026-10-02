@@ -20,13 +20,15 @@ defineSlots<{
 </template>
 
 <style scoped>
-/* A borderless toolbar-style button whose word appears when you reach for it. */
+/* A quiet borderless button whose word appears when you reach for it. */
 .skip {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  min-height: 28px;
+  height: 24px;
   padding: 0 8px;
+  font-size: 12px;
+  font-weight: 500;
   border-radius: var(--radius-control);
   color: var(--color-text-secondary);
 
