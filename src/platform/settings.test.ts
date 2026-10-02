@@ -10,6 +10,7 @@ const settings: Settings = {
   showMenuBarIcon: true,
   showDockIcon: false,
   language: 'system',
+  learnFromWork: false,
 };
 
 describe('settingsRepository', () => {

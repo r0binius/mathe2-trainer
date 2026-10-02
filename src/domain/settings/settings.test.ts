@@ -9,6 +9,7 @@ const defaults = {
   showMenuBarIcon: true,
   showDockIcon: true,
   language: 'system',
+  learnFromWork: false,
 };
 
 describe('decodeSettings', () => {
@@ -26,6 +27,18 @@ describe('decodeSettings', () => {
     expect(decodeSettings({ ...defaults, language: 'de' })).toStrictEqual(
       ok({ ...defaults, language: 'de' }),
     );
+  });
+
+  it('decodes learning from work turned on', () => {
+    expect(decodeSettings({ ...defaults, learnFromWork: true })).toStrictEqual(
+      ok({ ...defaults, learnFromWork: true }),
+    );
+  });
+
+  it('rejects settings without learning from work, which Rust always sends', () => {
+    const { trigger, showMenuBarIcon, showDockIcon, language } = defaults;
+
+    expect(decodeSettings({ trigger, showMenuBarIcon, showDockIcon, language }).kind).toBe('err');
   });
 
   it('rejects an unknown trigger', () => {

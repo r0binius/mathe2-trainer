@@ -52,6 +52,9 @@ What changes underneath:
 
 All of this runs only while **Settings → General → Learn from how I work** is on. Turning it off stops watching and deletes the counts.
 
+- **Permissions:** watching needs Accessibility (menus) and Input Monitoring (the event tap). The switch turns on regardless, and macOS asks for what's missing; until both are granted, the Settings row says which one is missing, with a button that opens System Settings there. Watching starts once both are granted.
+- **Its own event tap:** the coach doesn't share the ⌘-hold tap, which lives as long as the app. It makes a tap of its own when the switch turns on, and removes it when it turns off, so off really means nothing is watched.
+
 ### 4.1 Menu choices (the coach)
 
 - Mouseless observes the frontmost app's menus through Accessibility (granted already for the lookup) and follows the **highlighted item**: on `AXSelectedChildrenChanged` from a menu, it reads the menu's `AXSelectedChildren`, whose title, key and modifier mask `menu_keys.rs` already turns into keys.
@@ -74,16 +77,16 @@ When a menu use matched a shortcut and **Show the shortcut when I use a menu** i
 
 ### 4.4 Storage
 
-A new table, kept per local day so it can be shown over time and deleted at once:
+A new table (`migrations/0005_usage.sql`), kept per local day so it can be shown over time and deleted at once. Saving the settings with the switch off deletes every row, and so does resetting progress:
 
 ```sql
 CREATE TABLE usage (
-    card_id TEXT NOT NULL,
+    shortcut_id TEXT NOT NULL,
     layout TEXT NOT NULL,
     day INTEGER NOT NULL,      -- local day number, as localDay counts it
-    by_keys INTEGER NOT NULL,
-    by_menu INTEGER NOT NULL,
-    PRIMARY KEY (card_id, layout, day)
+    by_keys INTEGER NOT NULL DEFAULT 0 CHECK (by_keys >= 0),
+    by_menu INTEGER NOT NULL DEFAULT 0 CHECK (by_menu >= 0),
+    PRIMARY KEY (shortcut_id, layout, day)
 ) STRICT;
 ```
 

@@ -12,6 +12,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::AppError;
 use crate::services::database::{Json, query_all};
+use crate::services::usage;
 use crate::services::values::{EpochMillis, InvalidValue, LayoutId, ShortcutId};
 
 /// The stability range FSRS works in, in days, as the frontend's scheduler checks it.
@@ -342,7 +343,7 @@ pub fn replace(connection: &mut Connection, progress: &StoredProgress) -> Result
     Ok(())
 }
 
-/// Deletes all progress: set records, cards and the review log, on every layout.
+/// Deletes all progress: set records, cards, the review log and the usage counts, on every layout.
 ///
 /// # Errors
 ///
@@ -352,6 +353,7 @@ pub fn reset(connection: &mut Connection) -> Result<(), AppError> {
 
     delete_sets_and_cards(&transaction)?;
     transaction.execute("DELETE FROM reviews", ())?;
+    usage::forget(&transaction)?;
     transaction.commit()?;
     Ok(())
 }
@@ -863,12 +865,23 @@ mod tests {
     fn reset_deletes_everything() {
         let database = Database::in_memory();
 
+        let count_use = "INSERT INTO usage (shortcut_id, layout, day, by_keys)
+            VALUES ('macos/Meta+m', 'German', 20000, 1)";
+        let uses = "SELECT count(*) FROM usage";
+
         saved(&database, &record(GERMAN, &[], None));
         reviewed(&database, &review(Grade::Good), Some(&card(GERMAN, 1)));
+        database
+            .with(|connection| Ok(connection.execute(count_use, ())?))
+            .expect("a use is counted");
         database.with(reset).expect("the progress is reset");
+        let remaining: i64 = database
+            .with(|connection| Ok(connection.query_row(uses, (), |row| row.get(0))?))
+            .expect("the usage counts are counted");
 
         assert_eq!(loaded(&database), StoredProgress::default());
         assert_eq!(logged(&database), []);
+        assert_eq!(remaining, 0);
     }
 
     #[test]

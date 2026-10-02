@@ -9,6 +9,7 @@ use serde_json::{Map, Value};
 
 use crate::error::AppError;
 use crate::services::database::query_all;
+use crate::services::usage;
 
 /// How the popover is opened.
 #[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize)]
@@ -86,6 +87,8 @@ pub struct Settings {
     pub show_dock_icon: bool,
     /// The language of the interface.
     pub language: Language,
+    /// Whether Mouseless watches menu choices and key presses of known shortcuts, and counts them.
+    pub learn_from_work: bool,
 }
 
 impl Settings {
@@ -105,6 +108,7 @@ impl Default for Settings {
             show_menu_bar_icon: true,
             show_dock_icon: true,
             language: Language::System,
+            learn_from_work: false,
         }
     }
 }
@@ -130,7 +134,8 @@ pub fn load(connection: &Connection) -> Result<Settings, AppError> {
         }))
 }
 
-/// Stores the settings that differ from their defaults, replacing what was stored.
+/// Stores the settings that differ from their defaults, replacing what was stored. Without
+/// [`Settings::learn_from_work`], the usage counts are deleted with them.
 ///
 /// # Errors
 ///
@@ -147,6 +152,9 @@ pub fn save(connection: &mut Connection, settings: &Settings) -> Result<(), AppE
                 (key, value.to_string()),
             )?;
         }
+    }
+    if !settings.learn_from_work {
+        usage::forget(&transaction)?;
     }
     transaction.commit()?;
     Ok(())
@@ -229,9 +237,10 @@ mod tests {
             trigger: Trigger::Shortcut {
                 keys: vec!["Meta".to_owned(), "Shift".to_owned(), "m".to_owned()],
             },
+            show_menu_bar_icon: true,
             show_dock_icon: false,
             language: Language::De,
-            ..Settings::default()
+            learn_from_work: true,
         }
     }
 
@@ -272,6 +281,7 @@ mod tests {
                 "showMenuBarIcon": true,
                 "showDockIcon": false,
                 "language": "de",
+                "learnFromWork": true,
             }),
         );
         assert_eq!(
@@ -287,6 +297,7 @@ mod tests {
             "showMenuBarIcon": true,
             "showDockIcon": true,
             "language": "system",
+            "learnFromWork": false,
             "showDockIcons": false,
         });
 
@@ -319,6 +330,7 @@ mod tests {
             stored(&database),
             [
                 ("language".to_owned(), r#""de""#.to_owned()),
+                ("learnFromWork".to_owned(), "true".to_owned()),
                 ("showDockIcon".to_owned(), "false".to_owned()),
                 (
                     "trigger".to_owned(),
@@ -336,6 +348,47 @@ mod tests {
         saved(&database, &Settings::default());
 
         assert_eq!(stored(&database), []);
+    }
+
+    fn count_use(database: &Database) {
+        let sql = "INSERT INTO usage (shortcut_id, layout, day, by_menu) VALUES ('macos/Meta+m', 'German', 20000, 1)";
+
+        database
+            .with(|connection| Ok(connection.execute(sql, ())?))
+            .expect("a use is counted");
+    }
+
+    fn uses(database: &Database) -> i64 {
+        database
+            .with(|connection| {
+                Ok(connection.query_row("SELECT count(*) FROM usage", (), |row| row.get(0))?)
+            })
+            .expect("the usage counts are counted")
+    }
+
+    #[test]
+    fn learns_from_work_only_once_it_is_turned_on() {
+        assert!(!Settings::default().learn_from_work);
+    }
+
+    #[test]
+    fn keeps_the_usage_counts_while_learning_from_work() {
+        let database = Database::in_memory();
+
+        count_use(&database);
+        saved(&database, &changed());
+
+        assert_eq!(uses(&database), 1);
+    }
+
+    #[test]
+    fn deletes_the_usage_counts_when_learning_from_work_is_off() {
+        let database = Database::in_memory();
+
+        count_use(&database);
+        saved(&database, &Settings::default());
+
+        assert_eq!(uses(&database), 0);
     }
 
     #[test]

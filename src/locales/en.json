@@ -86,6 +86,8 @@
     "menuBarIcon": "Show in menu bar",
     "dockIcon": "Show in Dock",
     "keepOneIcon": "One of the two always stays, so Mouseless can be reached.",
+    "learnFromWork": "Learn from how I work",
+    "learnFromWorkHint": "Counts which known shortcuts you press, and which you still choose from menus. Only the counts per day are kept, on this Mac; turning it off deletes them.",
     "language": "Language",
     "system": "Same as system",
     "progress": "Progress",
@@ -93,7 +95,7 @@
     "confirmReset": "Click again to reset",
     "saveFailed": "Couldn't save the change",
     "triggerHint": "How the popover with the shortcuts of the app in front opens.",
-    "progressHint": "Deletes what you learned and all reviews, on every keyboard layout."
+    "progressHint": "Deletes what you learned, all reviews and what was counted of your work, on every keyboard layout."
   },
   "popover": {
     "noApp": "Open the popover over an app to see its shortcuts.",

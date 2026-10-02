@@ -14,7 +14,11 @@ defineProps<{
 
 const emit = defineEmits<{
   /** A control changed the setting it stands for. */
-  change: [changes: Partial<Pick<Settings, 'language' | 'showMenuBarIcon' | 'showDockIcon'>>];
+  change: [
+    changes: Partial<
+      Pick<Settings, 'language' | 'showMenuBarIcon' | 'showDockIcon' | 'learnFromWork'>
+    >,
+  ];
 }>();
 
 const text = useText();
@@ -58,7 +62,7 @@ function checkedOf(event: Event): boolean {
   </GroupedList>
 
   <!-- One icon always stays: the one left can't be turned off. -->
-  <GroupedList class="icons">
+  <GroupedList class="group">
     <SettingRow
       :label="text.ui('settings.menuBarIcon')"
       label-for="menu-bar-icon"
@@ -82,10 +86,25 @@ function checkedOf(event: Event): boolean {
       />
     </SettingRow>
   </GroupedList>
+
+  <GroupedList class="group">
+    <SettingRow
+      :label="text.ui('settings.learnFromWork')"
+      label-for="learn-from-work"
+      :hint="text.ui('settings.learnFromWorkHint')"
+    >
+      <input
+        id="learn-from-work"
+        type="checkbox"
+        :checked="settings.learnFromWork"
+        @change="emit('change', { learnFromWork: checkedOf($event) })"
+      />
+    </SettingRow>
+  </GroupedList>
 </template>
 
 <style scoped>
-.icons {
+.group {
   margin-top: 12px;
 }
 

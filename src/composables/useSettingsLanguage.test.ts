@@ -17,6 +17,7 @@ const german: Settings = {
   showMenuBarIcon: true,
   showDockIcon: true,
   language: 'de',
+  learnFromWork: false,
 };
 
 /** Mounts a window in English whose settings choose German, and shows its UI language. */

@@ -86,6 +86,8 @@
     "menuBarIcon": "In der Menüleiste zeigen",
     "dockIcon": "Im Dock zeigen",
     "keepOneIcon": "Eines der beiden bleibt immer, damit Mouseless erreichbar ist.",
+    "learnFromWork": "Aus meiner Arbeit lernen",
+    "learnFromWorkHint": "Zählt, welche bekannten Kurzbefehle du drückst und welche du noch im Menü wählst. Nur die Anzahl pro Tag wird gespeichert, auf diesem Mac; Ausschalten löscht sie.",
     "language": "Sprache",
     "system": "Wie im System",
     "progress": "Fortschritt",
@@ -93,7 +95,7 @@
     "confirmReset": "Zum Zurücksetzen erneut klicken",
     "saveFailed": "Änderung konnte nicht gespeichert werden",
     "triggerHint": "Wie sich das Popover mit den Kurzbefehlen der App im Vordergrund öffnet.",
-    "progressHint": "Löscht, was du gelernt hast, und alle Wiederholungen, auf jedem Tastaturlayout."
+    "progressHint": "Löscht, was du gelernt hast, alle Wiederholungen und was von deiner Arbeit gezählt wurde, auf jedem Tastaturlayout."
   },
   "popover": {
     "noApp": "Öffne das Popover über einer App, um ihre Kurzbefehle zu sehen.",

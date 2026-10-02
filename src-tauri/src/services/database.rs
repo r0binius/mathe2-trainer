@@ -26,6 +26,7 @@ const MIGRATIONS: &[M<'static>] = &[
     M::up(include_str!("../../migrations/0002_progress.sql")),
     M::up(include_str!("../../migrations/0003_trained.sql")),
     M::up(include_str!("../../migrations/0004_key_count.sql")),
+    M::up(include_str!("../../migrations/0005_usage.sql")),
 ];
 
 /// The app's one connection, shared by the commands through Tauri's managed state (in an [`Arc`],
