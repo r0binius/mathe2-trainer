@@ -604,7 +604,7 @@ Close the gaps between the shortcut trainer and the research in `docs/specs/shor
 - [x] 18.2 Relative grading
   - [x] 18.2a Key counts in the review log
   - [x] 18.2b Typical times and grading limits
-- [ ] 18.3 Spike: menu choices
+- [x] 18.3 Spike: menu choices
 - [ ] 18.4 The switch and the coach
 - [ ] 18.5 The banner
 - [ ] 18.6 Key presses
@@ -616,6 +616,7 @@ Close the gaps between the shortcut trainer and the research in `docs/specs/shor
 - Easy and hard are relative to the learner's median time for shortcuts with as many keys (the last 200 correct first tries), with today's 2 s and 6 s until there are 20.
 - One switch, off by default (_Learn from how I work_), lets Mouseless watch menu choices and key presses of known shortcuts. Only counts per shortcut and day are stored, and turning it off deletes them.
 - Menu choices of known shortcuts fill an app's _Your commands_ set and, unless turned off, show a brief banner with the keys. The overview shows the share done by keyboard and the commands still chosen from menus.
+- A menu choice is the item Accessibility reports as highlighted, plus a mouse-up on it or Return, which the event tap sees. macOS's own _menu item selected_ notification only reports shortcut presses, and not in Electron apps (spike 18.3).
 
 ## UI/UX overhaul ✅ ([#14](https://codeberg.org/gobin/mouseless/issues/14))
 

@@ -54,9 +54,13 @@ All of this runs only while **Settings → General → Learn from how I work** i
 
 ### 4.1 Menu choices (the coach)
 
-- Mouseless observes the frontmost app's menus through Accessibility (granted already for the lookup). When a menu item with a shortcut is chosen, Rust reads its keys (as the lookup does, `menu_keys.rs`) and tells the frontend which app and which keys.
+- Mouseless observes the frontmost app's menus through Accessibility (granted already for the lookup) and follows the **highlighted item**: on `AXSelectedChildrenChanged` from a menu, it reads the menu's `AXSelectedChildren`, whose title, key and modifier mask `menu_keys.rs` already turns into keys.
+- The event tap (which watches ⌘ for the trigger) tells a **choice** from a dismissal: a left mouse-up inside the highlighted item's frame (`AXPosition`, `AXSize`, read on mouse-up), or Return while the menu is open. Escape, or a click outside the menu, closes it without a choice. Rust then tells the frontend which app and which keys.
 - The frontend matches the keys to the app's shortcuts on the current layout. A match counts one menu use for that shortcut; anything else is ignored.
-- **Feasibility is open:** macOS has a "menu item selected" notification, but it's not documented whether it fires for choosing or for highlighting, and apps aren't required to send it. Sub-step 18.3 tests it in Mouseless's apps first. If it doesn't work, a click on a menu item can be detected with the event tap and the Accessibility element under the pointer.
+- **What the spike found** (18.3, `examples/menu_events.rs`, Notes, VSCodium and Finder on macOS 27):
+  - `AXMenuItemSelected` is **not** posted when an item is chosen with the mouse, in AppKit (Notes) or Electron (VSCodium) apps. AppKit apps post it when an item's **shortcut is pressed** with no menu open (Finder ⌘F, Notes ⌘A); VSCodium doesn't. So it can't count menu choices, and it can't count key presses either (18.6 keeps the event tap).
+  - The highlighted item is readable in both kinds of app. Accessibility shows the same thing for a choice and for Escape: the last highlight, then `AXMenuClosed`. That's why the event tap decides.
+  - Not tested yet, so checked in 18.4: Spotify, choosing with the keyboard (^F2, arrows, Return), and Help's menu search.
 
 ### 4.2 The banner
 
@@ -93,7 +97,7 @@ CREATE TABLE usage (
 
 1. **18.1 Learning criterion:** the recalled-once stage and `recallsToLearn`.
 2. **18.2 Relative grading:** the log rows carry card, duration and failure; typical times; `gradeRecall` with limits.
-3. **18.3 Spike: menu choices.** A throwaway example (`src-tauri/examples/`) that prints what macOS reports when menu items are highlighted and chosen in Notes, VSCodium, Spotify and Finder. The result decides §4.1 and is written down here.
+3. **18.3 Spike: menu choices.** A throwaway example (`src-tauri/examples/menu_events.rs`) that prints what macOS reports when menu items are highlighted and chosen. The result is in §4.1; 18.4 removes the example once the real observer exists.
 4. **18.4 The switch and the coach:** the setting, the `usage` table, menu observation, matching, counting menu uses.
 5. **18.5 The banner:** the panel and its setting.
 6. **18.6 Key presses:** watched shortcuts sent to Rust, the event tap counting matches.
