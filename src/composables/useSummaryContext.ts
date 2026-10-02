@@ -1,5 +1,5 @@
 import type { ComputedRef } from 'vue';
-import { computed, onScopeDispose, ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import { practicePolicy } from '@/domain/keyboard/policy';
 import type { SummaryContext } from '@/domain/progress/summary';
@@ -12,6 +12,8 @@ import { useKeymapStore } from '@/stores/keymap';
 import { useProgressStore } from '@/stores/progress';
 import { useSettingsStore } from '@/stores/settings';
 
+import { useWindowListener } from './useWindowListener';
+
 /**
  * What the screens summarize progress with, once the settings, the layout and the progress are
  * loaded. The app keeps running for days, so the end of today moves on whenever the window gains
@@ -23,13 +25,8 @@ export function useSummaryContext(): ComputedRef<Loadable<SummaryContext>> {
   const progress = useProgressStore();
   const endOfToday = ref(endOfTodayNow());
 
-  function refresh(): void {
+  useWindowListener('focus', () => {
     endOfToday.value = endOfTodayNow();
-  }
-
-  window.addEventListener('focus', refresh);
-  onScopeDispose(() => {
-    window.removeEventListener('focus', refresh);
   });
 
   return computed(() =>

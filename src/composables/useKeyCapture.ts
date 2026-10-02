@@ -1,10 +1,12 @@
 import type { Ref } from 'vue';
-import { onScopeDispose, readonly, ref } from 'vue';
+import { readonly, ref } from 'vue';
 
 import type { KeyPress } from '@/domain/keyboard/capture';
 import { combinationOf, heldKeysOf, heldModifiersOf } from '@/domain/keyboard/capture';
 import type { KeyCombination } from '@/domain/keyboard/combination';
 import type { Keymap } from '@/domain/keyboard/keymap';
+
+import { useWindowListener } from './useWindowListener';
 
 /**
  * Listens to the keyboard while the calling component lives: reports each combination pressed as
@@ -42,15 +44,9 @@ export function useKeyCapture(
     held.value = [];
   }
 
-  window.addEventListener('keydown', onKeyDown);
-  window.addEventListener('keyup', onKeyUp);
-  window.addEventListener('blur', onBlur);
-
-  onScopeDispose(() => {
-    window.removeEventListener('keydown', onKeyDown);
-    window.removeEventListener('keyup', onKeyUp);
-    window.removeEventListener('blur', onBlur);
-  });
+  useWindowListener('keydown', onKeyDown);
+  useWindowListener('keyup', onKeyUp);
+  useWindowListener('blur', onBlur);
 
   return readonly(held);
 }

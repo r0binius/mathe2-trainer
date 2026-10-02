@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, inject, nextTick, onMounted, onScopeDispose, useTemplateRef, watch } from 'vue';
+import { computed, inject, nextTick, onMounted, useTemplateRef, watch } from 'vue';
 
 import BaseButton from '@/components/BaseButton.vue';
+import { useWindowListener } from '@/composables/useWindowListener';
 import type { Keymap } from '@/domain/keyboard/keymap';
 import type { LookupGroup } from '@/domain/lookup/rows';
 import { builtInGroups, menuGroups } from '@/domain/lookup/rows';
@@ -104,11 +105,11 @@ watch(
 );
 
 // Escape closes the popover, like a menu.
-function onKeyDown(event: KeyboardEvent): void {
+useWindowListener('keydown', (event) => {
   if (event.key === 'Escape') {
     void dismiss();
   }
-}
+});
 
 async function dismiss(): Promise<void> {
   const dismissed = await windows.dismissPopover();
@@ -117,12 +118,6 @@ async function dismiss(): Promise<void> {
     logger.error(`Could not close the popover: ${dismissed.error.message}`);
   }
 }
-
-window.addEventListener('keydown', onKeyDown);
-
-onScopeDispose(() => {
-  window.removeEventListener('keydown', onKeyDown);
-});
 </script>
 
 <template>

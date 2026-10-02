@@ -1,7 +1,8 @@
-import { onMounted, onScopeDispose } from 'vue';
+import { onMounted } from 'vue';
 
 import type { Box, Direction } from './spatial';
 import { nearestInDirection } from './spatial';
+import { useWindowListener } from './useWindowListener';
 
 const focusableSelector = 'a[href], button:not(:disabled), select:not(:disabled)';
 
@@ -72,10 +73,7 @@ export function useSpatialNav(root: () => HTMLElement | null, back?: () => void)
   }
 
   onMounted(focusFirstOnOpen);
-  window.addEventListener('keydown', onKeyDown);
-  onScopeDispose(() => {
-    window.removeEventListener('keydown', onKeyDown);
-  });
+  useWindowListener('keydown', onKeyDown);
 }
 
 /** Focuses the first link, button or menu inside `root`, if it has one. */

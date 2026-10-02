@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { onScopeDispose, ref } from 'vue';
+import { ref } from 'vue';
 
 import BaseButton from '@/components/BaseButton.vue';
 import KeyCapSmall from '@/components/KeyCapSmall.vue';
 import { keyPressOf } from '@/composables/useKeyCapture';
 import { useKeyLabels } from '@/composables/useKeyLabels';
+import { useWindowListener } from '@/composables/useWindowListener';
 import { combinationOf } from '@/domain/keyboard/capture';
 import type { Rejection } from '@/domain/keyboard/policy';
 import { checkShortcut, macosReserved, triggerPolicy } from '@/domain/keyboard/policy';
@@ -43,20 +44,23 @@ const rejection = ref<Rejection>();
 function startRecording(): void {
   recording.value = true;
   rejection.value = undefined;
-  // Capturing, so the key doesn't also reach a button: Escape or Space would press it.
-  window.addEventListener('keydown', onKeyDown, { capture: true });
 }
 
-function stopRecording(): void {
-  window.removeEventListener('keydown', onKeyDown, { capture: true });
-  recording.value = false;
-}
+// Capturing, so while recording the key doesn't also reach a button: Escape or Space would press it.
+useWindowListener(
+  'keydown',
+  (event) => {
+    if (recording.value) {
+      event.preventDefault();
+      recordKey(event);
+    }
+  },
+  { capture: true },
+);
 
-function onKeyDown(event: KeyboardEvent): void {
-  event.preventDefault();
-
+function recordKey(event: KeyboardEvent): void {
   if (event.key === 'Escape') {
-    stopRecording();
+    recording.value = false;
     return;
   }
   if (keymap.layout.status === 'loaded') {
@@ -73,7 +77,7 @@ function record(keys: readonly string[] | undefined): void {
 
   switch (checked.kind) {
     case 'ok':
-      stopRecording();
+      recording.value = false;
       emit('choose', { kind: 'shortcut', keys: checked.value });
       return;
     case 'err':
@@ -81,10 +85,6 @@ function record(keys: readonly string[] | undefined): void {
       return;
   }
 }
-
-onScopeDispose(() => {
-  window.removeEventListener('keydown', onKeyDown, { capture: true });
-});
 </script>
 
 <template>
