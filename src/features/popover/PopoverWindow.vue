@@ -2,13 +2,13 @@
 import { computed, inject, nextTick, onMounted, useTemplateRef, watch } from 'vue';
 
 import BaseButton from '@/components/BaseButton.vue';
+import { useSettingsLanguage } from '@/composables/useSettingsLanguage';
 import { useWindowListener } from '@/composables/useWindowListener';
 import type { Keymap } from '@/domain/keyboard/keymap';
 import type { LookupGroup } from '@/domain/lookup/rows';
 import { builtInGroups, menuGroups } from '@/domain/lookup/rows';
-import { uiLanguageFor } from '@/domain/settings/language';
 import type { AppDefinition } from '@/domain/shortcuts/types';
-import { useText, useUiLanguage } from '@/i18n';
+import { useText } from '@/i18n';
 import {
   consoleLogger,
   loggerKey,
@@ -36,11 +36,7 @@ const keymap = useKeymapStore();
 const [lookup, dispatch] = useLookup(props.apps, inject(lookupKey, missingLookup), logger);
 const list = useTemplateRef<InstanceType<typeof ShortcutList>>('list');
 
-useUiLanguage(() =>
-  settings.settings.status === 'loaded'
-    ? uiLanguageFor(settings.settings.value.language, navigator.languages)
-    : undefined,
-);
+useSettingsLanguage();
 
 onMounted(() => {
   void settings.load();

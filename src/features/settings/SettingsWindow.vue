@@ -3,10 +3,10 @@ import { computed, onMounted, ref } from 'vue';
 
 import BaseIcon from '@/components/BaseIcon.vue';
 import type { IconName } from '@/components/icons';
-import { uiLanguageFor } from '@/domain/settings/language';
+import { useSettingsLanguage } from '@/composables/useSettingsLanguage';
 import type { Settings } from '@/domain/settings/settings';
 import type { UiKey } from '@/i18n';
-import { useText, useUiLanguage } from '@/i18n';
+import { useText } from '@/i18n';
 import { useKeymapStore } from '@/stores/keymap';
 import { useSettingsStore } from '@/stores/settings';
 
@@ -33,11 +33,7 @@ const title = computed(
   () => panes.find((pane) => pane.id === shown.value)?.title ?? 'settings.title',
 );
 
-useUiLanguage(() =>
-  settings.settings.status === 'loaded'
-    ? uiLanguageFor(settings.settings.value.language, navigator.languages)
-    : undefined,
-);
+useSettingsLanguage();
 
 // The recorder turns key presses into combinations on the current layout.
 onMounted(() => {

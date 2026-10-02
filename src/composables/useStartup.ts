@@ -3,16 +3,15 @@ import { computed, inject, onMounted, watch } from 'vue';
 
 import type { LayoutId } from '@/domain/keyboard/keymap';
 import type { SummaryContext } from '@/domain/progress/summary';
-import { uiLanguageFor } from '@/domain/settings/language';
 import type { Loadable } from '@/domain/shared/loadable';
 import type { AppDefinition } from '@/domain/shortcuts/types';
-import { useUiLanguage } from '@/i18n';
 import { localTimeAt } from '@/localTime';
 import { consoleLogger, loggerKey } from '@/ports';
 import { useKeymapStore } from '@/stores/keymap';
 import { useProgressStore } from '@/stores/progress';
 import { useSettingsStore } from '@/stores/settings';
 
+import { useSettingsLanguage } from './useSettingsLanguage';
 import { useSummaryContext } from './useSummaryContext';
 
 /**
@@ -34,11 +33,7 @@ export function useStartup(
     keymap.layout.status === 'loaded' ? keymap.layout.value.id : undefined,
   );
 
-  useUiLanguage(() =>
-    settings.settings.status === 'loaded'
-      ? uiLanguageFor(settings.settings.value.language, navigator.languages)
-      : undefined,
-  );
+  useSettingsLanguage();
 
   function loadLog(layout: LayoutId | undefined): void {
     if (layout !== undefined) {
