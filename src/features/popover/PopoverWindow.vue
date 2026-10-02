@@ -152,20 +152,25 @@ onScopeDispose(() => {
 </template>
 
 <style scoped>
+/* An opaque panel with a hairline and small corners, the same spacing on every side. */
 .popover {
   display: flex;
   flex-direction: column;
   gap: 8px;
   height: 100vh;
-  padding: 16px 12px 0;
+  padding: 10px 10px 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-box);
   color: var(--color-text);
 }
 
 /* Not shrunk by a long list: with its overflow hidden, it could shrink to nothing. */
 .app {
   flex: none;
-  padding: 0 4px;
-  font-size: 15px;
+  padding: 0 2px;
+  font-size: 14px;
   font-weight: 600;
 }
 

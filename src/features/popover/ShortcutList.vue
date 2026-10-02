@@ -58,22 +58,21 @@ defineExpose({
 </template>
 
 <style scoped>
-/* A rounded search field, as in the toolbars of macOS 27. */
+/* A flat search field with a hairline; focus shows the shared ring. */
 .search {
   flex: none;
   width: 100%;
-  height: 28px;
-  padding: 0 12px;
-  border: none;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-control);
-  background-color: var(--color-fill);
+  background-color: var(--color-content);
   color: var(--color-text);
   font: inherit;
-  font-size: 13px;
-  outline: none;
+  font-size: 12px;
 
-  &:focus-visible {
-    box-shadow: 0 0 0 3px var(--color-selection);
+  &::placeholder {
+    color: var(--color-text-tertiary);
   }
 }
 
@@ -81,8 +80,8 @@ defineExpose({
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  margin: 8px -12px 0;
-  padding: 0 12px 12px;
+  margin: 4px -10px 0;
+  padding: 0 10px 10px;
 }
 
 .hint {
@@ -92,28 +91,32 @@ defineExpose({
 }
 
 .group + .group {
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
-/* A section heading, as in a menu. */
+/* A section label: small uppercase mono, faint. */
 .group-title {
-  padding: 4px 0;
-  color: var(--color-text-secondary);
-  font-size: 11px;
-  font-weight: 600;
+  padding: 6px 2px 2px;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 ul {
   list-style: none;
 }
 
-/* A row as a menu item: the title on the left, its keys on the right. */
+/* A dense row: the title on the left, its keys on the right. */
 .row {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 22px;
-  font-size: 13px;
+  min-height: 20px;
+  padding: 0 2px;
+  font-size: 12px;
 }
 
 .title {

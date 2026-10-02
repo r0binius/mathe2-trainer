@@ -85,7 +85,7 @@ The fonts are bundled as woff2 (400, 500, 600 of each, Latin) from Fontsource (`
   - Key caps on `raised` with a hairline border and a 3 px `key-edge` bottom; `learned` outline when correct, `mistake` outline and colour after a mistake, next to the expected keys.
   - Skip stays a button, styled quiet. The preview showed keyboard hints (`esc` stop, `⇥` skip), but practice takes every key as an answer, and shortcuts use both keys (⌃⇥), so there are no such keys to show. Keys for them are a separate decision.
   - The stage keeps its generous spacing; the frame around it stays compact.
-- **Popover:** an opaque `box` panel with a hairline border and 8 px radius instead of the system glass; a flat search field; dense rows with keys right-aligned in mono; the selected row on `raised`.
+- **Popover:** an opaque `box` panel with a hairline border and 8 px radius instead of the system glass (the window stays transparent around it, so the corners round); a flat search field with a hairline; mono section labels; dense 20 px rows with keys right-aligned in mono.
 - **Settings:** the same frame; rows as `box` lists; toggles square-ish (4 px) in `action`; buttons flat, the main one in `action`, the quiet one on `raised` with a border.
 - **Focus ring:** 2 px `action` at 50 %, outside the element.
 - **Icons:** the app logos stay; the line icons (`BaseIcon`) take `text-secondary`, and the overview icon `action`.

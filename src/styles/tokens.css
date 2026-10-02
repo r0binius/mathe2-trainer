@@ -32,9 +32,6 @@
   /* The raised bottom edge of a key cap. */
   --color-key-edge: #d6cabb;
 
-  /* Until the popover gets its new styles (14.5). */
-  --color-selection: color-mix(in srgb, var(--color-action) 30%, transparent);
-
   /* Small corners and no capsules: boxes, controls and key caps. */
   --radius-box: 5px;
   --radius-control: 4px;
