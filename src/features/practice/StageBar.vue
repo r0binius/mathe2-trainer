@@ -1,21 +1,22 @@
 <script setup lang="ts">
-import type { LearnStage } from '@/domain/practice/learn';
+import type { LearnStep } from '@/domain/practice/learn';
 
 defineProps<{
   /** How far each shortcut of the session got, in the session's order. */
-  stages: readonly LearnStage[];
+  steps: readonly LearnStep[];
 }>();
 </script>
 
 <template>
   <!-- The footer says the same in words, so VoiceOver skips the bar. -->
   <div class="stages" aria-hidden="true">
-    <span v-for="(stage, index) in stages" :key="index" class="stage" :class="stage" />
+    <span v-for="(step, index) in steps" :key="index" class="stage" :class="step" />
   </div>
 </template>
 
 <style scoped>
-/* One segment per shortcut: a track while unseen, due once trained, learned once recalled. */
+/* One segment per shortcut: a track while unseen, due once trained, half learned once recalled
+once, learned once recalled enough. */
 .stages {
   display: flex;
   flex-wrap: wrap;
@@ -34,6 +35,10 @@ defineProps<{
 
   &.trained {
     background-color: var(--color-due);
+  }
+
+  &.recalled {
+    background-color: color-mix(in srgb, var(--color-learned) 50%, var(--color-border));
   }
 
   &.learned {

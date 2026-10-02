@@ -594,13 +594,13 @@ Branch `feature/learning-overview`. A view of where learning stands: what's due 
 - **A small reformat can break the previous commit's check.** One longer word in a Markdown table made Prettier re-pad the whole table; run the formatter after every edit, not only before the first commit.
 - **A blank screenshot is a permission, not a bug.** `screencapture -l` returns only the frame without Screen Recording access, so a person still looks at new screens.
 
-## Science-backed training ⏳ ([#18](https://codeberg.org/gobin/mouseless/issues/18))
+## Science-backed training 🚧 ([#18](https://codeberg.org/gobin/mouseless/issues/18))
 
 Close the gaps between the shortcut trainer and the research in `docs/specs/shortcut-learning-research.md` (§5): a learning criterion of two recalls, grading limits relative to the learner's own times, and a coach that connects practice to real use. The design is in `docs/specs/science-backed-training.md`.
 
 **Sub-steps**
 
-- [ ] 18.1 Learning criterion
+- [x] 18.1 Learning criterion
 - [ ] 18.2 Relative grading
 - [ ] 18.3 Spike: menu choices
 - [ ] 18.4 The switch and the coach

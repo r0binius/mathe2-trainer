@@ -6,7 +6,7 @@ import BackButton from '@/components/BackButton.vue';
 import PageLayout from '@/components/PageLayout.vue';
 import TextProgress from '@/components/TextProgress.vue';
 import { appPracticeItems, reviewItems } from '@/domain/practice/items';
-import type { LearnStage } from '@/domain/practice/learn';
+import type { LearnStep } from '@/domain/practice/learn';
 import { reviewPool, reviewStrategy } from '@/domain/practice/review';
 import type { SummaryContext } from '@/domain/progress/summary';
 import { dueCards } from '@/domain/scheduling/scheduler';
@@ -47,8 +47,8 @@ const [{ session, held, saveFailed }, { skip, forget }] = usePracticeScreen(
 const done = computed(() => session.value.pool.done);
 
 /** The review as a bar: the reviewed cards as learned, the rest still to come. */
-const stages = computed(() =>
-  due.map((_, index): LearnStage => (index < done.value ? 'learned' : 'unseen')),
+const steps = computed(() =>
+  due.map((_, index): LearnStep => (index < done.value ? 'learned' : 'unseen')),
 );
 </script>
 
@@ -63,7 +63,7 @@ const stages = computed(() =>
       :session="session"
       :held="held"
       :save-failed="saveFailed"
-      :stages="stages"
+      :steps="steps"
       :context="[text.appTitle(app), text.ui('review.title')]"
       @skip="skip"
       @forget="forget"

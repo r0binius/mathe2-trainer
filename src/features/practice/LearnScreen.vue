@@ -6,7 +6,7 @@ import BackButton from '@/components/BackButton.vue';
 import PageLayout from '@/components/PageLayout.vue';
 import TextProgress from '@/components/TextProgress.vue';
 import { practiceItems } from '@/domain/practice/items';
-import { learnPool, learnStrategy } from '@/domain/practice/learn';
+import { learnPool, learnStrategy, stepOf } from '@/domain/practice/learn';
 import { setProgressOf } from '@/domain/progress/storedProgress';
 import type { SummaryContext } from '@/domain/progress/summary';
 import type { AppDefinition, ShortcutSet } from '@/domain/shortcuts/types';
@@ -47,8 +47,8 @@ const [{ session, held, saveFailed }, { skip, forget }] = usePracticeScreen(
   },
 );
 
-const stages = computed(() => session.value.pool.entries.map(({ stage }) => stage));
-const learned = computed(() => stages.value.filter((stage) => stage === 'learned').length);
+const steps = computed(() => session.value.pool.entries.map(stepOf));
+const learned = computed(() => steps.value.filter((step) => step === 'learned').length);
 
 /** The learned count to announce, while its message shows. */
 const announced = ref<number>();
@@ -69,13 +69,13 @@ watch(learned, (count) => {
       :session="session"
       :held="held"
       :save-failed="saveFailed"
-      :stages="stages"
+      :steps="steps"
       :context="[text.appTitle(app), text.app(app.id, set.title), text.ui('learn.title')]"
       @skip="skip"
       @forget="forget"
     >
       <template #progress>
-        <TextProgress :value="learned" :max="stages.length" />
+        <TextProgress :value="learned" :max="steps.length" />
         <span
           v-if="announced !== undefined"
           :key="announced"

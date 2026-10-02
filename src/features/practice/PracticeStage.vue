@@ -6,7 +6,7 @@ import KeyCap from '@/components/KeyCap.vue';
 import SkipButton from '@/components/SkipButton.vue';
 import { useKeyLabels } from '@/composables/useKeyLabels';
 import type { KeyCombination } from '@/domain/keyboard/combination';
-import type { LearnStage } from '@/domain/practice/learn';
+import type { LearnStep } from '@/domain/practice/learn';
 import type { PracticeItem, Session } from '@/domain/practice/session';
 import { useText } from '@/i18n';
 
@@ -24,7 +24,7 @@ const props = defineProps<{
   /** Whether a result couldn't be saved, shown as a notice. */
   saveFailed: boolean;
   /** How far each shortcut of the session got, shown as a bar on top. */
-  stages: readonly LearnStage[];
+  steps: readonly LearnStep[];
   /** Where the session is, such as the app, set and mode, shown as a label above the bar. */
   context: readonly string[];
 }>();
@@ -94,7 +94,7 @@ watch(
     <p class="visually-hidden" aria-live="polite">{{ announcement }}</p>
 
     <p class="context caption">{{ context.join(' · ') }}</p>
-    <StageBar :stages="stages" />
+    <StageBar :steps="steps" />
 
     <Transition name="shortcut" mode="out-in">
       <div
