@@ -38,8 +38,7 @@ a {
   text-decoration: none;
 }
 
-button,
-textarea {
+button {
   border: none;
   background-color: transparent;
   color: inherit;

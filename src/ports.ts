@@ -10,8 +10,7 @@ import type { MenuGroup } from '@/domain/lookup/menuShortcuts';
 import type { ProgressRepository } from '@/domain/progress/repository';
 import type { SettingsRepository } from '@/domain/settings/repository';
 import type { PlatformError } from '@/domain/shared/platformError';
-import type { Result } from '@/domain/shared/result';
-import type { Err } from '@/domain/shared/result';
+import type { Err, Result } from '@/domain/shared/result';
 import { err } from '@/domain/shared/result';
 
 /** Where the app provides the settings repository to the stores. */
