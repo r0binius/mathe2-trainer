@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { KeyLabel } from '@/domain/keyboard/labels';
 
+import type { AnswerResult } from './answerResult';
 import ResultBadge from './ResultBadge.vue';
 
 defineProps<{
@@ -11,7 +12,7 @@ defineProps<{
   /** Whether the key is down, or shown as pressed: the keycap pops up over its outline. */
   pressed?: boolean;
   /** Whether pressing it was right, shown as a badge; no badge while undecided. */
-  result?: 'correct' | 'wrong' | undefined;
+  result?: AnswerResult | undefined;
 }>();
 </script>
 

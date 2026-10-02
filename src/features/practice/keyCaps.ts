@@ -1,3 +1,4 @@
+import type { AnswerResult } from '@/components/answerResult';
 import type { KeyCombination } from '@/domain/keyboard/combination';
 import type { Session } from '@/domain/practice/session';
 
@@ -6,7 +7,7 @@ export type KeyCapState = {
   readonly key: string;
   readonly hidden: boolean;
   readonly pressed: boolean;
-  readonly result?: 'correct' | 'wrong';
+  readonly result?: AnswerResult;
 };
 
 /** A session that shows an item, while it waits for the keys or shows the success. */

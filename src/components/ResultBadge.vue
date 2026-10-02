@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import type { AnswerResult } from './answerResult';
+
 defineProps<{
   /** Whether it went right (a green check) or wrong (a red cross). */
-  result: 'correct' | 'wrong';
+  result: AnswerResult;
 }>();
 </script>
 
