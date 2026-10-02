@@ -23,17 +23,17 @@ defineProps<{
 /* SF Symbols' checkmark.circle.fill and xmark.circle.fill. */
 path {
   fill: none;
-  stroke: var(--color-on-accent);
+  stroke: var(--color-on-action);
   stroke-width: 1.6;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .correct circle {
-  fill: var(--color-green);
+  fill: var(--color-learned);
 }
 
 .wrong circle {
-  fill: var(--color-red);
+  fill: var(--color-mistake);
 }
 </style>

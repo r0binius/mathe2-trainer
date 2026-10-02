@@ -135,7 +135,7 @@ defineExpose({ focusSelected });
 /* A sidebar section header: small, semibold and faint. */
 .heading {
   padding: 0 6px 4px;
-  color: var(--color-label-tertiary);
+  color: var(--color-text-tertiary);
   font-size: 11px;
   font-weight: 600;
 }
@@ -146,7 +146,7 @@ defineExpose({ focusSelected });
   gap: 8px;
   height: 32px;
   padding: 0 8px;
-  border-radius: var(--radius-row);
+  border-radius: var(--radius-box);
 
   /* The selection is bold, lightened accent while the sidebar has focus, and gray otherwise. */
   &.selected {
@@ -156,7 +156,7 @@ defineExpose({ focusSelected });
 
   .list:focus-within &.selected {
     background-color: var(--color-selection);
-    color: var(--color-on-accent);
+    color: var(--color-on-action);
   }
 
   &:focus-visible {
@@ -175,7 +175,7 @@ defineExpose({ focusSelected });
 .icon {
   width: 20px;
   flex: none;
-  color: var(--color-accent);
+  color: var(--color-action);
 
   .list:focus-within .selected & {
     color: inherit;
@@ -188,7 +188,7 @@ defineExpose({ focusSelected });
 
 /* A count like Mail's unread one. */
 .due {
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
   font-variant-numeric: tabular-nums;
 
   .list:focus-within .selected & {

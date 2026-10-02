@@ -158,7 +158,7 @@ onScopeDispose(() => {
   gap: 8px;
   height: 100vh;
   padding: 16px 12px 0;
-  color: var(--color-label);
+  color: var(--color-text);
 }
 
 /* Not shrunk by a long list: with its overflow hidden, it could shrink to nothing. */
@@ -176,7 +176,7 @@ onScopeDispose(() => {
   justify-items: center;
   gap: 12px;
   padding: 24px;
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
   text-align: center;
 }
 </style>

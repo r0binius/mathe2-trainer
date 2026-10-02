@@ -58,7 +58,7 @@ to them, and no line below. */
 }
 
 .subtitle {
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
   font-weight: 400;
 }
 

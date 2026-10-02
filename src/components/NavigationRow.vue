@@ -50,12 +50,12 @@ defineSlots<{
   flex: none;
   align-items: center;
   gap: 8px;
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
 .arrow {
   flex: none;
-  color: var(--color-label-tertiary);
+  color: var(--color-text-tertiary);
 }
 </style>

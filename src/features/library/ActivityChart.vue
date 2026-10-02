@@ -53,7 +53,7 @@ const days = computed(() =>
   gap: 2px;
   height: 72px;
   padding-top: 16px;
-  border-bottom: 1px solid var(--color-separator);
+  border-bottom: 1px solid var(--color-border);
 }
 
 /* A day's slot fills its share of the width; the bar inside grows from the baseline. */
@@ -71,14 +71,14 @@ const days = computed(() =>
   max-width: 24px;
   min-height: 2px;
   border-radius: 4px 4px 0 0;
-  background-color: var(--color-accent);
+  background-color: var(--color-action);
 }
 
 /* The peak's number sits on its cap, in the text colour, not the bar's. */
 .peak {
   position: absolute;
   bottom: 100%;
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
@@ -87,7 +87,7 @@ const days = computed(() =>
   display: flex;
   justify-content: space-between;
   margin-top: 4px;
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
   font-size: 11px;
 }
 </style>

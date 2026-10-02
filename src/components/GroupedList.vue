@@ -31,7 +31,7 @@ defineSlots<{
     position: absolute;
     inset: 0 0 auto 12px;
     height: 1px;
-    background-color: var(--color-separator);
+    background-color: var(--color-border);
   }
 }
 </style>

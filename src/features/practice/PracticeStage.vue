@@ -158,7 +158,7 @@ watch(
 .description {
   max-width: 360px;
   margin: 6px auto 0;
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
 }
 
 .keys {
@@ -186,7 +186,7 @@ watch(
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
@@ -197,7 +197,7 @@ watch(
 }
 
 .save-failed {
-  color: var(--color-red);
+  color: var(--color-mistake);
 }
 
 .shortcut-enter-active,

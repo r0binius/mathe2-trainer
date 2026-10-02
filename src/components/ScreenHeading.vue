@@ -47,6 +47,6 @@ const slots = defineSlots<{
 
 .meta {
   margin-top: 2px;
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
 }
 </style>

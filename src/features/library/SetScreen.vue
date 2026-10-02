@@ -124,7 +124,7 @@ const continues = computed(() => {
 
 .description {
   margin-top: 1px;
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
   font-size: 11px;
 }
 

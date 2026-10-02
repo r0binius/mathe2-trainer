@@ -72,13 +72,13 @@ const emit = defineEmits<{
 }
 
 .danger {
-  color: var(--color-red);
+  color: var(--color-mistake);
 }
 
 .accent {
-  background-color: var(--color-accent);
+  background-color: var(--color-action);
   box-shadow: var(--shadow-button);
-  color: var(--color-on-accent);
+  color: var(--color-on-action);
 
   &:active {
     filter: brightness(0.9);
@@ -87,7 +87,7 @@ const emit = defineEmits<{
 
 .dangerText {
   padding: 0;
-  color: var(--color-red);
+  color: var(--color-mistake);
 }
 
 /* A toolbar item: a glass capsule, as on macOS 27. */

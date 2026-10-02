@@ -17,11 +17,11 @@ The look was settled on a preview page with both themes side by side; this spec 
 
 ### The invariant this changes
 
-`CLAUDE.md` and `legacy-architecture.md` §16 say Mouseless follows macOS 27 (system colours, font and materials, measured against System Settings and Finder), from the _Native design_ step. That's replaced by:
+`CLAUDE.md` says Mouseless follows macOS 27 (system colours, font and materials, measured against System Settings and Finder), from the _Native design_ step. That's replaced by:
 
 > **A Mac app with its own look:** it behaves like a Mac app (window controls, system appearance, keyboard conventions, Settings window, menu bar) but draws its own interface from `tokens.css`: IBM Plex, its own palette and flat surfaces. A new surface is measured against this spec, not against the system's apps.
 
-Both documents change with the first sub-step.
+It changes with the first sub-step.
 
 ## 2. Tokens
 
@@ -60,7 +60,7 @@ All colours are roles in `src/styles/tokens.css`; components use the roles, neve
 | Practice key caps                   | Plex Mono   | 22 px / 500, caps 52 px high                                         |
 | Modifier symbols                    | system font | the size of their surroundings, 500                                  |
 
-The fonts are bundled as woff2 (400, 500, 600 of each, Latin) from IBM's packages (`@ibm/plex-sans`, `@ibm/plex-mono`, OFL). The CSP's `default-src 'self'` already allows them. Key caps and shortcut labels wrap modifier symbols in their own element, so the system font applies to those alone.
+The fonts are bundled as woff2 (400, 500, 600 of each, Latin) from Fontsource (`@fontsource/ibm-plex-sans`, `@fontsource/ibm-plex-mono`, OFL); IBM's own packages install a telemetry dependency. The CSP's `default-src 'self'` already allows them. The Latin files have no key symbols except ↑ and ↓, so `styles/fonts.css` leaves those two out of the range too: every key symbol then falls back to the system font, with no markup of its own.
 
 **Shape and space:**
 
@@ -91,7 +91,7 @@ The fonts are bundled as woff2 (400, 500, 600 of each, Latin) from IBM's package
 
 ## 4. Sub-steps
 
-1. **14.1 Tokens and fonts:** the new `tokens.css`, the bundled Plex fonts, `base.css` (body type, focus ring), the modifier-symbol element, and the invariant updated in `CLAUDE.md` and `legacy-architecture.md`.
+1. **14.1 Tokens and fonts:** the new `tokens.css`, the bundled Plex fonts, `base.css` (body type, focus ring), and the invariant updated in `CLAUDE.md`.
 2. **14.2 Frame and sidebar:** window config (no effects or transparency, traffic lights), title bar, sidebar.
 3. **14.3 Lists, overview, app and set screens:** shared components (`GroupedList`, `NavigationRow`, `PageLayout`, `ListSection`, `BaseButton`, meters, chart).
 4. **14.4 Practice:** stage bar, prompt, key caps, feedback, skip.

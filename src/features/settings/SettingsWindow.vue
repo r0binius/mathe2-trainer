@@ -108,7 +108,7 @@ async function change(changes: Partial<Settings>): Promise<void> {
   flex: none;
   justify-items: center;
   padding: 7px 0 6px;
-  border-bottom: 1px solid var(--color-separator);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .title {
@@ -130,16 +130,16 @@ async function change(changes: Partial<Settings>): Promise<void> {
   min-width: 64px;
   padding: 4px 8px;
   border-radius: 10px;
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
   font-size: 11px;
 
   &:hover {
-    color: var(--color-label);
+    color: var(--color-text);
   }
 
   &.selected {
     background-color: var(--color-fill);
-    color: var(--color-accent);
+    color: var(--color-action);
   }
 }
 
@@ -151,6 +151,6 @@ async function change(changes: Partial<Settings>): Promise<void> {
 
 .failed {
   margin-top: 12px;
-  color: var(--color-red);
+  color: var(--color-mistake);
 }
 </style>

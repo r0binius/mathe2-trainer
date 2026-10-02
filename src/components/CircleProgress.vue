@@ -49,7 +49,7 @@ const remaining = computed(() => (max > 0 ? (max - value) / max : 1));
 }
 
 .done {
-  stroke: var(--color-accent);
+  stroke: var(--color-action);
   transition: stroke-dashoffset 0.5s ease;
 }
 </style>

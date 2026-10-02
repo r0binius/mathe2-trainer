@@ -28,11 +28,11 @@ defineSlots<{
   min-height: 28px;
   padding: 0 8px;
   border-radius: var(--radius-control);
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
 
   &:hover {
     background-color: var(--color-fill);
-    color: var(--color-label);
+    color: var(--color-text);
   }
 }
 

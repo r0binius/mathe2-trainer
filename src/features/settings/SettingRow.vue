@@ -42,7 +42,7 @@ defineSlots<{
 
 .hint {
   margin-top: 2px;
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
   font-size: 11px;
 }
 

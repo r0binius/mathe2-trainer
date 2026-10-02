@@ -77,7 +77,7 @@ provide(focusSidebarKey, () => {
   height: 100vh;
   padding: 32px;
   background-color: var(--color-window);
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
   text-align: center;
 }
 

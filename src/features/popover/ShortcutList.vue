@@ -67,7 +67,7 @@ defineExpose({
   border: none;
   border-radius: var(--radius-control);
   background-color: var(--color-fill);
-  color: var(--color-label);
+  color: var(--color-text);
   font: inherit;
   font-size: 13px;
   outline: none;
@@ -87,7 +87,7 @@ defineExpose({
 
 .hint {
   padding: 24px 0;
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
   text-align: center;
 }
 
@@ -98,7 +98,7 @@ defineExpose({
 /* A section heading, as in a menu. */
 .group-title {
   padding: 4px 0;
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
   font-size: 11px;
   font-weight: 600;
 }

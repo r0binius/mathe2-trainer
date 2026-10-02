@@ -19,15 +19,15 @@
 }
 
 :root {
-  /* Native controls and scrollbars in the system's appearance. */
+  /* Scrollbars and form controls in the system's appearance, light or dark. */
   color-scheme: light dark;
 }
 
-/* The system's body text: 13 points of SF Pro. */
+/* Body text: 13 pixels of IBM Plex Sans. */
 body {
   overflow: hidden;
   background-color: var(--color-window);
-  color: var(--color-label);
+  color: var(--color-text);
   font-family: var(--font-sans);
   font-size: 13px;
   line-height: 1.3;
@@ -47,10 +47,10 @@ textarea {
   font: inherit;
 }
 
-/* The system's focus ring, in the accent color. */
+/* The focus ring, in the action color, just outside the element. */
 :focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--color-accent) 50%, transparent);
-  outline-offset: 0;
+  outline: 2px solid color-mix(in srgb, var(--color-action) 50%, transparent);
+  outline-offset: 1px;
 }
 
 /* Read by VoiceOver but not shown, such as what practice announces. */

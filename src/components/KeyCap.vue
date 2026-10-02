@@ -45,19 +45,20 @@ defineProps<{
   min-width: 56px;
   height: 56px;
   padding: 0 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-key);
+  font-family: var(--font-mono);
   font-size: 24px;
 }
 
 /* Where the key goes: a shallow well, dashed while the key is being asked for. */
 .outline {
-  border: 1.5px solid var(--color-separator);
+  border: 1.5px solid var(--color-border);
   background-color: var(--color-fill);
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
 
   .hidden & {
     border-style: dashed;
-    border-color: var(--color-label-tertiary);
+    border-color: var(--color-text-tertiary);
     background-color: transparent;
     color: transparent;
   }
@@ -72,12 +73,12 @@ defineProps<{
 .cap {
   position: absolute;
   inset: 0;
-  background-color: var(--color-key);
+  background-color: var(--color-raised);
   box-shadow:
     0 0 0 0.5px var(--color-key-edge),
     0 2px 0 var(--color-key-edge),
     0 3px 6px rgb(0 0 0 / 12%);
-  color: var(--color-label);
+  color: var(--color-text);
   will-change: transform;
 }
 
@@ -86,7 +87,7 @@ defineProps<{
   top: calc(100% + 10px);
   left: -2px;
   width: calc(100% + 4px);
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
   font-size: 11px;
   text-align: center;
 

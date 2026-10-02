@@ -138,7 +138,7 @@ onScopeDispose(() => {
 
 .rejected {
   max-width: 260px;
-  color: var(--color-red);
+  color: var(--color-mistake);
   font-size: 11px;
   text-align: end;
 }

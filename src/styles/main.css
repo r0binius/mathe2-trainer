@@ -1,3 +1,4 @@
 /* The global stylesheet of every window, imported by each window's entry. */
+@import './fonts.css';
 @import './tokens.css';
 @import './base.css';

@@ -168,13 +168,13 @@ const figures = computed((): readonly { readonly value: string; readonly label: 
 }
 
 .label {
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
   font-size: 11px;
 }
 
 .total {
   margin: -2px 0 6px 2px;
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
 }
 
 .logo {
@@ -189,18 +189,18 @@ const figures = computed((): readonly { readonly value: string; readonly label: 
   height: 6px;
   overflow: hidden;
   border-radius: 3px;
-  background-color: color-mix(in srgb, var(--color-accent) 20%, transparent);
+  background-color: color-mix(in srgb, var(--color-action) 20%, transparent);
 }
 
 .fill {
   display: block;
   height: 100%;
   border-radius: 3px;
-  background-color: var(--color-accent);
+  background-color: var(--color-action);
 }
 
 .hint {
-  color: var(--color-label-secondary);
+  color: var(--color-text-secondary);
   text-align: center;
 }
 </style>
