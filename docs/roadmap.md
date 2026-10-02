@@ -617,11 +617,23 @@ Close the gaps between the shortcut trainer and the research in `docs/specs/shor
 
 ## UI/UX overhaul ⏳ ([#14](https://codeberg.org/gobin/mouseless/issues/14))
 
-Sharpen the look. Planned in detail when it starts.
+Give Mouseless a look of its own, after Halloy and Gram: IBM Plex Sans and Mono, a warm dark and a paper light palette with one accent per meaning, a flat frame, compact chrome and lists, and a generous practice stage. It replaces the _native Mac app_ invariant. The design is in `docs/specs/ui-overhaul.md`.
 
-**Carried over**
+**Sub-steps**
 
-- Fonts: the invariants call for the system font (_Native design_), so replacing it would change that decision.
+- [ ] 14.1 Tokens and fonts
+- [ ] 14.2 Frame and sidebar
+- [ ] 14.3 Lists, overview, app and set screens
+- [ ] 14.4 Practice
+- [ ] 14.5 Popover
+- [ ] 14.6 Settings window
+
+**Decisions**
+
+- Away from the native look (no system materials, system blue or SF Pro), still a Mac window: traffic lights, system appearance, keyboard conventions.
+- IBM Plex Sans for text, Plex Mono for keys, figures and labels, bundled; modifier symbols in the system font.
+- Our own light and dark palette following the system appearance, checked for contrast; accents for action, learned, mistake, due and info.
+- A flat 32 px title bar, no sidebar or popover glass; compact frame and lists, a generous practice stage; equal spacing on a panel's edges, actions in its bottom-right corner.
 
 ## Linux ⏳ ([#10](https://codeberg.org/gobin/mouseless/issues/10))
 
