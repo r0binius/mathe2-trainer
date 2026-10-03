@@ -2147,6 +2147,7 @@ dependencies = [
 name = "mouseless"
 version = "1.0.0"
 dependencies = [
+ "dispatch2",
  "objc2",
  "objc2-app-kit",
  "objc2-application-services",

@@ -8,7 +8,8 @@ use super::{lookup, popover, tray};
 use crate::error::AppError;
 
 /// The main window's label, as in `tauri.conf.json`.
-const MAIN: &str = "main";
+/// The main window's label, as in `tauri.conf.json` and its capability.
+pub const MAIN: &str = "main";
 
 /// The Settings window's label, as in `tauri.conf.json`.
 const SETTINGS: &str = "settings";

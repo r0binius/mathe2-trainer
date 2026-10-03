@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 use tauri::{Manager, RunEvent};
 
+use super::coach::Coach;
 use super::coordinator::Event;
 use super::lookup::AppInFrontState;
 use super::settings::apply_settings;
@@ -41,6 +42,7 @@ pub fn run() -> tauri::Result<()> {
         .setup(|app| {
             // Managed first: a layout change asks for it from the moment layouts are watched.
             app.manage(Triggers::default());
+            app.manage(Coach::default());
             app.manage(AppInFrontState::default());
             let directory = app
                 .path()

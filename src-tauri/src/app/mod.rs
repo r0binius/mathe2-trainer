@@ -1,10 +1,12 @@
 //! The app itself: how it's built, and the windows, menus and menu bar icon it shows.
 
+mod coach;
 mod coordinator;
 mod hold;
 mod layout;
 mod lookup;
 mod menu;
+mod menu_watch;
 mod popover;
 mod run;
 mod settings;

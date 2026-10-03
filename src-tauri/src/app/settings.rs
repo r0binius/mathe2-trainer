@@ -1,10 +1,10 @@
 //! Applies the settings that take effect outside the webview: the trigger, the Dock and menu bar
-//! icons and the language of the menus.
+//! icons, the language of the menus, and watching menu choices.
 
 use tauri::AppHandle;
 use tauri_plugin_log::log;
 
-use super::{menu, tray, trigger};
+use super::{coach, menu, tray, trigger};
 use crate::platform;
 use crate::services::settings::Settings;
 
@@ -18,6 +18,7 @@ pub fn apply_settings(app: &AppHandle, settings: &Settings) {
         .in_interface(&platform::preferred_languages());
 
     trigger::apply(app, settings.trigger.clone());
+    coach::apply(app, settings.learn_from_work);
     if let Err(error) = app.set_dock_visibility(settings.show_dock_icon) {
         log::error!("cannot show or hide the Dock icon: {error}");
     }

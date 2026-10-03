@@ -4,12 +4,11 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use objc2::MainThreadMarker;
 use objc2_core_graphics::{
-    CGEventFlags, CGEventMask, CGEventType, CGPreflightListenEventAccess,
-    CGRequestListenEventAccess,
+    CGEventFlags, CGEventType, CGPreflightListenEventAccess, CGRequestListenEventAccess,
 };
 
 use crate::error::AppError;
-use crate::platform::macos::event_tap;
+use crate::platform::macos::event_tap::{EventTap, mask_of};
 use crate::platform::{KeyInput, ModifierHold};
 
 /// The events that start or cancel holding ⌘: modifier changes, key presses and clicks.
@@ -53,19 +52,17 @@ impl ModifierHold for SystemModifierHold {
         if self.watching.swap(true, Ordering::Relaxed) {
             return Err(AppError::trigger("the keyboard is watched already"));
         }
-        event_tap::listen(
+        let tap = EventTap::listen(
             main_thread,
             mask_of(&WATCHED),
-            Box::new(move |kind, flags| on_input(input_of(kind, flags))),
+            Box::new(move |event| on_input(input_of(event.kind, event.flags))),
         )
-        .inspect_err(|_| self.watching.store(false, Ordering::Relaxed))
-    }
-}
+        .inspect_err(|_| self.watching.store(false, Ordering::Relaxed))?;
 
-fn mask_of(kinds: &[CGEventType]) -> CGEventMask {
-    kinds.iter().fold(0, |mask, kind| {
-        mask | 1_u64.checked_shl(kind.0).unwrap_or_default()
-    })
+        // The hold is watched for as long as the app runs.
+        tap.leak();
+        Ok(())
+    }
 }
 
 /// What an event means for holding ⌘.
@@ -118,13 +115,5 @@ mod tests {
 
         assert_eq!(input_of(CGEventType::KeyDown, flags), KeyInput::Other);
         assert_eq!(input_of(CGEventType::LeftMouseDown, flags), KeyInput::Other);
-    }
-
-    #[test]
-    fn watches_the_events_by_their_bits() {
-        assert_eq!(
-            mask_of(&[CGEventType::KeyDown, CGEventType::FlagsChanged]),
-            (1 << 10) | (1 << 12)
-        );
     }
 }

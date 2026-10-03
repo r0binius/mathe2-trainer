@@ -8,12 +8,14 @@ mod app_menus;
 mod current;
 mod key_code;
 mod layout;
+mod menu_choices;
 mod modifier_hold;
 
 pub use self::app_menus::{AppMenus, MenuAccess, MenuGroup, MenuShortcut, RunningApp};
 pub use self::current::Platform;
 pub use self::key_code::KeyCode;
 pub use self::layout::{KeyCharacters, Keymap, KeymapSource, Layout};
+pub use self::menu_choices::{Frame, MenuChoices, MenuItem, MenuSignal, Point};
 pub use self::modifier_hold::{KeyInput, ModifierHold};
 
 #[cfg(target_os = "macos")]
