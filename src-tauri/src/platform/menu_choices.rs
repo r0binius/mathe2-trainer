@@ -3,7 +3,7 @@
 use std::rc::Rc;
 
 use crate::error::AppError;
-use crate::platform::Access;
+use crate::platform::{Access, Keymap};
 
 /// A point on screen, in global display coordinates with the origin at the top left.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -63,9 +63,13 @@ pub enum MenuSignal {
     Highlighted(Option<MenuItem>),
     /// One of the observed app's menus closed.
     MenuClosed,
+    /// One of the watched combinations was pressed, named as it was given to
+    /// [`MenuChoices::watch_keys`].
+    KeysPressed(Vec<String>),
 }
 
-/// Watches clicks, key presses and one app's menus everywhere in the session, for menu choices.
+/// Watches clicks, key presses and one app's menus everywhere in the session, for menu choices and
+/// presses of known shortcuts.
 ///
 /// Every call runs on the main thread, where the signals arrive too.
 pub trait MenuChoices {
@@ -98,6 +102,10 @@ pub trait MenuChoices {
     /// Returns a lookup error if it isn't watching, or the app can't be observed, such as when
     /// Accessibility isn't allowed.
     fn observe(&self, process: Option<i32>) -> Result<(), AppError>;
+
+    /// Reports a press of any of `combinations`, named as the shortcut data names keys on
+    /// `keymap`'s layout, in place of the ones before. No other key press is ever reported.
+    fn watch_keys(&self, combinations: &[Vec<String>], keymap: &Keymap);
 
     /// Stops watching, if it is.
     fn stop(&self);

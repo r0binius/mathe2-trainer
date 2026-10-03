@@ -1,5 +1,6 @@
 //! Menu choices, watched with an event tap and the Accessibility API, as [`MenuChoices`].
 
+use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::{Mutex, PoisonError};
 
@@ -10,9 +11,10 @@ use objc2_core_graphics::{CGEventType, CGPreflightListenEventAccess, CGRequestLi
 use crate::error::AppError;
 use crate::platform::macos::accessibility::{self, Element, Observer, Value};
 use crate::platform::macos::event_tap::{EventTap, TapEvent, mask_of};
+use crate::platform::macos::key_presses::{Press, press_from, press_of};
 use crate::platform::macos::menu_keys::{KeyEquivalent, keys_of};
 use crate::platform::macos::system_settings;
-use crate::platform::{Access, Frame, MenuChoices, MenuItem, MenuSignal, Point};
+use crate::platform::{Access, Frame, Keymap, MenuChoices, MenuItem, MenuSignal, Point};
 
 /// The events that can change the app in front or choose a menu item.
 const WATCHED: [CGEventType; 5] = [
@@ -51,6 +53,9 @@ pub struct SystemMenuChoices {
     watching: Mutex<Option<MainThreadBound<Watching>>>,
 }
 
+/// The watched combinations, as presses and by the names they were given with.
+type WatchedKeys = Vec<(Press, Vec<String>)>;
+
 /// What's kept while watching.
 struct Watching {
     /// Removed when watching stops.
@@ -59,6 +64,8 @@ struct Watching {
     observer: Option<Observer>,
     /// Where the signals go, shared with the tap and the observer.
     on_signal: Rc<dyn Fn(MenuSignal)>,
+    /// The watched combinations, as presses and by their names, shared with the tap.
+    watched_keys: Rc<RefCell<WatchedKeys>>,
 }
 
 impl std::fmt::Debug for Watching {
@@ -96,16 +103,19 @@ impl MenuChoices for SystemMenuChoices {
         }
 
         let signals = Rc::clone(&on_signal);
+        let watched_keys = Rc::new(RefCell::new(Vec::new()));
+        let keys = Rc::clone(&watched_keys);
         let tap = EventTap::listen(
             main_thread,
             mask_of(&WATCHED),
-            Box::new(move |event| signals(signal_of(event))),
+            Box::new(move |event| report(event, &*signals, &keys.borrow())),
         )?;
         *watching = Some(MainThreadBound::new(
             Watching {
                 _tap: tap,
                 observer: None,
                 on_signal,
+                watched_keys,
             },
             main_thread,
         ));
@@ -126,6 +136,19 @@ impl MenuChoices for SystemMenuChoices {
             .map(|process| observer_of(main_thread, process, Rc::clone(&watching.on_signal)))
             .transpose()?;
         Ok(())
+    }
+
+    fn watch_keys(&self, combinations: &[Vec<String>], keymap: &Keymap) {
+        let watching = self.lock();
+        let (Ok(main_thread), Some(watching)) = (main_thread(), watching.as_ref()) else {
+            return;
+        };
+        let presses = combinations
+            .iter()
+            .filter_map(|keys| press_of(keys, keymap).map(|press| (press, keys.clone())))
+            .collect();
+
+        *watching.get(main_thread).watched_keys.borrow_mut() = presses;
     }
 
     fn stop(&self) {
@@ -168,6 +191,24 @@ fn observer_of(
             }
         }),
     )
+}
+
+/// Reports what an event of the tap means: for menu choices, and as a watched combination, if it's
+/// one.
+fn report(event: TapEvent, on_signal: &dyn Fn(MenuSignal), watched: &WatchedKeys) {
+    on_signal(signal_of(event));
+    if let Some(pressed) = watched_press(watched, event) {
+        on_signal(MenuSignal::KeysPressed(pressed));
+    }
+}
+
+/// The watched combination a key-down event of the tap is, if it's one of them.
+fn watched_press(watched: &WatchedKeys, event: TapEvent) -> Option<Vec<String>> {
+    let press = press_from(event)?;
+
+    watched
+        .iter()
+        .find_map(|(watched, keys)| (*watched == press).then(|| keys.clone()))
 }
 
 /// What an event of the tap means for menu choices.

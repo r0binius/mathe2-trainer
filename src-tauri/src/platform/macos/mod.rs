@@ -6,6 +6,7 @@ mod accessibility;
 mod carbon;
 mod event_tap;
 mod input_source;
+mod key_presses;
 mod keymap;
 mod languages;
 mod menu_keys;

@@ -4,6 +4,7 @@ mod banner;
 mod coach;
 mod coordinator;
 mod hold;
+mod key_watch;
 mod layout;
 mod lookup;
 mod menu;
@@ -18,8 +19,9 @@ mod trigger;
 mod windows;
 
 pub use self::banner::{Banner, show as show_banner};
-pub use self::coach::{CoachAccess, access as coach_access};
+pub use self::coach::{CoachAccess, access as coach_access, watch_shortcuts};
 pub use self::coordinator::Event;
+pub use self::key_watch::WatchedShortcut;
 pub use self::lookup::read_menus;
 pub use self::run::run;
 pub use self::settings::apply_settings;

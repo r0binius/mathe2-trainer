@@ -16,6 +16,7 @@
     "allow-get-settings",
     "allow-record-menu-use",
     "allow-show-banner",
+    "allow-set-watched-shortcuts",
     "log:allow-log"
   ]
 }

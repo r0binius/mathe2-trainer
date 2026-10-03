@@ -21,6 +21,7 @@ const COMMANDS: &[&str] = &[
     "ask_for_input_access",
     "record_menu_use",
     "show_banner",
+    "set_watched_shortcuts",
 ];
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

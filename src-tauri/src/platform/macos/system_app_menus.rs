@@ -22,6 +22,14 @@ impl AppMenus for SystemAppMenus {
         running_app(process)
     }
 
+    fn own_app_in_front(&self) -> bool {
+        let own = NSRunningApplication::currentApplication().processIdentifier();
+
+        NSWorkspace::sharedWorkspace()
+            .frontmostApplication()
+            .is_some_and(|app| app.processIdentifier() == own)
+    }
+
     fn access(&self) -> Access {
         Access::of(accessibility::is_trusted())
     }

@@ -8,12 +8,17 @@ use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_log::log;
 
+use super::key_watch::{WatchedShortcut, combinations, shortcut_used};
 use super::menu_watch::{MenuEffect, MenuMessage, MenuWatch, update_menu_watch};
 use super::windows;
 use crate::platform::{Access, MenuSignal, Platform};
+use crate::services::values::ShortcutId;
 
 /// The event that tells the main window about a menu choice.
 const MENU_CHOSEN: &str = "menu-chosen";
+
+/// The event that tells the main window a learned shortcut was pressed in its app.
+const KEY_USED: &str = "key-used";
 
 /// Where watching the menus stands, kept in Tauri's managed state.
 #[derive(Debug, Default)]
@@ -26,6 +31,8 @@ struct CoachState {
     /// Whether they are: not until both Accessibility and Input Monitoring are allowed.
     watching: bool,
     watch: MenuWatch,
+    /// The learned shortcuts whose presses count, as the main window sent them last.
+    watched: Vec<WatchedShortcut>,
 }
 
 /// What the coach needs the user to allow, as the Settings window shows it.
@@ -35,6 +42,12 @@ pub struct CoachAccess {
     menus: Access,
     /// Input Monitoring, to watch clicks and key presses.
     input: Access,
+}
+
+/// A press of a learned shortcut as `key-used` carries it.
+#[derive(Clone, Debug, Serialize)]
+struct KeyUsed {
+    id: ShortcutId,
 }
 
 /// A menu choice as `menu-chosen` carries it.
@@ -55,7 +68,36 @@ pub fn apply(app: &AppHandle, learn_from_work: bool) {
         retry(app);
     } else if lock(app).watching {
         app.state::<Platform>().menu_choices.stop();
-        *lock(app) = CoachState::default();
+        let watched = std::mem::take(&mut lock(app).watched);
+        *lock(app) = CoachState {
+            watched,
+            ..CoachState::default()
+        };
+    }
+}
+
+/// Counts presses of `watched` from now on, in place of the shortcuts before; the main window
+/// sends them whenever what's learned or the layout changes. Kept while not watching, for when
+/// watching starts.
+///
+/// Runs on the main thread, where the platform watches.
+pub fn watch_shortcuts(app: &AppHandle, watched: Vec<WatchedShortcut>) {
+    lock(app).watched = watched;
+    if lock(app).watching {
+        watch_keys(app);
+    }
+}
+
+/// Hands the platform the combinations to report, resolved on the current layout.
+fn watch_keys(app: &AppHandle) {
+    let platform = app.state::<Platform>();
+    let combinations = combinations(&lock(app).watched);
+
+    match platform.keymap.current_layout() {
+        Ok(layout) => platform
+            .menu_choices
+            .watch_keys(&combinations, &layout.keymap),
+        Err(error) => log::warn!("cannot watch key presses on the current layout: {error}"),
     }
 }
 
@@ -98,6 +140,7 @@ fn start(app: &AppHandle) {
     match started {
         Ok(()) => {
             lock(app).watching = true;
+            watch_keys(app);
             // Observe the app in front right away, not only from the next click.
             on_signal(app, MenuSignal::Pressed);
         }
@@ -113,9 +156,26 @@ fn on_signal(app: &AppHandle, signal: MenuSignal) {
         MenuSignal::Return => MenuMessage::Return,
         MenuSignal::Highlighted(item) => MenuMessage::Highlighted(item),
         MenuSignal::MenuClosed => MenuMessage::MenuClosed,
+        MenuSignal::KeysPressed(keys) => return report_key_use(app, &keys),
     };
 
     dispatch(app, message);
+}
+
+/// Tells the main window which learned shortcut a press of `keys` used, if it was pressed in that
+/// shortcut's app. Presses in Mouseless itself, such as while practicing, never count.
+fn report_key_use(app: &AppHandle, keys: &[String]) {
+    let platform = app.state::<Platform>();
+    let in_front = (!platform.menus.own_app_in_front())
+        .then(|| platform.menus.app_in_front())
+        .flatten();
+    let used = shortcut_used(&lock(app).watched, in_front.as_ref(), keys).cloned();
+
+    if let Some(id) = used
+        && let Err(error) = app.emit_to(windows::MAIN, KEY_USED, KeyUsed { id })
+    {
+        log::error!("cannot tell the main window about a key press: {error}");
+    }
 }
 
 /// Updates the watch with `message` and carries out its effect.

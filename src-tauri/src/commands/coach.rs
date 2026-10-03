@@ -2,7 +2,7 @@
 
 use tauri::{AppHandle, State};
 
-use crate::app::{self, Banner, CoachAccess};
+use crate::app::{self, Banner, CoachAccess, WatchedShortcut};
 use crate::error::AppError;
 use crate::platform::Platform;
 
@@ -47,4 +47,16 @@ pub fn ask_for_input_access(platform: State<'_, Platform>) -> Result<(), AppErro
 )]
 pub fn show_banner(app: AppHandle, banner: Banner) -> Result<(), AppError> {
     app::show_banner(&app, &banner).map_err(|source| AppError::Window { source })
+}
+
+/// Counts presses of these learned shortcuts from now on, in place of the ones before, while
+/// learning from work is on. Synchronous, so it runs on the main thread, where the platform
+/// watches.
+#[tauri::command]
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "Tauri passes command arguments by value"
+)]
+pub fn set_watched_shortcuts(app: AppHandle, shortcuts: Vec<WatchedShortcut>) {
+    app::watch_shortcuts(&app, shortcuts);
 }

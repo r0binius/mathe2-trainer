@@ -41,6 +41,9 @@ pub trait AppMenus {
     /// is topmost. `None` if no other app has a window.
     fn app_in_front(&self) -> Option<RunningApp>;
 
+    /// Whether this app itself is in front, such as while the user practices in it.
+    fn own_app_in_front(&self) -> bool;
+
     /// Whether the user lets the app read other apps' menus.
     fn access(&self) -> Access;
 
