@@ -11,6 +11,7 @@ const settings: Settings = {
   showDockIcon: false,
   language: 'system',
   learnFromWork: false,
+  showMenuBanner: true,
 };
 
 describe('settingsRepository', () => {

@@ -13,6 +13,7 @@ import type { SettingsRepository } from '@/domain/settings/repository';
 import type { PlatformError } from '@/domain/shared/platformError';
 import type { Err, Result } from '@/domain/shared/result';
 import { err } from '@/domain/shared/result';
+import type { Banner } from '@/domain/usage/banner';
 import type { MenuChoice } from '@/domain/usage/menuChoice';
 import type { UsageRepository } from '@/domain/usage/repository';
 
@@ -88,6 +89,13 @@ export type Coach = {
    * function stops it.
    */
   readonly onMenuChosen: (listener: (choice: MenuChoice) => void) => () => void;
+  /** Shows a shortcut's title and keys in the banner below the menu bar, for a moment. */
+  readonly showBanner: (banner: Banner) => Promise<Result<void, PlatformError>>;
+  /**
+   * Calls `listener` with every banner the banner window is to show, until the returned function
+   * stops it.
+   */
+  readonly onBannerShown: (listener: (banner: Banner) => void) => () => void;
 };
 
 /** Where the app provides the coach to the windows. */
@@ -184,6 +192,8 @@ export const missingCoach: Coach = {
   load: unavailable,
   askFor: unavailable,
   onMenuChosen: () => ignore,
+  showBanner: unavailable,
+  onBannerShown: () => ignore,
 };
 
 /** What the main window injects when the app provided no usage counts: counting fails. */

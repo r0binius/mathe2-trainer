@@ -41,4 +41,28 @@ describe('coach', () => {
     expect(listen).toHaveBeenCalledWith('menu-chosen', expect.any(Function));
     expect(listener).toHaveBeenCalledWith(choice);
   });
+
+  it('shows a banner with show_banner', async () => {
+    const banner = { title: 'Als Galerie', keys: ['Meta', '2'] };
+    const invoke = vi.fn(() => Promise.resolve(null));
+
+    await expect(coach(invoke, vi.fn<Listen>(), logger).showBanner(banner)).resolves.toStrictEqual(
+      ok(undefined),
+    );
+    expect(invoke).toHaveBeenCalledWith('show_banner', { banner });
+  });
+
+  it('follows banner-shown with its decoded payload', () => {
+    const banner = { title: 'Als Galerie', keys: ['Meta', '2'] };
+    const listen = vi.fn<Listen>((_event, handler) => {
+      handler({ payload: banner });
+      return Promise.resolve(vi.fn());
+    });
+    const listener = vi.fn();
+
+    coach(vi.fn(), listen, logger).onBannerShown(listener);
+
+    expect(listen).toHaveBeenCalledWith('banner-shown', expect.any(Function));
+    expect(listener).toHaveBeenCalledWith(banner);
+  });
 });

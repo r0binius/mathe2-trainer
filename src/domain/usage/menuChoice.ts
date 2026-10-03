@@ -24,6 +24,12 @@ export const decodeMenuChoice: Decoder<MenuChoice> = object({
   keys: array(string),
 });
 
+/** The shortcut of Mouseless's data a menu choice used, and its app. */
+export type MenuMatch = {
+  readonly app: AppDefinition;
+  readonly item: PracticeItem;
+};
+
 /**
  * The shortcut of Mouseless's data that a menu choice used, or `undefined` if Mouseless has no
  * sets for the app or no shortcut with those keys. The menu's keys are resolved on the layout as
@@ -33,11 +39,15 @@ export function matchMenuChoice(
   apps: readonly AppDefinition[],
   { bundleId, keys }: MenuChoice,
   context: PracticeContext,
-): PracticeItem | undefined {
+): MenuMatch | undefined {
   const app = findAppByBundleId(apps, bundleId);
   const pressed = practicableKeys(context.keymap, [keys], lookupPolicy);
+  const item =
+    app === undefined || pressed === undefined
+      ? undefined
+      : appPracticeItems(app, context).find((practiced) =>
+          isSameCombination(practiced.keys, pressed),
+        );
 
-  return app === undefined || pressed === undefined
-    ? undefined
-    : appPracticeItems(app, context).find((item) => isSameCombination(item.keys, pressed));
+  return app === undefined || item === undefined ? undefined : { app, item };
 }

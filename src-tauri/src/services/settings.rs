@@ -78,6 +78,10 @@ fn ui_language_of(tag: &str) -> Option<UiLanguage> {
 /// Everything the user can set, in the shape the frontend sends and receives.
 #[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "each is a switch the user sets on its own, as in the frontend's Settings"
+)]
 pub struct Settings {
     /// How the popover is opened.
     pub trigger: Trigger,
@@ -89,6 +93,9 @@ pub struct Settings {
     pub language: Language,
     /// Whether Mouseless watches menu choices and key presses of known shortcuts, and counts them.
     pub learn_from_work: bool,
+    /// Whether a menu choice of a known shortcut shows its keys in a banner, while learning from
+    /// work.
+    pub show_menu_banner: bool,
 }
 
 impl Settings {
@@ -109,6 +116,7 @@ impl Default for Settings {
             show_dock_icon: true,
             language: Language::System,
             learn_from_work: false,
+            show_menu_banner: true,
         }
     }
 }
@@ -241,6 +249,7 @@ mod tests {
             show_dock_icon: false,
             language: Language::De,
             learn_from_work: true,
+            show_menu_banner: false,
         }
     }
 
@@ -282,6 +291,7 @@ mod tests {
                 "showDockIcon": false,
                 "language": "de",
                 "learnFromWork": true,
+                "showMenuBanner": false,
             }),
         );
         assert_eq!(
@@ -298,6 +308,7 @@ mod tests {
             "showDockIcon": true,
             "language": "system",
             "learnFromWork": false,
+            "showMenuBanner": true,
             "showDockIcons": false,
         });
 
@@ -332,6 +343,7 @@ mod tests {
                 ("language".to_owned(), r#""de""#.to_owned()),
                 ("learnFromWork".to_owned(), "true".to_owned()),
                 ("showDockIcon".to_owned(), "false".to_owned()),
+                ("showMenuBanner".to_owned(), "false".to_owned()),
                 (
                     "trigger".to_owned(),
                     r#"{"keys":["Meta","Shift","m"],"kind":"shortcut"}"#.to_owned(),

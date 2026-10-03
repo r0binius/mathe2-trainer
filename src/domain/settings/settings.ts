@@ -17,6 +17,8 @@ export type Settings = {
   readonly language: LanguageSetting;
   /** Whether Mouseless watches menu choices and key presses of known shortcuts, and counts them. */
   readonly learnFromWork: boolean;
+  /** Whether a menu choice of a known shortcut shows its keys in a banner, while learning. */
+  readonly showMenuBanner: boolean;
 };
 
 const decodeTrigger: Decoder<Trigger> = oneOf([
@@ -31,6 +33,7 @@ export const decodeSettings: Decoder<Settings> = object({
   showDockIcon: boolean,
   language: decodeLanguageSetting,
   learnFromWork: boolean,
+  showMenuBanner: boolean,
 });
 
 /**

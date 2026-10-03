@@ -15,6 +15,7 @@ const settings: Settings = {
   showDockIcon: true,
   language: 'system',
   learnFromWork: false,
+  showMenuBanner: true,
 };
 
 const locked = { kind: 'database', message: 'database is locked' } as const;

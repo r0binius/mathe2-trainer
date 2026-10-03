@@ -10,6 +10,7 @@ const defaults = {
   showDockIcon: true,
   language: 'system',
   learnFromWork: false,
+  showMenuBanner: true,
 };
 
 describe('decodeSettings', () => {

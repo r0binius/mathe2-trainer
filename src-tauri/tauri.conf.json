@@ -38,6 +38,19 @@
         "visibleOnAllWorkspaces": true
       },
       {
+        "label": "banner",
+        "url": "banner.html",
+        "width": 360,
+        "height": 52,
+        "visible": false,
+        "decorations": false,
+        "transparent": true,
+        "resizable": false,
+        "focusable": false,
+        "alwaysOnTop": true,
+        "visibleOnAllWorkspaces": true
+      },
+      {
         "label": "settings",
         "title": "Mouseless",
         "url": "settings.html",

@@ -20,6 +20,7 @@ const COMMANDS: &[&str] = &[
     "get_coach_access",
     "ask_for_input_access",
     "record_menu_use",
+    "show_banner",
 ];
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

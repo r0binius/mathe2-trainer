@@ -70,6 +70,9 @@ All of this runs only while **Settings → General → Learn from how I work** i
 
 When a menu use matched a shortcut and **Show the shortcut when I use a menu** is on, a small panel at the top of the screen shows the shortcut's title and keys for about 2 seconds. It never takes focus or catches clicks, and a new one replaces the last.
 
+- The main window, which matched the choice, sends the translated title and keys (`show_banner`). Rust places the `banner` window centred 8 points below the menu bar of the screen the pointer is on, shows it, and hides it after 2.2 s unless a newer banner replaced it; the page fades in and out within 2 s.
+- The window is created hidden and unfocusable (`focusable: false`), and lets clicks through (`set_ignore_cursor_events`): showing it doesn't make Mouseless active or bring its other windows forward, which the running app confirmed in 18.5.
+
 ### 4.3 Key presses
 
 - Rust's event tap (which today watches ⌘ for the popover trigger) also watches key presses while the switch is on.

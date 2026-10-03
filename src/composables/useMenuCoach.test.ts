@@ -41,9 +41,14 @@ const context: SummaryContext = {
 };
 
 /** The coach in a main window whose context is `loaded`, with the menu choices the test makes. */
-function coach(loaded: SummaryContext | undefined, repository: Partial<UsageRepository> = {}) {
+function coach(
+  loaded: SummaryContext | undefined,
+  repository: Partial<UsageRepository> = {},
+  showsBanner = true,
+) {
   const stopFollowing = vi.fn();
   const onMenuChosen = vi.fn<Coach['onMenuChosen']>(() => stopFollowing);
+  const showBanner = vi.fn<Coach['showBanner']>(() => Promise.resolve(ok(undefined)));
   const usage: UsageRepository = {
     recordMenuUse: vi.fn(() => Promise.resolve(ok(undefined))),
     ...repository,
@@ -56,8 +61,13 @@ function coach(loaded: SummaryContext | undefined, repository: Partial<UsageRepo
   scope.run(() => {
     useMenuCoach(
       [notes],
-      { coach: { onMenuChosen }, usage, logger },
-      { context: () => loaded, now: () => now },
+      { coach: { onMenuChosen, showBanner }, usage, logger },
+      {
+        context: () => loaded,
+        now: () => now,
+        showsBanner: () => showsBanner,
+        appText: (appId, key) => `${appId}:${key}`,
+      },
     );
   });
 
@@ -68,6 +78,7 @@ function coach(loaded: SummaryContext | undefined, repository: Partial<UsageRepo
       });
     },
     usage,
+    showBanner,
     logger,
     stopFollowing,
     stop: () => {
@@ -89,12 +100,33 @@ describe('useMenuCoach', () => {
     });
   });
 
+  it("shows the shortcut's title in the interface's language and its keys in the banner", () => {
+    const { choose, showBanner } = coach(context);
+
+    choose({ bundleId: 'com.apple.Notes', keys: ['Meta', 'n'] });
+
+    expect(showBanner).toHaveBeenCalledWith({
+      title: 'notes:essentials.newNote',
+      keys: ['Meta', 'n'],
+    });
+  });
+
+  it('shows no banner when the settings turn it off, and still counts', () => {
+    const { choose, showBanner, usage } = coach(context, {}, false);
+
+    choose({ bundleId: 'com.apple.Notes', keys: ['Meta', 'n'] });
+
+    expect(showBanner).not.toHaveBeenCalled();
+    expect(usage.recordMenuUse).toHaveBeenCalledOnce();
+  });
+
   it('ignores a choice Mouseless has no shortcut for', () => {
-    const { choose, usage } = coach(context);
+    const { choose, usage, showBanner } = coach(context);
 
     choose({ bundleId: 'com.apple.Notes', keys: ['Meta', 'p'] });
 
     expect(usage.recordMenuUse).not.toHaveBeenCalled();
+    expect(showBanner).not.toHaveBeenCalled();
   });
 
   it('ignores choices until the window has loaded', () => {

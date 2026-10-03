@@ -609,7 +609,7 @@ Close the gaps between the shortcut trainer and the research in `docs/specs/shor
   - [x] 18.4a The switch and the usage table
   - [x] 18.4b Menu choices in Rust
   - [x] 18.4c Matching and counting
-- [ ] 18.5 The banner
+- [x] 18.5 The banner
 - [ ] 18.6 Key presses
 - [ ] 18.7 Your commands and the overview
 

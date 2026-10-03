@@ -26,6 +26,7 @@ const german: Settings = {
   showDockIcon: true,
   language: 'de',
   learnFromWork: false,
+  showMenuBanner: true,
 };
 
 function unused(): never {

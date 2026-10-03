@@ -88,6 +88,7 @@
     "keepOneIcon": "One of the two always stays, so Mouseless can be reached.",
     "learnFromWork": "Learn from how I work",
     "learnFromWorkHint": "Counts which known shortcuts you press, and which you still choose from menus. Only the counts per day are kept, on this Mac; turning it off deletes them.",
+    "showMenuBanner": "Show the shortcut when I use a menu",
     "missing": {
       "menus": "Allow Accessibility, so Mouseless sees which menu item you choose.",
       "input": "Allow Input Monitoring, so Mouseless sees your clicks and key presses."

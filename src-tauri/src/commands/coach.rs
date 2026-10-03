@@ -1,8 +1,8 @@
-//! What the coach needs the user to allow.
+//! What the coach needs the user to allow, and the banner it shows.
 
 use tauri::{AppHandle, State};
 
-use crate::app::{self, CoachAccess};
+use crate::app::{self, Banner, CoachAccess};
 use crate::error::AppError;
 use crate::platform::Platform;
 
@@ -32,4 +32,19 @@ pub fn get_coach_access(app: AppHandle) -> CoachAccess {
 )]
 pub fn ask_for_input_access(platform: State<'_, Platform>) -> Result<(), AppError> {
     platform.menu_choices.ask_for_input_access()
+}
+
+/// Shows a shortcut's title and keys in the banner below the menu bar for a moment, in place of
+/// the one before. Synchronous, so it runs on the main thread, where macOS changes windows.
+///
+/// # Errors
+///
+/// Returns a window error if the banner can't be placed, told what to show, or shown.
+#[tauri::command]
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "Tauri passes command arguments by value"
+)]
+pub fn show_banner(app: AppHandle, banner: Banner) -> Result<(), AppError> {
+    app::show_banner(&app, &banner).map_err(|source| AppError::Window { source })
 }

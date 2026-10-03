@@ -39,23 +39,29 @@ describe('decodeMenuChoice', () => {
 });
 
 describe('matchMenuChoice', () => {
-  it("finds the shortcut of the app's data with the chosen keys", () => {
+  it("finds the shortcut of the app's data with the chosen keys, and its app", () => {
     const choice = { bundleId: 'com.apple.Notes', keys: ['Meta', 'n'] };
+    const match = matchMenuChoice([notes], choice, context);
 
-    expect(matchMenuChoice([notes], choice, context)?.id).toBe('notes/Meta+n');
+    expect(match?.app).toBe(notes);
+    expect(match?.item.id).toBe('notes/Meta+n');
   });
 
   it('resolves the menu keys on the layout, as the popover does', () => {
     // On German, ? is Shift+ß, which is how the practice item names it.
     const choice = { bundleId: 'com.apple.Notes', keys: ['Meta', '?'] };
 
-    expect(matchMenuChoice([notes], choice, context)?.keys).toStrictEqual(['Shift', 'Meta', 'ß']);
+    expect(matchMenuChoice([notes], choice, context)?.item.keys).toStrictEqual([
+      'Shift',
+      'Meta',
+      'ß',
+    ]);
   });
 
   it('matches keys in any order', () => {
     const choice = { bundleId: 'com.apple.Notes', keys: ['n', 'Meta'] };
 
-    expect(matchMenuChoice([notes], choice, context)?.id).toBe('notes/Meta+n');
+    expect(matchMenuChoice([notes], choice, context)?.item.id).toBe('notes/Meta+n');
   });
 
   it('matches nothing for a shortcut Mouseless has no data on', () => {

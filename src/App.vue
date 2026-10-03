@@ -17,10 +17,13 @@ import {
   missingUsageRepository,
   usageRepositoryKey,
 } from './ports';
+import { useSettingsStore } from './stores/settings';
 
 const [context, retry] = useStartup(apps);
+const text = useText();
+const settings = useSettingsStore();
 
-// Counted here because the main window lives as long as the app; closing it only hides it.
+// Here because the main window lives as long as the app; closing it only hides it.
 useMenuCoach(
   apps,
   {
@@ -31,9 +34,11 @@ useMenuCoach(
   {
     context: () => (context.value.status === 'loaded' ? context.value.value : undefined),
     now: Date.now,
+    showsBanner: () =>
+      settings.settings.status === 'loaded' && settings.settings.value.showMenuBanner,
+    appText: text.app,
   },
 );
-const text = useText();
 const sidebar = useTemplateRef('sidebar');
 const detail = useTemplateRef<HTMLElement>('detail');
 

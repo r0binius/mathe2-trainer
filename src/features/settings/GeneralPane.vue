@@ -23,7 +23,10 @@ const emit = defineEmits<{
   /** A control changed the setting it stands for. */
   change: [
     changes: Partial<
-      Pick<Settings, 'language' | 'showMenuBarIcon' | 'showDockIcon' | 'learnFromWork'>
+      Pick<
+        Settings,
+        'language' | 'showMenuBarIcon' | 'showDockIcon' | 'learnFromWork' | 'showMenuBanner'
+      >
     >,
   ];
   /** Open System Settings was clicked for a permission that's missing. */
@@ -114,6 +117,18 @@ function checkedOf(event: Event): boolean {
         type="checkbox"
         :checked="settings.learnFromWork"
         @change="emit('change', { learnFromWork: checkedOf($event) })"
+      />
+    </SettingRow>
+    <SettingRow
+      v-if="settings.learnFromWork"
+      :label="text.ui('settings.showMenuBanner')"
+      label-for="show-menu-banner"
+    >
+      <input
+        id="show-menu-banner"
+        type="checkbox"
+        :checked="settings.showMenuBanner"
+        @change="emit('change', { showMenuBanner: checkedOf($event) })"
       />
     </SettingRow>
     <!-- Watching waits until both are allowed; each missing one gets its own way there. -->

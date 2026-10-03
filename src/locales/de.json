@@ -88,6 +88,7 @@
     "keepOneIcon": "Eines der beiden bleibt immer, damit Mouseless erreichbar ist.",
     "learnFromWork": "Aus meiner Arbeit lernen",
     "learnFromWorkHint": "Zählt, welche bekannten Kurzbefehle du drückst und welche du noch im Menü wählst. Nur die Anzahl pro Tag wird gespeichert, auf diesem Mac; Ausschalten löscht sie.",
+    "showMenuBanner": "Kurzbefehl zeigen, wenn ich ein Menü benutze",
     "missing": {
       "menus": "Erlaube Bedienungshilfen, damit Mouseless sieht, welchen Menüpunkt du wählst.",
       "input": "Erlaube Eingabeüberwachung, damit Mouseless deine Klicks und Tastendrücke sieht."

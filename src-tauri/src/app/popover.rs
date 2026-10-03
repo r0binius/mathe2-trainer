@@ -2,9 +2,9 @@
 //!
 //! `tauri.conf.json` creates it hidden at startup, so it's loaded before it first opens.
 
-use tauri::{
-    AppHandle, Manager, Monitor, PhysicalPosition, PhysicalRect, PhysicalSize, WebviewWindow,
-};
+use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalRect, PhysicalSize, WebviewWindow};
+
+use super::screen::{shows, signed};
 
 /// The popover's window label, as in `tauri.conf.json` and its capability.
 pub const LABEL: &str = "popover";
@@ -43,23 +43,6 @@ pub fn open_below(
     popover.set_focus()
 }
 
-/// Whether `point` lies on the monitor's screen, menu bar included.
-fn shows(monitor: &Monitor, point: PhysicalPosition<i32>) -> bool {
-    let screen = PhysicalRect {
-        position: *monitor.position(),
-        size: *monitor.size(),
-    };
-
-    contains(screen, point)
-}
-
-fn contains(area: PhysicalRect<i32, u32>, point: PhysicalPosition<i32>) -> bool {
-    let right = area.position.x.saturating_add(signed(area.size.width));
-    let bottom = area.position.y.saturating_add(signed(area.size.height));
-
-    (area.position.x..right).contains(&point.x) && (area.position.y..bottom).contains(&point.y)
-}
-
 /// Where the popover goes: right below the icon and centred on it, but moved left or right to stay
 /// inside the `area` the screen leaves to windows.
 fn below(
@@ -83,11 +66,6 @@ fn below(
         x: centred.min(rightmost).max(area.position.x),
         y: icon.position.y.saturating_add(signed(icon.size.height)),
     }
-}
-
-/// A size as a coordinate. No screen is 2³¹ pixels wide, so the saturation never happens.
-fn signed(length: u32) -> i32 {
-    i32::try_from(length).unwrap_or(i32::MAX)
 }
 
 #[cfg(test)]
@@ -137,13 +115,5 @@ mod tests {
         let icon = rect(100, 0, 60, 74);
 
         assert_eq!(below(icon, POPOVER, rect(-400, 74, 400, 908)).x, -400);
-    }
-
-    #[test]
-    fn finds_the_screen_an_icon_is_on() {
-        let left = rect(-1920, 0, 1920, 1080);
-
-        assert!(contains(left, PhysicalPosition { x: -1, y: 0 }));
-        assert!(!contains(left, PhysicalPosition { x: 0, y: 0 }));
     }
 }

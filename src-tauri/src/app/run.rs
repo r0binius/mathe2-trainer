@@ -4,6 +4,7 @@ use std::sync::Arc;
 
 use tauri::{Manager, RunEvent};
 
+use super::banner::{self, Banners};
 use super::coach::Coach;
 use super::coordinator::Event;
 use super::lookup::AppInFrontState;
@@ -43,6 +44,7 @@ pub fn run() -> tauri::Result<()> {
             // Managed first: a layout change asks for it from the moment layouts are watched.
             app.manage(Triggers::default());
             app.manage(Coach::default());
+            app.manage(Banners::default());
             app.manage(AppInFrontState::default());
             let directory = app
                 .path()
@@ -55,6 +57,7 @@ pub fn run() -> tauri::Result<()> {
             layout::follow_changes(app.handle(), &platform)?;
             app.manage(platform);
             windows::report_window_events(app.handle())?;
+            banner::prepare(app.handle())?;
             // English until the settings are applied, right after.
             tray::create(
                 app.handle(),
@@ -66,6 +69,7 @@ pub fn run() -> tauri::Result<()> {
         .invoke_handler(tauri::generate_handler![
             commands::coach::ask_for_input_access,
             commands::coach::get_coach_access,
+            commands::coach::show_banner,
             commands::keymap::get_keymap,
             commands::lookup::ask_for_menu_access,
             commands::lookup::read_menu_shortcuts,
