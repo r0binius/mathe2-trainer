@@ -24,11 +24,11 @@ describe('byKeyboard', () => {
   it('shares the uses done with the keys out of all uses', () => {
     const counts = [used('notes/Meta+n', 3, 1), used('notes/Meta+2', 3, 1)];
 
-    expect(byKeyboard([notes], counts).share).toBe(0.75);
+    expect(byKeyboard([notes], counts)?.share).toBe(0.75);
   });
 
-  it('has no share before anything was counted', () => {
-    expect(byKeyboard([notes], []).share).toBeUndefined();
+  it('has nothing to sum up before anything was counted', () => {
+    expect(byKeyboard([notes], [])).toBeUndefined();
   });
 
   it('lists the shortcuts chosen from menus most, each with its app and how often', () => {
@@ -38,7 +38,7 @@ describe('byKeyboard', () => {
       used('notes/Meta+n', 5, 0),
     ];
 
-    expect(byKeyboard([notes], counts).fromMenus).toStrictEqual([
+    expect(byKeyboard([notes], counts)?.fromMenus).toStrictEqual([
       { app: notes, shortcut: gallery, byMenu: 2 },
       { app: notes, shortcut: newNote, byMenu: 1 },
     ]);
@@ -58,12 +58,12 @@ describe('byKeyboard', () => {
     };
     const counts = ids.map((key, index) => used(`notes/Meta+${key}`, 1, index));
 
-    const listed = byKeyboard([many], counts).fromMenus.map(({ shortcut }) => shortcut.title);
+    const listed = byKeyboard([many], counts)?.fromMenus.map(({ shortcut }) => shortcut.title);
 
     expect(listed).toStrictEqual(['f', 'e', 'd', 'c', 'b']);
   });
 
   it('leaves out shortcuts no longer in the data', () => {
-    expect(byKeyboard([notes], [used('notes/Meta+q', 0, 4)]).fromMenus).toStrictEqual([]);
+    expect(byKeyboard([notes], [used('notes/Meta+q', 0, 4)])?.fromMenus).toStrictEqual([]);
   });
 });

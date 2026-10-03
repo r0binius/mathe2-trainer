@@ -16,22 +16,23 @@ export type MenuLeader = {
 
 /** How the user worked over the days of the counts, as the overview's By keyboard shows it. */
 export type ByKeyboard = {
-  /** The share of uses done with the keys, from 0 to 1, once anything was counted. */
-  readonly share?: number;
+  /** The share of uses done with the keys, from 0 to 1. */
+  readonly share: number;
   /** The shortcuts chosen from menus most, the most chosen first. */
   readonly fromMenus: readonly MenuLeader[];
 };
 
 /**
  * Sums up the counts: the share of uses done with the keys, and the {@link menuLeaders} shortcuts
- * of `apps` chosen from menus most. Counts of shortcuts no longer in the data are left out of the
- * list, but not of the share, which is history.
+ * of `apps` chosen from menus most, or `undefined` before anything was counted. Counts of
+ * shortcuts no longer in the data are left out of the list, but not of the share, which is
+ * history.
  * @see §5 of `docs/specs/science-backed-training.md`
  */
 export function byKeyboard(
   apps: readonly AppDefinition[],
   counts: readonly UsageCount[],
-): ByKeyboard {
+): ByKeyboard | undefined {
   const byKeys = sum(counts.map((count) => count.byKeys));
   const total = byKeys + sum(counts.map((count) => count.byMenu));
   const fromMenus = [...menuTotals(counts)]
@@ -39,7 +40,7 @@ export function byKeyboard(
     .flatMap(([id, byMenu]) => leaderOf(apps, id, byMenu))
     .slice(0, menuLeaders);
 
-  return total === 0 ? { fromMenus } : { share: byKeys / total, fromMenus };
+  return total === 0 ? undefined : { share: byKeys / total, fromMenus };
 }
 
 /** The shortcut `id` names, with its app, or nothing if it's no longer in the data. */

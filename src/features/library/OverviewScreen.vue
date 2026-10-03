@@ -63,12 +63,11 @@ const logLoaded = computed(() => progress.log.status === 'loaded');
  * How the user worked lately, while learning from work is on and anything was counted: the share
  * done with the keys, and the commands still chosen from menus most.
  */
-const keyboard = computed(() => {
-  const learning = settings.current?.learnFromWork === true;
-  const summary = learning && usage.counts ? byKeyboard(props.apps, usage.counts) : undefined;
-
-  return summary?.share === undefined ? undefined : { ...summary, share: summary.share };
-});
+const keyboard = computed(() =>
+  settings.current?.learnFromWork === true && usage.counts
+    ? byKeyboard(props.apps, usage.counts)
+    : undefined,
+);
 
 /** A figure from the review log, or {@link unknown} while the log isn't loaded. */
 function fromLog(value: string): string {
