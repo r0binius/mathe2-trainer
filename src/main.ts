@@ -11,8 +11,8 @@ import { createWindow } from './window';
 createWindow(App)
   .use(
     createAppRouter(apps, (app) => {
-      const { usage } = useUsageStore();
-      const set = usage.status === 'loaded' ? yourCommands(app, usage.value.counts) : undefined;
+      const { counts } = useUsageStore();
+      const set = counts && yourCommands(app, counts);
 
       return set === undefined ? [] : [set];
     }),

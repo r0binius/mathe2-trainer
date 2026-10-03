@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { inject, onScopeDispose, shallowRef } from 'vue';
+import { computed, inject, onScopeDispose, shallowRef } from 'vue';
 
 import type { LayoutId } from '@/domain/keyboard/keymap';
 import type { Loadable } from '@/domain/shared/loadable';
@@ -24,6 +24,10 @@ export type LayoutUsage = {
 export const useUsageStore = defineStore('usage', () => {
   const repository = inject(usageRepositoryKey, missingUsageRepository);
   const usage = shallowRef<Loadable<LayoutUsage>>({ status: 'loading' });
+  /** The counts once they're loaded, for the screens that only read them. */
+  const counts = computed(() =>
+    usage.value.status === 'loaded' ? usage.value.value.counts : undefined,
+  );
   /** The layout whose counts were asked for last, so the counts of an earlier one are dropped. */
   const asked = shallowRef<LayoutId>();
 
@@ -60,5 +64,5 @@ export const useUsageStore = defineStore('usage', () => {
     }),
   );
 
-  return { usage, load, record };
+  return { usage, counts, load, record };
 });

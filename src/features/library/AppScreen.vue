@@ -47,8 +47,8 @@ const recent = computed(() => recentFirst(sets.value));
 
 /** The shortcuts chosen from the app's menus lately, as a set to learn, once there are any. */
 const yours = computed(() => {
-  const { usage } = usageStore;
-  const set = usage.status === 'loaded' ? yourCommands(props.app, usage.value.counts) : undefined;
+  const { counts } = usageStore;
+  const set = counts && yourCommands(props.app, counts);
 
   return set && summarizeSet(props.app.id, set, props.context);
 });

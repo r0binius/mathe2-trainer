@@ -65,10 +65,7 @@ const logLoaded = computed(() => progress.log.status === 'loaded');
  */
 const keyboard = computed(() => {
   const learning = settings.current?.learnFromWork === true;
-  const summary =
-    learning && usage.usage.status === 'loaded'
-      ? byKeyboard(props.apps, usage.usage.value.counts)
-      : undefined;
+  const summary = learning && usage.counts ? byKeyboard(props.apps, usage.counts) : undefined;
 
   return summary?.share === undefined ? undefined : { ...summary, share: summary.share };
 });
