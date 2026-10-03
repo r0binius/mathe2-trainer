@@ -7,7 +7,7 @@ import { useSettingsLanguage } from '@/composables/useSettingsLanguage';
 import type { Settings } from '@/domain/settings/settings';
 import type { UiKey } from '@/i18n';
 import { useText } from '@/i18n';
-import { coachKey, consoleLogger, loggerKey, missingCoach } from '@/ports';
+import { coachPermissionsKey, consoleLogger, loggerKey, missingCoachPermissions } from '@/ports';
 import { useKeymapStore } from '@/stores/keymap';
 import { useSettingsStore } from '@/stores/settings';
 
@@ -31,7 +31,7 @@ const text = useText();
 const shown = ref<Pane>('general');
 const failed = ref(false);
 const [coachAccess, askFor] = useCoachAccess(
-  inject(coachKey, missingCoach),
+  inject(coachPermissionsKey, missingCoachPermissions),
   () => settings.current?.learnFromWork === true,
   inject(loggerKey, consoleLogger),
 );

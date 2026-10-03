@@ -4,7 +4,7 @@ import type { Decoder } from '@/domain/shared/decode';
 import { decodeBanner } from '@/domain/usage/banner';
 import { decodeMenuChoice } from '@/domain/usage/menuChoice';
 import { decodeKeyUsed } from '@/domain/usage/watched';
-import type { Coach, Logger } from '@/ports';
+import type { Banners, Coach, CoachPermissions, Logger } from '@/ports';
 
 import type { Invoke, Listen } from './ipc';
 import { commandCaller, decodingPayloads, nothing, subscriber } from './ipc';
@@ -24,29 +24,38 @@ const bannerShown = 'banner-shown';
 /** The event the Rust side sends the main window for every press of a watched shortcut. */
 const keyUsed = 'key-used';
 
-/**
- * The coach on the Rust side. If listening for menu choices, banners or key presses fails, or
- * what arrives doesn't decode, `logger` says why.
- */
-export function coach(invoke: Invoke, listen: Listen, logger: Logger): Coach {
-  const call = commandCaller(invoke);
-
-  function reportFor(event: string): (message: string) => void {
-    return (message) => {
+/** Follows an event of the Rust side with its decoded payload; `logger` says why it can't. */
+function following(listen: Listen, logger: Logger) {
+  return function follow<T>(event: string, decoder: Decoder<T>) {
+    function report(message: string): void {
       logger.error(`Could not follow ${event}: ${message}`);
-    };
-  }
+    }
 
-  function follow<T>(event: string, decoder: Decoder<T>) {
-    return decodingPayloads(subscriber(listen, event, reportFor(event)), decoder, reportFor(event));
-  }
+    return decodingPayloads(subscriber(listen, event, report), decoder, report);
+  };
+}
+
+/** What learning from how the user works needs the user to allow, asked of the Rust side. */
+export function coachPermissions(invoke: Invoke): CoachPermissions {
+  const call = commandCaller(invoke);
 
   return {
     load: () => call('get_coach_access', decodeCoachAccess),
     askFor: (permission) => call(askCommands[permission], nothing),
+  };
+}
+
+/**
+ * The coach on the Rust side. If listening for menu choices or key presses fails, or what arrives
+ * doesn't decode, `logger` says why.
+ */
+export function coach(invoke: Invoke, listen: Listen, logger: Logger): Coach {
+  const call = commandCaller(invoke);
+  const follow = following(listen, logger);
+
+  return {
     onMenuChosen: follow(menuChosen, decodeMenuChoice),
     showBanner: (banner) => call('show_banner', nothing, { banner }),
-    onBannerShown: follow(bannerShown, decodeBanner),
     setWatched: (shortcuts) => call('set_watched_shortcuts', nothing, { shortcuts }),
     onKeyUsed: (listener) =>
       follow(
@@ -56,4 +65,9 @@ export function coach(invoke: Invoke, listen: Listen, logger: Logger): Coach {
         listener(id);
       }),
   };
+}
+
+/** The banners the Rust side tells the banner window to show. */
+export function banners(listen: Listen, logger: Logger): Banners {
+  return { onShown: following(listen, logger)(bannerShown, decodeBanner) };
 }

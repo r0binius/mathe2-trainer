@@ -75,10 +75,10 @@ export type Lookup = {
 export const lookupKey: InjectionKey<Lookup> = Symbol('lookup');
 
 /**
- * The coach on the Rust side, while learning from how the user works is on: what it needs the
- * user to allow, and the menu choices it sees. A shell port like {@link Windows}.
+ * What learning from how the user works needs the user to allow, and asking for it. A shell port
+ * like {@link Windows}.
  */
-export type Coach = {
+export type CoachPermissions = {
   /**
    * Whether each permission is allowed. Once both are while the switch is on, the Rust side
    * starts watching.
@@ -86,6 +86,16 @@ export type Coach = {
   readonly load: () => Promise<Result<CoachAccess, PlatformError>>;
   /** Opens System Settings where the user allows `permission`. */
   readonly askFor: (permission: Permission) => Promise<Result<void, PlatformError>>;
+};
+
+/** Where the app provides the coach's permissions to the Settings window. */
+export const coachPermissionsKey: InjectionKey<CoachPermissions> = Symbol('coach permissions');
+
+/**
+ * The coach on the Rust side, while learning from how the user works is on: the menu choices and
+ * presses of watched shortcuts it sees, and the banner it shows. A shell port like {@link Windows}.
+ */
+export type Coach = {
   /**
    * Calls `listener` for every menu item with a shortcut the user chooses, until the returned
    * function stops it.
@@ -93,11 +103,6 @@ export type Coach = {
   readonly onMenuChosen: (listener: (choice: MenuChoice) => void) => () => void;
   /** Shows a shortcut's title and keys in the banner below the menu bar, for a moment. */
   readonly showBanner: (banner: Banner) => Promise<Result<void, PlatformError>>;
-  /**
-   * Calls `listener` with every banner the banner window is to show, until the returned function
-   * stops it.
-   */
-  readonly onBannerShown: (listener: (banner: Banner) => void) => () => void;
   /** Counts presses of these learned shortcuts from now on, in place of the ones before. */
   readonly setWatched: (
     shortcuts: readonly WatchedShortcut[],
@@ -109,8 +114,19 @@ export type Coach = {
   readonly onKeyUsed: (listener: (id: ShortcutId) => void) => () => void;
 };
 
-/** Where the app provides the coach to the windows. */
+/** Where the app provides the coach to the main window. */
 export const coachKey: InjectionKey<Coach> = Symbol('coach');
+
+/** What the banner window is told to show. A shell port like {@link Windows}. */
+export type Banners = {
+  /**
+   * Calls `listener` with every banner to show, until the returned function stops it.
+   */
+  readonly onShown: (listener: (banner: Banner) => void) => () => void;
+};
+
+/** Where the app provides the banners to the banner window. */
+export const bannersKey: InjectionKey<Banners> = Symbol('banners');
 
 /** Where the app provides the usage counts to the main window. */
 export const usageRepositoryKey: InjectionKey<UsageRepository> = Symbol('usage repository');
@@ -198,16 +214,19 @@ export const missingLookup: Lookup = {
   readMenuShortcuts: unavailable,
 };
 
-/** What a window injects when the app provided no coach: unknown access, and no choices. */
+/** What the Settings window injects when the app provided no coach permissions: unknown. */
+export const missingCoachPermissions: CoachPermissions = { load: unavailable, askFor: unavailable };
+
+/** What the main window injects when the app provided no coach: no choices, no presses. */
 export const missingCoach: Coach = {
-  load: unavailable,
-  askFor: unavailable,
   onMenuChosen: () => ignore,
   showBanner: unavailable,
-  onBannerShown: () => ignore,
   setWatched: unavailable,
   onKeyUsed: () => ignore,
 };
+
+/** What the banner window injects when the app provided no banners: it never shows one. */
+export const missingBanners: Banners = { onShown: () => ignore };
 
 /** What the main window injects when the app provided no usage counts: counting fails. */
 export const missingUsageRepository: UsageRepository = {

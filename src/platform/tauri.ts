@@ -4,10 +4,18 @@ import { listen } from '@tauri-apps/api/event';
 import type { ProgressRepository } from '@/domain/progress/repository';
 import type { SettingsRepository } from '@/domain/settings/repository';
 import type { UsageRepository } from '@/domain/usage/repository';
-import type { Changes, Coach, KeymapSource, Lookup, Windows } from '@/ports';
+import type {
+  Banners,
+  Changes,
+  Coach,
+  CoachPermissions,
+  KeymapSource,
+  Lookup,
+  Windows,
+} from '@/ports';
 
 import { changes } from './changes';
-import { coach } from './coach';
+import { banners, coach, coachPermissions } from './coach';
 import { keymapSource } from './keymap';
 import { tauriLogger } from './log';
 import { lookup } from './lookup';
@@ -18,8 +26,9 @@ import { windows } from './windows';
 
 /**
  * What the Rust side provides: the repositories, the keyboard layout and other windows' changes to
- * the stores, the window coordinator to the windows, the lookup to the popover, the coach to the
- * Settings and main windows, and the usage counts to the main window.
+ * the stores, the window coordinator to the windows, the lookup to the popover, the coach's
+ * permissions to the Settings window, the coach and the usage counts to the main window, and the
+ * banners to the banner window.
  */
 export type Ports = {
   readonly settings: SettingsRepository;
@@ -28,7 +37,9 @@ export type Ports = {
   readonly windows: Windows;
   readonly changes: Changes;
   readonly lookup: Lookup;
+  readonly coachPermissions: CoachPermissions;
   readonly coach: Coach;
+  readonly banners: Banners;
   readonly usage: UsageRepository;
 };
 
@@ -44,7 +55,9 @@ export function tauriPorts(): Ports {
     windows: windows(invoke),
     changes: changes(listen, tauriLogger),
     lookup: lookup(invoke, listen, tauriLogger),
+    coachPermissions: coachPermissions(invoke),
     coach: coach(invoke, listen, tauriLogger),
+    banners: banners(listen, tauriLogger),
     usage: usageRepository(invoke),
   };
 }

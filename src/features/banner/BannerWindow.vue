@@ -4,7 +4,7 @@ import { inject, onScopeDispose, ref } from 'vue';
 import KeyCapSmall from '@/components/KeyCapSmall.vue';
 import { useKeyLabels } from '@/composables/useKeyLabels';
 import type { Banner } from '@/domain/usage/banner';
-import { coachKey, missingCoach } from '@/ports';
+import { bannersKey, missingBanners } from '@/ports';
 
 const labelOf = useKeyLabels();
 const banner = ref<Banner>();
@@ -12,7 +12,7 @@ const banner = ref<Banner>();
 const shown = ref(0);
 
 onScopeDispose(
-  inject(coachKey, missingCoach).onBannerShown((next) => {
+  inject(bannersKey, missingBanners).onShown((next) => {
     banner.value = next;
     shown.value += 1;
   }),
