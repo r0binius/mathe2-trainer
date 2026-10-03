@@ -19,4 +19,17 @@ describe('usageRepository', () => {
     );
     expect(invoke).toHaveBeenCalledWith('record_use', { shortcutUse });
   });
+
+  it('loads the counts of a layout with load_usage', async () => {
+    const counts = [{ id: 'notes/Meta+n', day: 20_000, byKeys: 2, byMenu: 1 }];
+    const invoke = vi.fn(() => Promise.resolve(counts));
+
+    await expect(
+      usageRepository(invoke).load('com.apple.keylayout.German', 20_000),
+    ).resolves.toStrictEqual(ok(counts));
+    expect(invoke).toHaveBeenCalledWith('load_usage', {
+      layout: 'com.apple.keylayout.German',
+      since: 20_000,
+    });
+  });
 });

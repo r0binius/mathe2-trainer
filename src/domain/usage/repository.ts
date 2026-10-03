@@ -2,6 +2,7 @@ import type { LayoutId } from '../keyboard/keymap';
 import type { PlatformError } from '../shared/platformError';
 import type { Result } from '../shared/result';
 import type { ShortcutId } from '../shortcuts/shortcutId';
+import type { UsageCount } from './usageCount';
 
 /** One use of a shortcut: which, on which layout and local day, and whether by keys or menu. */
 export type ShortcutUse = {
@@ -14,6 +15,11 @@ export type ShortcutUse = {
 
 /** Where the uses of shortcuts are counted, per day. */
 export type UsageRepository = {
+  /** The counts on one layout from the local day `since` on, oldest day first. */
+  readonly load: (
+    layout: LayoutId,
+    since: number,
+  ) => Promise<Result<readonly UsageCount[], PlatformError>>;
   /** Counts one use. Nothing is counted once learning from work is off. */
   readonly recordUse: (shortcutUse: ShortcutUse) => Promise<Result<void, PlatformError>>;
 };

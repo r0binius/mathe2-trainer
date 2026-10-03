@@ -58,7 +58,7 @@ const context: SummaryContext = {
 /** The coach in a main window whose context is `loaded`, with the choices and presses the test makes. */
 function coach(
   loaded: SummaryContext | undefined,
-  repository: Partial<UsageRepository> = {},
+  repository: Partial<Pick<UsageRepository, 'recordUse'>> = {},
   showsBanner = true,
 ) {
   const stopFollowing = vi.fn();
@@ -66,7 +66,7 @@ function coach(
   const onKeyUsed = vi.fn<Coach['onKeyUsed']>(() => stopFollowing);
   const showBanner = vi.fn<Coach['showBanner']>(() => Promise.resolve(ok(undefined)));
   const setWatched = vi.fn<Coach['setWatched']>(() => Promise.resolve(ok(undefined)));
-  const usage: UsageRepository = {
+  const usage: Pick<UsageRepository, 'recordUse'> = {
     recordUse: vi.fn(() => Promise.resolve(ok(undefined))),
     ...repository,
   };

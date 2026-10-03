@@ -210,7 +210,10 @@ export const missingCoach: Coach = {
 };
 
 /** What the main window injects when the app provided no usage counts: counting fails. */
-export const missingUsageRepository: UsageRepository = { recordUse: unavailable };
+export const missingUsageRepository: UsageRepository = {
+  load: unavailable,
+  recordUse: unavailable,
+};
 
 /** What a store injects when the app provided no changes: no other window changes anything. */
 export const missingChanges: Changes = {

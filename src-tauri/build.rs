@@ -20,6 +20,7 @@ const COMMANDS: &[&str] = &[
     "get_coach_access",
     "ask_for_input_access",
     "record_use",
+    "load_usage",
     "show_banner",
     "set_watched_shortcuts",
 ];

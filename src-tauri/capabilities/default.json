@@ -15,6 +15,7 @@
     "allow-replace-progress",
     "allow-get-settings",
     "allow-record-use",
+    "allow-load-usage",
     "allow-show-banner",
     "allow-set-watched-shortcuts",
     "log:allow-log"

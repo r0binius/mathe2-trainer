@@ -1,4 +1,5 @@
 import type { UsageRepository } from '@/domain/usage/repository';
+import { decodeUsageCounts } from '@/domain/usage/usageCount';
 
 import type { Invoke } from './ipc';
 import { commandCaller, nothing } from './ipc';
@@ -8,6 +9,7 @@ export function usageRepository(invoke: Invoke): UsageRepository {
   const call = commandCaller(invoke);
 
   return {
+    load: (layout, since) => call('load_usage', decodeUsageCounts, { layout, since }),
     recordUse: (shortcutUse) => call('record_use', nothing, { shortcutUse }),
   };
 }

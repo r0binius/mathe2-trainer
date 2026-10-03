@@ -9,26 +9,21 @@ import { apps } from './data/apps';
 import LibrarySidebar from './features/library/LibrarySidebar.vue';
 import { focusSidebarKey } from './features/library/sidebarFocus';
 import { useText } from './i18n';
-import {
-  coachKey,
-  consoleLogger,
-  loggerKey,
-  missingCoach,
-  missingUsageRepository,
-  usageRepositoryKey,
-} from './ports';
+import { coachKey, consoleLogger, loggerKey, missingCoach } from './ports';
 import { useSettingsStore } from './stores/settings';
+import { useUsageStore } from './stores/usage';
 
 const [context, retry] = useStartup(apps);
 const text = useText();
 const settings = useSettingsStore();
+const usageStore = useUsageStore();
 
 // Here because the main window lives as long as the app; closing it only hides it.
 useCoach(
   apps,
   {
     coach: inject(coachKey, missingCoach),
-    usage: inject(usageRepositoryKey, missingUsageRepository),
+    usage: { recordUse: usageStore.record },
     logger: inject(loggerKey, consoleLogger),
   },
   {

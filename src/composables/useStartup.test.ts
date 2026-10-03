@@ -9,6 +9,7 @@ import type { Settings } from '@/domain/settings/settings';
 import type { PlatformError } from '@/domain/shared/platformError';
 import type { Result } from '@/domain/shared/result';
 import { err, ok } from '@/domain/shared/result';
+import type { UsageRepository } from '@/domain/usage/repository';
 import { createAppI18n } from '@/i18n';
 import type { KeymapSource } from '@/ports';
 import {
@@ -16,6 +17,7 @@ import {
   missingKeymapSource,
   progressRepositoryKey,
   settingsRepositoryKey,
+  usageRepositoryKey,
 } from '@/ports';
 
 import { useStartup } from './useStartup';
@@ -47,6 +49,10 @@ async function startWith(settings: Result<Settings, PlatformError>) {
     replace: unused,
     reset: unused,
   };
+  const usageRepository: UsageRepository = {
+    load: vi.fn(() => Promise.resolve(ok([]))),
+    recordUse: unused,
+  };
   const keymapSource: KeymapSource = {
     load: () => Promise.resolve(ok({ id: 'com.apple.keylayout.German', keymap: {} })),
     onChange: missingKeymapSource.onChange,
@@ -64,12 +70,13 @@ async function startWith(settings: Result<Settings, PlatformError>) {
     .provide(settingsRepositoryKey, settingsRepository)
     .provide(progressRepositoryKey, progressRepository)
     .provide(keymapSourceKey, keymapSource)
+    .provide(usageRepositoryKey, usageRepository)
     .mount(host);
   await vi.waitFor(() => {
     expect(host.textContent).not.toBe('loading');
   });
 
-  return { host, progressRepository };
+  return { host, progressRepository, usageRepository };
 }
 
 afterEach(() => {
@@ -89,6 +96,17 @@ describe('useStartup', () => {
 
     await vi.waitFor(() => {
       expect(progressRepository.loadLog).toHaveBeenCalledWith(
+        'com.apple.keylayout.German',
+        expect.any(Number),
+      );
+    });
+  });
+
+  it('loads the usage counts of the current layout', async () => {
+    const { usageRepository } = await startWith(ok(german));
+
+    await vi.waitFor(() => {
+      expect(usageRepository.load).toHaveBeenCalledWith(
         'com.apple.keylayout.German',
         expect.any(Number),
       );

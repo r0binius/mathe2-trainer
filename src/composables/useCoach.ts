@@ -18,7 +18,7 @@ import type { Coach, Logger } from '@/ports';
  */
 export type CoachPorts = {
   readonly coach: Pick<Coach, 'onMenuChosen' | 'showBanner' | 'setWatched' | 'onKeyUsed'>;
-  readonly usage: UsageRepository;
+  readonly usage: Pick<UsageRepository, 'recordUse'>;
   readonly logger: Logger;
 };
 

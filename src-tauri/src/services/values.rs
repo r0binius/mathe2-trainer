@@ -145,9 +145,17 @@ impl FromSql for EpochMillis {
 
 /// A local day, counted as the frontend's `localDay` counts it: days since 1970-01-01 in the
 /// user's time zone. Never before it.
-#[derive(Copy, Clone, Debug, Eq, Ord, PartialEq, PartialOrd, Deserialize)]
+#[derive(Copy, Clone, Debug, Eq, Ord, PartialEq, PartialOrd, Deserialize, Serialize)]
 #[serde(try_from = "i64")]
 pub struct LocalDay(i64);
+
+impl LocalDay {
+    /// A day as the database stores it, checked when it came in.
+    #[must_use]
+    pub const fn stored(day: i64) -> Self {
+        Self(day)
+    }
+}
 
 impl TryFrom<i64> for LocalDay {
     type Error = InvalidValue;
@@ -164,6 +172,12 @@ impl TryFrom<i64> for LocalDay {
 impl ToSql for LocalDay {
     fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
         self.0.to_sql()
+    }
+}
+
+impl FromSql for LocalDay {
+    fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
+        i64::column_result(value).map(Self::stored)
     }
 }
 

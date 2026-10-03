@@ -1,9 +1,10 @@
 //! How often shortcuts are used, counted per day while "Learn from how I work" is on.
 
-use rusqlite::{Connection, named_params};
-use serde::Deserialize;
+use rusqlite::{Connection, Row, named_params};
+use serde::{Deserialize, Serialize};
 
 use crate::error::AppError;
+use crate::services::database::query_all;
 use crate::services::settings;
 use crate::services::values::{LayoutId, LocalDay, ShortcutId};
 
@@ -67,6 +68,49 @@ pub fn record_use(connection: &Connection, shortcut_use: &ShortcutUse) -> Result
     Ok(())
 }
 
+/// How often a shortcut was used on one day, as the frontend's `UsageCount`.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UsageCount {
+    /// The shortcut used.
+    pub id: ShortcutId,
+    /// The local day.
+    pub day: LocalDay,
+    /// How often by its keys.
+    pub by_keys: u32,
+    /// How often from a menu.
+    pub by_menu: u32,
+}
+
+/// The counts on one layout from the local day `since` on, oldest day first.
+///
+/// # Errors
+///
+/// Returns a database error if they can't be read.
+pub fn counts(
+    connection: &Connection,
+    layout: &LayoutId,
+    since: LocalDay,
+) -> Result<Vec<UsageCount>, AppError> {
+    Ok(query_all(
+        connection,
+        "SELECT shortcut_id, day, by_keys, by_menu FROM usage
+         WHERE layout = :layout AND day >= :since
+         ORDER BY day, shortcut_id",
+        named_params! { ":layout": layout, ":since": since },
+        read_count,
+    )?)
+}
+
+fn read_count(row: &Row<'_>) -> rusqlite::Result<UsageCount> {
+    Ok(UsageCount {
+        id: row.get("shortcut_id")?,
+        day: row.get("day")?,
+        by_keys: row.get("by_keys")?,
+        by_menu: row.get("by_menu")?,
+    })
+}
+
 /// Deletes every count, as turning the switch off or resetting progress does.
 ///
 /// # Errors
@@ -116,11 +160,11 @@ mod tests {
     /// A count by day: the day, by keys and by menu.
     type Count = (i64, i64, i64);
 
-    fn count_of(row: &rusqlite::Row<'_>) -> rusqlite::Result<Count> {
+    fn count_of(row: &Row<'_>) -> rusqlite::Result<Count> {
         Ok((row.get(0)?, row.get(1)?, row.get(2)?))
     }
 
-    fn counts(database: &Database) -> Vec<Count> {
+    fn stored_counts(database: &Database) -> Vec<Count> {
         let sql = "SELECT day, by_keys, by_menu FROM usage ORDER BY day";
 
         database
@@ -138,7 +182,7 @@ mod tests {
         record(&database, &used(20_000, "keys"));
         record(&database, &used(20_001, "menu"));
 
-        assert_eq!(counts(&database), [(20_000, 2, 1), (20_001, 0, 1)]);
+        assert_eq!(stored_counts(&database), [(20_000, 2, 1), (20_001, 0, 1)]);
     }
 
     #[test]
@@ -147,7 +191,7 @@ mod tests {
 
         record(&database, &used(20_000, "keys"));
 
-        assert_eq!(counts(&database), []);
+        assert_eq!(stored_counts(&database), []);
     }
 
     #[test]
@@ -161,5 +205,43 @@ mod tests {
 
         assert!(serde_json::from_value::<ShortcutUse>(before).is_err());
         assert!(serde_json::from_value::<ShortcutUse>(spoken).is_err());
+    }
+
+    #[test]
+    fn reads_the_counts_of_one_layout_from_a_day_on() {
+        let database = Database::in_memory();
+        let on_us = ShortcutUse {
+            layout: LayoutId::stored("com.apple.keylayout.US".to_owned()),
+            ..used(20_001, "keys")
+        };
+
+        learning(&database, true);
+        record(&database, &used(19_999, "menu"));
+        record(&database, &used(20_000, "keys"));
+        record(&database, &used(20_000, "menu"));
+        record(&database, &on_us);
+        let read = database
+            .with(|connection| {
+                counts(
+                    connection,
+                    &LayoutId::stored("com.apple.keylayout.German".to_owned()),
+                    LocalDay::stored(20_000),
+                )
+            })
+            .expect("the counts are read");
+
+        assert_eq!(
+            read,
+            [UsageCount {
+                id: ShortcutId::stored("macos/Meta+m".to_owned()),
+                day: LocalDay::stored(20_000),
+                by_keys: 1,
+                by_menu: 1,
+            }]
+        );
+        assert_eq!(
+            serde_json::to_value(&read).expect("the counts serialize"),
+            json!([{ "id": "macos/Meta+m", "day": 20_000, "byKeys": 1, "byMenu": 1 }])
+        );
     }
 }
