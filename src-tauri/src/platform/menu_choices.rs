@@ -81,7 +81,7 @@ pub trait MenuChoices {
     ///
     /// # Errors
     ///
-    /// Returns a lookup error if the system's settings can't be opened.
+    /// Returns a coach error if the system's settings can't be opened.
     fn ask_for_input_access(&self) -> Result<(), AppError>;
 
     /// Starts watching clicks and key presses, reporting them, and later the observed app's menus,
@@ -89,7 +89,7 @@ pub trait MenuChoices {
     ///
     /// # Errors
     ///
-    /// Returns a lookup error if it's watching already, isn't on the main thread, or the system
+    /// Returns a coach error if it's watching already, isn't on the main thread, or the system
     /// refuses, such as when Input Monitoring isn't allowed.
     fn start(&self, on_signal: Rc<dyn Fn(MenuSignal)>) -> Result<(), AppError>;
 
@@ -99,7 +99,7 @@ pub trait MenuChoices {
     ///
     /// # Errors
     ///
-    /// Returns a lookup error if it isn't watching, or the app can't be observed, such as when
+    /// Returns a coach error if it isn't watching, or the app can't be observed, such as when
     /// Accessibility isn't allowed.
     fn observe(&self, process: Option<i32>) -> Result<(), AppError>;
 

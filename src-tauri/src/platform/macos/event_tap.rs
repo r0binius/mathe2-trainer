@@ -24,8 +24,6 @@ use objc2_core_graphics::{
     CGEventTapPlacement, CGEventTapProxy, CGEventType,
 };
 
-use crate::error::AppError;
-
 /// An event as a tap reports it.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct TapEvent {
@@ -76,13 +74,13 @@ impl EventTap {
     ///
     /// # Errors
     ///
-    /// Returns a trigger error if macOS refuses the tap, such as when Input Monitoring isn't
-    /// allowed.
+    /// Returns why if macOS refuses the tap, such as when Input Monitoring isn't allowed, for the
+    /// caller to report as its own error.
     pub fn listen(
         main_thread: MainThreadMarker,
         mask: CGEventMask,
         on_event: OnEvent,
-    ) -> Result<Self, AppError> {
+    ) -> Result<Self, &'static str> {
         let tap = NonNull::from(Box::leak(Box::new(Tap {
             on_event,
             port: OnceCell::new(),
@@ -104,18 +102,14 @@ impl EventTap {
         let Some(port) = created else {
             // SAFETY: `tap` came from `Box::leak` above, and without a tap nothing else holds it.
             drop(unsafe { Box::from_raw(tap.as_ptr()) });
-            return Err(AppError::trigger(
-                "macOS refused to let the app watch the keyboard",
-            ));
+            return Err("macOS refused to let the app watch the keyboard");
         };
         let Some(source) = CFMachPort::new_run_loop_source(None, Some(&port), 0) else {
             port.invalidate();
             // SAFETY: the tap is invalidated before it ever ran, and `tap` came from `Box::leak`
             // above, which nothing else holds.
             drop(unsafe { Box::from_raw(tap.as_ptr()) });
-            return Err(AppError::trigger(
-                "cannot make a run loop source for the event tap",
-            ));
+            return Err("cannot make a run loop source for the event tap");
         };
         let event_tap = Self {
             port,
@@ -160,8 +154,8 @@ pub fn mask_of(kinds: &[CGEventType]) -> CGEventMask {
     })
 }
 
-fn main_run_loop() -> Result<CFRetained<CFRunLoop>, AppError> {
-    CFRunLoop::main().ok_or_else(|| AppError::trigger("there's no main run loop"))
+fn main_run_loop() -> Result<CFRetained<CFRunLoop>, &'static str> {
+    CFRunLoop::main().ok_or("there's no main run loop")
 }
 
 fn common_modes() -> Option<&'static objc2_core_foundation::CFRunLoopMode> {

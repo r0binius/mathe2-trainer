@@ -84,7 +84,13 @@ impl MenuChoices for SystemMenuChoices {
 
     fn ask_for_input_access(&self) -> Result<(), AppError> {
         CGRequestListenEventAccess();
-        system_settings::open(system_settings::INPUT_MONITORING)
+        if system_settings::open(system_settings::INPUT_MONITORING) {
+            Ok(())
+        } else {
+            Err(AppError::coach(
+                "macOS didn't open the Input Monitoring settings",
+            ))
+        }
     }
 
     fn start(&self, on_signal: Rc<dyn Fn(MenuSignal)>) -> Result<(), AppError> {
@@ -92,12 +98,12 @@ impl MenuChoices for SystemMenuChoices {
         let mut watching = self.lock();
 
         if watching.is_some() {
-            return Err(AppError::lookup("menu choices are watched already"));
+            return Err(AppError::coach("menu choices are watched already"));
         }
         if !CGPreflightListenEventAccess() {
             // Shows macOS's prompt the first time; the user allows it in System Settings.
             CGRequestListenEventAccess();
-            return Err(AppError::lookup(
+            return Err(AppError::coach(
                 "the user hasn't allowed Input Monitoring yet",
             ));
         }
@@ -109,7 +115,8 @@ impl MenuChoices for SystemMenuChoices {
             main_thread,
             mask_of(&WATCHED),
             Box::new(move |event| report(event, &*signals, &keys.borrow())),
-        )?;
+        )
+        .map_err(AppError::coach)?;
         *watching = Some(MainThreadBound::new(
             Watching {
                 _tap: tap,
@@ -127,7 +134,7 @@ impl MenuChoices for SystemMenuChoices {
         let mut watching = self.lock();
         let watching = watching
             .as_mut()
-            .ok_or_else(|| AppError::lookup("menu choices aren't watched"))?
+            .ok_or_else(|| AppError::coach("menu choices aren't watched"))?
             .get_mut(main_thread);
 
         // The old observer goes first, so a failure leaves none rather than a stale one.
@@ -170,7 +177,7 @@ impl SystemMenuChoices {
 
 fn main_thread() -> Result<MainThreadMarker, AppError> {
     MainThreadMarker::new()
-        .ok_or_else(|| AppError::lookup("menu choices are only watched on the main thread"))
+        .ok_or_else(|| AppError::coach("menu choices are only watched on the main thread"))
 }
 
 /// An observer of the menus of the app running as `process`, whose signals go to `on_signal`.
@@ -180,9 +187,7 @@ fn observer_of(
     on_signal: Rc<dyn Fn(MenuSignal)>,
 ) -> Result<Observer, AppError> {
     if !accessibility::is_trusted() {
-        return Err(AppError::lookup(
-            "the user hasn't allowed Accessibility yet",
-        ));
+        return Err(AppError::coach("the user hasn't allowed Accessibility yet"));
     }
 
     Observer::new(
@@ -195,6 +200,7 @@ fn observer_of(
             }
         }),
     )
+    .map_err(|error| AppError::coach(format!("cannot observe the app's menus: {error}")))
 }
 
 /// Reports what an event of the tap means: for menu choices, and as a watched combination, if it's

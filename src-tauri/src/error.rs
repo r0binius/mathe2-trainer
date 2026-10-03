@@ -71,6 +71,12 @@ pub enum AppError {
         /// What went wrong, for the logs.
         reason: String,
     },
+    /// How the user works couldn't be watched, or what it needs couldn't be asked for.
+    #[error("cannot watch how you work: {reason}")]
+    Coach {
+        /// What went wrong, for the logs.
+        reason: String,
+    },
     /// A window couldn't be found, shown, hidden or told something.
     #[error("cannot change a window: {source}")]
     Window {
@@ -101,6 +107,13 @@ impl AppError {
         }
     }
 
+    /// A coach error, with the `reason` for the logs.
+    pub fn coach(reason: impl Into<String>) -> Self {
+        Self::Coach {
+            reason: reason.into(),
+        }
+    }
+
     /// The kind of this error, as the frontend sees it.
     #[must_use]
     pub fn kind(&self) -> ErrorKind {
@@ -112,6 +125,7 @@ impl AppError {
             Self::Keymap { .. } => ErrorKind::Keymap,
             Self::Trigger { .. } | Self::Shortcut { .. } => ErrorKind::Trigger,
             Self::Lookup { .. } => ErrorKind::Lookup,
+            Self::Coach { .. } => ErrorKind::Coach,
             Self::Window { .. } => ErrorKind::Window,
         }
     }
@@ -145,6 +159,8 @@ pub enum ErrorKind {
     Trigger,
     /// Looking up another app's menus failed.
     Lookup,
+    /// Watching how the user works failed.
+    Coach,
     /// Showing or hiding a window failed.
     Window,
 }

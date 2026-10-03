@@ -57,6 +57,7 @@ impl ModifierHold for SystemModifierHold {
             mask_of(&WATCHED),
             Box::new(move |event| on_input(input_of(event.kind, event.flags))),
         )
+        .map_err(AppError::trigger)
         .inspect_err(|_| self.watching.store(false, Ordering::Relaxed))?;
 
         // The hold is watched for as long as the app runs.

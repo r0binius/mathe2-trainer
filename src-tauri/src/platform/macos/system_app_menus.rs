@@ -36,7 +36,13 @@ impl AppMenus for SystemAppMenus {
 
     fn ask_for_access(&self) -> Result<(), AppError> {
         accessibility::ask_for_trust();
-        system_settings::open(system_settings::ACCESSIBILITY)
+        if system_settings::open(system_settings::ACCESSIBILITY) {
+            Ok(())
+        } else {
+            Err(AppError::lookup(
+                "macOS didn't open the Accessibility settings",
+            ))
+        }
     }
 
     fn read(&self, process: i32) -> Result<Vec<MenuGroup>, AppError> {

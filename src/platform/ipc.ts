@@ -40,6 +40,7 @@ const decodeAppError = object({
     literal('keymap'),
     literal('trigger'),
     literal('lookup'),
+    literal('coach'),
     literal('window'),
   ]),
   message: string,
