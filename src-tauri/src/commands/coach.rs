@@ -31,7 +31,7 @@ pub fn get_coach_access(app: AppHandle) -> CoachAccess {
     reason = "Tauri passes command arguments by value"
 )]
 pub fn ask_for_input_access(platform: State<'_, Platform>) -> Result<(), AppError> {
-    platform.menu_choices.ask_for_input_access()
+    platform.work_watch.ask_for_input_access()
 }
 
 /// Shows a shortcut's title and keys in the banner below the menu bar for a moment, in place of

@@ -9,16 +9,16 @@ mod app_menus;
 mod current;
 mod key_code;
 mod layout;
-mod menu_choices;
 mod modifier_hold;
+mod work_watch;
 
 pub use self::access::Access;
 pub use self::app_menus::{AppMenus, MenuGroup, MenuShortcut, RunningApp};
 pub use self::current::Platform;
 pub use self::key_code::KeyCode;
 pub use self::layout::{KeyCharacters, Keymap, KeymapSource, Layout};
-pub use self::menu_choices::{Frame, MenuChoices, MenuItem, MenuSignal, Point};
 pub use self::modifier_hold::{KeyInput, ModifierHold};
+pub use self::work_watch::{Frame, MenuItem, Point, WorkSignal, WorkWatch};
 
 #[cfg(target_os = "macos")]
 pub mod macos;

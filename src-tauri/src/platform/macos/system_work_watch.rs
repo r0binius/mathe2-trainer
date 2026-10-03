@@ -1,4 +1,5 @@
-//! Menu choices, watched with an event tap and the Accessibility API, as [`MenuChoices`].
+//! How the user works, watched with an event tap and the Accessibility API, as [`WorkWatch`]:
+//! menu choices, and presses of the watched shortcuts.
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -14,7 +15,7 @@ use crate::platform::macos::event_tap::{EventTap, TapEvent, mask_of};
 use crate::platform::macos::key_presses::{Press, press_from, presses_of};
 use crate::platform::macos::menu_keys::{KeyEquivalent, keys_of};
 use crate::platform::macos::system_settings;
-use crate::platform::{Access, Frame, Keymap, MenuChoices, MenuItem, MenuSignal, Point};
+use crate::platform::{Access, Frame, Keymap, MenuItem, Point, WorkSignal, WorkWatch};
 
 /// The events that can change the app in front or choose a menu item.
 const WATCHED: [CGEventType; 5] = [
@@ -47,7 +48,7 @@ const ITEM: [&str; 5] = [
 /// Watches menu choices with an event tap, which needs Input Monitoring, and an Accessibility
 /// observer of the app in front, which needs Accessibility.
 #[derive(Debug, Default)]
-pub struct SystemMenuChoices {
+pub struct SystemWorkWatch {
     /// The tap and the observer while watching. They live on the main thread, where their events
     /// arrive.
     watching: Mutex<Option<MainThreadBound<Watching>>>,
@@ -63,7 +64,7 @@ struct Watching {
     /// The observer of the app in front, if any.
     observer: Option<Observer>,
     /// Where the signals go, shared with the tap and the observer.
-    on_signal: Rc<dyn Fn(MenuSignal)>,
+    on_signal: Rc<dyn Fn(WorkSignal)>,
     /// The watched combinations, as presses and by their names, shared with the tap.
     watched_keys: Rc<RefCell<WatchedKeys>>,
 }
@@ -77,7 +78,7 @@ impl std::fmt::Debug for Watching {
     }
 }
 
-impl MenuChoices for SystemMenuChoices {
+impl WorkWatch for SystemWorkWatch {
     fn input_access(&self) -> Access {
         Access::of(CGPreflightListenEventAccess())
     }
@@ -93,7 +94,7 @@ impl MenuChoices for SystemMenuChoices {
         }
     }
 
-    fn start(&self, on_signal: Rc<dyn Fn(MenuSignal)>) -> Result<(), AppError> {
+    fn start(&self, on_signal: Rc<dyn Fn(WorkSignal)>) -> Result<(), AppError> {
         let main_thread = main_thread()?;
         let mut watching = self.lock();
 
@@ -168,7 +169,7 @@ impl MenuChoices for SystemMenuChoices {
     }
 }
 
-impl SystemMenuChoices {
+impl SystemWorkWatch {
     fn lock(&self) -> std::sync::MutexGuard<'_, Option<MainThreadBound<Watching>>> {
         // Every change is a single assignment, so a panic can't leave it half changed.
         self.watching.lock().unwrap_or_else(PoisonError::into_inner)
@@ -184,7 +185,7 @@ fn main_thread() -> Result<MainThreadMarker, AppError> {
 fn observer_of(
     main_thread: MainThreadMarker,
     process: i32,
-    on_signal: Rc<dyn Fn(MenuSignal)>,
+    on_signal: Rc<dyn Fn(WorkSignal)>,
 ) -> Result<Observer, AppError> {
     if !accessibility::is_trusted() {
         return Err(AppError::coach("the user hasn't allowed Accessibility yet"));
@@ -205,10 +206,10 @@ fn observer_of(
 
 /// Reports what an event of the tap means: for menu choices, and as a watched combination, if it's
 /// one.
-fn report(event: TapEvent, on_signal: &dyn Fn(MenuSignal), watched: &WatchedKeys) {
+fn report(event: TapEvent, on_signal: &dyn Fn(WorkSignal), watched: &WatchedKeys) {
     on_signal(signal_of(event));
     if let Some(pressed) = watched_press(watched, event) {
-        on_signal(MenuSignal::KeysPressed(pressed));
+        on_signal(WorkSignal::KeysPressed(pressed));
     }
 }
 
@@ -222,24 +223,24 @@ fn watched_press(watched: &WatchedKeys, event: TapEvent) -> Option<Vec<String>> 
 }
 
 /// What an event of the tap means for menu choices.
-fn signal_of(event: TapEvent) -> MenuSignal {
+fn signal_of(event: TapEvent) -> WorkSignal {
     if event.kind == CGEventType::LeftMouseUp {
-        MenuSignal::MouseUp(Point {
+        WorkSignal::MouseUp(Point {
             x: event.location.x,
             y: event.location.y,
         })
     } else if event.kind == CGEventType::KeyDown && RETURN_KEYS.contains(&event.key_code) {
-        MenuSignal::Return
+        WorkSignal::Return
     } else {
-        MenuSignal::Pressed
+        WorkSignal::Pressed
     }
 }
 
 /// What a notification of the observed app means: a menu's new highlight, or a menu closed.
 /// Others, such as the menu bar's selection, mean nothing here.
-fn menu_signal_of(notification: &str, element: &Element) -> Option<MenuSignal> {
+fn menu_signal_of(notification: &str, element: &Element) -> Option<WorkSignal> {
     match notification {
-        MENU_CLOSED => Some(MenuSignal::MenuClosed),
+        MENU_CLOSED => Some(WorkSignal::MenuClosed),
         SELECTION_CHANGED => highlight_in(element),
         _ => None,
     }
@@ -248,12 +249,12 @@ fn menu_signal_of(notification: &str, element: &Element) -> Option<MenuSignal> {
 /// The highlight of a menu, if `element` is one: its item with a shortcut, or none for an item
 /// without one or that can't be read. `None` for an element that isn't a menu, such as the menu
 /// bar.
-fn highlight_in(element: &Element) -> Option<MenuSignal> {
+fn highlight_in(element: &Element) -> Option<WorkSignal> {
     let [role, selected] = element.values(&MENU).ok()?.try_into().ok()?;
 
     match (role, selected) {
         (Value::Text(role), Value::Elements(items)) if role == "AXMenu" => {
-            Some(MenuSignal::Highlighted(items.first().and_then(item_of)))
+            Some(WorkSignal::Highlighted(items.first().and_then(item_of)))
         }
         _ => None,
     }
@@ -315,7 +316,7 @@ mod tests {
     fn a_left_mouse_up_reports_where() {
         assert_eq!(
             signal_of(event(CGEventType::LeftMouseUp, 0)),
-            MenuSignal::MouseUp(Point { x: 12.0, y: 34.0 })
+            WorkSignal::MouseUp(Point { x: 12.0, y: 34.0 })
         );
     }
 
@@ -323,11 +324,11 @@ mod tests {
     fn return_and_enter_choose() {
         assert_eq!(
             signal_of(event(CGEventType::KeyDown, 0x24)),
-            MenuSignal::Return
+            WorkSignal::Return
         );
         assert_eq!(
             signal_of(event(CGEventType::KeyDown, 0x4C)),
-            MenuSignal::Return
+            WorkSignal::Return
         );
     }
 
@@ -335,11 +336,11 @@ mod tests {
     fn other_keys_and_clicks_are_presses() {
         assert_eq!(
             signal_of(event(CGEventType::KeyDown, 0x00)),
-            MenuSignal::Pressed
+            WorkSignal::Pressed
         );
         assert_eq!(
             signal_of(event(CGEventType::LeftMouseDown, 0)),
-            MenuSignal::Pressed
+            WorkSignal::Pressed
         );
     }
 }

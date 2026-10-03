@@ -1,4 +1,5 @@
-//! Watching which menu items the user chooses, and the trait that does it.
+//! Watching how the user works, while learning from work is on: which menu items they choose, and
+//! which watched shortcuts they press. And the trait that does it.
 
 use std::rc::Rc;
 
@@ -51,7 +52,7 @@ pub struct MenuItem {
 
 /// What the platform reports while it watches.
 #[derive(Clone, Debug, PartialEq)]
-pub enum MenuSignal {
+pub enum WorkSignal {
     /// A mouse button or a key other than Return went down, so the app in front may have changed.
     Pressed,
     /// The left mouse button came up at a point.
@@ -64,7 +65,7 @@ pub enum MenuSignal {
     /// One of the observed app's menus closed.
     MenuClosed,
     /// One of the watched combinations was pressed, named as it was given to
-    /// [`MenuChoices::watch_keys`].
+    /// [`WorkWatch::watch_keys`].
     KeysPressed(Vec<String>),
 }
 
@@ -72,7 +73,7 @@ pub enum MenuSignal {
 /// presses of known shortcuts.
 ///
 /// Every call runs on the main thread, where the signals arrive too.
-pub trait MenuChoices {
+pub trait WorkWatch {
     /// Whether the user lets the app watch clicks and key presses, which the system guards.
     fn input_access(&self) -> Access;
 
@@ -85,13 +86,13 @@ pub trait MenuChoices {
     fn ask_for_input_access(&self) -> Result<(), AppError>;
 
     /// Starts watching clicks and key presses, reporting them, and later the observed app's menus,
-    /// to `on_signal` until [`MenuChoices::stop`].
+    /// to `on_signal` until [`WorkWatch::stop`].
     ///
     /// # Errors
     ///
     /// Returns a coach error if it's watching already, isn't on the main thread, or the system
     /// refuses, such as when Input Monitoring isn't allowed.
-    fn start(&self, on_signal: Rc<dyn Fn(MenuSignal)>) -> Result<(), AppError>;
+    fn start(&self, on_signal: Rc<dyn Fn(WorkSignal)>) -> Result<(), AppError>;
 
     /// Observes the menus of the app running as `process` instead of the one before, or none.
     /// Never call it from a signal of the observed app's menus: that would drop the observer

@@ -11,7 +11,7 @@ use tauri_plugin_log::log;
 use super::key_watch::{WatchedShortcut, combinations, shortcut_used};
 use super::menu_watch::{MenuEffect, MenuMessage, MenuWatch, update_menu_watch};
 use super::windows;
-use crate::platform::{Access, MenuSignal, Platform};
+use crate::platform::{Access, Platform, WorkSignal};
 use crate::services::values::ShortcutId;
 
 /// The event that tells the main window about a menu choice.
@@ -67,7 +67,7 @@ pub fn apply(app: &AppHandle, learn_from_work: bool) {
     if learn_from_work {
         retry(app);
     } else if lock(app).watching {
-        app.state::<Platform>().menu_choices.stop();
+        app.state::<Platform>().work_watch.stop();
         // The watched shortcuts stay, for when watching starts again.
         let mut state = lock(app);
         state.watching = false;
@@ -94,7 +94,7 @@ fn watch_keys(app: &AppHandle) {
 
     match platform.keymap.current_layout() {
         Ok(layout) => platform
-            .menu_choices
+            .work_watch
             .watch_keys(&combinations, &layout.keymap),
         Err(error) => log::warn!("cannot watch key presses on the current layout: {error}"),
     }
@@ -109,7 +109,7 @@ pub fn access(app: &AppHandle) -> CoachAccess {
     let platform = app.state::<Platform>();
     let access = CoachAccess {
         menus: platform.menus.access(),
-        input: platform.menu_choices.input_access(),
+        input: platform.work_watch.input_access(),
     };
 
     if access.menus == Access::Granted && access.input == Access::Granted {
@@ -133,7 +133,7 @@ fn start(app: &AppHandle) {
     let handle = app.clone();
     let started = app
         .state::<Platform>()
-        .menu_choices
+        .work_watch
         .start(Rc::new(move |signal| on_signal(&handle, signal)));
 
     match started {
@@ -141,21 +141,21 @@ fn start(app: &AppHandle) {
             lock(app).watching = true;
             watch_keys(app);
             // Observe the app in front right away, not only from the next click.
-            on_signal(app, MenuSignal::Pressed);
+            on_signal(app, WorkSignal::Pressed);
         }
         Err(error) => log::error!("cannot watch menu choices: {error}"),
     }
 }
 
 /// Turns what the platform reports into a message, with the app in front for a press.
-fn on_signal(app: &AppHandle, signal: MenuSignal) {
+fn on_signal(app: &AppHandle, signal: WorkSignal) {
     let message = match signal {
-        MenuSignal::Pressed => MenuMessage::Pressed(app.state::<Platform>().menus.app_in_front()),
-        MenuSignal::MouseUp(point) => MenuMessage::MouseUp(point),
-        MenuSignal::Return => MenuMessage::Return,
-        MenuSignal::Highlighted(item) => MenuMessage::Highlighted(item),
-        MenuSignal::MenuClosed => MenuMessage::MenuClosed,
-        MenuSignal::KeysPressed(keys) => return report_key_use(app, &keys),
+        WorkSignal::Pressed => MenuMessage::Pressed(app.state::<Platform>().menus.app_in_front()),
+        WorkSignal::MouseUp(point) => MenuMessage::MouseUp(point),
+        WorkSignal::Return => MenuMessage::Return,
+        WorkSignal::Highlighted(item) => MenuMessage::Highlighted(item),
+        WorkSignal::MenuClosed => MenuMessage::MenuClosed,
+        WorkSignal::KeysPressed(keys) => return report_key_use(app, &keys),
     };
 
     dispatch(app, message);
@@ -188,7 +188,7 @@ fn dispatch(app: &AppHandle, message: MenuMessage) {
 
     match effect {
         Some(MenuEffect::Observe(process)) => {
-            if let Err(error) = app.state::<Platform>().menu_choices.observe(process) {
+            if let Err(error) = app.state::<Platform>().work_watch.observe(process) {
                 // Forget the app, so the next click tries again, such as once Accessibility is
                 // allowed.
                 lock(app).watch = MenuWatch::default();

@@ -2,7 +2,7 @@
 
 #[cfg(target_os = "macos")]
 use crate::platform::macos;
-use crate::platform::{AppMenus, KeymapSource, MenuChoices, ModifierHold};
+use crate::platform::{AppMenus, KeymapSource, ModifierHold, WorkWatch};
 
 /// The platform's implementations of the traits, for the system the app is built for.
 pub struct Platform {
@@ -12,8 +12,8 @@ pub struct Platform {
     pub modifier_hold: Box<dyn ModifierHold + Send + Sync>,
     /// Finds the app the user works in, and reads its menus.
     pub menus: Box<dyn AppMenus + Send + Sync>,
-    /// Watches which menu items the user chooses.
-    pub menu_choices: Box<dyn MenuChoices + Send + Sync>,
+    /// Watches how the user works: menu choices and presses of known shortcuts.
+    pub work_watch: Box<dyn WorkWatch + Send + Sync>,
 }
 
 /// The implementations for macOS.
@@ -24,6 +24,6 @@ pub fn current() -> Platform {
         keymap: Box::new(macos::SystemKeymap::default()),
         modifier_hold: Box::new(macos::SystemModifierHold::default()),
         menus: Box::new(macos::SystemAppMenus),
-        menu_choices: Box::new(macos::SystemMenuChoices::default()),
+        work_watch: Box::new(macos::SystemWorkWatch::default()),
     }
 }
