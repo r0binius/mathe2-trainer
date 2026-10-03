@@ -1,307 +1,88 @@
 import { describe, expect, it } from 'vitest';
 
-import type {
-  PracticeItem,
-  PracticeStrategy,
-  Presentation,
-  ProgressEffect,
-  Session,
-  SessionMsg,
-} from './session';
-import { startSession, successPauseMs, updateSession } from './session';
+import type { Item } from '../content/types';
+import { learnPool, learnStrategy } from './learn';
+import { reviewPool, reviewStrategy } from './review';
+import type { Session, SessionMsg } from './session';
+import { startSession, updateSession } from './session';
 
-const find: PracticeItem = { id: 'vscodium/Meta+f', keys: ['Meta', 'f'], title: 'find' };
-const save: PracticeItem = { id: 'vscodium/Meta+s', keys: ['Meta', 's'], title: 'save' };
+const definition: Item = { kind: 'definition', id: 't/def/a', title: 'A', statement: 'a' };
+const claim: Item = { kind: 'claim', id: 't/wf/b', statement: 'b', holds: false, reason: 'r' };
+const roll = { roll: 0, at: 1000 };
 
-/** Presents a list in order, drawing with the roll, and reports what it's asked to do as effects. */
-const inOrder: PracticeStrategy<readonly Presentation[]> = {
-  next: (pool, { roll, previous }) => {
-    const candidates = pool.filter(({ item }) => item.id !== previous?.id);
-    return candidates[Math.floor(roll * candidates.length)];
-  },
-  complete: (pool, attempt) => ({
-    pool: pool.filter(({ item }) => item.id !== attempt.item.id),
-    effects: [
-      {
-        type: 'tested',
-        id: attempt.item.id,
-        failed: attempt.failed,
-        durationMs: attempt.durationMs,
-        keyCount: attempt.item.keys.length,
-      },
-    ],
-  }),
-  skip: (pool, item) => ({
-    pool: pool.filter((presentation) => presentation.item.id !== item.id),
-    effects: [],
-  }),
-};
+function run<Pool>(
+  strategy: Parameters<typeof updateSession<Pool>>[0],
+  start: Session<Pool>,
+  msgs: readonly SessionMsg[],
+) {
+  return msgs.reduce(
+    ({ model, effects }, msg) => {
+      const next = updateSession(strategy, model, msg);
 
-const training: Presentation = { item: find, mode: 'training' };
-const testing: Presentation = { item: find, mode: 'testing' };
-
-function presenting(
-  presentation: Presentation,
-  pool: readonly Presentation[] = [presentation],
-): Session<readonly Presentation[]> {
-  return {
-    phase: 'presenting',
-    pool,
-    ...presentation,
-    presentation: 1,
-    shownAt: 1000,
-    misses: 0,
-  };
+      return { model: next.model, effects: [...effects, ...next.effects] };
+    },
+    { model: start, effects: [] as readonly unknown[] },
+  );
 }
 
-function succeeded(
-  pool: readonly Presentation[],
-  item: PracticeItem = find,
-): Session<readonly Presentation[]> {
-  return { phase: 'succeeded', pool, item, presentation: 1 };
-}
-
-describe('startSession', () => {
-  it('presents what the strategy draws with the roll, shown at the given time', () => {
-    const pool: readonly Presentation[] = [training, { item: save, mode: 'testing' }];
-
-    expect(startSession(inOrder, pool, { roll: 0.9, at: 1000 })).toStrictEqual({
-      phase: 'presenting',
-      pool,
-      item: save,
-      mode: 'testing',
-      presentation: 1,
-      shownAt: 1000,
-      misses: 0,
-    });
-  });
-
-  it('finishes at once when the strategy has nothing to present', () => {
-    expect(startSession(inOrder, [], { roll: 0, at: 1000 })).toStrictEqual({
-      phase: 'finished',
-      pool: [],
-    });
-  });
-});
-
-describe('answering', () => {
-  it('succeeds with the right keys in any order, completing the attempt with the strategy', () => {
-    expect(
-      updateSession(inOrder, presenting(training), {
-        type: 'answer',
-        keys: ['f', 'Meta'],
-        at: 3500,
-      }),
-    ).toStrictEqual({
-      model: succeeded([]),
-      effects: [
-        { type: 'tested', id: find.id, failed: false, durationMs: 2500, keyCount: 2 },
-        { type: 'advanceAfter', ms: successPauseMs, presentation: 1 },
-      ],
-    });
-  });
-
-  it('shows a success for one second, as in the old app', () => {
-    expect(successPauseMs).toBe(1000);
-  });
-
-  it('counts a miss in training, without remembering the keys', () => {
-    expect(
-      updateSession(inOrder, presenting(training), {
-        type: 'answer',
-        keys: ['Meta', 'g'],
-        at: 2000,
-      }),
-    ).toStrictEqual({ model: { ...presenting(training), misses: 1 }, effects: [] });
-  });
-
-  it('rejects extra keys', () => {
-    const { model } = updateSession(inOrder, presenting(training), {
-      type: 'answer',
-      keys: ['Shift', 'Meta', 'f'],
-      at: 2000,
-    });
-
-    expect(model).toMatchObject({ phase: 'presenting', misses: 1 });
-  });
-
-  it('keeps the first wrong keys of a test as its failure', () => {
-    const first = updateSession(inOrder, presenting(testing), {
-      type: 'answer',
-      keys: ['Meta', 'g'],
-      at: 2000,
-    });
-    const second = updateSession(inOrder, first.model, {
-      type: 'answer',
-      keys: ['Meta', 'h'],
-      at: 3000,
-    });
-
-    expect(second).toStrictEqual({
-      model: { ...presenting(testing), misses: 2, failure: { kind: 'wrong', keys: ['Meta', 'g'] } },
-      effects: [],
-    });
-  });
-
-  it('completes a test as failed when it had a wrong answer', () => {
-    const missed = updateSession(inOrder, presenting(testing), {
-      type: 'answer',
-      keys: ['Meta', 'g'],
-      at: 2000,
-    });
-
-    expect(
-      updateSession(inOrder, missed.model, { type: 'answer', keys: ['Meta', 'f'], at: 4000 })
-        .effects,
-    ).toContainEqual({ type: 'tested', id: find.id, failed: true, durationMs: 3000, keyCount: 2 });
-  });
-
-  it('ignores answers after a success, while the result is shown', () => {
-    const session = succeeded([]);
-
-    expect(
-      updateSession(inOrder, session, { type: 'answer', keys: ['Meta', 'g'], at: 2000 }).model,
-    ).toBe(session);
-  });
-});
-
-describe('forgetting', () => {
-  it('reveals the keys of a test as forgotten, without counting a miss', () => {
-    expect(updateSession(inOrder, presenting(testing), { type: 'forget' })).toStrictEqual({
-      model: { ...presenting(testing), failure: { kind: 'forgot' } },
-      effects: [],
-    });
-  });
-
-  it('completes a forgotten test as failed once its keys are pressed', () => {
-    const forgot = updateSession(inOrder, presenting(testing), { type: 'forget' });
-
-    expect(
-      updateSession(inOrder, forgot.model, { type: 'answer', keys: ['Meta', 'f'], at: 4000 })
-        .effects,
-    ).toContainEqual({ type: 'tested', id: find.id, failed: true, durationMs: 3000, keyCount: 2 });
-  });
-
-  it('ignores forgetting while training, since the keys are shown', () => {
-    const session = presenting(training);
-
-    expect(updateSession(inOrder, session, { type: 'forget' }).model).toBe(session);
-  });
-
-  it('keeps a wrong answer as the failure when forgetting afterwards', () => {
-    const missed = updateSession(inOrder, presenting(testing), {
-      type: 'answer',
-      keys: ['Meta', 'g'],
-      at: 2000,
-    });
-
-    expect(updateSession(inOrder, missed.model, { type: 'forget' }).model).toBe(missed.model);
-  });
-});
-
-describe('advancing', () => {
-  it('presents the next draw, avoiding the item just shown, from the given time', () => {
-    const next: Presentation = { item: save, mode: 'training' };
-    const pool = [training, next];
-
-    expect(
-      updateSession(inOrder, succeeded(pool), {
-        type: 'advance',
-        presentation: 1,
-        roll: 0,
-        at: 5000,
-      }),
-    ).toStrictEqual({
-      model: { ...presenting(next, pool), presentation: 2, shownAt: 5000 },
-      effects: [],
-    });
-  });
-
-  it('finishes when the strategy has nothing left to present', () => {
-    expect(
-      updateSession(inOrder, succeeded([]), {
-        type: 'advance',
-        presentation: 1,
-        roll: 0,
-        at: 5000,
-      }),
-    ).toStrictEqual({ model: { phase: 'finished', pool: [] }, effects: [] });
-  });
-
-  it('is ignored while an item waits for its answer', () => {
-    const session = presenting(training);
-
-    expect(
-      updateSession(inOrder, session, { type: 'advance', presentation: 1, roll: 0, at: 5000 })
-        .model,
-    ).toBe(session);
-  });
-});
-
-describe('an advance from an earlier success', () => {
-  it('is ignored, so an old timer can’t cut a later success short', () => {
-    const later = { ...succeeded([training]), presentation: 2 };
-
-    expect(
-      updateSession(inOrder, later, { type: 'advance', presentation: 1, roll: 0, at: 5000 }).model,
-    ).toBe(later);
-  });
-});
-
-describe('skipping', () => {
-  it('skips with the strategy and presents the next draw', () => {
-    const next: Presentation = { item: save, mode: 'testing' };
-
-    expect(
-      updateSession(inOrder, presenting(training, [training, next]), {
-        type: 'skip',
-        roll: 0,
-        at: 5000,
-      }),
-    ).toStrictEqual({
-      model: { ...presenting(next, [next]), presentation: 2, shownAt: 5000 },
-      effects: [],
-    });
-  });
-
-  it('passes on what the strategy reports', () => {
-    const reporting: PracticeStrategy<readonly Presentation[]> = {
-      ...inOrder,
-      skip: (pool) => ({
-        pool,
-        effects: [{ type: 'tested', id: 'x/y', failed: true, durationMs: 0, keyCount: 1 }],
-      }),
-    };
-
-    expect(
-      updateSession(reporting, presenting(training), { type: 'skip', roll: 0, at: 5000 }).effects,
-    ).toStrictEqual<readonly ProgressEffect[]>([
-      { type: 'tested', id: 'x/y', failed: true, durationMs: 0, keyCount: 1 },
-    ]);
-  });
-
-  it('is ignored after a success', () => {
-    const session = succeeded([training]);
-
-    expect(updateSession(inOrder, session, { type: 'skip', roll: 0, at: 5000 }).model).toBe(
-      session,
+describe('learning', () => {
+  it('trains a new statement, then tests it until it is recalled twice', () => {
+    const start = startSession(
+      learnStrategy,
+      learnPool([definition], { learned: [], trained: [] }),
+      0,
     );
+
+    expect(start).toMatchObject({ phase: 'asking', mode: 'training' });
+
+    const { model, effects } = run(learnStrategy, start, [
+      { type: 'continue', ...roll },
+      { type: 'reveal' },
+      { type: 'grade', grade: 'good', ...roll },
+      { type: 'reveal' },
+      { type: 'grade', grade: 'good', ...roll },
+    ]);
+
+    expect(model.phase).toBe('finished');
+    expect(effects).toContainEqual({ type: 'tested', id: definition.id, grade: 'good', at: 1000 });
+    expect(effects.at(-1)).toMatchObject({
+      type: 'learningChanged',
+      snapshot: { learned: [definition.id] },
+    });
+  });
+
+  it('never shows a claim with its answer, and grades it by the verdict', () => {
+    const start = startSession(learnStrategy, learnPool([claim], { learned: [], trained: [] }), 0);
+
+    expect(start).toMatchObject({ phase: 'asking', mode: 'testing' });
+
+    const wrong = updateSession(learnStrategy, start, { type: 'judge', holds: true, at: 5 });
+
+    expect(wrong.model).toMatchObject({ phase: 'revealed', judgedCorrectly: false });
+    expect(wrong.effects).toContainEqual({ type: 'tested', id: claim.id, grade: 'again', at: 5 });
+  });
+
+  it('ignores a grade before the answer is revealed', () => {
+    const pool = learnPool([definition], { learned: [], trained: [definition.id] });
+    const start = startSession(learnStrategy, pool, 0);
+
+    expect(
+      updateSession(learnStrategy, start, { type: 'grade', grade: 'good', ...roll }).model,
+    ).toBe(start);
   });
 });
 
-describe('a finished session', () => {
-  it('ignores every message', () => {
-    const session: Session<readonly Presentation[]> = { phase: 'finished', pool: [] };
-    const msgs: readonly SessionMsg[] = [
-      { type: 'answer', keys: ['Meta', 'f'], at: 0 },
-      { type: 'advance', presentation: 1, roll: 0, at: 0 },
-      { type: 'skip', roll: 0, at: 0 },
-    ];
-
-    expect(msgs.map((msg) => updateSession(inOrder, session, msg).model)).toStrictEqual([
-      session,
-      session,
-      session,
+describe('reviewing', () => {
+  it('asks a forgotten item again until it is recalled', () => {
+    const start = startSession(reviewStrategy, reviewPool([definition]), 0);
+    const { model, effects } = run(reviewStrategy, start, [
+      { type: 'reveal' },
+      { type: 'grade', grade: 'again', ...roll },
+      { type: 'reveal' },
+      { type: 'grade', grade: 'easy', ...roll },
     ]);
+
+    expect(model).toMatchObject({ phase: 'finished', pool: { done: 1 } });
+    expect(effects).toHaveLength(2);
   });
 });

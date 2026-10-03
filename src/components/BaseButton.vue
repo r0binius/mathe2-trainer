@@ -5,12 +5,12 @@ import type { IconName } from './icons';
 const {
   variant = 'neutral',
   size = 'regular',
-  // eslint-disable-next-line @typescript-eslint/no-useless-default-assignment -- not useless in Vue: without a default, an absent boolean prop is cast to `false`, and `aria-pressed="false"` makes every button a toggle, which VoiceOver announces as a checkbox.
+  // eslint-disable-next-line @typescript-eslint/no-useless-default-assignment -- not useless in Vue: without a default, an absent boolean prop is cast to `false`, and `aria-pressed="false"` makes every button a toggle, which screen readers announces as a checkbox.
   pressed = undefined,
 } = defineProps<{
   /** An icon before the label, or instead of one. */
   icon?: IconName;
-  /** What an icon-only button does, for VoiceOver and as its tooltip. */
+  /** What an icon-only button does, for screen readers and as its tooltip. */
   label?: string;
   /**
    * What kind of button it is: `neutral` a quiet button, `accent` the one main action on a
@@ -20,8 +20,10 @@ const {
   variant?: 'neutral' | 'accent' | 'danger' | 'dangerText' | 'toolbar';
   /** `large` for a screen's main action next to its heading. */
   size?: 'regular' | 'large';
-  /** Whether a button that stands for a choice is the one chosen, for VoiceOver. */
+  /** Whether a button that stands for a choice is the one chosen, for screen readers. */
   pressed?: boolean;
+  /** Whether the button can't be used right now. */
+  disabled?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -38,6 +40,7 @@ const emit = defineEmits<{
     :aria-label="label"
     :aria-pressed="pressed"
     :title="label"
+    :disabled="disabled"
     @click="emit('click', $event)"
   >
     <BaseIcon v-if="icon" :name="icon" />
@@ -51,20 +54,25 @@ const emit = defineEmits<{
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  height: 24px;
-  padding: 0 10px;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  cursor: pointer;
   border-radius: var(--radius-control);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
-  line-height: 1;
-  white-space: nowrap;
+  line-height: 1.2;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
 }
 
 .large {
-  height: 28px;
-  padding: 0 14px;
-  font-size: 13px;
+  min-height: 40px;
+  padding: 0 18px;
+  font-size: 15px;
 }
 
 /* A quiet button: raised, with a hairline. */
@@ -107,8 +115,8 @@ const emit = defineEmits<{
 
 /* A title bar item: flat, with a fill under the pointer. */
 .toolbar {
-  min-width: 24px;
-  min-height: 24px;
+  min-width: 32px;
+  min-height: 32px;
   padding: 0 6px;
   color: var(--color-text-secondary);
 

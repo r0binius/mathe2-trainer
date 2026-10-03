@@ -1,124 +1,71 @@
-import type { Ref } from 'vue';
-import { inject, readonly, ref } from 'vue';
+import type { ShallowRef } from 'vue';
 
-import type { KeyCombination } from '@/domain/keyboard/combination';
-import type { Keymap } from '@/domain/keyboard/keymap';
 import type {
   PracticeStrategy,
   ProgressEffect,
   Session,
-  SessionEffect,
   SessionMsg,
 } from '@/domain/practice/session';
 import { startSession, updateSession } from '@/domain/practice/session';
-import type { PlatformError } from '@/domain/shared/platformError';
-import type { Result } from '@/domain/shared/result';
-import { consoleLogger, loggerKey } from '@/ports';
+import type { Grade } from '@/domain/scheduling/scheduler';
+import { useProgressStore } from '@/stores/progress';
 
-import { useKeyCapture } from './useKeyCapture';
 import { useProgram } from './useProgram';
 
-/**
- * What a practice session needs from outside: the layout's keymap, where its results are saved,
- * and the clock and random numbers its messages carry. Tests pass fixed ones.
- */
-export type PracticeShell = {
-  readonly keymap: () => Keymap;
-  readonly save: (effect: ProgressEffect) => Promise<Result<void, PlatformError>>;
-  readonly now: () => number;
-  readonly random: () => number;
-};
-
-/** What a practice screen shows: the session, the keys held, and whether a save failed. */
-export type PracticeView<Pool> = {
-  readonly session: Readonly<Ref<Session<Pool>>>;
-  readonly held: Readonly<Ref<KeyCombination>>;
-  /** A result couldn't be saved. The session goes on, since the answers were still right. */
-  readonly saveFailed: Readonly<Ref<boolean>>;
-};
-
-/** What the user can do besides pressing keys: skip the shortcut, or say it's forgotten. */
-export type PracticeActions = {
+/** A running practice session, and what the learner can do in it. */
+// eslint-disable-next-line functional/no-mixed-types -- the model to render next to what changes it, as `useProgram` returns them
+export type PracticeSession<Pool> = {
+  readonly session: Readonly<ShallowRef<Session<Pool>>>;
+  readonly reveal: () => void;
+  readonly judge: (holds: boolean) => void;
+  readonly grade: (grade: Grade) => void;
+  readonly proceed: () => void;
   readonly skip: () => void;
-  readonly forget: () => void;
 };
 
 /**
- * Runs a practice session with the given strategy while the calling screen lives: key presses
- * answer, pauses become timers, and results are saved. Returns what to show, and the actions.
- * @see §1.1 of `docs/architecture.md`
+ * Runs a practice session as an Elm program: the pure session decides, and this shell rolls the
+ * dice, reads the clock and saves the results to the progress store.
  */
 export function usePracticeSession<Pool>(
   strategy: PracticeStrategy<Pool>,
   pool: Pool,
-  shell: PracticeShell,
-): readonly [view: PracticeView<Pool>, actions: PracticeActions] {
-  const { keymap, save, now, random } = shell;
-  const saveFailed = ref(false);
-  const logger = inject(loggerKey, consoleLogger);
+): PracticeSession<Pool> {
+  const store = useProgressStore();
+  const [session, dispatch] = useProgram<Session<Pool>, SessionMsg, ProgressEffect>(
+    startSession(strategy, pool, Math.random()),
+    {
+      update: (model, msg) => updateSession(strategy, model, msg),
+      run: (effect) => {
+        if (effect.type === 'tested') {
+          store.tested(effect.id, effect.grade, effect.at);
+        } else {
+          store.learningChanged(effect.snapshot);
+        }
+      },
+    },
+  );
 
-  function run(effect: SessionEffect, dispatch: (msg: SessionMsg) => void, signal: AbortSignal) {
-    switch (effect.type) {
-      case 'advanceAfter':
-        afterDelay(effect.ms, signal, () => {
-          dispatch({ type: 'advance', presentation: effect.presentation, ...roll() });
-        });
-        return;
-      case 'tested':
-      case 'learningChanged':
-        void save(effect).then(reportFailure);
-        return;
-    }
+  function rolled(): { readonly roll: number; readonly at: number } {
+    return { roll: Math.random(), at: Date.now() };
   }
 
-  function reportFailure(saved: Result<void, PlatformError>): void {
-    if (saved.kind === 'err') {
-      saveFailed.value = true;
-      logger.error(`Could not save practice progress: ${saved.error.message}`);
-    }
-  }
-
-  function roll() {
-    return { roll: random(), at: now() };
-  }
-
-  const [session, dispatch] = useProgram(startSession(strategy, pool, roll()), {
-    update: (model, msg) => updateSession(strategy, model, msg),
-    run,
-  });
-
-  const held = useKeyCapture(keymap, (keys) => {
-    dispatch({ type: 'answer', keys, at: now() });
-  });
-
-  function skip(): void {
-    dispatch({ type: 'skip', ...roll() });
-  }
-
-  function forget(): void {
-    dispatch({ type: 'forget' });
-  }
-
-  return [
-    { session, held, saveFailed: readonly(saveFailed) },
-    { skip, forget },
-  ];
-}
-
-/**
- * Runs `action` after `ms`, unless `signal` aborts first. Whichever comes first removes the
- * other, so nothing stays registered: a session would otherwise collect one abort listener per
- * answer until it ends.
- */
-function afterDelay(ms: number, signal: AbortSignal, action: () => void): void {
-  const timer = setTimeout(() => {
-    signal.removeEventListener('abort', cancel);
-    action();
-  }, ms);
-
-  function cancel(): void {
-    clearTimeout(timer);
-  }
-
-  signal.addEventListener('abort', cancel, { once: true });
+  return {
+    session,
+    reveal: () => {
+      dispatch({ type: 'reveal' });
+    },
+    judge: (holds) => {
+      dispatch({ type: 'judge', holds, at: Date.now() });
+    },
+    grade: (grade) => {
+      dispatch({ type: 'grade', grade, ...rolled() });
+    },
+    proceed: () => {
+      dispatch({ type: 'continue', ...rolled() });
+    },
+    skip: () => {
+      dispatch({ type: 'skip', ...rolled() });
+    },
+  };
 }

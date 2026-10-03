@@ -1,192 +1,71 @@
 import { defineStore } from 'pinia';
-import { inject, onScopeDispose, shallowRef } from 'vue';
+import { computed, inject, shallowRef } from 'vue';
 
-import type { LayoutId } from '@/domain/keyboard/keymap';
-import type { GradeLimits } from '@/domain/practice/grading';
-import { fixedLimits, gradeLimits, gradeRecall } from '@/domain/practice/grading';
 import type { LearnSnapshot } from '@/domain/practice/snapshot';
-import { logStart } from '@/domain/progress/overview';
-import { progressChanged, reconcileProgress } from '@/domain/progress/reconcile';
-import type { LoggedReview } from '@/domain/progress/repository';
-import type { LayoutLog } from '@/domain/progress/reviewLog';
-import { recordLearning } from '@/domain/progress/setProgress';
-import type { SetKey, StoredProgress } from '@/domain/progress/storedProgress';
-import { cardOf, setProgressOf, withCard, withSetRecord } from '@/domain/progress/storedProgress';
+import type { ExamResult, Progress } from '@/domain/progress/progress';
+import { noProgress, recordExam, recordLearning, recordTest } from '@/domain/progress/progress';
+import { endOfLocalDay } from '@/domain/scheduling/days';
 import { scheduleWithFsrs } from '@/domain/scheduling/fsrs';
-import type { ReviewTime } from '@/domain/scheduling/scheduler';
-import { reviewCard } from '@/domain/scheduling/scheduler';
-import type { Loadable } from '@/domain/shared/loadable';
-import { loadableOf, mapLoadable } from '@/domain/shared/loadable';
-import type { PlatformError } from '@/domain/shared/platformError';
-import type { Result } from '@/domain/shared/result';
-import { err } from '@/domain/shared/result';
-import type { AppDefinition } from '@/domain/shortcuts/types';
-import {
-  changesKey,
-  consoleLogger,
-  loggerKey,
-  missingChanges,
-  missingProgressRepository,
-  progressRepositoryKey,
-} from '@/ports';
+import type { Grade, ReviewTime } from '@/domain/scheduling/scheduler';
+import { repositoryKey } from '@/ports';
 
-/** A test that counts for reviews, as the session reports it, plus when and on which layout. */
-export type TestResult = Omit<LoggedReview, 'grade'>;
+/** A moment with the system's UTC offset, for counting local days. */
+export function localTimeAt(at: number): ReviewTime {
+  return { at, utcOffsetMinutes: -new Date(at).getTimezoneOffset() };
+}
 
-const notLoaded: PlatformError = { kind: 'notLoaded', message: 'progress is not loaded yet' };
-
-/**
- * Learning progress and review cards on every layout, and the review log of the current one.
- * Loading reconciles them with the app data; a change is computed by the domain, saved, and only
- * then shown.
- */
+/** The learner's progress: loaded once, changed through pure domain functions, saved on change. */
 export const useProgressStore = defineStore('progress', () => {
-  const repository = inject(progressRepositoryKey, missingProgressRepository);
-  const logger = inject(loggerKey, consoleLogger);
-  const progress = shallowRef<Loadable<StoredProgress>>({ status: 'loading' });
-  /** How often progress was reset, so a running practice session can tell it's gone. */
-  const resets = shallowRef(0);
-  /** The review log of the current layout, for the overview. */
-  const log = shallowRef<Loadable<LayoutLog>>({ status: 'loading' });
-  /** The layout whose log was asked for last, so the log of an earlier one is dropped. */
-  const logLayout = shallowRef<LayoutId>();
+  const repository = inject(repositoryKey);
+  const progress = shallowRef<Progress>(noProgress);
+  const loaded = shallowRef(false);
+  const saveFailed = shallowRef(false);
+  /** The time the screens count "today" from; refreshed with every change. */
+  const now = shallowRef(localTimeAt(Date.now()));
+  const endOfToday = computed(() => endOfLocalDay(now.value));
 
-  /**
-   * Waits for a save and, once it's stored, applies the change to the progress shown. It applies
-   * it to the progress as it is by then, so saves close together don't undo each other.
-   */
-  async function saveThenShow(
-    saving: Promise<Result<void, PlatformError>>,
-    change: (stored: StoredProgress) => StoredProgress,
-  ): Promise<Result<void, PlatformError>> {
-    const saved = await saving;
-
-    if (saved.kind === 'ok' && progress.value.status === 'loaded') {
-      progress.value = { status: 'loaded', value: change(progress.value.value) };
-    }
-
-    return saved;
-  }
-
-  /**
-   * Loads the progress on every layout and reconciles it with the app data. What reconciling
-   * removed is written back.
-   */
-  async function load(apps: readonly AppDefinition[]): Promise<void> {
-    const loaded = await repository.load();
-
-    if (loaded.kind === 'err') {
-      progress.value = { status: 'failed', error: loaded.error };
-      return;
-    }
-
-    loaded.value.skipped.forEach(({ path, expected }) => {
-      logger.warn(`Skipped stored progress at ${path}: expected ${expected}`);
+  function commit(next: Progress): void {
+    progress.value = next;
+    now.value = localTimeAt(Date.now());
+    void repository?.save(next).then((saved) => {
+      saveFailed.value = !saved;
     });
+  }
 
-    const stored = loaded.value.progress;
-    const reconciled = reconcileProgress(stored, apps);
-
-    // Shown even if writing it back fails: it only lacks what the data no longer has, and the
-    // next start reconciles again.
-    progress.value = { status: 'loaded', value: reconciled };
-
-    if (progressChanged(stored, reconciled)) {
-      const written = await repository.replace(reconciled);
-
-      if (written.kind === 'err') {
-        logger.warn(`Could not write back reconciled progress: ${written.error.message}`);
-      }
+  async function load(): Promise<void> {
+    if (repository !== undefined) {
+      progress.value = await repository.load();
     }
+    loaded.value = true;
   }
 
-  /** Loads the review log of `layout` for the overview, from a year back as of `now`. */
-  async function loadLog(layout: LayoutId, now: ReviewTime): Promise<void> {
-    logLayout.value = layout;
-    const loaded = await repository.loadLog(layout, logStart(now));
-
-    if (logLayout.value === layout) {
-      log.value = mapLoadable(loadableOf(loaded), (entries) => ({ layout, entries }));
-    }
+  function tested(id: string, grade: Grade, at: number): void {
+    commit(recordTest(scheduleWithFsrs, progress.value, { id, grade, ...localTimeAt(at) }));
   }
 
-  /** Adds a logged review to the log shown, if it's the log of the review's layout. */
-  function addToLog(review: LoggedReview): void {
-    const { layout, at, utcOffsetMinutes, grade, failed, durationMs, keyCount } = review;
-
-    if (log.value.status === 'loaded' && log.value.value.layout === layout) {
-      const { entries } = log.value.value;
-      const entry = { at, utcOffsetMinutes, grade, failed, durationMs, keyCount };
-      log.value = { status: 'loaded', value: { layout, entries: [...entries, entry] } };
-    }
+  function learningChanged(snapshot: LearnSnapshot): void {
+    commit(recordLearning(progress.value, snapshot, Date.now()));
   }
 
-  /** Saves a learning session's snapshot into its set's progress. */
-  async function saveLearning(
-    key: SetKey,
-    snapshot: LearnSnapshot,
-    at: number,
-  ): Promise<Result<void, PlatformError>> {
-    if (progress.value.status !== 'loaded') {
-      return err(notLoaded);
-    }
-
-    const current = setProgressOf(progress.value.value, key);
-    const record = { ...key, progress: recordLearning(current, snapshot, at) };
-    return saveThenShow(repository.saveSet(record), (stored) => withSetRecord(stored, record));
+  function examFinished(result: ExamResult): void {
+    commit(recordExam(progress.value, result));
   }
 
-  /**
-   * The grading limits for a test: relative to the learner's own times in the log of its layout,
-   * or fixed while that log isn't loaded.
-   */
-  function limitsFor({ layout, keyCount }: TestResult): GradeLimits {
-    return log.value.status === 'loaded' && log.value.value.layout === layout
-      ? gradeLimits(log.value.value.entries, keyCount)
-      : fixedLimits;
+  function reset(): void {
+    commit({ ...noProgress, updatedAt: Date.now() });
   }
 
-  /** Grades a test, schedules its card and logs it. A failed first test creates no card. */
-  async function recordReview(test: TestResult): Promise<Result<void, PlatformError>> {
-    if (progress.value.status !== 'loaded') {
-      return err(notLoaded);
-    }
-
-    const review = { ...test, grade: gradeRecall(test, limitsFor(test)) };
-    const card = reviewCard(scheduleWithFsrs, cardOf(progress.value.value, test), review);
-    const saved = await saveThenShow(repository.recordReview(review, card), (stored) =>
-      card === undefined ? stored : withCard(stored, card),
-    );
-
-    if (saved.kind === 'ok') {
-      addToLog(review);
-    }
-
-    return saved;
-  }
-
-  /** Shows the progress as gone, which ends a running practice session. */
-  function forgetAll(): void {
-    progress.value = { status: 'loaded', value: { sets: [], cards: [] } };
-    log.value = mapLoadable(log.value, ({ layout }) => ({ layout, entries: [] }));
-    resets.value += 1;
-  }
-
-  /**
-   * Deletes all progress, cards and the review log, on every layout. The other windows forget
-   * theirs when the Rust side tells them.
-   */
-  async function reset(): Promise<Result<void, PlatformError>> {
-    const deleted = await repository.reset();
-
-    if (deleted.kind === 'ok') {
-      forgetAll();
-    }
-
-    return deleted;
-  }
-
-  onScopeDispose(inject(changesKey, missingChanges).onProgressReset(forgetAll));
-
-  return { progress, resets, log, load, loadLog, saveLearning, recordReview, reset };
+  return {
+    progress,
+    loaded,
+    saveFailed,
+    now,
+    endOfToday,
+    load,
+    tested,
+    learningChanged,
+    examFinished,
+    reset,
+    where: () => repository?.describe() ?? 'browser',
+  };
 });

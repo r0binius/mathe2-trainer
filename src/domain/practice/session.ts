@@ -1,23 +1,16 @@
-import type { KeyCombination } from '../keyboard/combination';
-import { isSameCombination } from '../keyboard/combination';
-import type { ShortcutId } from '../shortcuts/shortcutId';
-import type { MessageKey } from '../shortcuts/types';
+import type { Item, ItemId } from '../content/types';
+import type { Grade } from '../scheduling/scheduler';
 import type { LearnSnapshot } from './snapshot';
 
-/** A shortcut to practice, with its keys already resolved for the current keyboard layout. */
-export type PracticeItem = {
-  readonly id: ShortcutId;
-  readonly keys: KeyCombination;
-  readonly title: MessageKey;
-  readonly description?: MessageKey;
-};
-
-/** Whether the keys are shown (`training`) or have to be recalled (`testing`). */
+/**
+ * Whether an item is shown with its answer to take in (`training`), or has to be recalled or
+ * solved first (`testing`).
+ */
 export type Mode = 'training' | 'testing';
 
 /** What a {@link PracticeStrategy} picks to show next. */
 export type Presentation = {
-  readonly item: PracticeItem;
+  readonly item: Item;
   readonly mode: Mode;
 };
 
@@ -26,52 +19,44 @@ export type Draw = {
   /** A random number in `[0, 1)`, rolled by the shell. */
   readonly roll: number;
   /** The item shown last, so the strategy can avoid repeating it right away. */
-  readonly previous: PracticeItem | undefined;
+  readonly previous: Item | undefined;
 };
 
-/** How an item was answered, once its keys were pressed correctly. */
+/** How an item went, once it was taken in or answered. */
 export type Attempt = {
-  readonly item: PracticeItem;
+  readonly item: Item;
   readonly mode: Mode;
-  /** Wrong keys were pressed first while testing. Misses while training don't count. */
-  readonly failed: boolean;
-  /** Time from showing the item to the correct answer. */
-  readonly durationMs: number;
+  /** How well it was recalled. A training has no grade: nothing was recalled yet. */
+  readonly grade: Grade | undefined;
+  /** When it was answered. */
+  readonly at: number;
 };
+
+/** Whether an attempt was a test that went wrong. */
+export function failed({ grade }: Attempt): boolean {
+  return grade === 'again';
+}
 
 /**
  * A practice result the shell has to save: a test that counts for reviews, or the progress of
- * learning a set.
+ * learning a deck.
  */
 export type ProgressEffect =
   | {
       readonly type: 'tested';
-      readonly id: ShortcutId;
-      readonly failed: boolean;
-      readonly durationMs: number;
-      readonly keyCount: number;
+      readonly id: ItemId;
+      readonly grade: Grade;
+      readonly at: number;
     }
   | {
       readonly type: 'learningChanged';
       readonly snapshot: LearnSnapshot;
     };
 
-/** Reports an attempt as a test that counts for reviews. */
-export function testedEffect({ item, failed, durationMs }: Attempt): ProgressEffect {
-  return { type: 'tested', id: item.id, failed, durationMs, keyCount: item.keys.length };
+/** Reports an attempt as a test that counts for reviews, if it was one. */
+export function testedEffects({ item, grade, at }: Attempt): readonly ProgressEffect[] {
+  return grade === undefined ? [] : [{ type: 'tested', id: item.id, grade, at }];
 }
-
-/**
- * Work the session asks the shell to do, as data (Elm's `Cmd`): save a result, or send
- * `advance` with the given presentation number after a pause.
- */
-export type SessionEffect =
-  | ProgressEffect
-  | {
-      readonly type: 'advanceAfter';
-      readonly ms: number;
-      readonly presentation: number;
-    };
 
 /** A strategy's new pool, and the results to save because of the change. */
 export type PoolUpdate<Pool> = {
@@ -87,52 +72,42 @@ export type PracticeStrategy<Pool> = {
   /** Picks what to show next, or `undefined` when the session is over. */
   readonly next: (pool: Pool, draw: Draw) => Presentation | undefined;
   readonly complete: (pool: Pool, attempt: Attempt) => PoolUpdate<Pool>;
-  readonly skip: (pool: Pool, item: PracticeItem) => PoolUpdate<Pool>;
+  readonly skip: (pool: Pool, item: Item) => PoolUpdate<Pool>;
 };
 
 /**
- * Why a test failed: the first wrong keys pressed, shown next to the right ones, or that the
- * shortcut was forgotten, which reveals the right keys without pressing any.
- */
-export type Failure =
-  { readonly kind: 'wrong'; readonly keys: KeyCombination } | { readonly kind: 'forgot' };
-
-/**
  * A practice session, the Elm model of learning and reviewing, in one of its phases. Each phase
- * holds only what makes sense in it, so the old app's contradictory flags (`success` while
- * `testFailed`, …) can't be represented.
+ * holds only what makes sense in it, so contradictory states can't be represented.
  */
 export type Session<Pool> =
   | {
-      /** An item waits for its keys. */
-      readonly phase: 'presenting';
+      /** An item is shown: to take in while training, to recall or judge while testing. */
+      readonly phase: 'asking';
       readonly pool: Pool;
-      readonly item: PracticeItem;
+      readonly item: Item;
       readonly mode: Mode;
-      /** Counts the items shown, from 1, so an `advance` can name the success it ends. */
+      /** Counts the items shown, from 1, so the UI can tell one showing from the next. */
       readonly presentation: number;
-      readonly shownAt: number;
-      /** How many wrong answers were given, so the UI can react to each one. */
-      readonly misses: number;
-      /** Why the test failed, if it did; a test ends only once its keys are pressed. */
-      readonly failure?: Failure;
     }
   | {
-      /** The item was answered correctly, and the result is shown until `advance`. */
-      readonly phase: 'succeeded';
+      /**
+       * The answer is shown. A statement or problem waits for the learner's own grade; a claim
+       * was judged already, and shows whether that was right until the learner continues.
+       */
+      readonly phase: 'revealed';
       readonly pool: Pool;
-      readonly item: PracticeItem;
+      readonly item: Item;
       readonly presentation: number;
+      /** Whether a claim was judged correctly. Absent while a grade is still to be given. */
+      readonly judgedCorrectly?: boolean;
     }
   | {
       readonly phase: 'finished';
       readonly pool: Pool;
     };
 
-type Presenting<Pool> = Extract<Session<Pool>, { readonly phase: 'presenting' }>;
-
-/** A session showing an item, while it waits for the keys or shows the success. */
-type Showing<Pool> = Exclude<Session<Pool>, { readonly phase: 'finished' }>;
+type Asking<Pool> = Extract<Session<Pool>, { readonly phase: 'asking' }>;
+type Revealed<Pool> = Extract<Session<Pool>, { readonly phase: 'revealed' }>;
 
 /** A random number in `[0, 1)` the shell rolled for picking the next item, and when. */
 export type Roll = { readonly roll: number; readonly at: number };
@@ -142,44 +117,37 @@ export type Roll = { readonly roll: number; readonly at: number };
  * from the shell, so the session itself stays pure.
  */
 export type SessionMsg =
-  | { readonly type: 'answer'; readonly keys: KeyCombination; readonly at: number }
-  | (Roll & {
-      readonly type: 'advance';
-      /** The presentation whose success ends, as its `advanceAfter` named it. */
-      readonly presentation: number;
-    })
-  | (Roll & { readonly type: 'skip' })
-  /** The shortcut being tested was forgotten: reveal its keys and count the test as failed. */
-  | { readonly type: 'forget' };
+  /** Show the answer of the statement or problem being tested. */
+  | { readonly type: 'reveal' }
+  /** The claim being tested was judged true or false. */
+  | { readonly type: 'judge'; readonly holds: boolean; readonly at: number }
+  /** The learner graded their own recall of the revealed answer. */
+  | (Roll & { readonly type: 'grade'; readonly grade: Grade })
+  /** Go on: a training was taken in, or a judged claim's reason was read. */
+  | (Roll & { readonly type: 'continue' })
+  | (Roll & { readonly type: 'skip' });
 
-/** The session after a message, and the effects the shell has to carry out because of it. */
+/** The session after a message, and the results the shell has to save because of it. */
 export type SessionUpdate<Pool> = {
   readonly model: Session<Pool>;
-  readonly effects: readonly SessionEffect[];
+  readonly effects: readonly ProgressEffect[];
 };
 
-type AnswerMsg = Extract<SessionMsg, { readonly type: 'answer' }>;
-
-/** How long a success is shown before the next item, as in the old app. */
-export const successPauseMs = 1000;
-
-/** Where the next presentation comes from: a roll, its time, its number and the item before. */
-type NextDraw = Draw & Roll & { readonly presentation: number };
+/** Where the next presentation comes from: a roll, its number and the item before. */
+type NextDraw = Draw & { readonly presentation: number };
 
 /** Starts a session by presenting the strategy's first pick, or finishes it if there's none. */
 export function startSession<Pool>(
   strategy: PracticeStrategy<Pool>,
   pool: Pool,
-  start: Roll,
+  roll: number,
 ): Session<Pool> {
-  return present(strategy, pool, { ...start, presentation: 1, previous: undefined });
+  return present(strategy, pool, { roll, presentation: 1, previous: undefined });
 }
 
 /**
  * Applies a message to the session (Elm's `update`). A message that doesn't fit the phase, such
- * as an answer while a success is shown or an `advance` for an earlier success, leaves the session
- * unchanged.
- * @see §8–9 of `docs/legacy-architecture.md` for the flow this replaces
+ * as a grade before the answer is revealed, leaves the session unchanged.
  */
 export function updateSession<Pool>(
   strategy: PracticeStrategy<Pool>,
@@ -187,90 +155,123 @@ export function updateSession<Pool>(
   msg: SessionMsg,
 ): SessionUpdate<Pool> {
   switch (msg.type) {
-    case 'answer':
-      return session.phase === 'presenting' ? answer(strategy, session, msg) : unchanged(session);
-    case 'advance':
-      return session.phase === 'succeeded' && msg.presentation === session.presentation
-        ? { model: next(strategy, session, msg), effects: [] }
+    case 'reveal':
+      return unchanged(reveal(session));
+    case 'judge':
+      return isTested(session, 'claim') ? judge(strategy, session, msg) : unchanged(session);
+    case 'grade':
+      return session.phase === 'revealed' && session.judgedCorrectly === undefined
+        ? complete(strategy, session, { ...msg, mode: 'testing' })
         : unchanged(session);
+    case 'continue':
+      return proceed(strategy, session, msg);
     case 'skip':
-      return session.phase === 'presenting' ? skip(strategy, session, msg) : unchanged(session);
-    case 'forget':
-      return { model: forget(session), effects: [] };
+      return session.phase === 'finished' ? unchanged(session) : skip(strategy, session, msg);
   }
 }
 
 function present<Pool>(
   strategy: PracticeStrategy<Pool>,
   pool: Pool,
-  { roll, at, presentation, previous }: NextDraw,
+  { roll, presentation, previous }: NextDraw,
 ): Session<Pool> {
   const picked = strategy.next(pool, { roll, previous });
 
   return picked === undefined
     ? { phase: 'finished', pool }
-    : { phase: 'presenting', pool, ...picked, presentation, shownAt: at, misses: 0 };
+    : { phase: 'asking', pool, item: picked.item, mode: modeFor(picked), presentation };
 }
 
-/** Presents what follows the session's current item, from the given pool. */
-function next<Pool>(
-  strategy: PracticeStrategy<Pool>,
-  { pool, item, presentation }: Showing<Pool>,
-  { roll, at }: Roll,
-): Session<Pool> {
-  return present(strategy, pool, { roll, at, presentation: presentation + 1, previous: item });
+/**
+ * Only statements are trained: showing a claim's verdict or a problem's solution before asking
+ * would give the answer away, so those are always tested.
+ */
+function modeFor({ item, mode }: Presentation): Mode {
+  return item.kind === 'claim' || item.kind === 'problem' ? 'testing' : mode;
 }
 
-function answer<Pool>(
+/** Whether the session waits for the answer to an item of the given kind being tested. */
+function isTested<Pool>(session: Session<Pool>, kind: Item['kind']): session is Asking<Pool> {
+  return session.phase === 'asking' && session.mode === 'testing' && session.item.kind === kind;
+}
+
+/** Shows the answer of a tested statement or problem; anything else stays as it is. */
+function reveal<Pool>(session: Session<Pool>): Session<Pool> {
+  return session.phase === 'asking' && session.mode === 'testing' && session.item.kind !== 'claim'
+    ? {
+        phase: 'revealed',
+        pool: session.pool,
+        item: session.item,
+        presentation: session.presentation,
+      }
+    : session;
+}
+
+/** Grades a claim by whether it was judged correctly, and shows its reason. */
+function judge<Pool>(
   strategy: PracticeStrategy<Pool>,
-  session: Presenting<Pool>,
-  { keys, at }: AnswerMsg,
+  session: Asking<Pool>,
+  { holds, at }: { readonly holds: boolean; readonly at: number },
 ): SessionUpdate<Pool> {
-  const { item, mode, presentation, shownAt, failure } = session;
-
-  if (!isSameCombination(keys, item.keys)) {
-    return { model: miss(session, keys), effects: [] };
-  }
-
+  const { item, presentation } = session;
+  const judgedCorrectly = item.kind === 'claim' && item.holds === holds;
   const { pool, effects } = strategy.complete(session.pool, {
     item,
-    mode,
-    failed: failure !== undefined,
-    durationMs: at - shownAt,
+    mode: 'testing',
+    grade: judgedCorrectly ? 'good' : 'again',
+    at,
   });
 
-  return {
-    model: { phase: 'succeeded', pool, item, presentation },
-    effects: [...effects, { type: 'advanceAfter', ms: successPauseMs, presentation }],
-  };
+  return { model: { phase: 'revealed', pool, item, presentation, judgedCorrectly }, effects };
 }
 
-function miss<Pool>(session: Presenting<Pool>, keys: KeyCombination): Presenting<Pool> {
-  const missed = { ...session, misses: session.misses + 1 };
+/** Goes on after a training or a judged claim; anything else stays as it is. */
+function proceed<Pool>(
+  strategy: PracticeStrategy<Pool>,
+  session: Session<Pool>,
+  rolled: Roll,
+): SessionUpdate<Pool> {
+  if (session.phase === 'asking' && session.mode === 'training') {
+    return complete(strategy, session, { mode: 'training', grade: undefined, ...rolled });
+  }
 
-  // Only a test remembers what was pressed: while training the right keys are on screen anyway.
-  return session.mode === 'testing'
-    ? { ...missed, failure: session.failure ?? { kind: 'wrong', keys } }
-    : missed;
+  return session.phase === 'revealed' && session.judgedCorrectly !== undefined
+    ? { model: next(strategy, session, rolled.roll), effects: [] }
+    : unchanged(session);
 }
 
-/** Reveals the keys of a test not failed yet; anything else stays as it is. */
-function forget<Pool>(session: Session<Pool>): Session<Pool> {
-  return session.phase === 'presenting' &&
-    session.mode === 'testing' &&
-    session.failure === undefined
-    ? { ...session, failure: { kind: 'forgot' } }
-    : session;
+function complete<Pool>(
+  strategy: PracticeStrategy<Pool>,
+  session: Asking<Pool> | Revealed<Pool>,
+  { mode, grade, roll, at }: Pick<Attempt, 'mode' | 'grade'> & Roll,
+): SessionUpdate<Pool> {
+  const { pool, effects } = strategy.complete(session.pool, {
+    item: session.item,
+    mode,
+    grade,
+    at,
+  });
+
+  return { model: next(strategy, { ...session, pool }, roll), effects };
+}
+
+/** Presents what follows the session's current item, from its pool. */
+function next<Pool>(
+  strategy: PracticeStrategy<Pool>,
+  { pool, item, presentation }: Asking<Pool> | Revealed<Pool>,
+  roll: number,
+): Session<Pool> {
+  return present(strategy, pool, { roll, presentation: presentation + 1, previous: item });
 }
 
 function skip<Pool>(
   strategy: PracticeStrategy<Pool>,
-  session: Presenting<Pool>,
-  rolled: Roll,
+  session: Asking<Pool> | Revealed<Pool>,
+  { roll }: Roll,
 ): SessionUpdate<Pool> {
   const { pool, effects } = strategy.skip(session.pool, session.item);
 
-  return { model: next(strategy, { ...session, pool }, rolled), effects };
+  return { model: next(strategy, { ...session, pool }, roll), effects };
 }
 
 function unchanged<Pool>(session: Session<Pool>): SessionUpdate<Pool> {

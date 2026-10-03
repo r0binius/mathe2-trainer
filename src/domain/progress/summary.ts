@@ -1,152 +1,120 @@
-import type { LayoutId } from '../keyboard/keymap';
-import type { PracticeContext } from '../practice/items';
-import { appPracticeItems, practiceItems, reviewItems } from '../practice/items';
-import type { PracticeItem } from '../practice/session';
-import type { Card } from '../scheduling/scheduler';
+import type { Item, ItemId } from '../content/types';
+import type { LearnSnapshot } from '../practice/snapshot';
+import { daysUntil, localDay } from '../scheduling/days';
+import type { ReviewTime } from '../scheduling/scheduler';
 import { dueCards } from '../scheduling/scheduler';
-import type { ShortcutId } from '../shortcuts/shortcutId';
-import type { AppCategory, AppDefinition, ShortcutSet } from '../shortcuts/types';
-import { appCategories } from '../shortcuts/types';
-import type { SetRecord, StoredProgress } from './storedProgress';
-import { setProgressOf } from './storedProgress';
+import type { LogEntry, Progress } from './progress';
 
-/**
- * What a summary depends on: the layout and practice policy, the stored progress, and the local end
- * of today, which decides what's due.
- */
-export type SummaryContext = PracticeContext & {
-  readonly layout: LayoutId;
-  readonly progress: StoredProgress;
-  readonly endOfToday: number;
-};
-
-/** A set as the screens show it, on the current layout. */
-export type SetSummary = {
-  readonly set: ShortcutSet;
-  /** Its shortcuts that can be practiced on this layout. */
-  readonly items: readonly PracticeItem[];
-  /** Which of those are learned. */
-  readonly learned: readonly ShortcutId[];
-  readonly completed: boolean;
-  /** When the set was last practiced, if anything of it is learned. */
-  readonly practicedAt?: number;
-};
-
-/** An app as the library shows it, on the current layout. */
-export type AppSummary = {
-  readonly app: AppDefinition;
-  /** How many of its shortcuts can be practiced, each counted once. */
-  readonly shortcuts: number;
+/** How much of some items is learned. */
+export type Tally = {
+  readonly total: number;
+  /** Recalled often enough to count as learned. */
   readonly learned: number;
-  /** How many shortcuts a review would offer today. */
-  readonly due: number;
-  /** When the next card is due, if none is due today. */
-  readonly nextDueAt?: number;
-  /** When one of its sets was last practiced, if anything of it is learned. */
-  readonly practicedAt?: number;
+  /** Seen or tested, but not learned yet. */
+  readonly trained: number;
 };
 
-/** The apps of one category. */
-export type CategoryGroup = {
-  readonly category: AppCategory;
-  readonly apps: readonly AppSummary[];
-};
-
-/**
- * Summarizes a set: what can be practiced on this layout, and how much of it is learned. Learned
- * shortcuts that can't be practiced here don't count, but stay stored.
- */
-export function summarizeSet(appId: string, set: ShortcutSet, context: SummaryContext): SetSummary {
-  const items = practiceItems(appId, set, context);
-  const progress = setProgressOf(context.progress, {
-    appId,
-    setId: set.id,
-    layout: context.layout,
-  });
-  const practicable = new Set(items.map(({ id }) => id));
-  const learned = (progress?.learned ?? []).filter((id) => practicable.has(id));
-  const summary = { set, items, learned, completed: progress?.completedAt !== undefined };
-
-  return progress === undefined || learned.length === 0
-    ? summary
-    : { ...summary, practicedAt: progress.updatedAt };
-}
-
-/**
- * Summarizes an app across its sets. A shortcut in two sets counts once, and the due count is what a
- * review session of the app would offer.
- */
-export function summarizeApp(app: AppDefinition, context: SummaryContext): AppSummary {
-  const items = appPracticeItems(app, context);
-  const practicable = new Set(items.map(({ id }) => id));
-  const records = practicedRecords(app.id, practicable, context);
-  const learned = new Set(records.flatMap(({ progress }) => progress.learned));
-  const cards = context.progress.cards.filter((card) => practicable.has(card.id));
-  const due = reviewItems(dueCards(cards, context.layout, context.endOfToday), items).length;
-  const next = earliest(cards.filter((card) => isLater(card, context)).map(({ dueAt }) => dueAt));
-  const practicedAt = latest(records.map(({ progress }) => progress.updatedAt));
-
+/** Counts how far the given items got. */
+export function tallyOf(items: readonly Item[], { stages }: Progress): Tally {
   return {
-    app,
-    shortcuts: items.length,
-    learned: items.filter(({ id }) => learned.has(id)).length,
-    due,
-    ...(next === undefined ? {} : { nextDueAt: next }),
-    ...(practicedAt === undefined ? {} : { practicedAt }),
+    total: items.length,
+    learned: items.filter(({ id }) => stages[id] === 'learned').length,
+    trained: items.filter(({ id }) => stages[id] === 'trained').length,
   };
 }
 
+/** What a learning session starts from: how far the given items got in earlier ones. */
+export function learningOf(
+  items: readonly Item[],
+  { stages }: Progress,
+): Pick<LearnSnapshot, 'learned' | 'trained'> {
+  const ids = items.map(({ id }) => id);
+
+  return {
+    learned: ids.filter((id) => stages[id] === 'learned'),
+    trained: ids.filter((id) => stages[id] === 'trained'),
+  };
+}
+
+/** The given items that are due for review today, the longest overdue first. */
+export function dueItems(
+  items: readonly Item[],
+  { cards }: Progress,
+  endOfToday: number,
+): readonly Item[] {
+  return dueCards(cards, endOfToday).flatMap((card) => items.filter(({ id }) => id === card.id));
+}
+
+/** In how many days an item is reviewed next, or `undefined` if it has no review card yet. */
+export function nextReviewIn(
+  id: ItemId,
+  { cards }: Progress,
+  endOfToday: number,
+): number | undefined {
+  const card = cards.find((candidate) => candidate.id === id);
+
+  return card && daysUntil(card.dueAt, endOfToday);
+}
+
+/** How many tests were taken on each of the last `days` local days, oldest first, today last. */
+export function activityOf(
+  log: readonly LogEntry[],
+  now: ReviewTime,
+  days: number,
+): readonly number[] {
+  const today = localDay(now);
+  const testDays = log.map(({ at }) => localDay({ ...now, at }));
+
+  return Array.from({ length: days }, (_, index) => {
+    const day = today - (days - 1 - index);
+
+    return testDays.filter((testDay) => testDay === day).length;
+  });
+}
+
 /**
- * The shortcuts of an app learned on the layout, in any of its sets: the data's own, and those
- * made at runtime, such as Your commands.
+ * How many days in a row were practiced, up to today. A day without practice ends the streak, but
+ * today doesn't yet: it still counts from yesterday until the day is over.
  */
-export function learnedInApp(appId: string, context: SummaryContext): ReadonlySet<ShortcutId> {
-  return new Set(
-    context.progress.sets
-      .filter((record) => record.appId === appId && record.layout === context.layout)
-      .flatMap(({ progress }) => progress.learned),
-  );
+export function streakOf(log: readonly LogEntry[], now: ReviewTime): number {
+  const today = localDay(now);
+  const practiced = new Set(log.map(({ at }) => localDay({ ...now, at })));
+
+  return countBack(practiced, practiced.has(today) ? today : today - 1);
 }
 
-/** The summaries that were practiced, the most recently practiced first. */
-export function recentFirst<T extends { readonly practicedAt?: number }>(
-  summaries: readonly T[],
-): readonly T[] {
-  return summaries
-    .filter((summary) => summary.practicedAt !== undefined)
-    .toSorted((a, b) => (b.practicedAt ?? 0) - (a.practicedAt ?? 0));
+function countBack(practiced: ReadonlySet<number>, day: number): number {
+  return practiced.has(day) ? 1 + countBack(practiced, day - 1) : 0;
 }
 
-/** The apps grouped by category, in the order of {@link appCategories}, without empty groups. */
-export function groupByCategory(apps: readonly AppSummary[]): readonly CategoryGroup[] {
-  return appCategories
-    .map((category) => ({ category, apps: apps.filter(({ app }) => app.category === category) }))
-    .filter((group) => group.apps.length > 0);
-}
+/** An item that keeps going wrong, and how often it did among its recent tests. */
+export type WeakSpot = {
+  readonly item: Item;
+  readonly misses: number;
+  readonly tests: number;
+};
 
-/** The app's set records on the layout with something learned that can still be practiced. */
-function practicedRecords(
-  appId: string,
-  practicable: ReadonlySet<ShortcutId>,
-  { progress, layout }: SummaryContext,
-): readonly SetRecord[] {
-  return progress.sets.filter(
-    (record) =>
-      record.appId === appId &&
-      record.layout === layout &&
-      record.progress.learned.some((id) => practicable.has(id)),
-  );
-}
+/** How many of an item's most recent tests decide whether it's a weak spot. */
+const recentTests = 5;
 
-/** Whether a card of the current layout is due after today. */
-function isLater(card: Card, { layout, endOfToday }: SummaryContext): boolean {
-  return card.layout === layout && card.dueAt >= endOfToday;
-}
+/**
+ * The items that went wrong most often in their recent tests, the worst first. An item whose
+ * last test was right after only one miss isn't listed: that miss is dealt with.
+ */
+export function weakSpots(
+  items: readonly Item[],
+  { log }: Progress,
+  limit: number,
+): readonly WeakSpot[] {
+  return items
+    .map((item) => {
+      const tests = log.filter(({ id }) => id === item.id).slice(-recentTests);
+      const misses = tests.filter(({ grade }) => grade === 'again').length;
 
-function earliest(times: readonly number[]): number | undefined {
-  return times.length === 0 ? undefined : Math.min(...times);
-}
-
-function latest(times: readonly number[]): number | undefined {
-  return times.length === 0 ? undefined : Math.max(...times);
+      return { item, misses, tests: tests.length, lastMissed: tests.at(-1)?.grade === 'again' };
+    })
+    .filter(({ misses, lastMissed }) => misses >= 2 || lastMissed)
+    .toSorted((a, b) => b.misses - a.misses)
+    .slice(0, limit)
+    .map(({ item, misses, tests }) => ({ item, misses, tests }));
 }

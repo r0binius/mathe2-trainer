@@ -1,44 +1,26 @@
 import { fileURLToPath, URL } from 'node:url';
 
 import vue from '@vitejs/plugin-vue';
+import { viteSingleFile } from 'vite-plugin-singlefile';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  plugins: [vue()],
-
-  // vue-i18n's feature flags. Only the Composition API is used, without the global `<i18n-t>` and
-  // `v-t`, so the rest is left out of the bundle, and declaring them silences its warning.
+  // The build is one self-contained HTML file: it can be opened from disk, hosted anywhere, or
+  // published as a Claude artifact.
+  plugins: [vue(), viteSingleFile()],
+  // MathJax reads its version from this constant; without it, it would look for a package.json
+  // with Node's `require`, which a browser doesn't have.
   define: {
-    __VUE_I18N_FULL_INSTALL__: false,
-    __VUE_I18N_LEGACY_API__: false,
-    __INTLIFY_PROD_DEVTOOLS__: false,
+    PACKAGE_VERSION: JSON.stringify('3.2.1'),
   },
-
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-
-  // One page per window: the main window, the popover, the Settings window and the banner.
   build: {
-    rolldownOptions: {
-      input: ['index.html', 'popover.html', 'settings.html', 'banner.html'],
-    },
+    chunkSizeWarningLimit: 4000,
   },
-
-  // Keep Rust compiler errors visible in the terminal.
-  clearScreen: false,
-
-  server: {
-    // Tauri expects the dev server on a fixed port.
-    port: 1420,
-    strictPort: true,
-    watch: {
-      ignored: ['**/src-tauri/**'],
-    },
-  },
-
   test: {
     include: ['src/**/*.test.ts'],
   },

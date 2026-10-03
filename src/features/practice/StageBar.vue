@@ -2,7 +2,7 @@
 import type { LearnStep } from '@/domain/practice/learn';
 
 defineProps<{
-  /** How far each shortcut of the session got, in the session's order. */
+  /** How far each item of the session got, in the session's order. */
   steps: readonly LearnStep[];
 }>();
 </script>
@@ -15,7 +15,7 @@ defineProps<{
 </template>
 
 <style scoped>
-/* One segment per shortcut: a track while unseen, due once trained, half learned once recalled
+/* One segment per item: a track while unseen, due once trained, half learned once recalled
 once, learned once recalled enough. */
 .stages {
   display: flex;

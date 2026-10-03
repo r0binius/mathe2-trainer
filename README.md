@@ -1,49 +1,61 @@
-# Mouseless
+# Mathe 2 – Prüfungstrainer
 
-Keyboard shortcut training and look-up for macOS (Linux later). A rewrite of [ueberdosis/mouseless](https://github.com/ueberdosis/mouseless), an Electron app, with Tauri 2, Vue 3 and TypeScript.
+Ein Lerntrainer für die Vorlesung Mathematik 2 (Kapitel 7 bis 13 des Skripts): Definitionen, Sätze,
+Wahr-oder-falsch-Aussagen und Klausuraufgaben mit Musterlösung, dazu Wiederholung in wachsenden
+Abständen, Nachschlagen und eine Prüfungssimulation.
 
-## Motivation
+Entstanden aus dem Tastaturkürzel-Trainer Mouseless: Lernablauf (erst zeigen, dann abfragen, bis es
+zweimal sitzt), Wiederholungsplanung (FSRS), Architektur und Aussehen sind übernommen. Die macOS-Hülle
+(Tauri, Rust, Menüleiste, Tastatur-Hooks) ist entfallen – der Trainer ist jetzt eine Web-App, die als
+eine einzige HTML-Datei gebaut wird und auch auf dem Handy läuft.
 
-The original Mouseless was abandoned about four years ago. I really like the idea, so I'm modernizing it with a new, current stack, and learning along the way.
+## Was drin ist
 
-## Docs
+| Bereich          | Was er tut                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------ |
+| Lernen           | Pro Kapitel vier Decks. Neue Definitionen und Sätze werden gezeigt, dann abgefragt.        |
+| Wiederholen      | Was gewusst wurde, kommt nach FSRS wieder: kurz vor dem Vergessen.                         |
+| Wahr oder falsch | Aussagen beurteilen, mit Begründung oder Gegenbeispiel. Wird automatisch bewertet.         |
+| Aufgaben         | Klausurnahe Aufgaben (viele von den Übungsblättern) mit Tipp und Musterlösung.             |
+| Nachschlagen     | Volltextsuche über alles, mit Filter nach Kapitel und Art.                                 |
+| Prüfung          | Zufällige Aufgaben auf Zeit, danach Selbstkorrektur mit Punkten und Auswertung je Kapitel. |
+| Tutor (optional) | Als veröffentlichtes Claude-Artifact: eigene Antwort prüfen oder etwas erklären lassen.    |
 
-- [Architecture](docs/architecture.md): layers, best practices, design patterns
-- [Conventions](docs/conventions.md): functional style, clean code, TypeScript, Vue and Rust rules
-- [Roadmap](docs/roadmap.md): the steps, decisions and what we learned
-- [Legacy architecture](docs/legacy-architecture.md): how the old app works and what the rewrite keeps
-- [UML](docs/uml.drawio): components, classes, the practice session's states and three sequences, as a draw.io file (open it in draw.io or the VS Code draw.io extension)
-- [Smoke test](docs/smoke-test.md): what to check by hand in the running app before a step is merged
+Alles lässt sich mit der Tastatur bedienen (Leertaste, 1–4, W/F, T, S, Esc); die Tasten stehen an den
+Knöpfen und in den Einstellungen.
 
-## Requirements
+## Inhalte ergänzen
 
-- Node.js 24+ and pnpm (see `packageManager` in `package.json`)
-- Rust (stable) via rustup
-- Xcode Command Line Tools
+Ein Kapitel ist eine Datei in `src/data/topics/`. Texte sind Rich Text: Absätze durch Leerzeilen,
+Listen mit `- `, `**fett**`, Formeln als TeX zwischen `$…$` oder `$$…$$`. Die Texte stehen in
+`String.raw`, damit Backslashes nicht verdoppelt werden müssen – deshalb darf im Text nie `${` stehen.
 
-## Scripts
+`pnpm test` rendert jede Formel einmal mit MathJax und schlägt fehl, wenn eine nicht lesbar ist oder
+eine ID doppelt vorkommt. IDs nicht nachträglich ändern: der Fortschritt hängt an ihnen.
 
-| Command            | Description                                               |
-| ------------------ | --------------------------------------------------------- |
-| `pnpm tauri dev`   | Run the app with hot reloading                            |
-| `pnpm tauri build` | Build `Mouseless.app`, ad-hoc signed for this Mac         |
-| `pnpm check`       | Run every check below; must pass before each commit       |
-| `pnpm format`      | Format all files with Prettier (`format:check` to verify) |
-| `pnpm lint`        | Lint with ESLint (`lint:fix` to apply fixes)              |
-| `pnpm typecheck`   | Type-check with `vue-tsc`                                 |
-| `pnpm test`        | Run unit tests with Vitest (`test:watch` while working)   |
-| `pnpm rust:format` | Format Rust with rustfmt (`rust:format:check` to verify)  |
-| `pnpm rust:lint`   | Lint Rust with Clippy                                     |
-| `pnpm rust:test`   | Run Rust tests                                            |
+## Aufbau
 
-## Editor
+```
+src/
+├─ domain/      rein funktional, ohne Vue: content (Typen, Suche, Rich Text), practice (Sitzung als
+│               Elm-Modell, Lern- und Wiederholstrategie), scheduling (FSRS), progress, exam
+├─ data/        die Kapitel
+├─ platform/    MathJax, Speicher (localStorage, im Artifact zusätzlich pro Konto), Tutor
+├─ stores/      Pinia: Fortschritt
+├─ composables/ useProgram (Elm-Laufzeit), usePracticeSession, useHotkeys
+├─ features/    library, practice, lookup, exam, settings
+└─ components/  Bausteine ohne eigene Logik
+```
 
-VS Code recommends the needed extensions (`.vscode/extensions.json`). Files are formatted with Prettier on save, and ESLint fixes are applied on save.
+## Befehle
 
-## Git
+| Befehl       | Zweck                                       |
+| ------------ | ------------------------------------------- |
+| `pnpm dev`   | Entwicklungsserver                          |
+| `pnpm build` | baut `dist/index.html`, eine einzelne Datei |
+| `pnpm check` | Format, Lint, Typen und Tests               |
 
-Commits follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) and branches follow [Conventional Branch](https://conventionalbranch.org). Git hooks installed by `pnpm install` check both. See [conventions](docs/conventions.md#git).
+## Lizenz
 
-## License
-
-[GPL-3.0-or-later](LICENSE). The app logos in `src/data/apps/*/logo.svg` belong to their owners and are not covered by this license.
+[GPL-3.0-or-later](LICENSE). Die Inhalte folgen dem Skript und den Übungsblättern von Prof. Dr. Volker
+Scheidemann; die Formulierungen der Lösungen sind eigene und ohne Gewähr.

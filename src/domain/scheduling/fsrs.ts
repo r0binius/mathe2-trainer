@@ -9,7 +9,7 @@ export const maximumIntervalDays = 365;
 
 const minuteMs = 60 * 1000;
 
-/** The chance of recalling a shortcut that reviews are planned for. */
+/** The chance of recalling an item that reviews are planned for. */
 const desiredRetention = 0.9;
 
 const ratings: Readonly<Record<Grade, FsrsGrade>> = {

@@ -1,12 +1,10 @@
-import type { LayoutId } from '../keyboard/keymap';
+import type { ItemId } from '../content/types';
 import type { Decoder } from '../shared/decode';
 import { andThen, integer, literal, number, object, oneOf, string } from '../shared/decode';
 import type { Result } from '../shared/result';
 import { err, ok } from '../shared/result';
-import type { ShortcutId } from '../shortcuts/shortcutId';
-import { decodeShortcutId } from '../shortcuts/shortcutId';
 
-/** How well a shortcut was recalled, on the scale FSRS schedules with. */
+/** How well an item was recalled, on the scale FSRS schedules with. */
 export type Grade = 'again' | 'hard' | 'good' | 'easy';
 
 /** Decodes a grade. */
@@ -28,7 +26,7 @@ const maxStability = 36_500;
 const minDifficulty = 1;
 const maxDifficulty = 10;
 
-/** What the memory model knows about a shortcut, and when to review it next, unchecked. */
+/** What the memory model knows about an item, and when to review it next, unchecked. */
 export type CardMemoryFields = {
   /** Days until the chance of recalling it drops to 90 %. */
   readonly stability: number;
@@ -57,10 +55,9 @@ export type InvalidMemory = {
   readonly reason: 'not-finite' | 'stability' | 'difficulty' | 'counts' | 'dates';
 };
 
-/** A shortcut's review card, one per shortcut and keyboard layout. */
-export type Card = CardMemory & {
-  readonly id: ShortcutId;
-  readonly layout: LayoutId;
+/** An item's review card: what the memory model knows about one definition, theorem, claim or problem. */
+export type ReviewCard = CardMemory & {
+  readonly id: ItemId;
 };
 
 /**
@@ -84,10 +81,9 @@ export type ReviewTime = {
   readonly utcOffsetMinutes: number;
 };
 
-/** A graded test of a shortcut. */
+/** A graded test of an item. */
 export type Review = ReviewTime & {
-  readonly id: ShortcutId;
-  readonly layout: LayoutId;
+  readonly id: ItemId;
   readonly grade: Grade;
 };
 
@@ -119,8 +115,7 @@ export function parseCardMemory(fields: CardMemoryFields): Result<CardMemory, In
 }
 
 const decodeCardFields = object({
-  id: decodeShortcutId,
-  layout: string,
+  id: string,
   stability: number,
   difficulty: number,
   lastReviewAt: integer,
@@ -130,25 +125,24 @@ const decodeCardFields = object({
 });
 
 /** Decodes a stored card, checking its memory with {@link parseCardMemory}. */
-export const decodeCard: Decoder<Card> = andThen(decodeCardFields, ({ id, layout, ...fields }) => {
+export const decodeCard: Decoder<ReviewCard> = andThen(decodeCardFields, ({ id, ...fields }) => {
   const memory = parseCardMemory(fields);
 
   return memory.kind === 'ok'
-    ? ok({ ...memory.value, id, layout })
+    ? ok({ ...memory.value, id })
     : err({ path: '', expected: `valid card memory (${memory.error.reason})` });
 });
 
 /**
- * Applies a review to a shortcut's card. A shortcut only gets a card once it's recalled: failing
+ * Applies a review to a item's card. An item only gets a card once it's recalled: failing
  * it before that is still part of learning it. A forgotten card is due a day after the review,
  * however stable the scheduler still thinks it is.
- * @see §9 of `docs/legacy-architecture.md`
  */
 export function reviewCard(
   scheduler: Scheduler,
-  card: Card | undefined,
-  { id, layout, grade, ...time }: Review,
-): Card | undefined {
+  card: ReviewCard | undefined,
+  { id, grade, ...time }: Review,
+): ReviewCard | undefined {
   if (card === undefined && grade === 'again') {
     return undefined;
   }
@@ -159,24 +153,17 @@ export function reviewCard(
   return {
     ...memory,
     id,
-    layout,
     dueAt: grade === 'again' ? memory.lastReviewAt + dayMs : memory.dueAt,
   };
 }
 
 /**
- * The layout's cards due today, the longest overdue first. A card due any time today counts, so a
+ * The cards due today, the longest overdue first. A card due any time today counts, so a
  * session in the morning also covers the evening. The shell passes the local end of today, since
  * it depends on the time zone.
  */
-export function dueCards(
-  cards: readonly Card[],
-  layout: LayoutId,
-  endOfToday: number,
-): readonly Card[] {
-  return cards
-    .filter((card) => card.layout === layout && card.dueAt < endOfToday)
-    .toSorted((a, b) => a.dueAt - b.dueAt);
+export function dueCards(cards: readonly ReviewCard[], endOfToday: number): readonly ReviewCard[] {
+  return cards.filter((card) => card.dueAt < endOfToday).toSorted((a, b) => a.dueAt - b.dueAt);
 }
 
 function finite(fields: CardMemoryFields): InvalidMemory | undefined {

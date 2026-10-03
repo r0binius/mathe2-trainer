@@ -1,38 +1,43 @@
 import type { RouteLocationRaw } from 'vue-router';
 
-/** The main window's pages, by route name. */
-export type RouteName = 'overview' | 'app' | 'review' | 'set' | 'learn';
+import type { DeckId } from '@/domain/content/types';
 
-/** Where each screen lives. */
-export const routePaths: Readonly<Record<RouteName, string>> = {
-  overview: '/',
-  app: '/apps/:appId',
-  review: '/apps/:appId/review',
-  set: '/apps/:appId/sets/:setId',
-  learn: '/apps/:appId/sets/:setId/learn',
-};
-
-/** The route to the overview of learning, the page the window starts on. */
+/** The route to the overview, the page the trainer starts on. */
 export function toOverview(): RouteLocationRaw {
   return { name: 'overview' };
 }
 
-/** The route to an app's sets. */
-export function toApp(appId: string): RouteLocationRaw {
-  return { name: 'app', params: { appId } };
+/** The route to a topic's decks. */
+export function toTopic(topicId: string): RouteLocationRaw {
+  return { name: 'topic', params: { topicId } };
 }
 
-/** The route to reviewing an app's due shortcuts. */
-export function toReview(appId: string): RouteLocationRaw {
-  return { name: 'review', params: { appId } };
+/** The route to a deck's items. */
+export function toDeck(topicId: string, deckId: DeckId): RouteLocationRaw {
+  return { name: 'deck', params: { topicId, deckId } };
 }
 
-/** The route to a set's shortcuts. */
-export function toSet(appId: string, setId: string): RouteLocationRaw {
-  return { name: 'set', params: { appId, setId } };
+/** The route to learning a deck. */
+export function toLearn(topicId: string, deckId: DeckId): RouteLocationRaw {
+  return { name: 'learn', params: { topicId, deckId } };
 }
 
-/** The route to learning a set. */
-export function toLearn(appId: string, setId: string): RouteLocationRaw {
-  return { name: 'learn', params: { appId, setId } };
+/** The route to reviewing what's due, of one topic or of all. */
+export function toReview(topicId?: string): RouteLocationRaw {
+  return topicId === undefined ? { name: 'reviewAll' } : { name: 'review', params: { topicId } };
+}
+
+/** The route to looking things up. */
+export function toLookup(): RouteLocationRaw {
+  return { name: 'lookup' };
+}
+
+/** The route to the mock exam. */
+export function toExam(): RouteLocationRaw {
+  return { name: 'exam' };
+}
+
+/** The route to the settings. */
+export function toSettings(): RouteLocationRaw {
+  return { name: 'settings' };
 }

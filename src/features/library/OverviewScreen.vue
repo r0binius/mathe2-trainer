@@ -1,250 +1,205 @@
 <script setup lang="ts">
-import { computed, useTemplateRef } from 'vue';
+import { computed } from 'vue';
 
+import BaseButton from '@/components/BaseButton.vue';
+import CircleProgress from '@/components/CircleProgress.vue';
 import GroupedList from '@/components/GroupedList.vue';
+import LinkRow from '@/components/LinkRow.vue';
 import ListSection from '@/components/ListSection.vue';
-import NavigationRow from '@/components/NavigationRow.vue';
-import PageLayout from '@/components/PageLayout.vue';
-import ScreenHeading from '@/components/ScreenHeading.vue';
+import RichText from '@/components/RichText.vue';
 import TextProgress from '@/components/TextProgress.vue';
-import { useSpatialNav } from '@/composables/useSpatialNav';
-import { summarizeOverview } from '@/domain/progress/overview';
-import type { SummaryContext } from '@/domain/progress/summary';
-import { summarizeApp } from '@/domain/progress/summary';
-import type { AppDefinition } from '@/domain/shortcuts/types';
-import { byKeyboard } from '@/domain/usage/byKeyboard';
-import { yourCommandsId } from '@/domain/usage/yourCommands';
-import type { UiKey } from '@/i18n';
-import { useText } from '@/i18n';
-import { localTimeAt } from '@/localTime';
-import { toApp, toReview, toSet } from '@/routes';
+import { headlineOf, locateAll, topicItems } from '@/domain/content/lookup';
+import type { Topic } from '@/domain/content/types';
+import { activityOf, dueItems, streakOf, tallyOf, weakSpots } from '@/domain/progress/summary';
+import { deckTitles } from '@/labels';
+import { toDeck, toExam, toLearn, toReview, toTopic } from '@/routes';
 import { useProgressStore } from '@/stores/progress';
-import { useSettingsStore } from '@/stores/settings';
-import { useUsageStore } from '@/stores/usage';
 
 import ActivityChart from './ActivityChart.vue';
-import AppLogo from './AppLogo.vue';
 
-const props = defineProps<{
-  /** Every app Mouseless teaches. */
-  apps: readonly AppDefinition[];
-  /** What progress is summarized with. */
-  context: SummaryContext;
+const { topics } = defineProps<{
+  /** Every topic of the lecture. */
+  topics: readonly Topic[];
 }>();
 
-const text = useText();
-const progress = useProgressStore();
-const settings = useSettingsStore();
-const usage = useUsageStore();
-const nav = useTemplateRef<HTMLElement>('nav');
+const store = useProgressStore();
+const located = locateAll(topics);
+const items = located.map(({ item }) => item);
 
-useSpatialNav(() => nav.value);
-
-/** What the figures from the review log show while it isn't loaded. */
-const unknown = '–';
-
-/**
- * The overview as of the last moment of today. The context moves today on when the window gains
- * focus, so the overview follows it to a new day.
- */
-const overview = computed(() => {
-  const log = progress.log.status === 'loaded' ? progress.log.value.entries : [];
-
-  return summarizeOverview(
-    props.apps.map((app) => summarizeApp(app, props.context)),
-    log,
-    localTimeAt(props.context.endOfToday - 1),
-  );
-});
-
-const logLoaded = computed(() => progress.log.status === 'loaded');
-
-/**
- * How the user worked lately, while learning from work is on and anything was counted: the share
- * done with the keys, and the commands still chosen from menus most.
- */
-const keyboard = computed(() =>
-  settings.current?.learnFromWork === true && usage.counts
-    ? byKeyboard(props.apps, usage.counts)
-    : undefined,
+const tally = computed(() => tallyOf(items, store.progress));
+const due = computed(() => dueItems(items, store.progress, store.endOfToday).length);
+const streak = computed(() => streakOf(store.progress.log, store.now));
+const activity = computed(() => activityOf(store.progress.log, store.now, 14));
+const weak = computed(() =>
+  weakSpots(items, store.progress, 5).map((spot) => ({
+    ...spot,
+    where: located.find(({ item }) => item.id === spot.item.id),
+  })),
 );
+const lastExam = computed(() => store.progress.exams.at(-1));
 
-/** A figure from the review log, or {@link unknown} while the log isn't loaded. */
-function fromLog(value: string): string {
-  return logLoaded.value ? value : unknown;
-}
+/** The first deck, in the lecture's order, that isn't learned completely: where to go on. */
+const next = computed(() =>
+  topics
+    .flatMap((topic) => topic.decks.map((deck) => ({ topic, deck })))
+    .find(({ deck }) => {
+      const { learned, total } = tallyOf(deck.items, store.progress);
 
-/** What a figure's value means, which its color shows: due counts and recall in their accents. */
-type FigureTone = 'due' | 'learned' | 'plain';
-
-/** The four figures on top, each a value, what it counts and its tone. */
-const figures = computed(
-  (): readonly { readonly value: string; readonly label: UiKey; readonly tone: FigureTone }[] => {
-    const { due, reviewedToday, recallRate, daysInARow } = overview.value;
-
-    return [
-      { value: String(due), label: 'overview.dueToday', tone: due > 0 ? 'due' : 'plain' },
-      { value: fromLog(String(reviewedToday)), label: 'overview.reviewedToday', tone: 'plain' },
-      {
-        value: fromLog(recallRate === undefined ? unknown : text.percent(recallRate)),
-        label: 'overview.recallRate',
-        tone: recallRate === undefined ? 'plain' : 'learned',
-      },
-      { value: fromLog(String(daysInARow)), label: 'overview.daysInARow', tone: 'plain' },
-    ];
-  },
+      return learned < total;
+    }),
 );
 </script>
 
 <template>
-  <PageLayout>
-    <nav ref="nav" class="overview">
-      <ScreenHeading class="heading" :title="text.ui('overview.title')" />
-      <dl class="figures">
-        <div v-for="figure in figures" :key="figure.label" class="figure">
-          <dt class="caption">{{ text.ui(figure.label) }}</dt>
-          <dd class="value" :class="figure.tone">{{ figure.value }}</dd>
-        </div>
-      </dl>
+  <div class="overview">
+    <header class="hero">
+      <p class="caption">Mathematik 2 · Kapitel 7 bis 13</p>
+      <h1 class="headline">
+        <template v-if="due > 0"
+          >{{ due }} {{ due === 1 ? 'Karte ist' : 'Karten sind' }} heute fällig.</template
+        >
+        <template v-else-if="tally.learned === 0">Fang mit den Definitionen an.</template>
+        <template v-else>Heute ist nichts fällig. Zeit für Neues.</template>
+      </h1>
+      <div class="actions">
+        <RouterLink v-if="due > 0" v-slot="{ navigate }" :to="toReview()" custom>
+          <BaseButton variant="accent" size="large" @click="navigate">Jetzt wiederholen</BaseButton>
+        </RouterLink>
+        <RouterLink
+          v-if="next !== undefined"
+          v-slot="{ navigate }"
+          :to="toLearn(next.topic.id, next.deck.id)"
+          custom
+        >
+          <BaseButton :variant="due > 0 ? 'neutral' : 'accent'" size="large" @click="navigate">
+            Weiter lernen: {{ next.topic.title }}, {{ deckTitles[next.deck.id] }}
+          </BaseButton>
+        </RouterLink>
+        <RouterLink v-slot="{ navigate }" :to="toExam()" custom>
+          <BaseButton size="large" @click="navigate">Prüfung simulieren</BaseButton>
+        </RouterLink>
+      </div>
+    </header>
 
-      <ListSection :title="text.ui('overview.activity')">
-        <ActivityChart v-if="logLoaded" :activity="overview.activity" />
-        <p v-else-if="progress.log.status === 'failed'" class="hint">
-          {{ text.ui('overview.logFailed') }}
-        </p>
-      </ListSection>
+    <dl class="figures">
+      <div class="figure">
+        <dt class="caption">Gelernt</dt>
+        <dd><TextProgress :value="tally.learned" :max="tally.total" /></dd>
+      </div>
+      <div class="figure">
+        <dt class="caption">In Arbeit</dt>
+        <dd class="mono">{{ tally.trained }}</dd>
+      </div>
+      <div class="figure">
+        <dt class="caption">Serie</dt>
+        <dd class="mono">{{ streak }} {{ streak === 1 ? 'Tag' : 'Tage' }}</dd>
+      </div>
+      <div v-if="lastExam !== undefined" class="figure">
+        <dt class="caption">Letzte Prüfung</dt>
+        <dd class="mono">{{ Math.round((lastExam.points / lastExam.max) * 100) }} %</dd>
+      </div>
+    </dl>
 
-      <ListSection v-if="overview.dueApps.length > 0" :title="text.ui('library.dueToday')">
-        <GroupedList>
-          <NavigationRow
-            v-for="summary in overview.dueApps"
-            :key="summary.app.id"
-            :to="toReview(summary.app.id)"
+    <ListSection title="Kapitel">
+      <GroupedList>
+        <LinkRow v-for="topic in topics" :key="topic.id" :to="toTopic(topic.id)">
+          <template #leading>
+            <CircleProgress
+              :value="tallyOf(topicItems(topic), store.progress).learned"
+              :max="topicItems(topic).length"
+              :size="18"
+            />
+          </template>
+          <span class="chapter">{{ topic.chapter }}</span> {{ topic.title }}
+          <template #meta>
+            <span
+              v-if="dueItems(topicItems(topic), store.progress, store.endOfToday).length > 0"
+              class="due"
+            >
+              {{ dueItems(topicItems(topic), store.progress, store.endOfToday).length }} fällig
+            </span>
+            <TextProgress
+              :value="tallyOf(topicItems(topic), store.progress).learned"
+              :max="topicItems(topic).length"
+            />
+          </template>
+        </LinkRow>
+      </GroupedList>
+    </ListSection>
+
+    <ListSection title="Aktivität der letzten 14 Tage">
+      <ActivityChart :activity="activity" />
+    </ListSection>
+
+    <ListSection v-if="weak.length > 0" title="Das sitzt noch nicht">
+      <GroupedList>
+        <template v-for="spot in weak" :key="spot.item.id">
+          <LinkRow
+            v-if="spot.where !== undefined"
+            :to="toDeck(spot.where.topic.id, spot.where.deck)"
           >
-            <template #leading><AppLogo :app-id="summary.app.id" /></template>
-            {{ text.appTitle(summary.app) }}
-            <template #meta>{{ text.ui('library.due', { n: summary.due }) }}</template>
-          </NavigationRow>
-        </GroupedList>
-      </ListSection>
-
-      <ListSection v-if="keyboard !== undefined" :title="text.ui('overview.byKeyboard')">
-        <p class="total">
-          {{ text.ui('overview.keyboardShare', { share: text.percent(keyboard.share) }) }}
-        </p>
-        <GroupedList v-if="keyboard.fromMenus.length > 0">
-          <NavigationRow
-            v-for="leader in keyboard.fromMenus"
-            :key="`${leader.app.id}/${leader.shortcut.title}`"
-            :to="toSet(leader.app.id, yourCommandsId)"
-          >
-            <template #leading><AppLogo :app-id="leader.app.id" /></template>
-            {{ text.app(leader.app.id, leader.shortcut.title) }}
-            <template #meta>{{ text.count('overview.fromMenu', leader.byMenu) }}</template>
-          </NavigationRow>
-        </GroupedList>
-      </ListSection>
-
-      <ListSection v-if="overview.learnedApps.length > 0" :title="text.ui('overview.progress')">
-        <p class="total">
-          {{
-            text.ui('overview.learnedOf', {
-              learned: overview.learned,
-              shortcuts: overview.shortcuts,
-            })
-          }}
-        </p>
-        <GroupedList>
-          <NavigationRow
-            v-for="summary in overview.learnedApps"
-            :key="summary.app.id"
-            :to="toApp(summary.app.id)"
-          >
-            <template #leading><AppLogo :app-id="summary.app.id" /></template>
-            {{ text.appTitle(summary.app) }}
-            <template #meta>
-              <!-- A meter: the learned share in the learned color on a track in the border color. -->
-              <span class="meter" aria-hidden="true">
-                <span
-                  class="fill"
-                  :style="{ width: `${(summary.learned / summary.shortcuts) * 100}%` }"
-                />
-              </span>
-              <TextProgress :value="summary.learned" :max="summary.shortcuts" />
-            </template>
-          </NavigationRow>
-        </GroupedList>
-      </ListSection>
-      <p v-else class="hint">{{ text.ui('library.choose') }}</p>
-    </nav>
-  </PageLayout>
+            <RichText :source="headlineOf(spot.item)" />
+            <template #meta>{{ spot.misses }} von {{ spot.tests }} falsch</template>
+          </LinkRow>
+        </template>
+      </GroupedList>
+    </ListSection>
+  </div>
 </template>
 
 <style scoped>
 .overview {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
   gap: 10px;
 }
 
-/* The grid's gap spaces the heading, so it needs no padding of its own. */
-.heading {
-  padding-bottom: 0;
-}
-
-/* Four figures in a row, each in a box, the value in mono and its label below. */
-.figures {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
-}
-
-.figure {
-  display: flex;
-  flex-direction: column-reverse;
-  gap: 2px;
-  padding: 6px 9px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-box);
-  background-color: var(--color-box);
-}
-
-.value {
-  font-family: var(--font-mono);
-  font-size: 19px;
+/* The one large line: what to do today. */
+.headline {
+  max-width: 18em;
+  font-size: clamp(26px, 5vw, 38px);
   font-weight: 500;
-
-  &.due {
-    color: var(--color-due);
-  }
-
-  &.learned {
-    color: var(--color-learned);
-  }
+  letter-spacing: -0.015em;
+  line-height: 1.15;
 }
 
-.total {
-  margin: -2px 0 6px 1px;
-  color: var(--color-text-secondary);
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 36px;
+}
+
+.figure dd {
+  margin-top: 2px;
+  font-size: 20px;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.chapter {
+  display: inline-block;
+  min-width: 6.4em;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-mono);
   font-size: 12px;
 }
 
-.meter {
-  width: 90px;
-  height: 4px;
-  overflow: hidden;
-  border-radius: 2px;
-  background-color: var(--color-border);
-}
-
-.fill {
-  display: block;
-  height: 100%;
-  border-radius: 2px;
-  background-color: var(--color-learned);
-}
-
-.hint {
-  color: var(--color-text-secondary);
-  text-align: center;
+.due {
+  color: var(--color-due);
 }
 </style>

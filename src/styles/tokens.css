@@ -36,35 +36,48 @@
   --radius-control: 4px;
   --radius-key: 6px;
 
-  /* The title bar, flat across the sidebar and the detail, with the window's buttons centred in it. */
-  --titlebar-height: 32px;
-  --sidebar-width: 176px;
+  --sidebar-width: 232px;
 
   --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', system-ui, monospace;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
   /* Robert Penner's curve, approximated as a cubic Bézier. */
   --ease-in-out-quad: cubic-bezier(0.455, 0.03, 0.515, 0.955);
 }
 
+/* Dark by the system's setting, unless the viewer chose light; and dark when the viewer chose it. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --color-window: #221f24;
     --color-content: #2a272c;
     --color-box: #322e34;
     --color-raised: #3c3740;
     --color-border: #433d46;
-
     --color-text: #efe6e1;
     --color-text-secondary: #b3a6a8;
     --color-text-tertiary: #857a7e;
-
     --color-action: #f6b593;
     --color-on-action: #221f24;
     --color-learned: #b4bd8f;
     --color-mistake: #ec7a85;
     --color-due: #f2d16b;
-
     --color-key-edge: #1a181c;
   }
+}
+
+:root[data-theme='dark'] {
+  --color-window: #221f24;
+  --color-content: #2a272c;
+  --color-box: #322e34;
+  --color-raised: #3c3740;
+  --color-border: #433d46;
+  --color-text: #efe6e1;
+  --color-text-secondary: #b3a6a8;
+  --color-text-tertiary: #857a7e;
+  --color-action: #f6b593;
+  --color-on-action: #221f24;
+  --color-learned: #b4bd8f;
+  --color-mistake: #ec7a85;
+  --color-due: #f2d16b;
+  --color-key-edge: #1a181c;
 }

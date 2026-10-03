@@ -18,7 +18,7 @@ const slots = defineSlots<{
   <header class="heading">
     <slot name="leading" />
     <div class="text">
-      <h1 class="title truncate">{{ title }}</h1>
+      <h1 class="title">{{ title }}</h1>
       <p v-if="slots.meta" class="meta"><slot name="meta" /></p>
     </div>
     <slot name="action" />
@@ -28,7 +28,8 @@ const slots = defineSlots<{
 <style scoped>
 .heading {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
   gap: 10px;
   padding-bottom: 10px;
 }
@@ -40,7 +41,7 @@ const slots = defineSlots<{
 
 /* The screen's title. */
 .title {
-  font-size: 17px;
+  font-size: 24px;
   font-weight: 600;
   line-height: 1.25;
 }
@@ -48,6 +49,6 @@ const slots = defineSlots<{
 .meta {
   margin-top: 1px;
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: 14px;
 }
 </style>

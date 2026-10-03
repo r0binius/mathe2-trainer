@@ -136,6 +136,24 @@ export function partialRecord<K extends string, T>(
 }
 
 /**
+ * Decodes an object used as a dictionary: whatever its keys are, each property is decoded by
+ * `item`. Properties that don't decode are left out, so one bad entry doesn't lose the rest.
+ */
+export function dictionary<T>(item: Decoder<T>): Decoder<Readonly<Partial<Record<string, T>>>> {
+  return function decodeDictionary(input) {
+    return isRecord(input)
+      ? ok(
+          Object.fromEntries(
+            Object.entries(input).flatMap(([key, value]) =>
+              valueOf(item(value)).map((decoded) => [key, decoded] as const),
+            ),
+          ),
+        )
+      : fail('an object');
+  };
+}
+
+/**
  * Decodes with the first decoder that succeeds, such as for a union's members. If none does, the
  * failure that got furthest into the input is the most telling, so that one is reported.
  */

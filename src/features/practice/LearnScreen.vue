@@ -1,115 +1,101 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed } from 'vue';
 
-import BackButton from '@/components/BackButton.vue';
-import PageLayout from '@/components/PageLayout.vue';
+import BaseButton from '@/components/BaseButton.vue';
 import TextProgress from '@/components/TextProgress.vue';
-import { practiceItems } from '@/domain/practice/items';
+import { usePracticeSession } from '@/composables/usePracticeSession';
+import type { Deck, Topic } from '@/domain/content/types';
 import { learnPool, learnStrategy, stepOf } from '@/domain/practice/learn';
-import { setProgressOf } from '@/domain/progress/storedProgress';
-import type { SummaryContext } from '@/domain/progress/summary';
-import type { AppDefinition, ShortcutSet } from '@/domain/shortcuts/types';
-import { useText } from '@/i18n';
-import { toSet } from '@/routes';
+import { learningOf } from '@/domain/progress/summary';
+import { deckTitles } from '@/labels';
+import { toDeck, toTopic } from '@/routes';
+import { useProgressStore } from '@/stores/progress';
 
 import PracticeStage from './PracticeStage.vue';
-import { usePracticeScreen } from './usePracticeScreen';
 
-const props = defineProps<{
-  /** The app the set belongs to. */
-  app: AppDefinition;
-  /** The set to learn. */
-  set: ShortcutSet;
-  /** The layout, policy and stored progress the session starts from. */
-  context: SummaryContext;
+const { topic, deck } = defineProps<{
+  /** The topic whose deck is learned. */
+  topic: Topic;
+  /** The deck to learn. */
+  deck: Deck;
 }>();
 
-const router = useRouter();
-const text = useText();
-const target = { appId: props.app.id, setId: props.set.id, layout: props.context.layout };
+const emit = defineEmits<{
+  /** Learn the deck once more, with a fresh session. */
+  restart: [];
+}>();
 
-// The session starts from the progress as it is now, and owns it from then on.
-const [{ session, held, saveFailed }, { skip, forget }] = usePracticeScreen(
-  {
-    strategy: learnStrategy,
-    pool: learnPool(
-      practiceItems(props.app.id, props.set, props.context),
-      setProgressOf(props.context.progress, target),
-    ),
-    target,
-  },
-  {
-    context: () => props.context,
-    leave: () => {
-      void router.push(toSet(props.app.id, props.set.id));
-    },
-  },
+const store = useProgressStore();
+// The pool starts from the progress at this moment; the session then owns it.
+const practice = usePracticeSession(
+  learnStrategy,
+  learnPool(deck.items, learningOf(deck.items, store.progress)),
 );
 
-const steps = computed(() => session.value.pool.entries.map(stepOf));
-const learned = computed(() => steps.value.filter((step) => step === 'learned').length);
-
-/** The learned count to announce, while its message shows. */
-const announced = ref<number>();
-
-watch(learned, (count) => {
-  announced.value = count;
-});
+const entries = computed(() => practice.session.value.pool.entries);
+const steps = computed(() => entries.value.map(stepOf));
+const learned = computed(() => entries.value.filter(({ stage }) => stage === 'learned').length);
 </script>
 
 <template>
-  <PageLayout>
-    <template #start>
-      <BackButton :to="toSet(app.id, set.id)" :label="text.ui('learn.back')" />
-    </template>
-
+  <div class="screen">
     <PracticeStage
-      :app-id="app.id"
-      :session="session"
-      :held="held"
-      :save-failed="saveFailed"
+      v-if="practice.session.value.phase !== 'finished'"
+      :practice="practice"
       :steps="steps"
-      :context="[text.appTitle(app), text.app(app.id, set.title), text.ui('learn.title')]"
-      @skip="skip"
-      @forget="forget"
+      :context="`${topic.title} · ${deckTitles[deck.id]} · Lernen`"
+      :grades="['again', 'good']"
+      :back="toDeck(topic.id, deck.id)"
     >
       <template #progress>
-        <TextProgress :value="learned" :max="steps.length" />
-        <span
-          v-if="announced !== undefined"
-          :key="announced"
-          class="announcement"
-          @animationend="announced = undefined"
-        >
-          {{ text.ui('learn.mastered', { n: announced }) }}
-        </span>
+        <TextProgress :value="learned" :max="entries.length" /> gelernt
       </template>
     </PracticeStage>
-  </PageLayout>
+
+    <div v-else class="done">
+      <p class="caption">{{ topic.title }} · {{ deckTitles[deck.id] }}</p>
+      <h1 class="headline">Geschafft.</h1>
+      <p class="text">
+        {{ learned }} von {{ entries.length }} sitzen. Was du heute gewusst hast, legt dir der
+        Trainer in ein paar Tagen wieder vor – kurz bevor du es vergisst.
+      </p>
+      <div class="actions">
+        <RouterLink v-slot="{ navigate }" :to="toTopic(topic.id)" custom>
+          <BaseButton variant="accent" size="large" @click="navigate">Zum Kapitel</BaseButton>
+        </RouterLink>
+        <BaseButton size="large" @click="emit('restart')">Noch einmal lernen</BaseButton>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-/* Shows for three seconds, then fades; its end removes it. */
-.announcement {
-  animation: announce 3s both;
+.screen {
+  min-height: 100%;
 }
 
-@keyframes announce {
-  0% {
-    transform: translateX(-8px);
-    opacity: 0;
-  }
+.done {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 520px;
+  margin: 0 auto;
+  padding-top: 12vh;
+}
 
-  7%,
-  93% {
-    transform: none;
-    opacity: 1;
-  }
+.headline {
+  font-size: 32px;
+  font-weight: 500;
+}
 
-  100% {
-    transform: translateX(8px);
-    opacity: 0;
-  }
+.text {
+  color: var(--color-text-secondary);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
 }
 </style>

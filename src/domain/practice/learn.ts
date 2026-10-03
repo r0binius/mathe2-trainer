@@ -1,51 +1,44 @@
-import type { ShortcutId } from '../shortcuts/shortcutId';
-import type {
-  Attempt,
-  PracticeItem,
-  PracticeStrategy,
-  Presentation,
-  ProgressEffect,
-} from './session';
-import { testedEffect } from './session';
+import type { Item, ItemId } from '../content/types';
+import type { Attempt, PracticeStrategy, Presentation, ProgressEffect } from './session';
+import { failed, testedEffects } from './session';
 import type { LearnSnapshot } from './snapshot';
 
 /**
- * How far a shortcut got: seen with its keys (trained), or recalled without them
+ * How far an item got: seen with its answer or tested once (trained), or recalled
  * {@link recallsToLearn} times in a row (learned).
  */
 export type LearnStage = 'unseen' | 'trained' | 'learned';
 
-/** How far a shortcut got as a learner sees it: a trained one recalled once is on its way. */
+/** How far an item got as a learner sees it: a trained one recalled once is on its way. */
 export type LearnStep = 'unseen' | 'trained' | 'recalled' | 'learned';
 
 /**
- * How many correct recalls in a row, with other shortcuts in between, make a shortcut learned.
- * @see §2 of `docs/specs/science-backed-training.md`
+ * How many correct recalls in a row, with other items in between, make an item learned.
  */
 export const recallsToLearn = 2;
 
-/** A shortcut of the set being learned. */
+/** An item of the set being learned. */
 export type LearnEntry = {
-  readonly item: PracticeItem;
+  readonly item: Item;
   readonly stage: LearnStage;
   /**
    * Correct recalls in a row in this session; a mistake starts over. Only the session counts
-   * them: a shortcut recalled fewer than {@link recallsToLearn} times is saved as trained.
+   * them: an item recalled fewer than {@link recallsToLearn} times is saved as trained.
    */
   readonly recalls: number;
   /** Left out for the rest of this session. It keeps its stage, so a learned one stays learned. */
   readonly skipped: boolean;
 };
 
-/** The pool of a learning session: the set's shortcuts in a stable order. */
+/** The pool of a learning session: the set's items in a stable order. */
 export type LearnPool = {
   readonly entries: readonly LearnEntry[];
-  /** Shortcuts whose first test of the session was reported. Later tests don't count. */
-  readonly tested: readonly ShortcutId[];
+  /** Items whose first test of the session was reported. Later tests don't count. */
+  readonly tested: readonly ItemId[];
 };
 
 /**
- * How likely each stage is to be picked next, as in the old app: mostly new shortcuts, now and
+ * How likely each stage is to be picked next, as in the old app: mostly new items, now and
  * then a trained one, and rarely a learned one.
  */
 const stageWeights: readonly (readonly [LearnStage, number])[] = [
@@ -61,15 +54,14 @@ type Bucket = {
 
 /**
  * Starts a learning session from the progress of earlier ones (restoring a {@link LearnSnapshot}):
- * learned shortcuts start as learned and trained ones as trained, so they come as tests. When every
- * shortcut is already learned, the set was completed and learning it again starts from scratch.
+ * learned items start as learned and trained ones as trained, so they come as tests. When every
+ * item is already learned, the set was completed and learning it again starts from scratch.
  */
 export function learnPool(
-  items: readonly PracticeItem[],
-  progress: Pick<LearnSnapshot, 'learned' | 'trained'> | undefined,
+  items: readonly Item[],
+  progress: Pick<LearnSnapshot, 'learned' | 'trained'>,
 ): LearnPool {
-  const learned = progress?.learned ?? [];
-  const trained = progress?.trained ?? [];
+  const { learned, trained } = progress;
   const completed = items.every(({ id }) => learned.includes(id));
 
   return {
@@ -86,24 +78,22 @@ export function learnPool(
 /** Captures what the next session needs from this one (the Memento). */
 export function snapshotLearning({ entries }: LearnPool): LearnSnapshot {
   return {
-    shortcuts: entries.map(({ item }) => item.id),
+    items: entries.map(({ item }) => item.id),
     learned: entries.filter(({ stage }) => stage === 'learned').map(({ item }) => item.id),
     trained: entries.filter(({ stage }) => stage === 'trained').map(({ item }) => item.id),
-    complete: entries.every(({ stage }) => stage === 'learned'),
   };
 }
 
-/** How far a shortcut got, telling a trained one that was recalled once from one that wasn't. */
+/** How far an item got, telling a trained one that was recalled once from one that wasn't. */
 export function stepOf({ stage, recalls }: LearnEntry): LearnStep {
   return stage === 'trained' && recalls > 0 ? 'recalled' : stage;
 }
 
 /**
- * Learning a set: new shortcuts are shown with their keys (training), the others are tested until
+ * Learning a set: new items are shown with their statement (training), the others are tested until
  * they're recalled {@link recallsToLearn} times in a row, and the session ends once every
- * shortcut that wasn't skipped is learned. Reports the first test of
- * each shortcut, and the progress whenever a shortcut changes its stage.
- * @see §8 of `docs/legacy-architecture.md`
+ * item that wasn't skipped is learned. Reports the first test of
+ * each item, and the progress whenever an item changes its stage.
  */
 export const learnStrategy: PracticeStrategy<LearnPool> = {
   next: (pool, { roll, previous }) => {
@@ -128,7 +118,7 @@ export const learnStrategy: PracticeStrategy<LearnPool> = {
     return {
       pool: next,
       effects: [
-        ...(firstTest ? [testedEffect(attempt)] : []),
+        ...(firstTest ? testedEffects(attempt) : []),
         ...progressChange(pool, next, attempt),
       ],
     };
@@ -144,12 +134,12 @@ export const learnStrategy: PracticeStrategy<LearnPool> = {
 };
 
 /**
- * A shortcut after it was answered: a correct recall counts towards learning it, and anything
+ * An item after it was answered: a correct recall counts towards learning it, and anything
  * else (training, or a test with a mistake) leaves it trained with the count started over. A
- * shortcut learned in an earlier session stays learned when it's recalled.
+ * item learned in an earlier session stays learned when it's recalled.
  */
-function afterAttempt(entry: LearnEntry, { mode, failed }: Attempt): LearnEntry {
-  if (mode === 'training' || failed) {
+function afterAttempt(entry: LearnEntry, attempt: Attempt): LearnEntry {
+  if (attempt.mode === 'training' || failed(attempt)) {
     return { ...entry, stage: 'trained', recalls: 0 };
   }
 
@@ -159,7 +149,7 @@ function afterAttempt(entry: LearnEntry, { mode, failed }: Attempt): LearnEntry 
   return { ...entry, stage: learned ? 'learned' : 'trained', recalls };
 }
 
-/** A `learningChanged` effect if the attempt moved its shortcut to another stage. */
+/** A `learningChanged` effect if the attempt moved its item to another stage. */
 function progressChange(
   before: LearnPool,
   after: LearnPool,
@@ -170,15 +160,11 @@ function progressChange(
     : [{ type: 'learningChanged', snapshot: snapshotLearning(after) }];
 }
 
-function stageIn({ entries }: LearnPool, item: PracticeItem): LearnStage | undefined {
+function stageIn({ entries }: LearnPool, item: Item): LearnStage | undefined {
   return entries.find((entry) => entry.item.id === item.id)?.stage;
 }
 
-function stageFrom(
-  id: ShortcutId,
-  learned: readonly ShortcutId[],
-  trained: readonly ShortcutId[],
-): LearnStage {
+function stageFrom(id: ItemId, learned: readonly ItemId[], trained: readonly ItemId[]): LearnStage {
   if (learned.includes(id)) {
     return 'learned';
   }
@@ -227,7 +213,7 @@ function present({ entries }: Bucket, share: number): Presentation | undefined {
 
 function updateEntry(
   entries: readonly LearnEntry[],
-  item: PracticeItem,
+  item: Item,
   update: (entry: LearnEntry) => LearnEntry,
 ): readonly LearnEntry[] {
   return entries.map((entry) => (entry.item.id === item.id ? update(entry) : entry));

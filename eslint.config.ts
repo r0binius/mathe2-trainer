@@ -17,7 +17,7 @@ import pluginVue from 'eslint-plugin-vue';
 //   no mutation except of Vue refs, no loops
 
 const frameworkImports = {
-  group: ['vue', 'vue-router', 'pinia', '@tauri-apps/*'],
+  group: ['vue', 'vue-router', 'pinia'],
   message: 'The domain is framework-free. Pass data in, or move this code to the shell.',
 };
 
@@ -38,7 +38,7 @@ const domainImports = [
 ];
 
 const config: ReturnType<typeof withVueTs> = withVueTs(
-  globalIgnores(['dist/**', 'src-tauri/**']),
+  globalIgnores(['dist/**']),
 
   js.configs.recommended,
   pluginVue.configs['flat/recommended'],
@@ -156,25 +156,6 @@ const config: ReturnType<typeof withVueTs> = withVueTs(
       ...functional.configs.noExceptions.rules,
       'functional/immutable-data': 'error',
       'functional/no-this-expressions': 'error',
-    },
-  },
-
-  {
-    name: 'mouseless/boundaries',
-    files: ['src/**/*.{ts,vue}'],
-    ignores: ['src/platform/**'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['@tauri-apps/*'],
-              message: 'Only src/platform talks to Tauri. Import the platform facade instead.',
-            },
-          ],
-        },
-      ],
     },
   },
 

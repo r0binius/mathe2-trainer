@@ -1,39 +1,32 @@
 <script setup lang="ts" generic="Pool">
-import { computed, ref, watch } from 'vue';
+import { computed, shallowRef, watch } from 'vue';
+import type { RouteLocationRaw } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import BaseButton from '@/components/BaseButton.vue';
-import KeyCap from '@/components/KeyCap.vue';
-import SkipButton from '@/components/SkipButton.vue';
-import { useKeyLabels } from '@/composables/useKeyLabels';
-import type { KeyCombination } from '@/domain/keyboard/combination';
+import KeyHint from '@/components/KeyHint.vue';
+import RichText from '@/components/RichText.vue';
+import TutorPanel from '@/components/TutorPanel.vue';
+import { useHotkeys } from '@/composables/useHotkeys';
+import type { PracticeSession } from '@/composables/usePracticeSession';
 import type { LearnStep } from '@/domain/practice/learn';
-import type { PracticeItem, Session } from '@/domain/practice/session';
-import { useText } from '@/i18n';
+import type { Grade } from '@/domain/scheduling/scheduler';
+import { kindLabels, kindPrompts } from '@/labels';
+import { useProgressStore } from '@/stores/progress';
 
-import { announcementOf } from './announcement';
-import { keyCapsOf } from './keyCaps';
 import StageBar from './StageBar.vue';
 
-const props = defineProps<{
-  /** The app whose shortcuts are practiced, for their texts. */
-  appId: string;
-  /** The practice session to show. */
-  session: Session<Pool>;
-  /** The keys held right now. */
-  held: KeyCombination;
-  /** Whether a result couldn't be saved, shown as a notice. */
-  saveFailed: boolean;
-  /** How far each shortcut of the session got, shown as a bar on top. */
+const { practice, grades, back } = defineProps<{
+  /** The running session and what can be done in it. */
+  practice: PracticeSession<Pool>;
+  /** How far each item of the session got, shown as a bar on top. */
   steps: readonly LearnStep[];
-  /** Where the session is, such as the app, set and mode, shown as a label above the bar. */
-  context: readonly string[];
-}>();
-
-const emit = defineEmits<{
-  /** Skip was clicked. */
-  skip: [];
-  /** Forgot was clicked: the shortcut being tested wasn't recalled. */
-  forget: [];
+  /** Where the session is, such as the topic, deck and mode. */
+  context: string;
+  /** The grades the learner can give themselves: two while learning, four while reviewing. */
+  grades: readonly Grade[];
+  /** Where Escape leads. */
+  back: RouteLocationRaw;
 }>();
 
 defineSlots<{
@@ -41,100 +34,210 @@ defineSlots<{
   progress: () => unknown;
 }>();
 
-const text = useText();
-const labelOf = useKeyLabels();
-const keyCaps = computed(() =>
-  props.session.phase === 'finished' ? [] : keyCapsOf(props.session, props.held),
-);
+const store = useProgressStore();
+const router = useRouter();
+const session = computed(() => practice.session.value);
 
-/** Whether a test is waiting for its keys, which can be forgotten. */
-const canForget = computed(
-  () =>
-    props.session.phase === 'presenting' &&
-    props.session.mode === 'testing' &&
-    props.session.failure === undefined,
-);
-
-/** What VoiceOver announces for the current state, such as the shortcut and its keys. */
-const announcement = computed(() => {
-  const announced = announcementOf(props.session);
-
-  return announced === undefined
-    ? ''
-    : text.ui(`practice.announce.${announced.kind}`, {
-        title: text.app(props.appId, announced.item.title),
-        keys: spokenKeys(announced.item),
-      });
-});
-
-/** The keys as VoiceOver reads them: by their keycap names where they have one ("Cmd + K"). */
-function spokenKeys({ keys }: PracticeItem): string {
-  return keys
-    .map((key) => {
-      const label = labelOf(key);
-
-      return label.name ?? label.symbol;
-    })
-    .join(' + ');
-}
-
-/** Plays the shake after a wrong answer; the animation's end clears it. */
-const shaking = ref(false);
+/** What the learner wrote down before revealing the answer, and whether a hint is shown. */
+const answer = shallowRef('');
+const hinted = shallowRef(false);
 
 watch(
-  () => (props.session.phase === 'presenting' ? props.session.misses : 0),
-  (misses) => {
-    shaking.value = misses > 0;
+  () => (session.value.phase === 'finished' ? 0 : session.value.presentation),
+  () => {
+    answer.value = '';
+    hinted.value = false;
   },
 );
+
+const gradeLabels: Readonly<Record<Grade, string>> = {
+  again: 'Nicht gewusst',
+  hard: 'Mit Mühe',
+  good: 'Gewusst',
+  easy: 'Sofort gewusst',
+};
+
+/** What the current state waits for, which decides the buttons and the keys. */
+const waitsFor = computed(() => {
+  const current = session.value;
+
+  if (current.phase === 'finished') {
+    return 'nothing';
+  }
+  if (current.phase === 'revealed') {
+    return current.judgedCorrectly === undefined ? 'grade' : 'continue';
+  }
+  if (current.mode === 'training') {
+    return 'continue';
+  }
+
+  return current.item.kind === 'claim' ? 'verdict' : 'reveal';
+});
+
+function gradeAt(index: number): (() => void) | undefined {
+  const grade = grades[index];
+
+  return waitsFor.value === 'grade' && grade !== undefined
+    ? () => {
+        practice.grade(grade);
+      }
+    : undefined;
+}
+
+function judgeAs(holds: boolean): (() => void) | undefined {
+  return waitsFor.value === 'verdict'
+    ? () => {
+        practice.judge(holds);
+      }
+    : undefined;
+}
+
+function primary(): void {
+  if (waitsFor.value === 'reveal') {
+    practice.reveal();
+  } else if (waitsFor.value === 'continue') {
+    practice.proceed();
+  }
+}
+
+useHotkeys(() => ({
+  Space: primary,
+  Enter: primary,
+  w: judgeAs(true),
+  f: judgeAs(false),
+  t: () => {
+    hinted.value = true;
+  },
+  s: practice.skip,
+  '1': gradeAt(0),
+  '2': gradeAt(1),
+  '3': gradeAt(2),
+  '4': gradeAt(3),
+  Escape: () => {
+    void router.push(back);
+  },
+}));
 </script>
 
 <template>
   <div class="practice">
-    <p class="visually-hidden" aria-live="polite">{{ announcement }}</p>
-
-    <p class="context caption">{{ context.join(' · ') }}</p>
+    <p class="context caption">{{ context }}</p>
     <StageBar :steps="steps" />
 
-    <Transition name="shortcut" mode="out-in">
-      <div
-        v-if="session.phase !== 'finished'"
-        :key="session.presentation"
-        class="shortcut"
-        :class="{ shaking }"
-        @animationend="shaking = false"
-      >
-        <h1 class="title">{{ text.app(appId, session.item.title) }}</h1>
-        <p v-if="session.item.description !== undefined" class="description">
-          {{ text.app(appId, session.item.description) }}
+    <Transition name="item" mode="out-in">
+      <div v-if="session.phase !== 'finished'" :key="session.presentation" class="item">
+        <p class="kind caption">
+          {{ kindLabels[session.item.kind] }}
+          <template v-if="session.phase === 'asking' && session.mode === 'training'">
+            – neu, einprägen
+          </template>
         </p>
-        <!-- Announced instead: the key caps alone would read as symbols. -->
-        <div class="keys" aria-hidden="true">
-          <div v-for="(row, index) in keyCaps" :key="index" class="row">
-            <KeyCap
-              v-for="cap in row"
-              :key="cap.key"
-              :label="labelOf(cap.key)"
-              :hidden="cap.hidden"
-              :pressed="cap.pressed"
-              :result="cap.result"
+
+        <!-- A definition or theorem: its name asks, its statement answers. -->
+        <template v-if="session.item.kind === 'definition' || session.item.kind === 'theorem'">
+          <h1 class="title">{{ session.item.title }}</h1>
+          <template v-if="waitsFor === 'reveal'">
+            <p class="prompt">{{ kindPrompts[session.item.kind] }}</p>
+            <textarea
+              v-model="answer"
+              class="answer"
+              rows="3"
+              placeholder="Sag es dir laut vor oder schreib es auf – hier oder auf Papier."
+              aria-label="Deine Antwort"
             />
+          </template>
+          <div v-else class="solution">
+            <RichText :source="session.item.statement" />
+            <aside v-if="session.item.note !== undefined" class="note">
+              <RichText :source="session.item.note" />
+            </aside>
+            <p v-if="session.item.ref !== undefined" class="ref">Skript: {{ session.item.ref }}</p>
           </div>
+        </template>
+
+        <!-- A claim: judged true or false, then its reason. -->
+        <template v-else-if="session.item.kind === 'claim'">
+          <RichText class="claim" :source="session.item.statement" />
+          <div v-if="session.phase === 'revealed'" class="solution">
+            <p class="verdict" :class="session.judgedCorrectly === true ? 'right' : 'wrong'">
+              {{ session.judgedCorrectly === true ? 'Richtig' : 'Leider nicht' }} – die Aussage ist
+              {{ session.item.holds ? 'wahr' : 'falsch' }}.
+            </p>
+            <RichText :source="session.item.reason" />
+            <p v-if="session.item.ref !== undefined" class="ref">Skript: {{ session.item.ref }}</p>
+          </div>
+        </template>
+
+        <!-- A problem: solved on paper, then compared with the worked solution. -->
+        <template v-else-if="session.item.kind === 'problem'">
+          <h1 class="title small">{{ session.item.title }}</h1>
+          <RichText class="task" :source="session.item.task" />
+          <aside v-if="hinted && session.item.hint !== undefined" class="note">
+            <RichText :source="session.item.hint" />
+          </aside>
+          <div v-if="session.phase === 'revealed'" class="solution">
+            <h2 class="caption">Lösung</h2>
+            <RichText :source="session.item.solution" />
+          </div>
+          <p class="ref">
+            {{ session.item.points }} Punkte<template v-if="session.item.source !== undefined"
+              >, {{ session.item.source }}</template
+            >
+          </p>
+        </template>
+
+        <div class="actions">
+          <template v-if="waitsFor === 'verdict'">
+            <BaseButton size="large" @click="practice.judge(true)">
+              Wahr <KeyHint label="W" />
+            </BaseButton>
+            <BaseButton size="large" @click="practice.judge(false)">
+              Falsch <KeyHint label="F" />
+            </BaseButton>
+          </template>
+          <template v-else-if="waitsFor === 'reveal'">
+            <BaseButton
+              v-if="session.item.kind === 'problem' && session.item.hint !== undefined && !hinted"
+              size="large"
+              @click="hinted = true"
+            >
+              Tipp <KeyHint label="T" />
+            </BaseButton>
+            <BaseButton variant="accent" size="large" @click="practice.reveal()">
+              {{ session.item.kind === 'problem' ? 'Lösung zeigen' : 'Aufdecken' }}
+              <KeyHint label="Leertaste" />
+            </BaseButton>
+          </template>
+          <template v-else-if="waitsFor === 'grade'">
+            <BaseButton
+              v-for="(grade, index) in grades"
+              :key="grade"
+              size="large"
+              :variant="grade === 'again' ? 'danger' : 'neutral'"
+              @click="practice.grade(grade)"
+            >
+              {{ gradeLabels[grade] }} <KeyHint :label="String(index + 1)" />
+            </BaseButton>
+          </template>
+          <BaseButton v-else variant="accent" size="large" @click="practice.proceed()">
+            Weiter <KeyHint label="Leertaste" />
+          </BaseButton>
         </div>
+
+        <TutorPanel v-if="session.phase === 'revealed'" :item="session.item" :answer="answer" />
       </div>
     </Transition>
 
     <footer class="footer">
       <div class="progress">
         <slot name="progress" />
-        <span v-if="saveFailed" class="save-failed">{{ text.ui('practice.saveFailed') }}</span>
+        <span v-if="store.saveFailed" class="save-failed">
+          Fortschritt konnte nicht gespeichert werden
+        </span>
       </div>
-      <div class="actions">
-        <BaseButton v-if="canForget" @click="emit('forget')">
-          {{ text.ui('practice.forgot') }}
-        </BaseButton>
-        <SkipButton @click="emit('skip')">{{ text.ui('practice.skip') }}</SkipButton>
-      </div>
+      <BaseButton variant="toolbar" icon="skip" @click="practice.skip()">
+        Überspringen <KeyHint label="S" />
+      </BaseButton>
     </footer>
   </div>
 </template>
@@ -143,51 +246,98 @@ watch(
 .practice {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  text-align: center;
+  gap: 10px;
+  min-height: 100%;
 }
 
 .context {
-  margin-bottom: 8px;
+  text-align: center;
 }
 
-.shortcut {
+.item {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 24px 0;
 }
 
-/* A short, damped shake after a wrong answer. */
-.shaking {
-  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+.kind {
+  color: var(--color-action);
 }
 
 /* The prompt: the stage's one large text. */
 .title {
-  font-size: 30px;
+  font-size: clamp(22px, 4.5vw, 30px);
   font-weight: 500;
   letter-spacing: -0.01em;
   line-height: 1.2;
+
+  &.small {
+    font-size: 20px;
+  }
 }
 
-.description {
-  max-width: 400px;
-  margin: 8px auto 0;
+.prompt {
   color: var(--color-text-secondary);
-  font-size: 14px;
 }
 
-.keys {
+.claim {
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.answer {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-box);
+  background-color: var(--color-box);
+  color: inherit;
+  font: inherit;
+  resize: vertical;
+}
+
+.solution {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 36px;
-  margin-top: 32px;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-box);
+  background-color: var(--color-box);
 }
 
-.row {
-  display: inline-flex;
+.note {
+  padding-left: 10px;
+  border-left: 2px solid var(--color-due);
+  color: var(--color-text-secondary);
+  font-size: 0.93em;
+}
+
+.ref {
+  color: var(--color-text-tertiary);
+  font-size: 12px;
+}
+
+.verdict {
+  font-weight: 600;
+
+  &.right {
+    color: var(--color-learned);
+  }
+
+  &.wrong {
+    color: var(--color-mistake);
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -196,75 +346,45 @@ watch(
   flex: none;
   align-items: center;
   justify-content: space-between;
-  min-height: 28px;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
 }
 
 .progress {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   color: var(--color-text-secondary);
-  font-size: 12px;
-}
-
-.actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  font-size: 13px;
 }
 
 .save-failed {
   color: var(--color-mistake);
 }
 
-.shortcut-enter-active,
-.shortcut-leave-active {
+.item-enter-active,
+.item-leave-active {
   transition:
-    transform 0.2s var(--ease-in-out-quad),
-    opacity 0.2s var(--ease-in-out-quad);
+    transform 0.18s var(--ease-in-out-quad),
+    opacity 0.18s var(--ease-in-out-quad);
 }
 
-.shortcut-enter-from {
+.item-enter-from {
   transform: translateX(10px);
   opacity: 0;
 }
 
-.shortcut-leave-to {
+.item-leave-to {
   transform: translateX(-10px);
   opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shaking {
-    animation: none;
-  }
-
-  .shortcut-enter-active,
-  .shortcut-leave-active {
+  .item-enter-active,
+  .item-leave-active {
     transition: none;
-  }
-}
-
-@keyframes shake {
-  10%,
-  90% {
-    transform: translate3d(-1px, 0, 0);
-  }
-
-  20%,
-  80% {
-    transform: translate3d(2px, 0, 0);
-  }
-
-  30%,
-  50%,
-  70% {
-    transform: translate3d(-4px, 0, 0);
-  }
-
-  40%,
-  60% {
-    transform: translate3d(4px, 0, 0);
   }
 }
 </style>

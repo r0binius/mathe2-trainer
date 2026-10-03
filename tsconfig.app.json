@@ -16,8 +16,6 @@
   "vueCompilerOptions": {
     // Type-check templates as strictly as scripts: unknown components, props,
     // events and directives are errors.
-    "strictTemplates": true,
-    // The one data attribute templates use: Tauri makes an element with it drag the window.
-    "dataAttributes": ["data-tauri-drag-region"]
+    "strictTemplates": true
   }
 }

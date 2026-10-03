@@ -1,48 +1,40 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-import { useText } from '@/i18n';
-
 const { activity } = defineProps<{
-  /** Reviews per day, oldest first, today last. */
+  /** Tests per day, oldest first, today last. */
   activity: readonly number[];
 }>();
 
-const text = useText();
-
-const total = computed(() => activity.reduce((sum, reviews) => sum + reviews, 0));
+const total = computed(() => activity.reduce((sum, tests) => sum + tests, 0));
 const peak = computed(() => Math.max(0, ...activity));
 
-/** Each day's bar: its height as a share of the peak, and what it says on hover and to VoiceOver. */
+/** Each day's bar: its height as a share of the peak. Only the most recent peak carries its number. */
 const days = computed(() =>
-  activity.map((reviews, index) => ({
-    reviews,
-    height: peak.value === 0 ? 0 : reviews / peak.value,
-    isPeak: reviews > 0 && reviews === peak.value && index === activity.lastIndexOf(peak.value),
-    label: text.ui('overview.reviewsOn', {
-      when: text.inDays(index - activity.length + 1),
-      n: reviews,
-    }),
+  activity.map((tests, index) => ({
+    tests,
+    height: peak.value === 0 ? 0 : tests / peak.value,
+    isPeak: tests > 0 && tests === peak.value && index === activity.lastIndexOf(peak.value),
   })),
 );
 </script>
 
 <template>
   <figure class="chart">
-    <!-- One bar per day on a shared baseline; only the most recent peak carries its number. -->
-    <div class="bars" role="img" :aria-label="text.count('overview.activityLabel', total)">
-      <div v-for="(day, index) in days" :key="index" class="day" :title="day.label">
-        <span v-if="day.isPeak" class="peak">{{ day.reviews }}</span>
-        <div v-if="day.reviews > 0" class="bar" :style="{ height: `${day.height * 100}%` }" />
+    <div
+      class="bars"
+      role="img"
+      :aria-label="`${total} Antworten in den letzten ${activity.length} Tagen`"
+    >
+      <div v-for="(day, index) in days" :key="index" class="day">
+        <span v-if="day.isPeak" class="peak">{{ day.tests }}</span>
+        <div v-if="day.tests > 0" class="bar" :style="{ height: `${day.height * 100}%` }" />
       </div>
     </div>
     <figcaption class="axis" aria-hidden="true">
-      <span>{{ text.inDays(1 - activity.length) }}</span>
-      <span>{{ text.inDays(0) }}</span>
+      <span>vor {{ activity.length - 1 }} Tagen</span>
+      <span>heute</span>
     </figcaption>
-    <ol class="visually-hidden">
-      <li v-for="(day, index) in days" :key="index">{{ day.label }}</li>
-    </ol>
   </figure>
 </template>
 
@@ -50,9 +42,9 @@ const days = computed(() =>
 .bars {
   display: flex;
   align-items: flex-end;
-  gap: 2px;
-  height: 56px;
-  padding-top: 14px;
+  gap: 3px;
+  height: 64px;
+  padding-top: 16px;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -68,13 +60,12 @@ const days = computed(() =>
 
 .bar {
   width: 100%;
-  max-width: 24px;
+  max-width: 28px;
   min-height: 2px;
   border-radius: 3px 3px 0 0;
   background-color: var(--color-action);
 }
 
-/* The peak's number sits on its cap, in the text colour, not the bar's. */
 .peak {
   position: absolute;
   bottom: 100%;
@@ -89,6 +80,6 @@ const days = computed(() =>
   margin-top: 4px;
   color: var(--color-text-tertiary);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
 }
 </style>

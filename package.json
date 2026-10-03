@@ -1,42 +1,32 @@
 {
-  "name": "mouseless",
+  "name": "mathe2-trainer",
   "private": true,
   "type": "module",
   "scripts": {
     "prepare": "lefthook install",
     "dev": "vite",
     "build": "vue-tsc --build && vite build",
-    "tauri": "tauri",
     "typecheck": "vue-tsc --build --force",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "rust:format": "cargo fmt --manifest-path src-tauri/Cargo.toml",
-    "rust:format:check": "cargo fmt --manifest-path src-tauri/Cargo.toml --check",
-    "rust:lint": "cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets --locked -- -D warnings",
-    "rust:test": "cargo test --manifest-path src-tauri/Cargo.toml --locked",
-    "rust:audit": "cargo deny --manifest-path src-tauri/Cargo.toml --locked check",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm rust:format:check && pnpm rust:lint && pnpm rust:test"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "@fontsource/ibm-plex-sans": "^5.3.0",
-    "@tauri-apps/api": "^2.12.0",
-    "@tauri-apps/plugin-log": "~2.10.0",
+    "mathjax-full": "^3.2.1",
     "pinia": "^4.0.3",
     "ts-fsrs": "^5.4.2",
     "vue": "^3.5.43",
-    "vue-i18n": "^11.4.12",
     "vue-router": "^5.3.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.3",
     "@eslint/js": "^10.0.1",
-    "@tauri-apps/cli": "^2.12.0",
     "@types/node": "^26.6.2",
     "@vitejs/plugin-vue": "^6.0.9",
     "@vue/eslint-config-prettier": "^10.2.0",
@@ -52,10 +42,11 @@
     "prettier": "^3.9.9",
     "typescript": "~6.0.3",
     "vite": "^8.3.1",
+    "vite-plugin-singlefile": "^2.3.3",
     "vitest": "^5.0.2",
     "vue-tsc": "^3.3.11"
   },
-  "description": "Keyboard shortcut training and look-up.",
+  "description": "Exam trainer for Mathematik 2: definitions, theorems, true-or-false and problems, with spaced repetition.",
   "license": "GPL-3.0-or-later",
   "packageManager": "pnpm@12.6.0",
   "engines": {
