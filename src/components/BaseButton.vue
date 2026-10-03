@@ -2,7 +2,12 @@
 import BaseIcon from './BaseIcon.vue';
 import type { IconName } from './icons';
 
-const { variant = 'neutral', size = 'regular' } = defineProps<{
+const {
+  variant = 'neutral',
+  size = 'regular',
+  // eslint-disable-next-line @typescript-eslint/no-useless-default-assignment -- not useless in Vue: without a default, an absent boolean prop is cast to `false`, and `aria-pressed="false"` makes every button a toggle, which VoiceOver announces as a checkbox.
+  pressed = undefined,
+} = defineProps<{
   /** An icon before the label, or instead of one. */
   icon?: IconName;
   /** What an icon-only button does, for VoiceOver and as its tooltip. */
