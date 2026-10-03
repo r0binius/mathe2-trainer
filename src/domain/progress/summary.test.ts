@@ -122,6 +122,12 @@ describe('summarizeApp', () => {
     expect(summarizeApp(app, contextWith(progress))).toMatchObject({ learned: 2, practicedAt: 9 });
   });
 
+  it('counts what a set made at runtime learned too, such as Your commands', () => {
+    const progress = { sets: [record('your-commands', ['app/Meta+f'], 7)], cards: [] };
+
+    expect(summarizeApp(app, contextWith(progress))).toMatchObject({ learned: 1, practicedAt: 7 });
+  });
+
   it("counts the layout's due cards of the app that a review would offer", () => {
     const cards = [
       card('app/Meta+f', endOfToday - 1),

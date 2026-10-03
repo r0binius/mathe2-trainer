@@ -42,11 +42,23 @@ describe('findAppByBundleId', () => {
 
 describe('findSet', () => {
   it('finds a set together with its app', () => {
-    expect(findSet(apps, 'notes', 'basics')).toStrictEqual({ app: notes, set: basics });
+    expect(findSet(apps, { appId: 'notes', setId: 'basics' }, () => [])).toStrictEqual({
+      app: notes,
+      set: basics,
+    });
+  });
+
+  it('finds a set made at runtime, with the app as the data defines it', () => {
+    const yours = { id: 'your-commands', title: 'yourCommands.title', shortcuts: [] };
+
+    expect(findSet(apps, { appId: 'notes', setId: 'your-commands' }, () => [yours])).toStrictEqual({
+      app: notes,
+      set: yours,
+    });
   });
 
   it('finds nothing when the app or the set is unknown', () => {
-    expect(findSet(apps, 'mail', 'basics')).toBeUndefined();
-    expect(findSet(apps, 'notes', 'formats')).toBeUndefined();
+    expect(findSet(apps, { appId: 'mail', setId: 'basics' }, () => [])).toBeUndefined();
+    expect(findSet(apps, { appId: 'notes', setId: 'formats' }, () => [])).toBeUndefined();
   });
 });

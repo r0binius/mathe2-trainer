@@ -65,6 +65,15 @@ describe('reconcileProgress', () => {
     expect(reconcileProgress({ sets: gone, cards: [] }, apps).sets).toStrictEqual([]);
   });
 
+  it("keeps Your commands' progress, of any of the app's shortcuts still in the data", () => {
+    const yours = record('your-commands', ['app/Meta+f', 'app/Meta+s', 'app/Meta+g']);
+    const progress = { sets: [yours, { ...yours, appId: 'removedApp' }], cards: [] };
+
+    expect(reconcileProgress(progress, apps).sets).toStrictEqual([
+      { ...yours, progress: { ...yours.progress, learned: ['app/Meta+f', 'app/Meta+s'] } },
+    ]);
+  });
+
   it('drops learned shortcuts that are no longer in their set, keeping the rest of the record', () => {
     const progress = {
       sets: [record('basics', ['app/Meta+f', 'app/Meta+g', 'app/Meta+s'])],

@@ -25,8 +25,10 @@ function propsOf(router: Router): unknown {
   return typeof props === 'function' ? props(route) : props;
 }
 
+const yours: ShortcutSet = { id: 'your-commands', title: 'yourCommands.title', shortcuts: [] };
+
 async function open(path: string) {
-  const router = createAppRouter([notes]);
+  const router = createAppRouter([notes], (app) => (app.id === 'notes' ? [yours] : []));
   await router.push(path);
 
   return router;
@@ -51,6 +53,12 @@ describe('createAppRouter', () => {
       app: notes,
       set: basics,
     });
+  });
+
+  it('finds a set made at runtime, such as Your commands', async () => {
+    const router = await open('/apps/notes/sets/your-commands/learn');
+
+    expect(propsOf(router)).toStrictEqual({ app: notes, set: yours });
   });
 
   it('goes to the overview for an app or set that does not exist', async () => {

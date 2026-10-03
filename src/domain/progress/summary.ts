@@ -7,7 +7,7 @@ import { dueCards } from '../scheduling/scheduler';
 import type { ShortcutId } from '../shortcuts/shortcutId';
 import type { AppCategory, AppDefinition, ShortcutSet } from '../shortcuts/types';
 import { appCategories } from '../shortcuts/types';
-import type { StoredProgress } from './storedProgress';
+import type { SetRecord, StoredProgress } from './storedProgress';
 import { setProgressOf } from './storedProgress';
 
 /**
@@ -78,22 +78,34 @@ export function summarizeSet(appId: string, set: ShortcutSet, context: SummaryCo
  */
 export function summarizeApp(app: AppDefinition, context: SummaryContext): AppSummary {
   const items = appPracticeItems(app, context);
-  const sets = app.sets.map((set) => summarizeSet(app.id, set, context));
-  const learned = new Set(sets.flatMap((set) => set.learned));
   const practicable = new Set(items.map(({ id }) => id));
+  const records = practicedRecords(app.id, practicable, context);
+  const learned = new Set(records.flatMap(({ progress }) => progress.learned));
   const cards = context.progress.cards.filter((card) => practicable.has(card.id));
   const due = reviewItems(dueCards(cards, context.layout, context.endOfToday), items).length;
   const next = earliest(cards.filter((card) => isLater(card, context)).map(({ dueAt }) => dueAt));
-  const practicedAt = latest(sets.flatMap((set) => set.practicedAt ?? []));
+  const practicedAt = latest(records.map(({ progress }) => progress.updatedAt));
 
   return {
     app,
     shortcuts: items.length,
-    learned: learned.size,
+    learned: items.filter(({ id }) => learned.has(id)).length,
     due,
     ...(next === undefined ? {} : { nextDueAt: next }),
     ...(practicedAt === undefined ? {} : { practicedAt }),
   };
+}
+
+/**
+ * The shortcuts of an app learned on the layout, in any of its sets: the data's own, and those
+ * made at runtime, such as Your commands.
+ */
+export function learnedInApp(appId: string, context: SummaryContext): ReadonlySet<ShortcutId> {
+  return new Set(
+    context.progress.sets
+      .filter((record) => record.appId === appId && record.layout === context.layout)
+      .flatMap(({ progress }) => progress.learned),
+  );
 }
 
 /** The summaries that were practiced, the most recently practiced first. */
@@ -110,6 +122,20 @@ export function groupByCategory(apps: readonly AppSummary[]): readonly CategoryG
   return appCategories
     .map((category) => ({ category, apps: apps.filter(({ app }) => app.category === category) }))
     .filter((group) => group.apps.length > 0);
+}
+
+/** The app's set records on the layout with something learned that can still be practiced. */
+function practicedRecords(
+  appId: string,
+  practicable: ReadonlySet<ShortcutId>,
+  { progress, layout }: SummaryContext,
+): readonly SetRecord[] {
+  return progress.sets.filter(
+    (record) =>
+      record.appId === appId &&
+      record.layout === layout &&
+      record.progress.learned.some((id) => practicable.has(id)),
+  );
 }
 
 /** Whether a card of the current layout is due after today. */

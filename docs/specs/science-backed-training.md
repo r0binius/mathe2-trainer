@@ -103,6 +103,8 @@ CREATE TABLE usage (
 The main window keeps the current layout's counts of the last 30 days in a store of its own (`useUsageStore`, `load_usage`), loaded at startup, when the layout changes and when the switch turns, and adds each use it records.
 
 - **Your commands:** on an app's screen, above its sets, a set of the shortcuts you chose from that app's menus in the last 30 days, most-used first. It's learned like any other set and keeps its own progress. It appears once there is at least one. It's a set made at runtime with the ID `your-commands`, in front of the app's own sets, so the set page, learning and its saved progress work as for any set; reconciling keeps its progress.
+  - A shortcut counts as learned for its app when any of the app's records on the layout says so (`learnedInApp`), so what Your commands teaches shows in the app's counts and is watched for key presses.
+  - Checked in the running app in 18.7: Notizen shows _Aus Menüs gewählt_ with Deine Befehle (the two shortcuts chosen from menus); learning it takes a training and two recalls of each; its progress survives a restart, and the app counts its shortcuts as learned.
 - **The overview** gets a _By keyboard_ section while the switch is on: the share of uses done with the keys over 30 days, and the commands you still use the menu for most, each leading to its app. The list shows the five commands chosen from menus most, each leading to its app's _Your commands_.
 - **Settings → General:** the switch, the banner setting under it, and a sentence on what's watched and stored.
 

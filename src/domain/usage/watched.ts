@@ -1,7 +1,7 @@
 import type { KeyCombination } from '../keyboard/combination';
 import { appPracticeItems } from '../practice/items';
 import type { SummaryContext } from '../progress/summary';
-import { summarizeSet } from '../progress/summary';
+import { learnedInApp } from '../progress/summary';
 import type { Decoder } from '../shared/decode';
 import { object } from '../shared/decode';
 import type { ShortcutId } from '../shortcuts/shortcutId';
@@ -29,9 +29,7 @@ export function watchedShortcuts(
   return apps
     .filter(({ bundleIds }) => bundleIds.length > 0)
     .flatMap((app) => {
-      const learned = new Set(
-        app.sets.flatMap((set) => summarizeSet(app.id, set, context).learned),
-      );
+      const learned = learnedInApp(app.id, context);
 
       return appPracticeItems(app, context)
         .filter(({ id }) => learned.has(id))

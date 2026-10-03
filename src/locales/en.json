@@ -35,7 +35,9 @@
   "app": {
     "sets": "Sets",
     "review": "Review {n}",
-    "nextReview": "Next review {when}"
+    "nextReview": "Next review {when}",
+    "yourCommands": "Your commands",
+    "fromMenus": "Chosen from menus, last 30 days"
   },
   "set": {
     "back": "Sets",

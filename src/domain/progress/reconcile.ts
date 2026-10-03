@@ -1,6 +1,7 @@
 import type { ShortcutId } from '../shortcuts/shortcutId';
 import { shortcutId } from '../shortcuts/shortcutId';
 import type { AppDefinition, ShortcutSet } from '../shortcuts/types';
+import { allShortcuts, yourCommandsId, yourCommandsTitle } from '../usage/yourCommands';
 import type { SetRecord, StoredProgress } from './storedProgress';
 
 /**
@@ -38,9 +39,7 @@ export function progressChanged(before: StoredProgress, after: StoredProgress): 
 }
 
 function reconcileSet(record: SetRecord, apps: readonly AppDefinition[]): readonly SetRecord[] {
-  const set = apps
-    .find(({ id }) => id === record.appId)
-    ?.sets.find(({ id }) => id === record.setId);
+  const set = setOf(record, apps);
 
   if (set === undefined) {
     return [];
@@ -54,6 +53,18 @@ function reconcileSet(record: SetRecord, apps: readonly AppDefinition[]): readon
     trained.length === record.progress.trained.length;
 
   return unchanged ? [record] : [{ ...record, progress: { ...record.progress, learned, trained } }];
+}
+
+/**
+ * The set a record belongs to. Your commands isn't in the data: its progress stays while its app
+ * exists, checked against all of the app's shortcuts, since the set changes with the user's use.
+ */
+function setOf(record: SetRecord, apps: readonly AppDefinition[]): ShortcutSet | undefined {
+  const app = apps.find(({ id }) => id === record.appId);
+
+  return record.setId === yourCommandsId && app !== undefined
+    ? { id: yourCommandsId, title: yourCommandsTitle, shortcuts: allShortcuts(app) }
+    : app?.sets.find(({ id }) => id === record.setId);
 }
 
 function setShortcutIds(appId: string, set: ShortcutSet): readonly ShortcutId[] {

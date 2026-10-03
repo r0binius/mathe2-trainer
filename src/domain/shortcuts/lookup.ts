@@ -11,14 +11,17 @@ export function findApp(apps: readonly AppDefinition[], appId: string): AppDefin
   return apps.find((app) => app.id === appId);
 }
 
-/** The set with the given IDs, with its app, or `undefined` if either doesn't exist. */
+/**
+ * The set with the given IDs, with its app, or `undefined` if either doesn't exist. An app's sets
+ * are its own and those `runtimeSets` makes for it, such as Your commands.
+ */
 export function findSet(
   apps: readonly AppDefinition[],
-  appId: string,
-  setId: string,
+  { appId, setId }: { readonly appId: string; readonly setId: string },
+  runtimeSets: (app: AppDefinition) => readonly ShortcutSet[],
 ): AppSet | undefined {
   const app = findApp(apps, appId);
-  const set = app?.sets.find(({ id }) => id === setId);
+  const set = app && [...runtimeSets(app), ...app.sets].find(({ id }) => id === setId);
 
   return app === undefined || set === undefined ? undefined : { app, set };
 }

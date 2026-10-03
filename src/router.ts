@@ -8,7 +8,7 @@ import type {
 import { createRouter, createWebHashHistory } from 'vue-router';
 
 import { findApp, findSet } from '@/domain/shortcuts/lookup';
-import type { AppDefinition } from '@/domain/shortcuts/types';
+import type { AppDefinition, ShortcutSet } from '@/domain/shortcuts/types';
 
 import AppScreen from './features/library/AppScreen.vue';
 import OverviewScreen from './features/library/OverviewScreen.vue';
@@ -30,8 +30,12 @@ type ScreenProps =
  * The main window's router, which picks the page the detail shows. A route's IDs are looked up in
  * `apps` before its page opens: the page gets the app and set as props, and a route to one that
  * doesn't exist, such as a hash route left over from older data, goes to the overview instead.
+ * An app's sets are its own and those `runtimeSets` makes for it, such as Your commands.
  */
-export function createAppRouter(apps: readonly AppDefinition[]): Router {
+export function createAppRouter(
+  apps: readonly AppDefinition[],
+  runtimeSets: (app: AppDefinition) => readonly ShortcutSet[] = () => [],
+): Router {
   function appOf(route: RouteLocationNormalized) {
     const app = findApp(apps, paramOf(route, 'appId'));
 
@@ -39,7 +43,9 @@ export function createAppRouter(apps: readonly AppDefinition[]): Router {
   }
 
   function setOf(route: RouteLocationNormalized) {
-    return findSet(apps, paramOf(route, 'appId'), paramOf(route, 'setId'));
+    const ids = { appId: paramOf(route, 'appId'), setId: paramOf(route, 'setId') };
+
+    return findSet(apps, ids, runtimeSets);
   }
 
   return createRouter({

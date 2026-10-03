@@ -51,12 +51,13 @@ export function createAppI18n(language: UiLanguage): Plugin {
   });
 }
 
+// Every app's catalog also names Your commands, so its set reads like the app's own.
 function germanCatalogOf(app: AppDefinition): readonly [string, Catalog] {
-  return [app.id, app.catalogs.de];
+  return [app.id, { ...app.catalogs.de, yourCommands: { title: de.app.yourCommands } }];
 }
 
 function englishCatalogOf(app: AppDefinition): readonly [string, Catalog] {
-  return [app.id, app.catalogs.en];
+  return [app.id, { ...app.catalogs.en, yourCommands: { title: en.app.yourCommands } }];
 }
 
 /** The translations of a component's texts. Components use it instead of vue-i18n's `t`. */
