@@ -610,9 +610,9 @@ Close the gaps between the shortcut trainer and the research in `docs/specs/shor
   - [x] 18.4b Menu choices in Rust
   - [x] 18.4c Matching and counting
 - [x] 18.5 The banner
-- [ ] 18.6 Key presses
+- [x] 18.6 Key presses
   - [x] 18.6a Recognizing presses in Rust
-  - [ ] 18.6b The watched list and counting
+  - [x] 18.6b The watched list and counting
 - [ ] 18.7 Your commands and the overview
 
 **Decisions**

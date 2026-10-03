@@ -78,8 +78,10 @@ When a menu use matched a shortcut and **Show the shortcut when I use a menu** i
 - The coach's own event tap (§4) also watches key presses while the switch is on.
 - The frontend gives Rust the learned shortcuts for each app on the current layout (bundle IDs, keys, card ID) and updates the list when progress or the layout changes.
 - A press counts only if it matches a learned shortcut of the frontmost app. Nothing else is kept, logged or sent.
-- **How a press is recognized** (18.6): the frontend sends the keys as resolved on the layout (`set_watched_shortcuts`); Rust turns each combination into a virtual key code and ⌃⌥⇧⌘ (`key_presses.rs`), a character through the layout and a key without one (an arrow, `F5`) through a table of Carbon's codes, ignoring fn and Caps Lock. The platform reports only presses of these combinations; the coach tells the main window the shortcut (`key-used`), which counts it for the local day as menu uses are counted.
+- **How a press is recognized** (18.6): the frontend sends the keys as resolved on the layout (`set_watched_shortcuts`); Rust turns each combination into virtual key codes and ⌃⌥⇧⌘ (`key_presses.rs`): a character through the layout, every key typing it (the 2 in the top row and on the keypad, as macOS triggers a key equivalent with either), and a key without one (an arrow, `F5`) through a table of Carbon's codes, ignoring fn and Caps Lock. The platform reports only presses of these combinations; the coach tells the main window the shortcut (`key-used`), which counts it for the local day as menu uses are counted.
 - Presses in Mouseless itself never count, so practicing isn't counted as use.
+- The main window computes the list (`watchedShortcuts`: the learned shortcuts of apps with a bundle ID, on the current layout) and sends it whenever its context changes; each `key-used` counts one use by keys (`record_use`, which also counts menu uses).
+- Checked in the running app in 18.6: ⌘2 learned in Notes counts each press, in the top row and on the keypad; the same press in Mouseless and an unlearned ⌘1 count nothing.
 
 ### 4.4 Storage
 

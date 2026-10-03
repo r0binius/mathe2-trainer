@@ -2,7 +2,7 @@
 import { inject, provide, useTemplateRef } from 'vue';
 
 import BaseButton from './components/BaseButton.vue';
-import { useMenuCoach } from './composables/useMenuCoach';
+import { useCoach } from './composables/useCoach';
 import { focusFirstIn } from './composables/useSpatialNav';
 import { useStartup } from './composables/useStartup';
 import { apps } from './data/apps';
@@ -24,7 +24,7 @@ const text = useText();
 const settings = useSettingsStore();
 
 // Here because the main window lives as long as the app; closing it only hides it.
-useMenuCoach(
+useCoach(
   apps,
   {
     coach: inject(coachKey, missingCoach),

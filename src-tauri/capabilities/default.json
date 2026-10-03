@@ -14,7 +14,7 @@
     "allow-record-review",
     "allow-replace-progress",
     "allow-get-settings",
-    "allow-record-menu-use",
+    "allow-record-use",
     "allow-show-banner",
     "allow-set-watched-shortcuts",
     "log:allow-log"

@@ -3,16 +3,17 @@ import type { PlatformError } from '../shared/platformError';
 import type { Result } from '../shared/result';
 import type { ShortcutId } from '../shortcuts/shortcutId';
 
-/** One use of a shortcut chosen from a menu: which, on which layout, and on which local day. */
-export type MenuUse = {
+/** One use of a shortcut: which, on which layout and local day, and whether by keys or menu. */
+export type ShortcutUse = {
   readonly id: ShortcutId;
   readonly layout: LayoutId;
   /** The local day number, as `localDay` counts it. */
   readonly day: number;
+  readonly by: 'keys' | 'menu';
 };
 
 /** Where the uses of shortcuts are counted, per day. */
 export type UsageRepository = {
-  /** Counts one use from a menu. Nothing is counted once learning from work is off. */
-  readonly recordMenuUse: (menuUse: MenuUse) => Promise<Result<void, PlatformError>>;
+  /** Counts one use. Nothing is counted once learning from work is off. */
+  readonly recordUse: (shortcutUse: ShortcutUse) => Promise<Result<void, PlatformError>>;
 };

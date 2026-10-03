@@ -13,9 +13,11 @@ import type { SettingsRepository } from '@/domain/settings/repository';
 import type { PlatformError } from '@/domain/shared/platformError';
 import type { Err, Result } from '@/domain/shared/result';
 import { err } from '@/domain/shared/result';
+import type { ShortcutId } from '@/domain/shortcuts/shortcutId';
 import type { Banner } from '@/domain/usage/banner';
 import type { MenuChoice } from '@/domain/usage/menuChoice';
 import type { UsageRepository } from '@/domain/usage/repository';
+import type { WatchedShortcut } from '@/domain/usage/watched';
 
 /** Where the app provides the settings repository to the stores. */
 export const settingsRepositoryKey: InjectionKey<SettingsRepository> =
@@ -96,6 +98,15 @@ export type Coach = {
    * stops it.
    */
   readonly onBannerShown: (listener: (banner: Banner) => void) => () => void;
+  /** Counts presses of these learned shortcuts from now on, in place of the ones before. */
+  readonly setWatched: (
+    shortcuts: readonly WatchedShortcut[],
+  ) => Promise<Result<void, PlatformError>>;
+  /**
+   * Calls `listener` with every watched shortcut pressed in its app, until the returned function
+   * stops it.
+   */
+  readonly onKeyUsed: (listener: (id: ShortcutId) => void) => () => void;
 };
 
 /** Where the app provides the coach to the windows. */
@@ -194,10 +205,12 @@ export const missingCoach: Coach = {
   onMenuChosen: () => ignore,
   showBanner: unavailable,
   onBannerShown: () => ignore,
+  setWatched: unavailable,
+  onKeyUsed: () => ignore,
 };
 
 /** What the main window injects when the app provided no usage counts: counting fails. */
-export const missingUsageRepository: UsageRepository = { recordMenuUse: unavailable };
+export const missingUsageRepository: UsageRepository = { recordUse: unavailable };
 
 /** What a store injects when the app provided no changes: no other window changes anything. */
 export const missingChanges: Changes = {

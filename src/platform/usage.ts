@@ -8,6 +8,6 @@ export function usageRepository(invoke: Invoke): UsageRepository {
   const call = commandCaller(invoke);
 
   return {
-    recordMenuUse: (menuUse) => call('record_menu_use', nothing, { menuUse }),
+    recordUse: (shortcutUse) => call('record_use', nothing, { shortcutUse }),
   };
 }

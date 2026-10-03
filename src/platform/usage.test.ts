@@ -5,17 +5,18 @@ import { ok } from '@/domain/shared/result';
 import { usageRepository } from './usage';
 
 describe('usageRepository', () => {
-  it('counts a menu use with record_menu_use', async () => {
-    const menuUse = {
+  it('counts a use with record_use', async () => {
+    const shortcutUse = {
       id: 'notes/Meta+n',
       layout: 'com.apple.keylayout.German',
       day: 20_000,
+      by: 'keys',
     } as const;
     const invoke = vi.fn(() => Promise.resolve(null));
 
-    await expect(usageRepository(invoke).recordMenuUse(menuUse)).resolves.toStrictEqual(
+    await expect(usageRepository(invoke).recordUse(shortcutUse)).resolves.toStrictEqual(
       ok(undefined),
     );
-    expect(invoke).toHaveBeenCalledWith('record_menu_use', { menuUse });
+    expect(invoke).toHaveBeenCalledWith('record_use', { shortcutUse });
   });
 });

@@ -61,24 +61,27 @@ pub struct Press {
     modifiers: CGEventFlags,
 }
 
-/// The press that types `keys` on `keymap`, or `None` if it isn't exactly one key besides the
-/// modifiers, or no key on the keyboard is it.
-pub fn press_of(keys: &[String], keymap: &Keymap) -> Option<Press> {
+/// The presses that type `keys` on `keymap`: one for every key typing its character, such as
+/// the 2 in the top row and on the keypad, as macOS triggers a menu item's key equivalent with
+/// either. None if it isn't exactly one key besides the modifiers, or no key on the keyboard is
+/// it.
+pub fn presses_of(keys: &[String], keymap: &Keymap) -> Vec<Press> {
     let (modifiers, others): (Vec<_>, Vec<_>) = keys
         .iter()
         .map(String::as_str)
         .partition(|key| modifier(key).is_some());
     let [key] = others.as_slice() else {
-        return None;
+        return Vec::new();
     };
+    let modifiers = modifiers
+        .iter()
+        .filter_map(|name| modifier(name))
+        .fold(CGEventFlags::empty(), CGEventFlags::union);
 
-    Some(Press {
-        key: virtual_key(key, keymap)?,
-        modifiers: modifiers
-            .iter()
-            .filter_map(|name| modifier(name))
-            .fold(CGEventFlags::empty(), CGEventFlags::union),
-    })
+    virtual_keys(key, keymap)
+        .into_iter()
+        .map(|key| Press { key, modifiers })
+        .collect()
 }
 
 /// The press a key-down event of the tap is, or `None` for any other event.
@@ -102,21 +105,28 @@ fn modifier(name: &str) -> Option<CGEventFlags> {
         .find_map(|&(modifier, flag)| (modifier == name).then_some(flag))
 }
 
-/// The key typing `key` without a modifier on `keymap`, else the named key `key` is.
+/// The keys typing `key` without a modifier on `keymap`, else the named key `key` is.
 ///
 /// Keys are found by their ISO positions, which hold every ANSI key too: the extra ISO key never
 /// comes up on an ANSI keyboard.
-fn virtual_key(key: &str, keymap: &Keymap) -> Option<u16> {
-    let typing = keymap
+fn virtual_keys(key: &str, keymap: &Keymap) -> Vec<u16> {
+    let typing: Vec<u16> = keymap
         .iter()
-        .find_map(|(&code, characters)| (characters.value == key).then_some(code));
+        .filter(|(_, characters)| characters.value == key)
+        .filter_map(|(&code, _)| {
+            key_positions(Keyboard::Iso)
+                .find_map(|(virtual_key, position)| (position == code).then_some(virtual_key))
+        })
+        .collect();
 
-    match typing {
-        Some(code) => key_positions(Keyboard::Iso)
-            .find_map(|(virtual_key, position)| (position == code).then_some(virtual_key)),
-        None => NAMED_KEYS
+    if typing.is_empty() {
+        NAMED_KEYS
             .iter()
-            .find_map(|&(name, virtual_key)| (name == key).then_some(virtual_key)),
+            .filter(|&&(name, _)| name == key)
+            .map(|&(_, virtual_key)| virtual_key)
+            .collect()
+    } else {
+        typing
     }
 }
 
@@ -127,7 +137,8 @@ mod tests {
     use super::*;
     use crate::platform::{KeyCharacters, KeyCode};
 
-    /// The German layout's keys that the tests use: ß on `Minus`, z on `KeyY`, n on `KeyN`.
+    /// The German layout's keys that the tests use: 2 in the top row and on the keypad, ß on
+    /// `Minus`, z on `KeyY`, n on `KeyN`.
     fn german() -> Keymap {
         let key = |value: &str| KeyCharacters {
             value: value.to_owned(),
@@ -137,9 +148,11 @@ mod tests {
         };
 
         Keymap::from([
+            (KeyCode::Digit2, key("2")),
             (KeyCode::Minus, key("ß")),
             (KeyCode::KeyY, key("z")),
             (KeyCode::KeyN, key("n")),
+            (KeyCode::Numpad2, key("2")),
         ])
     }
 
@@ -158,28 +171,29 @@ mod tests {
 
     #[test]
     fn finds_a_character_by_the_key_typing_it_on_the_layout() {
-        let help = press_of(&keys(&["Shift", "Meta", "ß"]), &german());
+        let help = presses_of(&keys(&["Shift", "Meta", "ß"]), &german());
         let pressed = press_from(key_down(
             0x1B,
             CGEventFlags::MaskShift.union(CGEventFlags::MaskCommand),
         ));
 
-        assert!(help.is_some());
-        assert_eq!(help, pressed);
+        assert_eq!(help, pressed.into_iter().collect::<Vec<_>>());
     }
 
     #[test]
     fn finds_a_key_by_its_position_not_its_ansi_name() {
         // z is on the key the US layout calls Y.
         assert_eq!(
-            press_of(&keys(&["Meta", "z"]), &german()),
+            presses_of(&keys(&["Meta", "z"]), &german()),
             press_from(key_down(0x10, CGEventFlags::MaskCommand))
+                .into_iter()
+                .collect::<Vec<_>>()
         );
     }
 
     #[test]
     fn finds_a_key_that_types_nothing_by_its_name() {
-        let next = press_of(&keys(&["Alt", "Meta", "ArrowRight"]), &german());
+        let next = presses_of(&keys(&["Alt", "Meta", "ArrowRight"]), &german());
         // macOS adds fn to the arrows, which no shortcut names.
         let pressed = press_from(key_down(
             0x7C,
@@ -188,36 +202,46 @@ mod tests {
                 .union(CGEventFlags::MaskSecondaryFn),
         ));
 
-        assert_eq!(next, pressed);
+        assert_eq!(next, pressed.into_iter().collect::<Vec<_>>());
+    }
+
+    #[test]
+    fn finds_every_key_typing_the_character_such_as_the_keypads() {
+        let presses = presses_of(&keys(&["Meta", "2"]), &german());
+        let top_row = press_from(key_down(0x13, CGEventFlags::MaskCommand));
+        let keypad = press_from(key_down(0x54, CGEventFlags::MaskCommand));
+
+        assert_eq!(
+            presses,
+            [top_row, keypad].into_iter().flatten().collect::<Vec<_>>()
+        );
     }
 
     #[test]
     fn tells_other_modifiers_apart() {
-        assert_ne!(
-            press_of(&keys(&["Meta", "n"]), &german()),
-            press_from(key_down(
-                0x2D,
-                CGEventFlags::MaskShift.union(CGEventFlags::MaskCommand)
-            ))
-        );
+        let pressed = press_from(key_down(
+            0x2D,
+            CGEventFlags::MaskShift.union(CGEventFlags::MaskCommand),
+        ));
+
+        assert!(!presses_of(&keys(&["Meta", "n"]), &german()).contains(&pressed.expect("a press")));
     }
 
     #[test]
     fn ignores_caps_lock() {
-        assert_eq!(
-            press_of(&keys(&["Meta", "n"]), &german()),
-            press_from(key_down(
-                0x2D,
-                CGEventFlags::MaskCommand.union(CGEventFlags::MaskAlphaShift)
-            ))
-        );
+        let pressed = press_from(key_down(
+            0x2D,
+            CGEventFlags::MaskCommand.union(CGEventFlags::MaskAlphaShift),
+        ));
+
+        assert!(presses_of(&keys(&["Meta", "n"]), &german()).contains(&pressed.expect("a press")));
     }
 
     #[test]
     fn needs_exactly_one_key_it_can_find() {
-        assert_eq!(press_of(&keys(&["Meta"]), &german()), None);
-        assert_eq!(press_of(&keys(&["Meta", "n", "z"]), &german()), None);
-        assert_eq!(press_of(&keys(&["Meta", "q"]), &german()), None);
+        assert_eq!(presses_of(&keys(&["Meta"]), &german()), []);
+        assert_eq!(presses_of(&keys(&["Meta", "n", "z"]), &german()), []);
+        assert_eq!(presses_of(&keys(&["Meta", "q"]), &german()), []);
     }
 
     #[test]

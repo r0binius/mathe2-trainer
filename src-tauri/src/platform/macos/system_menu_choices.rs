@@ -11,7 +11,7 @@ use objc2_core_graphics::{CGEventType, CGPreflightListenEventAccess, CGRequestLi
 use crate::error::AppError;
 use crate::platform::macos::accessibility::{self, Element, Observer, Value};
 use crate::platform::macos::event_tap::{EventTap, TapEvent, mask_of};
-use crate::platform::macos::key_presses::{Press, press_from, press_of};
+use crate::platform::macos::key_presses::{Press, press_from, presses_of};
 use crate::platform::macos::menu_keys::{KeyEquivalent, keys_of};
 use crate::platform::macos::system_settings;
 use crate::platform::{Access, Frame, Keymap, MenuChoices, MenuItem, MenuSignal, Point};
@@ -145,7 +145,11 @@ impl MenuChoices for SystemMenuChoices {
         };
         let presses = combinations
             .iter()
-            .filter_map(|keys| press_of(keys, keymap).map(|press| (press, keys.clone())))
+            .flat_map(|keys| {
+                presses_of(keys, keymap)
+                    .into_iter()
+                    .map(|press| (press, keys.clone()))
+            })
             .collect();
 
         *watching.get(main_thread).watched_keys.borrow_mut() = presses;

@@ -19,7 +19,7 @@ const COMMANDS: &[&str] = &[
     "read_menu_shortcuts",
     "get_coach_access",
     "ask_for_input_access",
-    "record_menu_use",
+    "record_use",
     "show_banner",
     "set_watched_shortcuts",
 ];

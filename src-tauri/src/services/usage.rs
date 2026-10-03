@@ -7,35 +7,61 @@ use crate::error::AppError;
 use crate::services::settings;
 use crate::services::values::{LayoutId, LocalDay, ShortcutId};
 
-/// A shortcut chosen from a menu, as the frontend sends it once it matched the choice.
+/// How a shortcut was used.
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum UsedBy {
+    /// Its keys were pressed in its app.
+    Keys,
+    /// It was chosen from its app's menu.
+    Menu,
+}
+
+/// A use of a shortcut, as the frontend sends it once it matched it.
 #[derive(Clone, Debug, Eq, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct MenuUse {
-    /// The shortcut chosen.
+pub struct ShortcutUse {
+    /// The shortcut used.
     pub id: ShortcutId,
     /// The keyboard layout it was matched on.
     pub layout: LayoutId,
-    /// The local day it was chosen on.
+    /// The local day it was used on.
     pub day: LocalDay,
+    /// Whether by its keys or from a menu.
+    pub by: UsedBy,
 }
 
-/// Counts one use of a shortcut from a menu, unless learning from work is off by now: a choice
-/// that arrives just after the switch turned off isn't kept.
+/// Counts one use of a shortcut, unless learning from work is off by now: a use that arrives just
+/// after the switch turned off isn't kept.
 ///
 /// # Errors
 ///
 /// Returns a database error if the settings can't be read or the count can't be written.
-pub fn record_menu_use(connection: &Connection, menu_use: &MenuUse) -> Result<(), AppError> {
+pub fn record_use(connection: &Connection, shortcut_use: &ShortcutUse) -> Result<(), AppError> {
     if !settings::load(connection)?.learn_from_work {
         return Ok(());
     }
 
     // Every field is named, so a new one fails to compile until it's counted too.
-    let MenuUse { id, layout, day } = menu_use;
+    let ShortcutUse {
+        id,
+        layout,
+        day,
+        by,
+    } = shortcut_use;
+    let sql = match by {
+        UsedBy::Keys => {
+            "INSERT INTO usage (shortcut_id, layout, day, by_keys) VALUES (:id, :layout, :day, 1)
+             ON CONFLICT (shortcut_id, layout, day) DO UPDATE SET by_keys = by_keys + 1"
+        }
+        UsedBy::Menu => {
+            "INSERT INTO usage (shortcut_id, layout, day, by_menu) VALUES (:id, :layout, :day, 1)
+             ON CONFLICT (shortcut_id, layout, day) DO UPDATE SET by_menu = by_menu + 1"
+        }
+    };
 
     connection.execute(
-        "INSERT INTO usage (shortcut_id, layout, day, by_menu) VALUES (:id, :layout, :day, 1)
-         ON CONFLICT (shortcut_id, layout, day) DO UPDATE SET by_menu = by_menu + 1",
+        sql,
         named_params! { ":id": id, ":layout": layout, ":day": day },
     )?;
     Ok(())
@@ -59,12 +85,13 @@ mod tests {
     use crate::services::database::{Database, query_all};
     use crate::services::settings::Settings;
 
-    /// A use of ⌘M on the German layout on `day`.
-    fn chosen(day: i64) -> MenuUse {
+    /// A use of ⌘M on the German layout on `day`, `by` keys or menu.
+    fn used(day: i64, by: &str) -> ShortcutUse {
         serde_json::from_value(json!({
             "id": "macos/Meta+m",
             "layout": "com.apple.keylayout.German",
             "day": day,
+            "by": by,
         }))
         .expect("the use deserializes")
     }
@@ -80,9 +107,9 @@ mod tests {
             .expect("the settings are saved");
     }
 
-    fn record(database: &Database, menu_use: &MenuUse) {
+    fn record(database: &Database, shortcut_use: &ShortcutUse) {
         database
-            .with(|connection| record_menu_use(connection, menu_use))
+            .with(|connection| record_use(connection, shortcut_use))
             .expect("the use is recorded");
     }
 
@@ -102,31 +129,37 @@ mod tests {
     }
 
     #[test]
-    fn counts_each_menu_use_per_day() {
+    fn counts_each_use_per_day_by_keys_and_from_menus() {
         let database = Database::in_memory();
 
         learning(&database, true);
-        record(&database, &chosen(20_000));
-        record(&database, &chosen(20_000));
-        record(&database, &chosen(20_001));
+        record(&database, &used(20_000, "menu"));
+        record(&database, &used(20_000, "keys"));
+        record(&database, &used(20_000, "keys"));
+        record(&database, &used(20_001, "menu"));
 
-        assert_eq!(counts(&database), [(20_000, 0, 2), (20_001, 0, 1)]);
+        assert_eq!(counts(&database), [(20_000, 2, 1), (20_001, 0, 1)]);
     }
 
     #[test]
     fn counts_nothing_while_learning_from_work_is_off() {
         let database = Database::in_memory();
 
-        record(&database, &chosen(20_000));
+        record(&database, &used(20_000, "keys"));
 
         assert_eq!(counts(&database), []);
     }
 
     #[test]
-    fn rejects_a_use_from_before_1970() {
-        let sent =
-            json!({ "id": "macos/Meta+m", "layout": "com.apple.keylayout.German", "day": -1 });
+    fn rejects_a_use_from_before_1970_or_of_another_kind() {
+        let before = json!({
+            "id": "macos/Meta+m", "layout": "com.apple.keylayout.German", "day": -1, "by": "keys",
+        });
+        let spoken = json!({
+            "id": "macos/Meta+m", "layout": "com.apple.keylayout.German", "day": 1, "by": "voice",
+        });
 
-        assert!(serde_json::from_value::<MenuUse>(sent).is_err());
+        assert!(serde_json::from_value::<ShortcutUse>(before).is_err());
+        assert!(serde_json::from_value::<ShortcutUse>(spoken).is_err());
     }
 }

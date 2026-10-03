@@ -3,6 +3,7 @@ import { decodeCoachAccess } from '@/domain/settings/coachAccess';
 import type { Decoder } from '@/domain/shared/decode';
 import { decodeBanner } from '@/domain/usage/banner';
 import { decodeMenuChoice } from '@/domain/usage/menuChoice';
+import { decodeKeyUsed } from '@/domain/usage/watched';
 import type { Coach, Logger } from '@/ports';
 
 import type { Invoke, Listen } from './ipc';
@@ -20,9 +21,12 @@ const menuChosen = 'menu-chosen';
 /** The event the Rust side sends the banner with what to show. */
 const bannerShown = 'banner-shown';
 
+/** The event the Rust side sends the main window for every press of a watched shortcut. */
+const keyUsed = 'key-used';
+
 /**
- * The coach on the Rust side. If listening for menu choices or banners fails, or what arrives
- * doesn't decode, `logger` says why.
+ * The coach on the Rust side. If listening for menu choices, banners or key presses fails, or
+ * what arrives doesn't decode, `logger` says why.
  */
 export function coach(invoke: Invoke, listen: Listen, logger: Logger): Coach {
   const call = commandCaller(invoke);
@@ -43,5 +47,13 @@ export function coach(invoke: Invoke, listen: Listen, logger: Logger): Coach {
     onMenuChosen: follow(menuChosen, decodeMenuChoice),
     showBanner: (banner) => call('show_banner', nothing, { banner }),
     onBannerShown: follow(bannerShown, decodeBanner),
+    setWatched: (shortcuts) => call('set_watched_shortcuts', nothing, { shortcuts }),
+    onKeyUsed: (listener) =>
+      follow(
+        keyUsed,
+        decodeKeyUsed,
+      )(({ id }) => {
+        listener(id);
+      }),
   };
 }
