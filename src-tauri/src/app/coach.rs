@@ -68,11 +68,10 @@ pub fn apply(app: &AppHandle, learn_from_work: bool) {
         retry(app);
     } else if lock(app).watching {
         app.state::<Platform>().menu_choices.stop();
-        let watched = std::mem::take(&mut lock(app).watched);
-        *lock(app) = CoachState {
-            watched,
-            ..CoachState::default()
-        };
+        // The watched shortcuts stay, for when watching starts again.
+        let mut state = lock(app);
+        state.watching = false;
+        state.watch = MenuWatch::default();
     }
 }
 
