@@ -143,6 +143,30 @@ impl FromSql for EpochMillis {
     }
 }
 
+/// A local day, counted as the frontend's `localDay` counts it: days since 1970-01-01 in the
+/// user's time zone. Never before it.
+#[derive(Copy, Clone, Debug, Eq, Ord, PartialEq, PartialOrd, Deserialize)]
+#[serde(try_from = "i64")]
+pub struct LocalDay(i64);
+
+impl TryFrom<i64> for LocalDay {
+    type Error = InvalidValue;
+
+    fn try_from(day: i64) -> Result<Self, Self::Error> {
+        if day < 0 {
+            Err(InvalidValue::new("day", "before 1970"))
+        } else {
+            Ok(Self(day))
+        }
+    }
+}
+
+impl ToSql for LocalDay {
+    fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
+        self.0.to_sql()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use serde_json::json;
@@ -168,6 +192,12 @@ mod tests {
     fn a_time_is_never_before_the_epoch() {
         assert!(serde_json::from_value::<EpochMillis>(json!(0)).is_ok());
         assert!(serde_json::from_value::<EpochMillis>(json!(-1)).is_err());
+    }
+
+    #[test]
+    fn a_day_is_never_before_the_epoch() {
+        assert!(serde_json::from_value::<LocalDay>(json!(20_000)).is_ok());
+        assert!(serde_json::from_value::<LocalDay>(json!(-1)).is_err());
     }
 
     #[test]

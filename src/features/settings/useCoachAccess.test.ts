@@ -3,17 +3,17 @@ import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { effectScope, nextTick, ref } from 'vue';
 
 import { err, ok } from '@/domain/shared/result';
-import type { CoachPermissions } from '@/ports';
+import type { Coach } from '@/ports';
 
 import { useCoachAccess } from './useCoachAccess';
 
 const denied = { menus: 'denied', input: 'granted' } as const;
 
 /** The access of a window whose switch the test turns, over a port that answers `denied`. */
-function watch(on: boolean, port: Partial<CoachPermissions> = {}) {
+function watch(on: boolean, port: Partial<Pick<Coach, 'load' | 'askFor'>> = {}) {
   const enabled = ref(on);
   const logger = { warn: vi.fn(), error: vi.fn() };
-  const fullPort: CoachPermissions = {
+  const fullPort: Pick<Coach, 'load' | 'askFor'> = {
     load: vi.fn(() => Promise.resolve(ok(denied))),
     askFor: vi.fn(() => Promise.resolve(ok(undefined))),
     ...port,
@@ -68,7 +68,7 @@ describe('useCoachAccess', () => {
 
   it('opens System Settings for a permission, and logs when it cannot', async () => {
     const { askFor, port, logger } = watch(true, {
-      askFor: vi.fn<CoachPermissions['askFor']>(() =>
+      askFor: vi.fn<Coach['askFor']>(() =>
         Promise.resolve(err({ kind: 'lookup', message: 'no settings' })),
       ),
     });

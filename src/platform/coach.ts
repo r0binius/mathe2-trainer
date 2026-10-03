@@ -1,9 +1,10 @@
 import type { Permission } from '@/domain/settings/coachAccess';
 import { decodeCoachAccess } from '@/domain/settings/coachAccess';
-import type { CoachPermissions } from '@/ports';
+import { decodeMenuChoice } from '@/domain/usage/menuChoice';
+import type { Coach, Logger } from '@/ports';
 
-import type { Invoke } from './ipc';
-import { commandCaller, nothing } from './ipc';
+import type { Invoke, Listen } from './ipc';
+import { commandCaller, decodingPayloads, nothing, subscriber } from './ipc';
 
 /** The command that opens System Settings where the user allows each permission. */
 const askCommands: Readonly<Record<Permission, string>> = {
@@ -11,12 +12,27 @@ const askCommands: Readonly<Record<Permission, string>> = {
   input: 'ask_for_input_access',
 };
 
-/** What learning from how the user works needs them to allow, asked of the Rust side. */
-export function coachPermissions(invoke: Invoke): CoachPermissions {
+/** The event the Rust side sends the main window for every menu choice it sees. */
+const menuChosen = 'menu-chosen';
+
+/**
+ * The coach on the Rust side. If listening for menu choices fails, or one doesn't decode,
+ * `logger` says why.
+ */
+export function coach(invoke: Invoke, listen: Listen, logger: Logger): Coach {
   const call = commandCaller(invoke);
+
+  function report(message: string): void {
+    logger.error(`Could not follow ${menuChosen}: ${message}`);
+  }
 
   return {
     load: () => call('get_coach_access', decodeCoachAccess),
     askFor: (permission) => call(askCommands[permission], nothing),
+    onMenuChosen: decodingPayloads(
+      subscriber(listen, menuChosen, report),
+      decodeMenuChoice,
+      report,
+    ),
   };
 }

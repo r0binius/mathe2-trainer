@@ -77,6 +77,7 @@ pub fn run() -> tauri::Result<()> {
             commands::progress::reset_progress,
             commands::settings::get_settings,
             commands::settings::set_settings,
+            commands::usage::record_menu_use,
             commands::windows::dismiss_popover,
         ])
         .build(tauri::generate_context!())?

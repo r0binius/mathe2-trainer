@@ -1,6 +1,6 @@
 import type { PlatformError } from '../shared/platformError';
 import type { Result } from '../shared/result';
-import { findAppInFront } from '../shortcuts/lookup';
+import { findAppByBundleId } from '../shortcuts/lookup';
 import type { AppDefinition } from '../shortcuts/types';
 import type { AppInFront, PopoverOpened } from './appInFront';
 import type { MenuGroup } from './menuShortcuts';
@@ -91,7 +91,7 @@ function open(
     return reopened(opening, { kind: 'noApp' });
   }
 
-  const builtIn = findAppInFront(apps, app);
+  const builtIn = findAppByBundleId(apps, app.bundleId);
 
   if (builtIn !== undefined) {
     return reopened(opening, { kind: 'builtIn', app: builtIn });

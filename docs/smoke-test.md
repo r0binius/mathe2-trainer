@@ -56,6 +56,7 @@ What `pnpm check` can't prove: the app running on a real Mac. Walk through it wi
 - [ ] In a long session (a whole set, twice), moving on after a correct answer stays as quick as at the start.
 - [ ] Testing hides the keys; a wrong answer shakes and shows the pressed keys against the right ones.
 - [ ] **Forgot** (only while testing) shows the right keys; pressing them moves on, and the shortcut counts as failed.
+- [ ] A tested shortcut is learned only at its second correct recall in a row, with others in between; after the first, its stage bar segment turns half sage, and a mistake turns it back.
 - [ ] "N mastered" shows when a shortcut is learned; leaving with **Overview** keeps the learned ones.
 - [ ] A finished set shows as completed; its shortcuts become due for review.
 - [ ] Review tests the due shortcuts, requeues a wrong one, and returns to the app when done.
@@ -106,3 +107,10 @@ What `pnpm check` can't prove: the app running on a real Mac. Walk through it wi
 - [ ] `pnpm tauri build` makes `Mouseless.app`; copied to `/Applications`, it starts, and **About Mouseless** shows its version.
 - [ ] It keeps its own database (`mouseless.db`, beside the dev build's `mouseless-dev.db`) across a reinstall.
 - [ ] After a rebuild, it asks for Input Monitoring and Accessibility again: the ad-hoc signature changed.
+
+## Learning from how I work
+
+- [ ] Settings → General → **Learn from how I work** is off at first. Turned on without Accessibility or Input Monitoring, a row names each missing one, and **Open System Settings** opens it there; once both are allowed and the window is back in front, the rows go away.
+- [ ] With it on, choosing a Notes menu item that Mouseless knows (Darstellung → Als Galerie) with the mouse counts one menu use in `usage` (`sqlite3 …/mouseless-dev.db 'SELECT * FROM usage'`); closing a menu with Escape, an item Mouseless doesn't know, and pressing the shortcut count nothing.
+- [ ] Turning it off deletes every row in `usage`, and choices afterwards count nothing; **Reset progress** deletes them too.
+- [ ] Holding ⌘ still opens the popover while it's on.

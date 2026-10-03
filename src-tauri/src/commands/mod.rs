@@ -7,4 +7,5 @@ pub mod keymap;
 pub mod lookup;
 pub mod progress;
 pub mod settings;
+pub mod usage;
 pub mod windows;

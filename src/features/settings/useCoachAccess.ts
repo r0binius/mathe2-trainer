@@ -3,7 +3,7 @@ import { readonly, ref, watch } from 'vue';
 
 import { useWindowListener } from '@/composables/useWindowListener';
 import type { CoachAccess, Permission } from '@/domain/settings/coachAccess';
-import type { CoachPermissions, Logger } from '@/ports';
+import type { Coach, Logger } from '@/ports';
 
 /**
  * What learning from how the user works needs them to allow, while `enabled` says it's on: asked
@@ -12,7 +12,7 @@ import type { CoachPermissions, Logger } from '@/ports';
  * access, unknown until the first answer, and how to open System Settings for a permission.
  */
 export function useCoachAccess(
-  port: CoachPermissions,
+  port: Pick<Coach, 'load' | 'askFor'>,
   enabled: () => boolean,
   logger: Logger,
 ): readonly [

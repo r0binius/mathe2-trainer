@@ -203,7 +203,7 @@ Rust stays idiomatic Rust: traits for the Bridge and Adapter patterns, structs f
 src/
 ├─ domain/
 │  ├─ keyboard/     keymap.ts (types), combination.ts, resolve.ts, capture.ts, policy.ts, labels.ts
-│  ├─ shortcuts/    types.ts, shortcutId.ts, lookup.ts (findApp, findSet, findAppInFront)
+│  ├─ shortcuts/    types.ts, shortcutId.ts, lookup.ts (findApp, findSet, findAppByBundleId)
 │  ├─ lookup/       appInFront.ts, menuShortcuts.ts (types, decoders), lookup.ts (Model, Msg, update), search.ts, rows.ts
 │  ├─ practice/     session.ts (Model, Msg, update), items.ts, learn.ts, review.ts, grading.ts
 │  ├─ scheduling/   scheduler.ts (port), fsrs.ts, days.ts

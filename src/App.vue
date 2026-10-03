@@ -1,15 +1,38 @@
 <script setup lang="ts">
-import { provide, useTemplateRef } from 'vue';
+import { inject, provide, useTemplateRef } from 'vue';
 
 import BaseButton from './components/BaseButton.vue';
+import { useMenuCoach } from './composables/useMenuCoach';
 import { focusFirstIn } from './composables/useSpatialNav';
 import { useStartup } from './composables/useStartup';
 import { apps } from './data/apps';
 import LibrarySidebar from './features/library/LibrarySidebar.vue';
 import { focusSidebarKey } from './features/library/sidebarFocus';
 import { useText } from './i18n';
+import {
+  coachKey,
+  consoleLogger,
+  loggerKey,
+  missingCoach,
+  missingUsageRepository,
+  usageRepositoryKey,
+} from './ports';
 
 const [context, retry] = useStartup(apps);
+
+// Counted here because the main window lives as long as the app; closing it only hides it.
+useMenuCoach(
+  apps,
+  {
+    coach: inject(coachKey, missingCoach),
+    usage: inject(usageRepositoryKey, missingUsageRepository),
+    logger: inject(loggerKey, consoleLogger),
+  },
+  {
+    context: () => (context.value.status === 'loaded' ? context.value.value : undefined),
+    now: Date.now,
+  },
+);
 const text = useText();
 const sidebar = useTemplateRef('sidebar');
 const detail = useTemplateRef<HTMLElement>('detail');

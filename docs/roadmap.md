@@ -605,10 +605,10 @@ Close the gaps between the shortcut trainer and the research in `docs/specs/shor
   - [x] 18.2a Key counts in the review log
   - [x] 18.2b Typical times and grading limits
 - [x] 18.3 Spike: menu choices
-- [ ] 18.4 The switch and the coach
+- [x] 18.4 The switch and the coach
   - [x] 18.4a The switch and the usage table
   - [x] 18.4b Menu choices in Rust
-  - [ ] 18.4c Matching and counting
+  - [x] 18.4c Matching and counting
 - [ ] 18.5 The banner
 - [ ] 18.6 Key presses
 - [ ] 18.7 Your commands and the overview
@@ -621,6 +621,10 @@ Close the gaps between the shortcut trainer and the research in `docs/specs/shor
 - Menu choices of known shortcuts fill an app's _Your commands_ set and, unless turned off, show a brief banner with the keys. The overview shows the share done by keyboard and the commands still chosen from menus.
 - A menu choice is the item Accessibility reports as highlighted, plus a mouse-up on it or Return, which the event tap sees. macOS's own _menu item selected_ notification only reports shortcut presses, and not in Electron apps (spike 18.3).
 - The coach has an event tap of its own, made when the switch turns on and removed when it turns off. The switch turns on even while Accessibility or Input Monitoring is missing; the Settings row then says which, and watching starts once both are granted.
+
+**Carried over**
+
+- Choosing a menu item with the keyboard (fn ^F2, arrows, Return) is untested in the running app, and so are Spotify and Help's menu search (spec §4.1).
 
 ## UI/UX overhaul ✅ ([#14](https://codeberg.org/gobin/mouseless/issues/14))
 

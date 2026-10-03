@@ -13,6 +13,8 @@ import type { SettingsRepository } from '@/domain/settings/repository';
 import type { PlatformError } from '@/domain/shared/platformError';
 import type { Err, Result } from '@/domain/shared/result';
 import { err } from '@/domain/shared/result';
+import type { MenuChoice } from '@/domain/usage/menuChoice';
+import type { UsageRepository } from '@/domain/usage/repository';
 
 /** Where the app provides the settings repository to the stores. */
 export const settingsRepositoryKey: InjectionKey<SettingsRepository> =
@@ -70,10 +72,10 @@ export type Lookup = {
 export const lookupKey: InjectionKey<Lookup> = Symbol('lookup');
 
 /**
- * What learning from how the user works needs them to allow, and asking for it. A shell port like
- * {@link Windows}.
+ * The coach on the Rust side, while learning from how the user works is on: what it needs the
+ * user to allow, and the menu choices it sees. A shell port like {@link Windows}.
  */
-export type CoachPermissions = {
+export type Coach = {
   /**
    * Whether each permission is allowed. Once both are while the switch is on, the Rust side
    * starts watching.
@@ -81,10 +83,18 @@ export type CoachPermissions = {
   readonly load: () => Promise<Result<CoachAccess, PlatformError>>;
   /** Opens System Settings where the user allows `permission`. */
   readonly askFor: (permission: Permission) => Promise<Result<void, PlatformError>>;
+  /**
+   * Calls `listener` for every menu item with a shortcut the user chooses, until the returned
+   * function stops it.
+   */
+  readonly onMenuChosen: (listener: (choice: MenuChoice) => void) => () => void;
 };
 
-/** Where the app provides the coach's permissions to the Settings window. */
-export const coachPermissionsKey: InjectionKey<CoachPermissions> = Symbol('coach permissions');
+/** Where the app provides the coach to the windows. */
+export const coachKey: InjectionKey<Coach> = Symbol('coach');
+
+/** Where the app provides the usage counts to the main window. */
+export const usageRepositoryKey: InjectionKey<UsageRepository> = Symbol('usage repository');
 
 /**
  * What one window changed that the others show too, which the Rust side tells every window
@@ -169,8 +179,15 @@ export const missingLookup: Lookup = {
   readMenuShortcuts: unavailable,
 };
 
-/** What the Settings window injects when the app provided no coach permissions: unknown. */
-export const missingCoachPermissions: CoachPermissions = { load: unavailable, askFor: unavailable };
+/** What a window injects when the app provided no coach: unknown access, and no choices. */
+export const missingCoach: Coach = {
+  load: unavailable,
+  askFor: unavailable,
+  onMenuChosen: () => ignore,
+};
+
+/** What the main window injects when the app provided no usage counts: counting fails. */
+export const missingUsageRepository: UsageRepository = { recordMenuUse: unavailable };
 
 /** What a store injects when the app provided no changes: no other window changes anything. */
 export const missingChanges: Changes = {

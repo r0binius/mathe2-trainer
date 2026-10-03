@@ -59,11 +59,12 @@ All of this runs only while **Settings → General → Learn from how I work** i
 
 - Mouseless observes the frontmost app's menus through Accessibility (granted already for the lookup) and follows the **highlighted item**: on `AXSelectedChildrenChanged` from a menu, it reads the menu's `AXSelectedChildren`, whose title, key and modifier mask `menu_keys.rs` already turns into keys.
 - The event tap (which watches ⌘ for the trigger) tells a **choice** from a dismissal: a left mouse-up inside the highlighted item's frame (`AXPosition`, `AXSize`, read on mouse-up), or Return while the menu is open. Escape, or a click outside the menu, closes it without a choice. Rust then tells the frontend which app and which keys.
-- The frontend matches the keys to the app's shortcuts on the current layout. A match counts one menu use for that shortcut; anything else is ignored.
+- The frontend (the main window, which lives as long as the app) matches the keys to the app's shortcuts on the current layout, resolved as the popover resolves menu keys (`matchMenuChoice`). A match counts one menu use for that shortcut on the local day (`record_menu_use`); anything else is ignored. Rust counts nothing once the switch is off, so a choice arriving just after it turned off isn't kept.
 - **What the spike found** (18.3, `examples/menu_events.rs`, Notes, VSCodium and Finder on macOS 27):
   - `AXMenuItemSelected` is **not** posted when an item is chosen with the mouse, in AppKit (Notes) or Electron (VSCodium) apps. AppKit apps post it when an item's **shortcut is pressed** with no menu open (Finder ⌘F, Notes ⌘A); VSCodium doesn't. So it can't count menu choices, and it can't count key presses either (18.6 keeps the event tap).
   - The highlighted item is readable in both kinds of app. Accessibility shows the same thing for a choice and for Escape: the last highlight, then `AXMenuClosed`. That's why the event tap decides.
-  - Not tested yet, so checked in 18.4: Spotify, choosing with the keyboard (^F2, arrows, Return), and Help's menu search.
+  - Checked in the running app in 18.4: choosing Notes' Darstellung → Als Galerie and Als Liste with the mouse counts one menu use each; closing a menu with Escape and pressing the shortcut count nothing. So the tap's mouse-up arrives before `AXMenuClosed`.
+  - Still unverified: choosing with the keyboard (fn ^F2, arrows, Return; Return is covered by unit tests only), Spotify, and Help's menu search.
 
 ### 4.2 The banner
 
