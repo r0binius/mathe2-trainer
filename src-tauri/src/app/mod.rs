@@ -15,6 +15,7 @@ mod tray;
 mod trigger;
 mod windows;
 
+pub use self::coach::{CoachAccess, access as coach_access};
 pub use self::coordinator::Event;
 pub use self::lookup::read_menus;
 pub use self::run::run;

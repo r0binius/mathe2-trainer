@@ -2,6 +2,7 @@
 //! returns its result, doing the database work on a blocking thread
 //! ([`Database::run`](crate::services::database::Database::run)).
 
+pub mod coach;
 pub mod keymap;
 pub mod lookup;
 pub mod progress;

@@ -3,6 +3,7 @@
 use serde::Serialize;
 
 use crate::error::AppError;
+use crate::platform::Access;
 
 /// An app running in the user's session.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -13,17 +14,6 @@ pub struct RunningApp {
     pub name: String,
     /// Its bundle ID, such as `com.apple.Notes`, unless it's a bare executable.
     pub bundle_id: Option<String>,
-}
-
-/// Whether the user lets the app read other apps' menus, which macOS grants in Privacy & Security
-/// → Accessibility.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub enum MenuAccess {
-    /// The user allowed it.
-    Granted,
-    /// The user hasn't allowed it yet, or turned it off.
-    Denied,
 }
 
 /// A shortcut in an app's menus.
@@ -52,7 +42,7 @@ pub trait AppMenus {
     fn app_in_front(&self) -> Option<RunningApp>;
 
     /// Whether the user lets the app read other apps' menus.
-    fn access(&self) -> MenuAccess;
+    fn access(&self) -> Access;
 
     /// Asks the user to let the app read other apps' menus, in the system's settings. The first
     /// time, the system also shows its own prompt.

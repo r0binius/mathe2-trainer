@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, inject, onMounted, ref } from 'vue';
 
 import BaseIcon from '@/components/BaseIcon.vue';
 import type { IconName } from '@/components/icons';
@@ -7,12 +7,14 @@ import { useSettingsLanguage } from '@/composables/useSettingsLanguage';
 import type { Settings } from '@/domain/settings/settings';
 import type { UiKey } from '@/i18n';
 import { useText } from '@/i18n';
+import { coachPermissionsKey, consoleLogger, loggerKey, missingCoachPermissions } from '@/ports';
 import { useKeymapStore } from '@/stores/keymap';
 import { useSettingsStore } from '@/stores/settings';
 
 import GeneralPane from './GeneralPane.vue';
 import ProgressPane from './ProgressPane.vue';
 import TriggerPane from './TriggerPane.vue';
+import { useCoachAccess } from './useCoachAccess';
 
 type Pane = 'general' | 'trigger' | 'progress';
 
@@ -28,6 +30,11 @@ const keymap = useKeymapStore();
 const text = useText();
 const shown = ref<Pane>('general');
 const failed = ref(false);
+const [coachAccess, askFor] = useCoachAccess(
+  inject(coachPermissionsKey, missingCoachPermissions),
+  () => settings.settings.status === 'loaded' && settings.settings.value.learnFromWork,
+  inject(loggerKey, consoleLogger),
+);
 
 const title = computed(
   () => panes.find((pane) => pane.id === shown.value)?.title ?? 'settings.title',
@@ -76,7 +83,9 @@ async function change(changes: Partial<Settings>): Promise<void> {
       <GeneralPane
         v-if="shown === 'general'"
         :settings="settings.settings.value"
+        :coach-access="coachAccess"
         @change="change"
+        @ask="askFor"
       />
       <TriggerPane
         v-else-if="shown === 'trigger'"

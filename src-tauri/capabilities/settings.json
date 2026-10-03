@@ -11,6 +11,9 @@
     "allow-reset-progress",
     "allow-get-settings",
     "allow-set-settings",
+    "allow-get-coach-access",
+    "allow-ask-for-input-access",
+    "allow-ask-for-menu-access",
     "log:allow-log"
   ]
 }

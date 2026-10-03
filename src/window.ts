@@ -10,6 +10,7 @@ import { tauriPorts } from './platform/tauri';
 import { logPolicyViolations } from './policyViolations';
 import {
   changesKey,
+  coachPermissionsKey,
   keyLabelsKey,
   keymapSourceKey,
   loggerKey,
@@ -41,6 +42,7 @@ export function createWindow(root: Component, rootProps?: Readonly<Record<string
     .provide(changesKey, ports.changes)
     .provide(windowsKey, ports.windows)
     .provide(lookupKey, ports.lookup)
+    .provide(coachPermissionsKey, ports.coach)
     .provide(keyLabelsKey, macosKeyLabels)
     .provide(loggerKey, tauriLogger);
 }

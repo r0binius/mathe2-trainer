@@ -14,6 +14,7 @@ mod system_app_menus;
 mod system_keymap;
 mod system_menu_choices;
 mod system_modifier_hold;
+mod system_settings;
 mod window_list;
 
 pub use self::languages::preferred_languages;

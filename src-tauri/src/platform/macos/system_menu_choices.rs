@@ -11,7 +11,8 @@ use crate::error::AppError;
 use crate::platform::macos::accessibility::{self, Element, Observer, Value};
 use crate::platform::macos::event_tap::{EventTap, TapEvent, mask_of};
 use crate::platform::macos::menu_keys::{KeyEquivalent, keys_of};
-use crate::platform::{Frame, MenuChoices, MenuItem, MenuSignal, Point};
+use crate::platform::macos::system_settings;
+use crate::platform::{Access, Frame, MenuChoices, MenuItem, MenuSignal, Point};
 
 /// The events that can change the app in front or choose a menu item.
 const WATCHED: [CGEventType; 5] = [
@@ -70,6 +71,15 @@ impl std::fmt::Debug for Watching {
 }
 
 impl MenuChoices for SystemMenuChoices {
+    fn input_access(&self) -> Access {
+        Access::of(CGPreflightListenEventAccess())
+    }
+
+    fn ask_for_input_access(&self) -> Result<(), AppError> {
+        CGRequestListenEventAccess();
+        system_settings::open(system_settings::INPUT_MONITORING)
+    }
+
     fn start(&self, on_signal: Rc<dyn Fn(MenuSignal)>) -> Result<(), AppError> {
         let main_thread = main_thread()?;
         let mut watching = self.lock();

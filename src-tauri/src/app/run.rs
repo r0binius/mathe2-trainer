@@ -64,6 +64,8 @@ pub fn run() -> tauri::Result<()> {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            commands::coach::ask_for_input_access,
+            commands::coach::get_coach_access,
             commands::keymap::get_keymap,
             commands::lookup::ask_for_menu_access,
             commands::lookup::read_menu_shortcuts,

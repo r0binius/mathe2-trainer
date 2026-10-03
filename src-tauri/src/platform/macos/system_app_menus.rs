@@ -2,15 +2,10 @@
 //! [`AppMenus`].
 
 use objc2_app_kit::{NSRunningApplication, NSWorkspace};
-use objc2_foundation::{NSString, NSURL};
 
 use crate::error::AppError;
-use crate::platform::macos::{accessibility, menus, window_list};
-use crate::platform::{AppMenus, MenuAccess, MenuGroup, RunningApp};
-
-/// System Settings → Privacy & Security → Accessibility.
-const ACCESSIBILITY_SETTINGS: &str =
-    "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility";
+use crate::platform::macos::{accessibility, menus, system_settings, window_list};
+use crate::platform::{Access, AppMenus, MenuGroup, RunningApp};
 
 /// Reads the apps in the session from AppKit, and their menus through the Accessibility API.
 #[derive(Debug, Default)]
@@ -27,26 +22,13 @@ impl AppMenus for SystemAppMenus {
         running_app(process)
     }
 
-    fn access(&self) -> MenuAccess {
-        if accessibility::is_trusted() {
-            MenuAccess::Granted
-        } else {
-            MenuAccess::Denied
-        }
+    fn access(&self) -> Access {
+        Access::of(accessibility::is_trusted())
     }
 
     fn ask_for_access(&self) -> Result<(), AppError> {
         accessibility::ask_for_trust();
-        let opened = NSURL::URLWithString(&NSString::from_str(ACCESSIBILITY_SETTINGS))
-            .is_some_and(|url| NSWorkspace::sharedWorkspace().openURL(&url));
-
-        if opened {
-            Ok(())
-        } else {
-            Err(AppError::lookup(
-                "macOS didn't open the Accessibility settings",
-            ))
-        }
+        system_settings::open(system_settings::ACCESSIBILITY)
     }
 
     fn read(&self, process: i32) -> Result<Vec<MenuGroup>, AppError> {

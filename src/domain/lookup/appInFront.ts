@@ -1,11 +1,7 @@
+import type { Access } from '../shared/access';
+import { decodeAccess } from '../shared/access';
 import type { Decoder } from '../shared/decode';
-import { literal, object, oneOf, optional, string } from '../shared/decode';
-
-/**
- * Whether the user lets Mouseless read other apps' menus, which macOS grants in Privacy & Security
- * → Accessibility.
- */
-export type MenuAccess = 'granted' | 'denied';
+import { object, optional, string } from '../shared/decode';
 
 /** The app the user works in, which the popover shows the shortcuts of. */
 export type AppInFront = {
@@ -19,11 +15,12 @@ export type AppInFront = {
 export type PopoverOpened = {
   /** Missing when no other app has a window. */
   readonly app?: AppInFront;
-  readonly menuAccess: MenuAccess;
+  /** Whether Mouseless may read other apps' menus (Accessibility). */
+  readonly menuAccess: Access;
 };
 
 /** Decodes the `popover-opened` event's payload. */
 export const decodePopoverOpened: Decoder<PopoverOpened> = object({
   app: optional(object({ name: string, bundleId: optional(string) })),
-  menuAccess: oneOf([literal('granted'), literal('denied')]),
+  menuAccess: decodeAccess,
 });

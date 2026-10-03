@@ -1,15 +1,22 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+
+import BaseButton from '@/components/BaseButton.vue';
 import BaseIcon from '@/components/BaseIcon.vue';
 import GroupedList from '@/components/GroupedList.vue';
+import type { CoachAccess, Permission } from '@/domain/settings/coachAccess';
+import { missingPermissions } from '@/domain/settings/coachAccess';
 import type { LanguageSetting } from '@/domain/settings/language';
 import type { Settings } from '@/domain/settings/settings';
 import { useText } from '@/i18n';
 
 import SettingRow from './SettingRow.vue';
 
-defineProps<{
+const props = defineProps<{
   /** The settings in use. */
   settings: Settings;
+  /** What learning from work needs the user to allow; unknown until it's asked. */
+  coachAccess?: CoachAccess | undefined;
 }>();
 
 const emit = defineEmits<{
@@ -19,6 +26,8 @@ const emit = defineEmits<{
       Pick<Settings, 'language' | 'showMenuBarIcon' | 'showDockIcon' | 'learnFromWork'>
     >,
   ];
+  /** Open System Settings was clicked for a permission that's missing. */
+  ask: [permission: Permission];
 }>();
 
 const text = useText();
@@ -38,6 +47,13 @@ function chooseLanguage(event: Event): void {
     });
   }
 }
+
+/** What learning from work still needs the user to allow, while it's on. */
+const missing = computed(() =>
+  props.settings.learnFromWork && props.coachAccess !== undefined
+    ? missingPermissions(props.coachAccess)
+    : [],
+);
 
 /** The checked state of a checkbox that changed. */
 function checkedOf(event: Event): boolean {
@@ -99,6 +115,16 @@ function checkedOf(event: Event): boolean {
         :checked="settings.learnFromWork"
         @change="emit('change', { learnFromWork: checkedOf($event) })"
       />
+    </SettingRow>
+    <!-- Watching waits until both are allowed; each missing one gets its own way there. -->
+    <SettingRow
+      v-for="permission in missing"
+      :key="permission"
+      :label="text.ui(`settings.missing.${permission}`)"
+    >
+      <BaseButton @click="emit('ask', permission)">
+        {{ text.ui('settings.openSystemSettings') }}
+      </BaseButton>
     </SettingRow>
   </GroupedList>
 </template>

@@ -3,6 +3,7 @@
 use std::rc::Rc;
 
 use crate::error::AppError;
+use crate::platform::Access;
 
 /// A point on screen, in global display coordinates with the origin at the top left.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -68,6 +69,17 @@ pub enum MenuSignal {
 ///
 /// Every call runs on the main thread, where the signals arrive too.
 pub trait MenuChoices {
+    /// Whether the user lets the app watch clicks and key presses, which the system guards.
+    fn input_access(&self) -> Access;
+
+    /// Asks the user to let the app watch clicks and key presses, in the system's settings. The
+    /// first time, the system also shows its own prompt.
+    ///
+    /// # Errors
+    ///
+    /// Returns a lookup error if the system's settings can't be opened.
+    fn ask_for_input_access(&self) -> Result<(), AppError>;
+
     /// Starts watching clicks and key presses, reporting them, and later the observed app's menus,
     /// to `on_signal` until [`MenuChoices::stop`].
     ///

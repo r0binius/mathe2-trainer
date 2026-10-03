@@ -8,6 +8,7 @@ import type { KeyLabels } from '@/domain/keyboard/labels';
 import type { PopoverOpened } from '@/domain/lookup/appInFront';
 import type { MenuGroup } from '@/domain/lookup/menuShortcuts';
 import type { ProgressRepository } from '@/domain/progress/repository';
+import type { CoachAccess, Permission } from '@/domain/settings/coachAccess';
 import type { SettingsRepository } from '@/domain/settings/repository';
 import type { PlatformError } from '@/domain/shared/platformError';
 import type { Err, Result } from '@/domain/shared/result';
@@ -67,6 +68,23 @@ export type Lookup = {
 
 /** Where the app provides the lookup to the popover. */
 export const lookupKey: InjectionKey<Lookup> = Symbol('lookup');
+
+/**
+ * What learning from how the user works needs them to allow, and asking for it. A shell port like
+ * {@link Windows}.
+ */
+export type CoachPermissions = {
+  /**
+   * Whether each permission is allowed. Once both are while the switch is on, the Rust side
+   * starts watching.
+   */
+  readonly load: () => Promise<Result<CoachAccess, PlatformError>>;
+  /** Opens System Settings where the user allows `permission`. */
+  readonly askFor: (permission: Permission) => Promise<Result<void, PlatformError>>;
+};
+
+/** Where the app provides the coach's permissions to the Settings window. */
+export const coachPermissionsKey: InjectionKey<CoachPermissions> = Symbol('coach permissions');
 
 /**
  * What one window changed that the others show too, which the Rust side tells every window
@@ -150,6 +168,9 @@ export const missingLookup: Lookup = {
   askForMenuAccess: unavailable,
   readMenuShortcuts: unavailable,
 };
+
+/** What the Settings window injects when the app provided no coach permissions: unknown. */
+export const missingCoachPermissions: CoachPermissions = { load: unavailable, askFor: unavailable };
 
 /** What a store injects when the app provided no changes: no other window changes anything. */
 export const missingChanges: Changes = {

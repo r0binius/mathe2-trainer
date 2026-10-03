@@ -8,7 +8,7 @@ use tauri_plugin_log::log;
 
 use super::popover;
 use crate::error::AppError;
-use crate::platform::{MenuAccess, MenuGroup, Platform, RunningApp};
+use crate::platform::{Access, MenuGroup, Platform, RunningApp};
 
 /// The event that tells the popover what it opens over, sent to it alone.
 const POPOVER_OPENED: &str = "popover-opened";
@@ -26,7 +26,7 @@ struct Opened {
     #[serde(skip_serializing_if = "Option::is_none")]
     app: Option<AppInFront>,
     /// Whether its menus can be read.
-    menu_access: MenuAccess,
+    menu_access: Access,
 }
 
 /// The app the popover opens over, without its process, which the webview has no use for.
@@ -104,7 +104,7 @@ mod tests {
                 name: "Notizen".to_owned(),
                 bundle_id: Some("com.apple.Notes".to_owned()),
             }),
-            menu_access: MenuAccess::Denied,
+            menu_access: Access::Denied,
         };
 
         assert_eq!(
@@ -120,7 +120,7 @@ mod tests {
     fn leaves_out_what_is_missing() {
         let opened = Opened {
             app: None,
-            menu_access: MenuAccess::Granted,
+            menu_access: Access::Granted,
         };
 
         assert_eq!(
