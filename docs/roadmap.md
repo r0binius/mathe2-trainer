@@ -613,10 +613,10 @@ Close the gaps between the shortcut trainer and the research in `docs/specs/shor
 - [x] 18.6 Key presses
   - [x] 18.6a Recognizing presses in Rust
   - [x] 18.6b The watched list and counting
-- [ ] 18.7 Your commands and the overview
+- [x] 18.7 Your commands and the overview
   - [x] 18.7a Reading the counts
   - [x] 18.7b Your commands
-  - [ ] 18.7c By keyboard in the overview
+  - [x] 18.7c By keyboard in the overview
 
 **Decisions**
 

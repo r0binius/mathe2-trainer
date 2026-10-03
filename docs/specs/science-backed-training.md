@@ -106,6 +106,7 @@ The main window keeps the current layout's counts of the last 30 days in a store
   - A shortcut counts as learned for its app when any of the app's records on the layout says so (`learnedInApp`), so what Your commands teaches shows in the app's counts and is watched for key presses.
   - Checked in the running app in 18.7: Notizen shows _Aus Menüs gewählt_ with Deine Befehle (the two shortcuts chosen from menus); learning it takes a training and two recalls of each; its progress survives a restart, and the app counts its shortcuts as learned.
 - **The overview** gets a _By keyboard_ section while the switch is on: the share of uses done with the keys over 30 days, and the commands you still use the menu for most, each leading to its app. The list shows the five commands chosen from menus most, each leading to its app's _Your commands_.
+  - `byKeyboard` sums up the counts; the section shows while the switch is on and anything was counted. Checked in the running app in 18.7: _37 % der Nutzungen mit den Tasten_ and the two Notes commands, each leading to Deine Befehle.
 - **Settings → General:** the switch, the banner setting under it, and a sentence on what's watched and stored.
 
 ## 6. Sub-steps

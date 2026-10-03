@@ -30,7 +30,10 @@
     "reviewsOn": "{when}: {n}",
     "progress": "Progress",
     "learnedOf": "{learned} of {shortcuts} learned",
-    "logFailed": "The review history couldn't be loaded."
+    "logFailed": "The review history couldn't be loaded.",
+    "byKeyboard": "By keyboard, last 30 days",
+    "keyboardShare": "{share} of uses with the keys",
+    "fromMenu": "once from the menu | {n} times from the menu"
   },
   "app": {
     "sets": "Sets",

@@ -12,11 +12,15 @@ import { summarizeOverview } from '@/domain/progress/overview';
 import type { SummaryContext } from '@/domain/progress/summary';
 import { summarizeApp } from '@/domain/progress/summary';
 import type { AppDefinition } from '@/domain/shortcuts/types';
+import { byKeyboard } from '@/domain/usage/byKeyboard';
+import { yourCommandsId } from '@/domain/usage/yourCommands';
 import type { UiKey } from '@/i18n';
 import { useText } from '@/i18n';
 import { localTimeAt } from '@/localTime';
-import { toApp, toReview } from '@/routes';
+import { toApp, toReview, toSet } from '@/routes';
 import { useProgressStore } from '@/stores/progress';
+import { useSettingsStore } from '@/stores/settings';
+import { useUsageStore } from '@/stores/usage';
 
 import ActivityChart from './ActivityChart.vue';
 import AppLogo from './AppLogo.vue';
@@ -30,6 +34,8 @@ const props = defineProps<{
 
 const text = useText();
 const progress = useProgressStore();
+const settings = useSettingsStore();
+const usage = useUsageStore();
 const nav = useTemplateRef<HTMLElement>('nav');
 
 useSpatialNav(() => nav.value);
@@ -52,6 +58,20 @@ const overview = computed(() => {
 });
 
 const logLoaded = computed(() => progress.log.status === 'loaded');
+
+/**
+ * How the user worked lately, while learning from work is on and anything was counted: the share
+ * done with the keys, and the commands still chosen from menus most.
+ */
+const keyboard = computed(() => {
+  const learning = settings.settings.status === 'loaded' && settings.settings.value.learnFromWork;
+  const summary =
+    learning && usage.usage.status === 'loaded'
+      ? byKeyboard(props.apps, usage.usage.value.counts)
+      : undefined;
+
+  return summary?.share === undefined ? undefined : { ...summary, share: summary.share };
+});
 
 /** A figure from the review log, or {@link unknown} while the log isn't loaded. */
 function fromLog(value: string): string {
@@ -108,6 +128,23 @@ const figures = computed(
             <template #leading><AppLogo :app-id="summary.app.id" /></template>
             {{ text.appTitle(summary.app) }}
             <template #meta>{{ text.ui('library.due', { n: summary.due }) }}</template>
+          </NavigationRow>
+        </GroupedList>
+      </ListSection>
+
+      <ListSection v-if="keyboard !== undefined" :title="text.ui('overview.byKeyboard')">
+        <p class="total">
+          {{ text.ui('overview.keyboardShare', { share: text.percent(keyboard.share) }) }}
+        </p>
+        <GroupedList v-if="keyboard.fromMenus.length > 0">
+          <NavigationRow
+            v-for="leader in keyboard.fromMenus"
+            :key="`${leader.app.id}/${leader.shortcut.title}`"
+            :to="toSet(leader.app.id, yourCommandsId)"
+          >
+            <template #leading><AppLogo :app-id="leader.app.id" /></template>
+            {{ text.app(leader.app.id, leader.shortcut.title) }}
+            <template #meta>{{ text.count('overview.fromMenu', leader.byMenu) }}</template>
           </NavigationRow>
         </GroupedList>
       </ListSection>

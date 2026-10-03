@@ -30,7 +30,10 @@
     "reviewsOn": "{when}: {n}",
     "progress": "Fortschritt",
     "learnedOf": "{learned} von {shortcuts} gelernt",
-    "logFailed": "Der Wiederholungsverlauf konnte nicht geladen werden."
+    "logFailed": "Der Wiederholungsverlauf konnte nicht geladen werden.",
+    "byKeyboard": "Mit der Tastatur, letzte 30 Tage",
+    "keyboardShare": "{share} der Nutzungen mit den Tasten",
+    "fromMenu": "einmal aus dem Menü | {n}-mal aus dem Menü"
   },
   "app": {
     "sets": "Sets",

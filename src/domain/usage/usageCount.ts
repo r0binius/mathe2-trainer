@@ -42,3 +42,13 @@ function oneMore(count: UsageCount, by: ShortcutUse['by']): UsageCount {
     ? { ...count, byKeys: count.byKeys + 1 }
     : { ...count, byMenu: count.byMenu + 1 };
 }
+
+/** How often each shortcut was chosen from a menu, over all the days of `counts`. */
+export function menuTotals(counts: readonly UsageCount[]): ReadonlyMap<ShortcutId, number> {
+  return counts
+    .filter(({ byMenu }) => byMenu > 0)
+    .reduce(
+      (totals, { id, byMenu }) => new Map([...totals, [id, (totals.get(id) ?? 0) + byMenu]]),
+      new Map<ShortcutId, number>(),
+    );
+}
