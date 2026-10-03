@@ -1,10 +1,5 @@
-import { shortcutId } from '../shortcuts/shortcutId';
-import type {
-  AppDefinition,
-  MessageKey,
-  ShortcutDefinition,
-  ShortcutSet,
-} from '../shortcuts/types';
+import { shortcutsById } from '../shortcuts/lookup';
+import type { AppDefinition, MessageKey, ShortcutSet } from '../shortcuts/types';
 import type { UsageCount } from './usageCount';
 import { menuTotals } from './usageCount';
 
@@ -23,11 +18,7 @@ export function yourCommands(
   app: AppDefinition,
   counts: readonly UsageCount[],
 ): ShortcutSet | undefined {
-  const definitions = new Map(
-    app.sets.flatMap(({ shortcuts }) =>
-      shortcuts.map((shortcut) => [shortcutId(app.id, shortcut.keys), shortcut] as const),
-    ),
-  );
+  const definitions = shortcutsById(app);
   const shortcuts = [...menuTotals(counts)]
     .toSorted(([, a], [, b]) => b - a)
     .flatMap(([id]) => definitions.get(id) ?? []);
@@ -35,9 +26,4 @@ export function yourCommands(
   return shortcuts.length === 0
     ? undefined
     : { id: yourCommandsId, title: yourCommandsTitle, shortcuts };
-}
-
-/** The definitions of every shortcut of an app, for checking Your commands' stored progress. */
-export function allShortcuts(app: AppDefinition): readonly ShortcutDefinition[] {
-  return app.sets.flatMap(({ shortcuts }) => shortcuts);
 }

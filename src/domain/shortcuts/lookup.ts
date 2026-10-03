@@ -1,4 +1,6 @@
-import type { AppDefinition, ShortcutSet } from './types';
+import type { ShortcutId } from './shortcutId';
+import { shortcutId } from './shortcutId';
+import type { AppDefinition, ShortcutDefinition, ShortcutSet } from './types';
 
 /** A set, and the app it belongs to. */
 export type AppSet = {
@@ -36,4 +38,13 @@ export function findAppByBundleId(
   bundleId: string | undefined,
 ): AppDefinition | undefined {
   return bundleId === undefined ? undefined : apps.find((app) => app.bundleIds.includes(bundleId));
+}
+
+/** Every shortcut of an app by its ID, once each, though sets may share one. */
+export function shortcutsById(app: AppDefinition): ReadonlyMap<ShortcutId, ShortcutDefinition> {
+  return new Map(
+    app.sets.flatMap(({ shortcuts }) =>
+      shortcuts.map((shortcut) => [shortcutId(app.id, shortcut.keys), shortcut] as const),
+    ),
+  );
 }

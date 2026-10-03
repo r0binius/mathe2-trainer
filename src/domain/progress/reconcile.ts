@@ -1,7 +1,8 @@
+import { shortcutsById } from '../shortcuts/lookup';
 import type { ShortcutId } from '../shortcuts/shortcutId';
 import { shortcutId } from '../shortcuts/shortcutId';
 import type { AppDefinition, ShortcutSet } from '../shortcuts/types';
-import { allShortcuts, yourCommandsId, yourCommandsTitle } from '../usage/yourCommands';
+import { yourCommandsId, yourCommandsTitle } from '../usage/yourCommands';
 import type { SetRecord, StoredProgress } from './storedProgress';
 
 /**
@@ -63,7 +64,7 @@ function setOf(record: SetRecord, apps: readonly AppDefinition[]): ShortcutSet |
   const app = apps.find(({ id }) => id === record.appId);
 
   return record.setId === yourCommandsId && app !== undefined
-    ? { id: yourCommandsId, title: yourCommandsTitle, shortcuts: allShortcuts(app) }
+    ? { id: yourCommandsId, title: yourCommandsTitle, shortcuts: [...shortcutsById(app).values()] }
     : app?.sets.find(({ id }) => id === record.setId);
 }
 

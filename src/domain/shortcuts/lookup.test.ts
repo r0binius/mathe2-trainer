@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { findApp, findAppByBundleId, findSet } from './lookup';
-import type { AppDefinition, ShortcutSet } from './types';
+import { findApp, findAppByBundleId, findSet, shortcutsById } from './lookup';
+import type { AppDefinition, ShortcutDefinition, ShortcutSet } from './types';
 
 const basics: ShortcutSet = { id: 'basics', title: 'basics.title', shortcuts: [] };
 
@@ -60,5 +60,20 @@ describe('findSet', () => {
   it('finds nothing when the app or the set is unknown', () => {
     expect(findSet(apps, { appId: 'mail', setId: 'basics' }, () => [])).toBeUndefined();
     expect(findSet(apps, { appId: 'notes', setId: 'formats' }, () => [])).toBeUndefined();
+  });
+});
+
+describe('shortcutsById', () => {
+  it("finds each of an app's shortcuts by its ID, once though two sets share it", () => {
+    const shared: ShortcutDefinition = { title: 'find', keys: [['Meta', 'f']] };
+    const app: AppDefinition = {
+      ...notes,
+      sets: [
+        { id: 'a', title: 'a.title', shortcuts: [shared] },
+        { id: 'b', title: 'b.title', shortcuts: [shared] },
+      ],
+    };
+
+    expect([...shortcutsById(app)]).toStrictEqual([['notes/Meta+f', shared]]);
   });
 });

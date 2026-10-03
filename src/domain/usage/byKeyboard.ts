@@ -1,5 +1,5 @@
+import { shortcutsById } from '../shortcuts/lookup';
 import type { ShortcutId } from '../shortcuts/shortcutId';
-import { shortcutId } from '../shortcuts/shortcutId';
 import type { AppDefinition, ShortcutDefinition } from '../shortcuts/types';
 import type { UsageCount } from './usageCount';
 import { menuTotals } from './usageCount';
@@ -49,13 +49,11 @@ function leaderOf(
   id: ShortcutId,
   byMenu: number,
 ): readonly MenuLeader[] {
-  return apps.flatMap((app) =>
-    app.sets
-      .flatMap(({ shortcuts }) => shortcuts)
-      .filter((shortcut) => shortcutId(app.id, shortcut.keys) === id)
-      .slice(0, 1)
-      .map((shortcut) => ({ app, shortcut, byMenu })),
-  );
+  return apps.flatMap((app) => {
+    const shortcut = shortcutsById(app).get(id);
+
+    return shortcut === undefined ? [] : [{ app, shortcut, byMenu }];
+  });
 }
 
 function sum(values: readonly number[]): number {
