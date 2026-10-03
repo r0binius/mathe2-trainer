@@ -29,8 +29,7 @@ useCoach(
   {
     context: () => (context.value.status === 'loaded' ? context.value.value : undefined),
     now: Date.now,
-    showsBanner: () =>
-      settings.settings.status === 'loaded' && settings.settings.value.showMenuBanner,
+    showsBanner: () => settings.current?.showMenuBanner === true,
     appText: text.app,
   },
 );

@@ -9,9 +9,9 @@ import { useSettingsStore } from '@/stores/settings';
 export function useSettingsLanguage(): void {
   const settings = useSettingsStore();
 
-  useUiLanguage(() =>
-    settings.settings.status === 'loaded'
-      ? uiLanguageFor(settings.settings.value.language, navigator.languages)
-      : undefined,
-  );
+  useUiLanguage(() => {
+    const language = settings.current?.language;
+
+    return language === undefined ? undefined : uiLanguageFor(language, navigator.languages);
+  });
 }

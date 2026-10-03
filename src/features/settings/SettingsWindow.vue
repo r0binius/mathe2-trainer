@@ -32,7 +32,7 @@ const shown = ref<Pane>('general');
 const failed = ref(false);
 const [coachAccess, askFor] = useCoachAccess(
   inject(coachKey, missingCoach),
-  () => settings.settings.status === 'loaded' && settings.settings.value.learnFromWork,
+  () => settings.current?.learnFromWork === true,
   inject(loggerKey, consoleLogger),
 );
 
@@ -50,8 +50,8 @@ onMounted(() => {
 
 /** Saves the settings with `changes`, and shows when that failed. */
 async function change(changes: Partial<Settings>): Promise<void> {
-  if (settings.settings.status === 'loaded') {
-    const saved = await settings.save({ ...settings.settings.value, ...changes });
+  if (settings.current !== undefined) {
+    const saved = await settings.save({ ...settings.current, ...changes });
     failed.value = saved.kind === 'err';
   }
 }
@@ -79,17 +79,17 @@ async function change(changes: Partial<Settings>): Promise<void> {
       </div>
     </header>
 
-    <main v-if="settings.settings.status === 'loaded'" class="pane" role="tabpanel">
+    <main v-if="settings.current !== undefined" class="pane" role="tabpanel">
       <GeneralPane
         v-if="shown === 'general'"
-        :settings="settings.settings.value"
+        :settings="settings.current"
         :coach-access="coachAccess"
         @change="change"
         @ask="askFor"
       />
       <TriggerPane
         v-else-if="shown === 'trigger'"
-        :trigger="settings.settings.value.trigger"
+        :trigger="settings.current.trigger"
         @choose="(trigger) => change({ trigger })"
       />
       <ProgressPane v-else @reset="(resetFailed) => (failed = resetFailed)" />

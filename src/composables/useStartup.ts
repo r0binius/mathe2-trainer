@@ -35,9 +35,7 @@ export function useStartup(
   const layoutId = computed(() =>
     keymap.layout.status === 'loaded' ? keymap.layout.value.id : undefined,
   );
-  const learning = computed(
-    () => settings.settings.status === 'loaded' && settings.settings.value.learnFromWork,
-  );
+  const learning = computed(() => settings.current?.learnFromWork === true);
 
   useSettingsLanguage();
 

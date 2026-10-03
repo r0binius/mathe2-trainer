@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { inject, onScopeDispose, shallowRef } from 'vue';
+import { computed, inject, onScopeDispose, shallowRef } from 'vue';
 
 import type { Settings } from '@/domain/settings/settings';
 import type { Loadable } from '@/domain/shared/loadable';
@@ -20,6 +20,10 @@ import {
 export const useSettingsStore = defineStore('settings', () => {
   const repository = inject(settingsRepositoryKey, missingSettingsRepository);
   const settings = shallowRef<Loadable<Settings>>({ status: 'loading' });
+  /** The settings once they're loaded, for the many places that only read one of them. */
+  const current = computed(() =>
+    settings.value.status === 'loaded' ? settings.value.value : undefined,
+  );
 
   /** Loads the settings. */
   async function load(): Promise<void> {
@@ -43,5 +47,5 @@ export const useSettingsStore = defineStore('settings', () => {
     }),
   );
 
-  return { settings, load, save };
+  return { settings, current, load, save };
 });

@@ -64,7 +64,7 @@ const logLoaded = computed(() => progress.log.status === 'loaded');
  * done with the keys, and the commands still chosen from menus most.
  */
 const keyboard = computed(() => {
-  const learning = settings.settings.status === 'loaded' && settings.settings.value.learnFromWork;
+  const learning = settings.current?.learnFromWork === true;
   const summary =
     learning && usage.usage.status === 'loaded'
       ? byKeyboard(props.apps, usage.usage.value.counts)
