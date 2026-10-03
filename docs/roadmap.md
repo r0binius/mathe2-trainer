@@ -594,7 +594,7 @@ Branch `feature/learning-overview`. A view of where learning stands: what's due 
 - **A small reformat can break the previous commit's check.** One longer word in a Markdown table made Prettier re-pad the whole table; run the formatter after every edit, not only before the first commit.
 - **A blank screenshot is a permission, not a bug.** `screencapture -l` returns only the frame without Screen Recording access, so a person still looks at new screens.
 
-## Science-backed training 🚧 ([#18](https://codeberg.org/gobin/mouseless/issues/18))
+## Science-backed training ✅ ([#18](https://codeberg.org/gobin/mouseless/issues/18))
 
 Close the gaps between the shortcut trainer and the research in `docs/specs/shortcut-learning-research.md` (§5): a learning criterion of two recalls, grading limits relative to the learner's own times, and a coach that connects practice to real use. The design is in `docs/specs/science-backed-training.md`.
 
@@ -630,6 +630,17 @@ Close the gaps between the shortcut trainer and the research in `docs/specs/shor
 **Carried over**
 
 - Choosing a menu item with the keyboard (fn ^F2, arrows, Return) is untested in the running app, and so are Spotify and Help's menu search (spec §4.1).
+
+**What we learned**
+
+- **Spike what the system really reports before designing on it.** macOS's _menu item selected_ notification turned out to report shortcut presses, not menu choices, and only in AppKit apps; the coach became highlight plus mouse-up instead.
+- **Rust reports, the frontend decides.** The coach sends an app and keys, and the frontend matches them against the data, resolved on the layout; the watched shortcuts go to Rust as keys, and Rust only finds the physical keys for them.
+- **What macOS treats as the same key, count as the same key.** A menu's ⌘2 fires from the keypad's 2 too, so a press is every key typing the character, not the first one found.
+- **Synthetic keystrokes aren't the user's.** System Events' `keystroke "2"` types on the keypad; `key code 19` is the 2 in the top row.
+- **The running app can be tested through Accessibility.** Setting `AXEnhancedUserInterface` makes WebKit build its tree; walking it (not `entire contents`) reads every text, and `AXPress` clicks links and buttons, so a whole learning session ran without a person.
+- **That walk finds accessibility bugs.** Every button was a checkbox: Vue casts an absent boolean prop to `false`, and `aria-pressed="false"` makes a toggle.
+- **Debug logging can record the user.** A temporary line logged every key code into the app's log file; it came out of the code and the file the same hour.
+- **A set made at runtime has to survive every place that checks sets against the data:** the router, summaries, the watched list and reconciling, which would otherwise delete its progress at the next start.
 
 ## UI/UX overhaul ✅ ([#14](https://codeberg.org/gobin/mouseless/issues/14))
 
