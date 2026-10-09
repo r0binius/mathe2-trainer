@@ -1,0 +1,14 @@
+{
+  "name": "mathe2-trainer",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  // The built page, served by the worker; only /api/* runs the worker code first.
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"],
+  },
+  // Wrangler creates the namespace on the first deploy. The secret SYNC_KEYS is set with
+  // `wrangler secret put SYNC_KEYS`.
+  "kv_namespaces": [{ "binding": "PROGRESS" }],
+}

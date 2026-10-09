@@ -87,13 +87,77 @@ async function cloudDocument(): Promise<CloudDocument | undefined> {
   }
 }
 
+const syncKeyKey = 'ad-trainer/sync-key';
+
+/** The key that unlocks the synced progress on this device, or `''` if there is none. */
+export function syncKey(): string {
+  try {
+    return window.localStorage.getItem(syncKeyKey) ?? '';
+  } catch {
+    return '';
+  }
+}
+
+/** Remembers the sync key on this device. Returns whether it was stored. */
+export function setSyncKey(key: string): boolean {
+  try {
+    window.localStorage.setItem(syncKeyKey, key.trim());
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The progress document on the server the page came from, or `undefined` while there is no sync
+ * key. A missing document reads as one that does not exist; any other failure throws.
+ */
+function serverDocument(): CloudDocument | undefined {
+  const key = syncKey();
+  const headers = { Authorization: `Bearer ${key}` };
+
+  return key === ''
+    ? undefined
+    : {
+        get: async () => {
+          const response = await fetch('/api/progress', { headers });
+
+          if (response.status === 404) {
+            return { exists: false, data: () => undefined };
+          }
+
+          if (!response.ok) {
+            throw new Error(`Sync failed: ${String(response.status)}`);
+          }
+
+          const json = await response.text();
+
+          return { exists: true, data: () => ({ json }) };
+        },
+        set: async (data) => {
+          const json = data['json'];
+          const response = await fetch('/api/progress', {
+            method: 'PUT',
+            headers,
+            body: typeof json === 'string' ? json : '',
+          });
+
+          if (!response.ok) {
+            throw new Error(`Sync failed: ${String(response.status)}`);
+          }
+        },
+      };
+}
+
 /**
  * Keeps the progress in this browser, and, where the page runs as a published artifact, also in
- * the learner's private document there, so it follows them to another device. Loading takes the
+ * the learner's private document there, or, with a sync key, on the server that serves the page,
+ * so it follows them to another device. Loading takes the
  * newer of the two copies. The synced copy is stored as one JSON string.
  */
 export function progressRepository(): ProgressRepository {
-  const cloud = cloudDocument();
+  const cloud = cloudDocument().then((document) => document ?? serverDocument());
   // eslint-disable-next-line functional/no-let -- remembers whether the account copy is reachable
   let synced = false;
 

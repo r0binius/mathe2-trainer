@@ -5,10 +5,12 @@ import BaseButton from '@/components/BaseButton.vue';
 import KeyHint from '@/components/KeyHint.vue';
 import ListSection from '@/components/ListSection.vue';
 import ScreenHeading from '@/components/ScreenHeading.vue';
+import { setSyncKey, syncKey } from '@/platform/storage';
 import { useProgressStore } from '@/stores/progress';
 
 const store = useProgressStore();
 const confirming = shallowRef(false);
+const input = shallowRef(syncKey());
 const tests = computed(() => store.progress.log.length);
 
 function reset(): void {
@@ -17,6 +19,12 @@ function reset(): void {
     confirming.value = false;
   } else {
     confirming.value = true;
+  }
+}
+
+function saveKey(): void {
+  if (setSyncKey(input.value)) {
+    window.location.reload();
   }
 }
 
@@ -51,6 +59,23 @@ const keys: readonly (readonly [string, string])[] = [
         </BaseButton>
         <BaseButton v-if="confirming" @click="confirming = false">Abbrechen</BaseButton>
       </div>
+    </ListSection>
+
+    <ListSection title="Synchronisieren">
+      <p class="text">
+        Mit demselben Sync-Schlüssel auf jedem Gerät bleibt der Fortschritt abgeglichen. Leer
+        lassen, um nur in diesem Browser zu speichern.
+      </p>
+      <form class="row" @submit.prevent="saveKey">
+        <input
+          v-model="input"
+          class="key-input"
+          type="password"
+          autocomplete="off"
+          aria-label="Sync-Schlüssel"
+        />
+        <BaseButton @click="saveKey">Speichern</BaseButton>
+      </form>
     </ListSection>
 
     <ListSection title="Tastatur">
@@ -90,6 +115,17 @@ const keys: readonly (readonly [string, string])[] = [
   display: flex;
   gap: 8px;
   margin-top: 10px;
+}
+
+.key-input {
+  flex: 1;
+  max-width: 320px;
+  padding: 6px 10px;
+  color: inherit;
+  font: inherit;
+  background: transparent;
+  border: 1px solid var(--color-text-secondary);
+  border-radius: 6px;
 }
 
 .keys {
