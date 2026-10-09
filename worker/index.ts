@@ -8,9 +8,10 @@ type Env = {
   /** Serves the built page. */
   readonly ASSETS: { readonly fetch: (request: Request) => Promise<Response> };
   readonly PROGRESS: Store;
-  /** The sync keys that may use the API, separated by commas. A secret. */
-  readonly SYNC_KEYS: string;
 };
+
+/** The page generates keys of 64 characters; anything much shorter could be guessed. */
+const minimumKeyLength = 32;
 
 /** The progress is a few kilobytes; this only keeps a stray request from filling the store. */
 const sizeLimit = 1_000_000;
@@ -27,9 +28,8 @@ function bearer(request: Request): string {
 
 async function progress(request: Request, env: Env): Promise<Response> {
   const key = bearer(request);
-  const allowed = env.SYNC_KEYS.split(',').map((entry) => entry.trim());
 
-  if (key === '' || !allowed.includes(key)) {
+  if (key.length < minimumKeyLength) {
     return new Response('Unauthorized', { status: 401 });
   }
 

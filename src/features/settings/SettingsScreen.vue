@@ -5,7 +5,7 @@ import BaseButton from '@/components/BaseButton.vue';
 import KeyHint from '@/components/KeyHint.vue';
 import ListSection from '@/components/ListSection.vue';
 import ScreenHeading from '@/components/ScreenHeading.vue';
-import { setSyncKey, syncKey } from '@/platform/storage';
+import { newSyncKey, setSyncKey, syncKey } from '@/platform/storage';
 import { useProgressStore } from '@/stores/progress';
 
 const store = useProgressStore();
@@ -20,6 +20,10 @@ function reset(): void {
   } else {
     confirming.value = true;
   }
+}
+
+function generateKey(): void {
+  input.value = newSyncKey();
 }
 
 function saveKey(): void {
@@ -63,17 +67,20 @@ const keys: readonly (readonly [string, string])[] = [
 
     <ListSection title="Synchronisieren">
       <p class="text">
-        Mit demselben Sync-Schlüssel auf jedem Gerät bleibt der Fortschritt abgeglichen. Leer
-        lassen, um nur in diesem Browser zu speichern.
+        Mit demselben Sync-Schlüssel auf jedem Gerät bleibt der Fortschritt abgeglichen. Auf dem
+        ersten Gerät einen Schlüssel erzeugen und speichern, auf den anderen denselben eintragen.
+        Wer den Schlüssel kennt, kann den Fortschritt lesen und ersetzen. Leer lassen, um nur in
+        diesem Browser zu speichern.
       </p>
       <form class="row" @submit.prevent="saveKey">
         <input
           v-model="input"
           class="key-input"
-          type="password"
+          type="text"
           autocomplete="off"
           aria-label="Sync-Schlüssel"
         />
+        <BaseButton @click="generateKey">Neu erzeugen</BaseButton>
         <BaseButton @click="saveKey">Speichern</BaseButton>
       </form>
     </ListSection>

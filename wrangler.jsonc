@@ -8,7 +8,7 @@
     "binding": "ASSETS",
     "run_worker_first": ["/api/*"],
   },
-  // Wrangler creates the namespace on the first deploy. The secret SYNC_KEYS is set with
-  // `wrangler secret put SYNC_KEYS`.
+  // Wrangler creates the namespace on the first deploy. The progress is stored under the hash of
+  // a sync key, which the settings page generates.
   "kv_namespaces": [{ "binding": "PROGRESS" }],
 }

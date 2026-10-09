@@ -87,7 +87,7 @@ async function cloudDocument(): Promise<CloudDocument | undefined> {
   }
 }
 
-const syncKeyKey = 'ad-trainer/sync-key';
+const syncKeyKey = 'mathe2-trainer/sync-key';
 
 /** The key that unlocks the synced progress on this device, or `''` if there is none. */
 export function syncKey(): string {
@@ -96,6 +96,13 @@ export function syncKey(): string {
   } catch {
     return '';
   }
+}
+
+/** A new random sync key: anyone who knows it can read and replace the progress stored under it. */
+export function newSyncKey(): string {
+  const bytes = window.crypto.getRandomValues(new Uint8Array(32));
+
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
 /** Remembers the sync key on this device. Returns whether it was stored. */
