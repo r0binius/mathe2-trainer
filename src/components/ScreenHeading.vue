@@ -21,7 +21,7 @@ const slots = defineSlots<{
       <h1 class="title">{{ title }}</h1>
       <p v-if="slots.meta" class="meta"><slot name="meta" /></p>
     </div>
-    <slot name="action" />
+    <div v-if="slots.action" class="action-bar"><slot name="action" /></div>
   </header>
 </template>
 

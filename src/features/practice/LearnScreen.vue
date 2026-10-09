@@ -59,7 +59,7 @@ const learned = computed(() => entries.value.filter(({ stage }) => stage === 'le
         {{ learned }} von {{ entries.length }} sitzen. Was du heute gewusst hast, legt dir der
         Trainer in ein paar Tagen wieder vor – kurz bevor du es vergisst.
       </p>
-      <div class="actions">
+      <div class="action-bar">
         <RouterLink v-slot="{ navigate }" :to="toTopic(topic.id)" custom>
           <BaseButton variant="accent" size="large" @click="navigate">Zum Kapitel</BaseButton>
         </RouterLink>
@@ -90,12 +90,5 @@ const learned = computed(() => entries.value.filter(({ stage }) => stage === 'le
 
 .text {
   color: var(--color-text-secondary);
-}
-
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
 }
 </style>

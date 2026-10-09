@@ -204,6 +204,14 @@ const next = computed(() =>
 }
 
 @media (max-width: 560px) {
+  .actions {
+    flex-direction: column;
+  }
+
+  .actions > * {
+    width: 100%;
+  }
+
   .chapter {
     min-width: 2.6em;
   }

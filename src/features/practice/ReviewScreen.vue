@@ -52,9 +52,11 @@ const back = computed(() => (topic === undefined ? toOverview() : toTopic(topic.
             : 'Der Trainer legt dir jede Karte wieder vor, kurz bevor du sie vergisst.'
         }}
       </p>
-      <RouterLink v-slot="{ navigate }" :to="back" custom>
-        <BaseButton variant="accent" size="large" @click="navigate">Zurück</BaseButton>
-      </RouterLink>
+      <div class="action-bar">
+        <RouterLink v-slot="{ navigate }" :to="back" custom>
+          <BaseButton variant="accent" size="large" @click="navigate">Zurück</BaseButton>
+        </RouterLink>
+      </div>
     </div>
   </div>
 </template>
