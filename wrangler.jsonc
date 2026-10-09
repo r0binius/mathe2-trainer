@@ -8,7 +8,7 @@
     "binding": "ASSETS",
     "run_worker_first": ["/api/*"],
   },
-  // Wrangler creates the namespace on the first deploy. The progress is stored under the hash of
-  // a sync key, which the settings page generates.
-  "kv_namespaces": [{ "binding": "PROGRESS" }],
+  // The progress is stored under the hash of a sync key, which the settings page generates. The
+  // namespace is pinned by id, so a deploy can never swap it for an empty one.
+  "kv_namespaces": [{ "binding": "PROGRESS", "id": "b6a10fddd7ad4aa4b4c1a7d9b69ba2a6" }],
 }
