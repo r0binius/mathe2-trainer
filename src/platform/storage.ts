@@ -105,6 +105,34 @@ export function newSyncKey(): string {
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
+/** Whether this page could sync: it is served over the web and is not a published artifact. */
+export function canSync(): boolean {
+  return (
+    window.location.protocol === 'https:' &&
+    (window as unknown as { readonly claude?: unknown }).claude === undefined
+  );
+}
+
+const syncHintKey = 'mathe2-trainer/sync-hint-until';
+
+/** Whether the reminder to sync was put off and is still waiting. */
+export function syncHintHidden(now: number): boolean {
+  try {
+    return now < Number(window.localStorage.getItem(syncHintKey) ?? '0');
+  } catch {
+    return false;
+  }
+}
+
+/** Puts the reminder to sync off until the given time. */
+export function hideSyncHintUntil(until: number): void {
+  try {
+    window.localStorage.setItem(syncHintKey, String(until));
+  } catch {
+    // The reminder just comes back at the next visit.
+  }
+}
+
 /** Remembers the sync key on this device. Returns whether it was stored. */
 export function setSyncKey(key: string): boolean {
   try {

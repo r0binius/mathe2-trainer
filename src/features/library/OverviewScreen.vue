@@ -11,6 +11,7 @@ import TextProgress from '@/components/TextProgress.vue';
 import { headlineOf, locateAll, topicItems } from '@/domain/content/lookup';
 import type { Topic } from '@/domain/content/types';
 import { activityOf, dueItems, streakOf, tallyOf, weakSpots } from '@/domain/progress/summary';
+import SyncHint from '@/features/settings/SyncHint.vue';
 import { deckTitles } from '@/labels';
 import { toDeck, toExam, toLearn, toReview, toTopic } from '@/routes';
 import { useProgressStore } from '@/stores/progress';
@@ -52,6 +53,8 @@ const next = computed(() =>
 
 <template>
   <div class="overview">
+    <SyncHint />
+
     <header class="hero">
       <p class="caption">Mathematik 2 · Kapitel 7 bis 13</p>
       <h1 class="headline">
