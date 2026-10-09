@@ -381,6 +381,34 @@ useHotkeys(() => ({
   opacity: 0;
 }
 
+/*
+ * On a phone a solution can be longer than the screen: the buttons that answer stay at the bottom
+ * edge instead of waiting below it.
+ */
+@media (max-width: 760px) {
+  .item {
+    padding: 14px 0 0;
+  }
+
+  .actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin: 0 -16px;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--color-border);
+    background-color: var(--color-content);
+  }
+
+  .actions > * {
+    flex: 1 1 0;
+  }
+
+  .footer {
+    padding-bottom: 8px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .item-enter-active,
   .item-leave-active {

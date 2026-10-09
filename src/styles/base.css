@@ -50,6 +50,25 @@ a {
   text-decoration: none;
 }
 
+button,
+a {
+  /* No double-tap zoom delay, and no grey flash where a finger touched. */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/*
+ * iOS zooms into any field set below 16 pixels, and does not zoom back out. Component styles
+ * set the font with `font: inherit`, so this has to win over them.
+ */
+@media (pointer: coarse) {
+  input:not([type='radio'], [type='checkbox']),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 button {
   border: none;
   background-color: transparent;

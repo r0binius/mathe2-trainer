@@ -202,4 +202,10 @@ const next = computed(() =>
 .due {
   color: var(--color-due);
 }
+
+@media (max-width: 560px) {
+  .chapter {
+    min-width: 2.6em;
+  }
+}
 </style>

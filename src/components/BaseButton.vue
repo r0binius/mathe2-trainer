@@ -75,6 +75,21 @@ const emit = defineEmits<{
   font-size: 15px;
 }
 
+/* A finger needs about 44 pixels. */
+@media (pointer: coarse) {
+  .button {
+    min-height: 40px;
+  }
+
+  .large {
+    min-height: 48px;
+  }
+
+  .toolbar {
+    min-width: 40px;
+  }
+}
+
 /* A quiet button: raised, with a hairline. */
 .neutral,
 .danger {

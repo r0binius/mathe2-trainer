@@ -120,12 +120,14 @@ const keys: readonly (readonly [string, string])[] = [
 
 .row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 10px;
 }
 
 .key-input {
-  flex: 1;
+  flex: 1 1 14em;
+  min-width: 0;
   max-width: 320px;
   padding: 6px 10px;
   color: inherit;

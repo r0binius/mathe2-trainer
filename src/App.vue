@@ -225,8 +225,8 @@ watch(
   }
 
   .menu-button {
-    min-height: 32px;
-    padding: 0 10px;
+    min-height: 40px;
+    padding: 0 14px;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-control);
     background-color: var(--color-raised);
@@ -237,15 +237,20 @@ watch(
 
   .due-link {
     margin-left: auto;
+    padding: 10px 0 10px 10px;
     cursor: pointer;
   }
 
+  /* An open menu lies over the page, below the bar, and scrolls on its own. */
   .sidebar {
-    position: static;
+    position: fixed;
+    inset: calc(57px + env(safe-area-inset-top, 0px)) 0 0;
+    z-index: 2;
     display: none;
     height: auto;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    overscroll-behavior: contain;
     border-right: none;
-    border-bottom: 1px solid var(--color-border);
   }
 
   .menu-open .sidebar {
@@ -257,7 +262,8 @@ watch(
   }
 
   .link {
-    min-height: 40px;
+    min-height: 44px;
+    font-size: 15px;
   }
 
   .content {
