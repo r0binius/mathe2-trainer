@@ -8,8 +8,10 @@ import LinkRow from '@/components/LinkRow.vue';
 import ListSection from '@/components/ListSection.vue';
 import RichText from '@/components/RichText.vue';
 import TextProgress from '@/components/TextProgress.vue';
+import { examDates } from '@/data/exam';
 import { headlineOf, locateAll, topicItems } from '@/domain/content/lookup';
 import type { Topic } from '@/domain/content/types';
+import { countdownTo, describeCountdown } from '@/domain/exam/countdown';
 import { activityOf, dueItems, streakOf, tallyOf, weakSpots } from '@/domain/progress/summary';
 import SyncHint from '@/features/settings/SyncHint.vue';
 import { deckTitles } from '@/labels';
@@ -38,6 +40,7 @@ const weak = computed(() =>
   })),
 );
 const lastExam = computed(() => store.progress.exams.at(-1));
+const countdown = computed(() => countdownTo(examDates, store.now));
 
 /** The first deck, in the lecture's order, that isn't learned completely: where to go on. */
 const next = computed(() =>
@@ -96,6 +99,10 @@ const next = computed(() =>
       <div class="figure">
         <dt class="caption">Serie</dt>
         <dd class="mono">{{ streak }} {{ streak === 1 ? 'Tag' : 'Tage' }}</dd>
+      </div>
+      <div v-if="countdown !== undefined" class="figure">
+        <dt class="caption">Bis zur Prüfung</dt>
+        <dd class="mono">{{ describeCountdown(countdown) }}</dd>
       </div>
       <div v-if="lastExam !== undefined" class="figure">
         <dt class="caption">Letzte Prüfung</dt>
