@@ -55,6 +55,12 @@ src/
 | `pnpm build` | baut `dist/index.html`, eine einzelne Datei |
 | `pnpm check` | Format, Lint, Typen und Tests               |
 
+## Mitarbeiten
+
+Fehler im Material oder Ideen? [CONTRIBUTING.md](CONTRIBUTING.md) erklärt den Weg über Fork und Pull
+Request. Wie der Trainer lokal läuft, veröffentlicht wird und was man beim Fortschritt und beim Sync
+nicht kaputtmachen darf, steht in [docs/entwicklung.md](docs/entwicklung.md).
+
 ## Lizenz
 
 [GPL-3.0-or-later](LICENSE). Die Inhalte folgen dem Skript und den Übungsblättern von Prof. Dr. Volker

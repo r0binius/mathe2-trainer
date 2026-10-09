@@ -28,3 +28,6 @@ möglich – was richtig wäre (Foliensatz und Seite helfen).
 
 Ein Pull Request sollte eine Sache ändern; so lässt er sich schnell prüfen. `main` ändert nur der
 Maintainer.
+
+Mehr zum Betrieb, zum Sync und zu den Regeln, die den Fortschritt der Lernenden schützen, steht in
+[docs/entwicklung.md](docs/entwicklung.md).

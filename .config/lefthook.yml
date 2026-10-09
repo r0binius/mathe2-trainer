@@ -9,7 +9,7 @@ pre-commit:
         [ -z "$branch" ] && exit 0
         case "$branch" in
           main)
-            echo "Commit on a branch, not on main (see docs/conventions.md#git)."
+            echo "Commit on a branch, not on main (see docs/entwicklung.md#git)."
             exit 1 ;;
         esac
         pattern='^(feature|feat|bugfix|fix|hotfix|release|chore)/[a-z0-9]+([.-][a-z0-9]+)*$'
