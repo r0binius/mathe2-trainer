@@ -1,6 +1,8 @@
 import type { Progress } from '@/domain/progress/progress';
 import { decodeProgress, newerOf, noProgress } from '@/domain/progress/progress';
 
+import { deferred } from './deferred';
+
 /** Where the progress is kept between visits. Saving never throws: a failed save is reported. */
 export type ProgressRepository = {
   readonly load: () => Promise<Progress>;
@@ -87,6 +89,17 @@ async function cloudDocument(): Promise<CloudDocument | undefined> {
   }
 }
 
+/**
+ * The server stores the progress in a key-value store whose free plan allows about a thousand
+ * writes a day for everyone together, so the progress is sent at most this often, and when the page
+ * is hidden. Five minutes keep a few learners well below the limit; the copy in the browser is
+ * always current.
+ */
+const syncIntervalMs = 5 * 60 * 1000;
+
+/** The largest body a request may have while the page closes. */
+const keepaliveLimit = 60_000;
+
 const syncKeyKey = 'mathe2-trainer/sync-key';
 
 /** The key that unlocks the synced progress on this device, or `''` if there is none. */
@@ -172,10 +185,13 @@ function serverDocument(): CloudDocument | undefined {
         },
         set: async (data) => {
           const json = data['json'];
+          const body = typeof json === 'string' ? json : '';
           const response = await fetch('/api/progress', {
             method: 'PUT',
             headers,
-            body: typeof json === 'string' ? json : '',
+            body,
+            // Lets a save that starts as the page closes finish; the browser allows 64 kilobytes.
+            keepalive: body.length < keepaliveLimit,
           });
 
           if (!response.ok) {
@@ -195,6 +211,34 @@ export function progressRepository(): ProgressRepository {
   const cloud = cloudDocument().then((document) => document ?? serverDocument());
   // eslint-disable-next-line functional/no-let -- remembers whether the account copy is reachable
   let synced = false;
+  const upload = deferred(async (progress: Progress) => {
+    const target = await cloud;
+
+    if (target === undefined) {
+      return true;
+    }
+
+    try {
+      await target.set({ json: JSON.stringify(progress), updatedAt: progress.updatedAt });
+      synced = true;
+
+      return true;
+    } catch {
+      synced = false;
+
+      return false;
+    }
+  }, syncIntervalMs);
+
+  // A hidden page may never come back, such as a phone's browser closed in the background.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      void upload.flush();
+    }
+  });
+  window.addEventListener('pagehide', () => {
+    void upload.flush();
+  });
 
   return {
     load: async () => {
@@ -210,16 +254,12 @@ export function progressRepository(): ProgressRepository {
         return local;
       }
     },
-    save: async (progress) => {
+    save: (progress) => {
       const stored = writeLocal(progress);
 
-      try {
-        await (await cloud)?.set({ json: JSON.stringify(progress), updatedAt: progress.updatedAt });
-      } catch {
-        synced = false;
-      }
+      upload.schedule(progress);
 
-      return stored || synced;
+      return Promise.resolve(stored || synced);
     },
     describe: () => (synced ? 'account' : 'browser'),
   };
